@@ -39,6 +39,12 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         parseDashboard(getJson(DASHBOARD_PATH, session.authorizationHeader))
     }
 
+    suspend fun wallet(session: AuthSession): MobileWalletData = withContext(Dispatchers.IO) {
+        val walletResponse = getJson(WALLET_PATH, session.authorizationHeader)
+        val transactionResponse = getJson(TRANSACTIONS_PATH, session.authorizationHeader)
+        parseWallet(walletResponse, transactionResponse)
+    }
+
     private fun getJson(path: String, authorization: String? = null): JSONObject =
         requestJson(path, method = "GET", authorization = authorization)
 
@@ -202,6 +208,81 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         }
     }
 
+    private fun parseWallet(walletResponse: JSONObject, transactionResponse: JSONObject): MobileWalletData {
+        val walletData = walletResponse.optJSONObject("data") ?: walletResponse
+        val wallet = walletData.optJSONObject("wallet") ?: walletData
+        val balance = firstNotBlank(
+            wallet.optString("current_balance"),
+            wallet.optString("currentBalance"),
+            wallet.optString("current_credit"),
+            wallet.optString("currentCredit"),
+            wallet.optString("balance"),
+            wallet.optString("credit")
+        ) ?: "0"
+
+        val transactionData = transactionResponse.optJSONObject("data") ?: transactionResponse
+        val transactions = firstArray(
+            transactionData.optJSONArray("transactions"),
+            transactionData.optJSONArray("recent_transactions"),
+            transactionData.optJSONArray("recentTransactions"),
+            transactionData.optJSONArray("results"),
+            transactionResponse.optJSONArray("transactions"),
+            transactionResponse.optJSONArray("results")
+        )
+
+        return MobileWalletData(
+            currentBalance = balance,
+            transactions = parseTransactions(transactions)
+        )
+    }
+
+    private fun parseTransactions(transactions: org.json.JSONArray?): List<MobileTransaction> {
+        if (transactions == null) return emptyList()
+        return (0 until transactions.length()).mapNotNull { index ->
+            val transaction = transactions.optJSONObject(index) ?: return@mapNotNull null
+            val type = firstNotBlank(
+                transaction.optString("type"),
+                transaction.optString("transaction_type"),
+                transaction.optString("transactionType")
+            )
+            val description = firstNotBlank(
+                transaction.optString("description"),
+                transaction.optString("title"),
+                transaction.optString("note"),
+                transaction.optString("reference")
+            )
+            val title = description ?: type?.replace("_", " ")?.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase() else it.toString()
+            } ?: "Transaction"
+            val subtitle = firstNotBlank(
+                transaction.optString("created_at"),
+                transaction.optString("createdAt"),
+                transaction.optString("date"),
+                transaction.optString("updated_at"),
+                transaction.optString("updatedAt")
+            ) ?: "Wallet activity"
+            val amount = firstNotBlank(
+                transaction.optString("amount"),
+                transaction.optString("value"),
+                transaction.optString("total"),
+                transaction.optString("credit_amount"),
+                transaction.optString("creditAmount")
+            ) ?: "0"
+            val status = firstNotBlank(
+                transaction.optString("status"),
+                transaction.optString("state"),
+                type
+            )
+
+            MobileTransaction(
+                title = title,
+                subtitle = subtitle,
+                amount = amount,
+                status = status
+            )
+        }
+    }
+
     private fun accountSummary(account: JSONObject?): String? {
         account ?: return null
         return when {
@@ -228,6 +309,8 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     companion object {
         private const val MOBILE_LOGIN_PATH = "api/v1/mobile/auth/login/"
         private const val DASHBOARD_PATH = "api/v1/mobile/dashboard/"
+        private const val WALLET_PATH = "api/v1/mobile/wallet/"
+        private const val TRANSACTIONS_PATH = "api/v1/mobile/transactions/"
         private const val REFRESH_PATH = "api/v1/auth/refresh/"
         private const val LOGOUT_PATH = "api/v1/auth/logout/"
         private const val TIMEOUT_MS = 30_000

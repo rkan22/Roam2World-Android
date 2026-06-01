@@ -30,6 +30,12 @@
     <string name="dashboard_empty_orders">No recent orders yet.</string>
     <string name="dashboard_load_failed">Could not load dashboard.</string>
     <string name="dashboard_missing_esim_target">eSIM target is not configured.</string>
+    <string name="wallet_title">Wallet</string>
+    <string name="wallet_current_balance">Current balance</string>
+    <string name="wallet_transactions">Transaction history</string>
+    <string name="wallet_empty_transactions">No wallet transactions yet.</string>
+    <string name="wallet_load_failed">Could not load wallet.</string>
+    <string name="wallet_pull_refresh">Pull to refresh wallet</string>
 
     <string name="profile_reload_slots">Reload Slots</string>
     <string name="profile_no_enabled_profile">Unknown</string>

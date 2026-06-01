@@ -13,13 +13,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileDashboardData
-import im.angry.openeuicc.auth.MobileDashboardOrder
+import im.angry.openeuicc.auth.MobileTransaction
+import im.angry.openeuicc.auth.MobileWalletData
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -30,46 +30,39 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DashboardActivity : AppCompatActivity() {
+class WalletActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var scroll: View
+    private lateinit var refresh: SwipeRefreshLayout
     private lateinit var bottomNav: BottomNavigationView
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var greeting: TextView
-    private lateinit var account: TextView
     private lateinit var balance: TextView
-    private lateinit var activeEsims: TextView
     private lateinit var error: TextView
-    private lateinit var orders: LinearLayout
+    private lateinit var transactions: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
+        setContentView(R.layout.activity_wallet)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.dashboard_title)
+        supportActionBar?.title = getString(R.string.wallet_title)
 
-        scroll = requireViewById(R.id.dashboard_scroll)
-        bottomNav = requireViewById(R.id.dashboard_bottom_nav)
-        progress = requireViewById(R.id.dashboard_progress)
-        greeting = requireViewById(R.id.dashboard_greeting)
-        account = requireViewById(R.id.dashboard_account)
-        balance = requireViewById(R.id.dashboard_balance)
-        activeEsims = requireViewById(R.id.dashboard_active_esims)
-        error = requireViewById(R.id.dashboard_error)
-        orders = requireViewById(R.id.dashboard_orders)
+        refresh = requireViewById(R.id.wallet_refresh)
+        bottomNav = requireViewById(R.id.wallet_bottom_nav)
+        balance = requireViewById(R.id.wallet_balance)
+        error = requireViewById(R.id.wallet_error)
+        transactions = requireViewById(R.id.wallet_transactions)
 
         setupInsets()
         setupBottomNavigation()
+        setupRefresh()
         renderPlaceholders()
-        loadDashboard()
+        loadWallet()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_dashboard
+        bottomNav.selectedItemId = R.id.nav_wallet
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -80,7 +73,7 @@ class DashboardActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.reload -> {
-                loadDashboard()
+                loadWallet()
                 true
             }
 
@@ -97,7 +90,7 @@ class DashboardActivity : AppCompatActivity() {
             window.decorView.rootView,
             arrayOf(
                 this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll),
+                mainViewPaddingInsetHandler(refresh),
                 { insets ->
                     bottomNav.updatePadding(
                         insets.left,
@@ -114,11 +107,11 @@ class DashboardActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_dashboard -> true
-                R.id.nav_wallet -> {
-                    openWalletActivity()
+                R.id.nav_dashboard -> {
+                    openDashboardActivity()
                     false
                 }
+                R.id.nav_wallet -> true
                 R.id.nav_esims -> {
                     openEsimActivity()
                     false
@@ -126,33 +119,34 @@ class DashboardActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        bottomNav.selectedItemId = R.id.nav_dashboard
+        bottomNav.selectedItemId = R.id.nav_wallet
+    }
+
+    private fun setupRefresh() {
+        refresh.setOnRefreshListener {
+            loadWallet()
+        }
     }
 
     private fun renderPlaceholders() {
-        greeting.text = getString(R.string.dashboard_greeting)
-        account.text = ""
         balance.text = "--"
-        activeEsims.text = "--"
-        renderOrders(emptyList())
+        renderTransactions(emptyList())
     }
 
-    private fun loadDashboard() {
+    private fun loadWallet() {
         lifecycleScope.launch {
             error.visibility = View.GONE
             setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            renderSession(session)
-
             val result = runCatching {
-                authApi.dashboard(session)
+                authApi.wallet(session)
             }
             setLoading(false)
 
             result
-                .onSuccess { renderDashboard(it) }
+                .onSuccess { renderWallet(it) }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.dashboard_load_failed)
+                    error.text = it.message ?: getString(R.string.wallet_load_failed)
                     error.visibility = View.VISIBLE
                 }
         }
@@ -175,64 +169,51 @@ class DashboardActivity : AppCompatActivity() {
         return refreshed
     }
 
-    private fun renderSession(session: AuthSession) {
-        greeting.text = session.displayName?.let { "Welcome, $it" }
-            ?: getString(R.string.dashboard_greeting)
-        account.text = listOfNotNull(
-            session.role?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-            session.email
-        ).joinToString(" - ")
-    }
-
-    private fun renderDashboard(data: MobileDashboardData) {
+    private fun renderWallet(data: MobileWalletData) {
         balance.text = data.currentBalance
-        activeEsims.text = data.activeEsimCount
-        renderOrders(data.recentOrders)
+        renderTransactions(data.transactions)
     }
 
-    private fun renderOrders(orderData: List<MobileDashboardOrder>) {
-        orders.removeAllViews()
-        if (orderData.isEmpty()) {
+    private fun renderTransactions(transactionData: List<MobileTransaction>) {
+        transactions.removeAllViews()
+        if (transactionData.isEmpty()) {
             TextView(this).apply {
-                text = getString(R.string.dashboard_empty_orders)
+                text = getString(R.string.wallet_empty_transactions)
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
                 setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                orders.addView(this)
+                transactions.addView(this)
             }
             return
         }
 
         val inflater = LayoutInflater.from(this)
-        orderData.forEach { order ->
-            val item = inflater.inflate(R.layout.dashboard_order_item, orders, false)
-            item.requireViewById<TextView>(R.id.order_title).text = order.title
-            item.requireViewById<TextView>(R.id.order_subtitle).text = order.subtitle
-            item.requireViewById<TextView>(R.id.order_amount).apply {
-                text = order.amount.orEmpty()
-                visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
+        transactionData.forEach { transaction ->
+            val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
+            item.requireViewById<TextView>(R.id.transaction_title).text = transaction.title
+            item.requireViewById<TextView>(R.id.transaction_subtitle).text = transaction.subtitle
+            item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
+            item.requireViewById<TextView>(R.id.transaction_status).apply {
+                text = transaction.status.orEmpty()
+                visibility = if (transaction.status.isNullOrBlank()) View.GONE else View.VISIBLE
             }
-            item.requireViewById<TextView>(R.id.order_status).apply {
-                text = order.status.orEmpty()
-                visibility = if (order.status.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            orders.addView(item)
+            transactions.addView(item)
         }
     }
 
     private fun setLoading(loading: Boolean) {
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
+        refresh.isRefreshing = loading
     }
 
-    private fun openWalletActivity() {
+    private fun openDashboardActivity() {
         startActivity(
-            Intent(this, WalletActivity::class.java).apply {
+            Intent(this, DashboardActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
         )
     }
 
     private fun openEsimActivity() {
-        val target = targetActivityName(META_ESIM_ACTIVITY)
+        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
         if (target.isNullOrBlank()) {
             error.text = getString(R.string.dashboard_missing_esim_target)
             error.visibility = View.VISIBLE
@@ -275,9 +256,5 @@ class DashboardActivity : AppCompatActivity() {
     private fun targetActivityName(key: String): String? {
         val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         return appInfo.metaData?.getString(key)
-    }
-
-    companion object {
-        const val META_ESIM_ACTIVITY = "im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
     }
 }
