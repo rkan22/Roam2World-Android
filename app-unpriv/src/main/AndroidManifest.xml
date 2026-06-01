@@ -14,6 +14,10 @@
         tools:targetApi="tiramisu">
         <meta-data
             android:name="im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
+            android:value="im.angry.openeuicc.ui.DashboardActivity" />
+
+        <meta-data
+            android:name="im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
             android:value="im.angry.openeuicc.ui.UnprivilegedMainActivity" />
 
         <!-- https://web.dev/get-installed-related-apps/?hl=en -->
@@ -30,6 +34,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DashboardActivity"
+            android:exported="false" />
 
         <activity
             android:name="im.angry.openeuicc.ui.UnprivilegedMainActivity"

@@ -19,6 +19,18 @@
     <string name="login_missing_target">Login target is not configured.</string>
     <string name="logout">Logout</string>
 
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_nav_esims">eSIMs</string>
+    <string name="dashboard_refresh">Refresh</string>
+    <string name="dashboard_greeting">Welcome</string>
+    <string name="dashboard_current_balance">Current balance</string>
+    <string name="dashboard_active_esims">Active eSIMs</string>
+    <string name="dashboard_recent_orders">Recent orders</string>
+    <string name="dashboard_loading">Loading dashboard...</string>
+    <string name="dashboard_empty_orders">No recent orders yet.</string>
+    <string name="dashboard_load_failed">Could not load dashboard.</string>
+    <string name="dashboard_missing_esim_target">eSIM target is not configured.</string>
+
     <string name="profile_reload_slots">Reload Slots</string>
     <string name="profile_no_enabled_profile">Unknown</string>
 

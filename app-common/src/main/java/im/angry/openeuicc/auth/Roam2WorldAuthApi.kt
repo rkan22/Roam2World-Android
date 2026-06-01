@@ -35,20 +35,38 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         Unit
     }
 
+    suspend fun dashboard(session: AuthSession): MobileDashboardData = withContext(Dispatchers.IO) {
+        parseDashboard(getJson(DASHBOARD_PATH, session.authorizationHeader))
+    }
+
+    private fun getJson(path: String, authorization: String? = null): JSONObject =
+        requestJson(path, method = "GET", authorization = authorization)
+
     private fun postJson(path: String, body: JSONObject, authorization: String? = null): JSONObject {
+        return requestJson(path, method = "POST", body = body, authorization = authorization)
+    }
+
+    private fun requestJson(
+        path: String,
+        method: String,
+        body: JSONObject? = null,
+        authorization: String? = null
+    ): JSONObject {
         val connection = (URL(resolve(path)).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
+            requestMethod = method
             connectTimeout = TIMEOUT_MS
             readTimeout = TIMEOUT_MS
-            doOutput = true
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Content-Type", "application/json")
             authorization?.let { setRequestProperty("Authorization", it) }
+            doOutput = body != null
         }
 
         return try {
-            connection.outputStream.use {
-                it.write(body.toString().toByteArray(Charsets.UTF_8))
+            body?.let { json ->
+                connection.outputStream.use {
+                    it.write(json.toString().toByteArray(Charsets.UTF_8))
+                }
             }
 
             val status = connection.responseCode
@@ -117,6 +135,73 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         )
     }
 
+    private fun parseDashboard(response: JSONObject): MobileDashboardData {
+        val data = response.optJSONObject("data") ?: response
+        val dashboard = data.optJSONObject("dashboard") ?: data
+        val balance = firstNotBlank(
+            dashboard.optString("current_balance"),
+            dashboard.optString("currentBalance"),
+            dashboard.optString("current_credit"),
+            dashboard.optString("currentCredit"),
+            dashboard.optString("balance"),
+            dashboard.optString("credit")
+        ) ?: "0"
+        val activeCount = firstNotBlank(
+            dashboard.optString("active_esim_count"),
+            dashboard.optString("active_eSIM_count"),
+            dashboard.optString("activeEsimCount"),
+            dashboard.optString("active_esims_count"),
+            dashboard.optString("active_esims"),
+            dashboard.optString("activeEsims")
+        ) ?: "0"
+        val orders = firstArray(
+            dashboard.optJSONArray("recent_orders"),
+            dashboard.optJSONArray("recentOrders"),
+            dashboard.optJSONArray("orders"),
+            data.optJSONArray("recent_orders"),
+            data.optJSONArray("recentOrders")
+        )
+
+        return MobileDashboardData(
+            currentBalance = balance,
+            activeEsimCount = activeCount,
+            recentOrders = parseOrders(orders)
+        )
+    }
+
+    private fun parseOrders(orders: org.json.JSONArray?): List<MobileDashboardOrder> {
+        if (orders == null) return emptyList()
+        return (0 until orders.length()).mapNotNull { index ->
+            val order = orders.optJSONObject(index) ?: return@mapNotNull null
+            val title = firstNotBlank(
+                order.optString("order_number"),
+                order.optString("orderNumber"),
+                order.optString("reference"),
+                order.optString("id")
+            )?.let { "#$it" } ?: "Order"
+            val subtitle = firstNotBlank(
+                order.optString("created_at"),
+                order.optString("createdAt"),
+                order.optString("date"),
+                order.optString("plan_name"),
+                order.optString("planName")
+            ) ?: "Recent order"
+            val amount = firstNotBlank(
+                order.optString("total_amount"),
+                order.optString("totalAmount"),
+                order.optString("amount"),
+                order.optString("price")
+            )
+            val status = firstNotBlank(order.optString("status"), order.optString("state"))
+            MobileDashboardOrder(
+                title = title,
+                subtitle = subtitle,
+                amount = amount,
+                status = status
+            )
+        }
+    }
+
     private fun accountSummary(account: JSONObject?): String? {
         account ?: return null
         return when {
@@ -137,8 +222,12 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     private fun firstNotBlank(vararg values: String?): String? =
         values.firstOrNull { !it.isNullOrBlank() && it != "null" }
 
+    private fun firstArray(vararg values: org.json.JSONArray?): org.json.JSONArray? =
+        values.firstOrNull { it != null }
+
     companion object {
         private const val MOBILE_LOGIN_PATH = "api/v1/mobile/auth/login/"
+        private const val DASHBOARD_PATH = "api/v1/mobile/dashboard/"
         private const val REFRESH_PATH = "api/v1/auth/refresh/"
         private const val LOGOUT_PATH = "api/v1/auth/logout/"
         private const val TIMEOUT_MS = 30_000
