@@ -133,6 +133,9 @@ class PurchaseHistoryActivity : AppCompatActivity() {
                 text = order.statusLabel().orEmpty()
                 visibility = if (order.status.isNullOrBlank()) View.GONE else View.VISIBLE
             }
+            item.setOnClickListener {
+                startActivity(MobileOrderDetailActivity.createIntent(this, order))
+            }
             orders.addView(item)
         }
     }

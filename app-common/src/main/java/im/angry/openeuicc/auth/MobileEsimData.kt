@@ -18,7 +18,11 @@ data class MobileEsim(
     val qrCode: String?,
     val qrCodeUrl: String?,
     val createdAt: String?,
-    val orderNumber: String?
+    val orderNumber: String?,
+    val expiresAt: String? = null,
+    val dataRemaining: String? = null,
+    val dataUsed: String? = null,
+    val orderId: String? = null
 ) {
     fun title(): String =
         packageName

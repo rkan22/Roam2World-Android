@@ -10,7 +10,10 @@ data class MobileOrder(
     val packageName: String,
     val price: String?,
     val status: String?,
-    val createdAt: String?
+    val createdAt: String?,
+    val provider: String? = null,
+    val esimId: String? = null,
+    val esim: MobileEsim? = null
 ) {
     fun displayNumber(): String =
         orderNumber?.let { "#$it" }

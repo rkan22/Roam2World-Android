@@ -14,7 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -29,7 +28,6 @@ import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
-import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
 import im.angry.openeuicc.util.activityToolbarInsetHandler
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
 import im.angry.openeuicc.util.setupRootViewSystemBarInsets
@@ -45,8 +43,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     private lateinit var error: TextView
     private lateinit var qrImage: ImageView
     private lateinit var qrUnavailable: TextView
+    private lateinit var copyIccidButton: MaterialButton
     private lateinit var copyActivationButton: MaterialButton
     private lateinit var copySmdpButton: MaterialButton
+    private lateinit var showQrButton: MaterialButton
     private lateinit var installButton: MaterialButton
     private lateinit var installUnavailable: TextView
 
@@ -66,8 +66,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         error = requireViewById(R.id.mobile_esim_detail_error)
         qrImage = requireViewById(R.id.mobile_esim_qr_image)
         qrUnavailable = requireViewById(R.id.mobile_esim_qr_unavailable)
+        copyIccidButton = requireViewById(R.id.mobile_esim_copy_iccid)
         copyActivationButton = requireViewById(R.id.mobile_esim_copy_activation)
         copySmdpButton = requireViewById(R.id.mobile_esim_copy_smdp)
+        showQrButton = requireViewById(R.id.mobile_esim_show_qr)
         installButton = requireViewById(R.id.mobile_esim_install_button)
         installUnavailable = requireViewById(R.id.mobile_esim_install_unavailable)
 
@@ -107,13 +109,15 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 setLoading(false)
                 return@launch
             }
-            val result = runCatching { authApi.esims(session) }
+            val result = runCatching {
+                selected.id?.takeIf { it.isNotBlank() }?.let { authApi.esim(session, it) }
+                    ?: authApi.esims(session).esims.firstOrNull { it.matches(selected) }
+                    ?: throw IllegalStateException(getString(R.string.mobile_esim_detail_missing))
+            }
             setLoading(false)
 
             result
-                .onSuccess { data ->
-                    data.esims.firstOrNull { it.matches(selected) }?.let { renderEsim(it) }
-                }
+                .onSuccess { renderEsim(it) }
                 .onFailure {
                     error.text = it.message ?: getString(R.string.mobile_esims_load_failed)
                     error.visibility = View.VISIBLE
@@ -153,6 +157,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         setOptionalText(R.id.mobile_esim_detail_status, esim.statusLabel(), R.string.mobile_esim_status_format)
         setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
         setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)
+        setOptionalText(R.id.mobile_esim_detail_matching_id, esim.matchingId, R.string.mobile_esim_matching_id_format)
+        setOptionalText(R.id.mobile_esim_detail_expires, esim.expiresAt, R.string.mobile_esim_expires_format)
+        setOptionalText(R.id.mobile_esim_detail_data_remaining, esim.dataRemaining, R.string.mobile_esim_data_remaining_format)
+        setOptionalText(R.id.mobile_esim_detail_data_used, esim.dataUsed, R.string.mobile_esim_data_used_format)
         setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt, R.string.mobile_esim_created_format)
         setOptionalText(R.id.mobile_esim_detail_order, esim.orderNumber, R.string.mobile_esim_order_format)
         renderQr(esim)
@@ -168,6 +176,15 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     }
 
     private fun renderActions(esim: MobileEsim) {
+        copyIccidButton.visibility = if (esim.iccid.isNullOrBlank()) View.GONE else View.VISIBLE
+        copyIccidButton.setOnClickListener {
+            copyToClipboard(
+                getString(R.string.mobile_esim_iccid_label),
+                esim.iccid,
+                R.string.toast_iccid_copied
+            )
+        }
+
         copyActivationButton.visibility = if (esim.activationCode.isNullOrBlank()) View.GONE else View.VISIBLE
         copyActivationButton.setOnClickListener {
             copyToClipboard(
@@ -186,31 +203,26 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             )
         }
 
+        val qrPayload = esim.qrPayload()
+        showQrButton.visibility = if (qrPayload.isNullOrBlank()) View.GONE else View.VISIBLE
+        showQrButton.setOnClickListener {
+            startActivity(MobileEsimQrActivity.createIntent(this, esim))
+        }
+
         val installCode = esim.installCode()
         installButton.isEnabled = !installCode.isNullOrBlank()
         installUnavailable.visibility = if (installCode.isNullOrBlank()) View.VISIBLE else View.GONE
         installButton.setOnClickListener {
-            launchInstallFlow(installCode)
+            launchInstallFlow(esim, installCode)
         }
     }
 
-    private fun launchInstallFlow(installCode: String?) {
+    private fun launchInstallFlow(esim: MobileEsim, installCode: String?) {
         if (installCode.isNullOrBlank()) {
             installUnavailable.visibility = View.VISIBLE
             return
         }
-
-        val lpaUri = if (installCode.startsWith("LPA:", ignoreCase = true)) {
-            installCode
-        } else {
-            "LPA:$installCode"
-        }
-        startActivity(
-            DownloadWizardActivity.newIntent(this).apply {
-                action = Intent.ACTION_VIEW
-                data = lpaUri.toUri()
-            }
-        )
+        startActivity(MobileEsimInstallActivity.createIntent(this, esim))
     }
 
     private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
@@ -270,7 +282,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 EXTRA_LPA_CODE,
                 EXTRA_SMDP,
                 EXTRA_QR_CODE,
-                EXTRA_QR_URL
+                EXTRA_QR_URL,
+                EXTRA_EXPIRES_AT,
+                EXTRA_DATA_REMAINING,
+                EXTRA_DATA_USED
             ).none { !intent.getStringExtra(it).isNullOrBlank() }
         ) {
             null
@@ -289,7 +304,11 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 qrCode = intent.getStringExtra(EXTRA_QR_CODE),
                 qrCodeUrl = intent.getStringExtra(EXTRA_QR_URL),
                 createdAt = intent.getStringExtra(EXTRA_CREATED_AT),
-                orderNumber = intent.getStringExtra(EXTRA_ORDER_NUMBER)
+                orderNumber = intent.getStringExtra(EXTRA_ORDER_NUMBER),
+                expiresAt = intent.getStringExtra(EXTRA_EXPIRES_AT),
+                dataRemaining = intent.getStringExtra(EXTRA_DATA_REMAINING),
+                dataUsed = intent.getStringExtra(EXTRA_DATA_USED),
+                orderId = intent.getStringExtra(EXTRA_ORDER_ID)
             )
         }
 
@@ -297,7 +316,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         listOf(
             id to other.id,
             iccid to other.iccid,
-            orderNumber to other.orderNumber
+            orderNumber to other.orderNumber,
+            orderId to other.orderId
         ).any { (left, right) -> !left.isNullOrBlank() && left == right }
 
     companion object {
@@ -316,6 +336,15 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         private const val EXTRA_QR_URL = "mobile_esim.qr_url"
         private const val EXTRA_CREATED_AT = "mobile_esim.created_at"
         private const val EXTRA_ORDER_NUMBER = "mobile_esim.order_number"
+        private const val EXTRA_EXPIRES_AT = "mobile_esim.expires_at"
+        private const val EXTRA_DATA_REMAINING = "mobile_esim.data_remaining"
+        private const val EXTRA_DATA_USED = "mobile_esim.data_used"
+        private const val EXTRA_ORDER_ID = "mobile_esim.order_id"
+
+        fun createIntent(context: Context, esimId: String): Intent =
+            Intent(context, MobileEsimDetailActivity::class.java).apply {
+                putExtra(EXTRA_ID, esimId)
+            }
 
         fun createIntent(context: Context, esim: MobileEsim): Intent =
             Intent(context, MobileEsimDetailActivity::class.java).apply {
@@ -333,6 +362,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 putExtra(EXTRA_QR_URL, esim.qrCodeUrl)
                 putExtra(EXTRA_CREATED_AT, esim.createdAt)
                 putExtra(EXTRA_ORDER_NUMBER, esim.orderNumber)
+                putExtra(EXTRA_EXPIRES_AT, esim.expiresAt)
+                putExtra(EXTRA_DATA_REMAINING, esim.dataRemaining)
+                putExtra(EXTRA_DATA_USED, esim.dataUsed)
+                putExtra(EXTRA_ORDER_ID, esim.orderId)
             }
     }
 }

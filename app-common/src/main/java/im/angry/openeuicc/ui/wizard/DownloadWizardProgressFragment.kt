@@ -56,12 +56,8 @@ class DownloadWizardProgressFragment : DownloadWizardActivity.DownloadWizardStep
     override val hasPrev: Boolean
         get() = false
 
-    override fun createNextFragment(): DownloadWizardActivity.DownloadWizardStepFragment? =
-        if (state.downloadError != null) {
-            DownloadWizardDiagnosticsFragment()
-        } else {
-            null
-        }
+    override fun createNextFragment(): DownloadWizardActivity.DownloadWizardStepFragment =
+        DownloadWizardResultFragment()
 
     override fun createPrevFragment(): DownloadWizardActivity.DownloadWizardStepFragment? = null
 

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" fill="#f8fafb"/>
+  <rect y="0" width="390" height="64" fill="#ffffff"/>
+  <path d="M28 32h18M34 24l-8 8 8 8" fill="none" stroke="#172026" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="62" y="38" font-family="Inter, Roboto, Arial, sans-serif" font-size="18" font-weight="600" fill="#172026">Order Detail</text>
+
+  <text x="20" y="110" font-family="Inter, Roboto, Arial, sans-serif" font-size="24" font-weight="650" fill="#172026">Order ORD-20260603-84A1</text>
+  <rect x="20" y="140" width="350" height="290" rx="8" fill="#eef3f6" stroke="#d7e0e6"/>
+  <text x="38" y="176" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Order Number</text>
+  <text x="190" y="176" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">ORD-20260603-84A1</text>
+  <line x1="38" y1="195" x2="352" y2="195" stroke="#d7e0e6"/>
+  <text x="38" y="224" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Package Name</text>
+  <text x="190" y="224" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">Europe 5GB / 30 days</text>
+  <line x1="38" y1="243" x2="352" y2="243" stroke="#d7e0e6"/>
+  <text x="38" y="272" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Provider</text>
+  <text x="190" y="272" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">Orange Balance</text>
+  <line x1="38" y1="291" x2="352" y2="291" stroke="#d7e0e6"/>
+  <text x="38" y="320" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Price</text>
+  <text x="190" y="320" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">$15.00</text>
+  <line x1="38" y1="339" x2="352" y2="339" stroke="#d7e0e6"/>
+  <text x="38" y="368" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Status</text>
+  <rect x="190" y="350" width="92" height="26" rx="13" fill="#dff4e8"/>
+  <text x="207" y="368" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" font-weight="700" fill="#137a3d">Completed</text>
+  <line x1="38" y1="387" x2="352" y2="387" stroke="#d7e0e6"/>
+  <text x="38" y="416" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">eSIM ID</text>
+  <text x="190" y="416" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#5d6972">10182</text>
+
+  <text x="20" y="468" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" fill="#5d6972">Created Date</text>
+  <text x="20" y="494" font-family="Inter, Roboto, Arial, sans-serif" font-size="16" font-weight="600" fill="#25323a">June 3, 2026 at 00:21</text>
+  <rect x="20" y="544" width="350" height="56" rx="28" fill="#0b57d0"/>
+  <text x="157" y="578" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">View eSIM</text>
+</svg>
