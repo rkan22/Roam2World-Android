@@ -3,6 +3,7 @@ package im.angry.openeuicc.ui
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
@@ -52,6 +53,7 @@ class LoginActivity : AppCompatActivity() {
         progress = requireViewById(R.id.login_progress)
         statusText = requireViewById(R.id.login_status)
 
+        logLoginEndpoint()
         loginButton.setOnClickListener { submitLogin() }
         passwordInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -63,6 +65,12 @@ class LoginActivity : AppCompatActivity() {
         }
 
         restoreSession()
+    }
+
+    private fun logLoginEndpoint() {
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Login endpoint: ${authApi.loginEndpointUrl}")
+        }
     }
 
     private fun setupInsets() {
@@ -190,6 +198,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val TAG = "LoginActivity"
         const val META_TARGET_ACTIVITY = "im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
     }
 }

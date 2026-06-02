@@ -1,13 +1,21 @@
 package im.angry.openeuicc.auth
 
+import android.util.Log
+import im.angry.openeuicc.common.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-class Roam2WorldAuthApi(private val baseUrl: String) {
+class Roam2WorldAuthApi(baseUrl: String) {
+    private val apiBaseUrl = normalizeBaseUrl(baseUrl)
+
+    val loginEndpointUrl: String
+        get() = resolve(MOBILE_LOGIN_PATH)
+
     suspend fun login(email: String, password: String): AuthSession = withContext(Dispatchers.IO) {
         val response = postJson(
             MOBILE_LOGIN_PATH,
@@ -94,7 +102,9 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         body: JSONObject? = null,
         authorization: String? = null
     ): JSONObject {
-        val connection = (URL(resolve(path)).openConnection() as HttpURLConnection).apply {
+        val requestUrl = resolve(path)
+        logRequest(method, requestUrl)
+        val connection = (URL(requestUrl).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = TIMEOUT_MS
             readTimeout = TIMEOUT_MS
@@ -118,7 +128,8 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
                 connection.errorStream
             })?.bufferedReader()?.use { it.readText() }).orEmpty()
 
-            val response = responseText.takeIf { it.isNotBlank() }?.let { JSONObject(it) } ?: JSONObject()
+            logRawResponse(method, requestUrl, status, connection.contentType, responseText)
+            val response = parseJsonResponse(responseText, status, connection.contentType, requestUrl)
             if (status !in 200..299 || response.optBoolean("success", true) == false) {
                 throw AuthApiException(response.errorMessage(status))
             }
@@ -129,7 +140,31 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     }
 
     private fun resolve(path: String): String =
-        "${baseUrl.trimEnd('/')}/${path.trimStart('/')}"
+        "${apiBaseUrl.trimEnd('/')}/${path.trimStart('/')}"
+
+    private fun parseJsonResponse(
+        responseText: String,
+        status: Int,
+        contentType: String?,
+        requestUrl: String
+    ): JSONObject {
+        if (responseText.isBlank()) return JSONObject()
+
+        val trimmed = responseText.trimStart()
+        if (!trimmed.startsWith("{")) {
+            val responseType = contentType?.takeIf { it.isNotBlank() } ?: "unknown content type"
+            throw AuthApiException(
+                "Backend returned non-JSON response from $requestUrl " +
+                    "(HTTP $status, $responseType). Check that ROAM2WORLD_API_BASE_URL points to the mobile API backend."
+            )
+        }
+
+        return try {
+            JSONObject(responseText)
+        } catch (e: JSONException) {
+            throw AuthApiException("Backend returned invalid JSON from $requestUrl (HTTP $status): ${e.message}")
+        }
+    }
 
     private fun parseSession(response: JSONObject, existing: AuthSession? = null): AuthSession {
         val data = response.optJSONObject("data") ?: response
@@ -137,14 +172,20 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
 
         val access = firstNotBlank(
             tokens?.optString("access"),
+            tokens?.optString("access_token"),
             data.optString("access"),
-            response.optString("access")
+            data.optString("access_token"),
+            response.optString("access"),
+            response.optString("access_token")
         ) ?: throw AuthApiException("Login response did not include an access token")
 
         val refresh = firstNotBlank(
             tokens?.optString("refresh"),
+            tokens?.optString("refresh_token"),
             data.optString("refresh"),
+            data.optString("refresh_token"),
             response.optString("refresh"),
+            response.optString("refresh_token"),
             existing?.refreshToken
         )
 
@@ -811,6 +852,9 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     }
 
     companion object {
+        private const val TAG = "Roam2WorldAuthApi"
+        private const val DEFAULT_API_BASE_URL = "https://roam2world-panels-backend.onrender.com"
+        private const val PARTNERS_FRONTEND_HOST = "partners.roam2world.com"
         private const val MOBILE_LOGIN_PATH = "api/v1/mobile/auth/login/"
         private const val DASHBOARD_PATH = "api/v1/mobile/dashboard/"
         private const val WALLET_PATH = "api/v1/mobile/wallet/"
@@ -821,6 +865,44 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         private const val REFRESH_PATH = "api/v1/auth/refresh/"
         private const val LOGOUT_PATH = "api/v1/auth/logout/"
         private const val TIMEOUT_MS = 30_000
+        private const val LOG_CHUNK_SIZE = 3_500
+
+        private fun normalizeBaseUrl(configuredBaseUrl: String): String {
+            val trimmed = configuredBaseUrl.trim().ifBlank { DEFAULT_API_BASE_URL }
+            val parsed = runCatching { URL(trimmed) }.getOrNull() ?: return DEFAULT_API_BASE_URL
+            if (parsed.host.equals(PARTNERS_FRONTEND_HOST, ignoreCase = true)) {
+                return DEFAULT_API_BASE_URL
+            }
+
+            val port = parsed.port.takeIf { it != -1 }?.let { ":$it" }.orEmpty()
+            return "${parsed.protocol}://${parsed.host}$port"
+        }
+
+        private fun logRequest(method: String, requestUrl: String) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "$method $requestUrl")
+            }
+        }
+
+        private fun logRawResponse(
+            method: String,
+            requestUrl: String,
+            status: Int,
+            contentType: String?,
+            responseText: String
+        ) {
+            if (!BuildConfig.DEBUG) return
+
+            Log.d(TAG, "HTTP $status $method $requestUrl contentType=${contentType.orEmpty()}")
+            if (responseText.isBlank()) {
+                Log.d(TAG, "Raw response body: <empty>")
+                return
+            }
+
+            responseText.chunked(LOG_CHUNK_SIZE).forEachIndexed { index, chunk ->
+                Log.d(TAG, "Raw response body[$index]: $chunk")
+            }
+        }
     }
 }
 
