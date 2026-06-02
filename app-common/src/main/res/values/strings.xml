@@ -36,6 +36,21 @@
     <string name="wallet_empty_transactions">No wallet transactions yet.</string>
     <string name="wallet_load_failed">Could not load wallet.</string>
     <string name="wallet_pull_refresh">Pull to refresh wallet</string>
+    <string name="packages_title">Packages</string>
+    <string name="packages_featured">Featured packages</string>
+    <string name="packages_catalog">Package catalog</string>
+    <string name="packages_search_hint">Search packages</string>
+    <string name="packages_empty">No packages found.</string>
+    <string name="packages_load_failed">Could not load packages.</string>
+    <string name="packages_global_country">Global</string>
+    <string name="package_detail_title">Package details</string>
+    <string name="package_detail_overview">Overview</string>
+    <string name="package_detail_visibility_format">Visible to: %s</string>
+    <string name="package_detail_data_format">Data: %s</string>
+    <string name="package_detail_validity_format">Validity: %s</string>
+    <string name="package_detail_network_format">Network: %s</string>
+    <string name="package_detail_coverage_format">Coverage: %s</string>
+    <string name="package_detail_description_format">%s</string>
 
     <string name="profile_reload_slots">Reload Slots</string>
     <string name="profile_no_enabled_profile">Unknown</string>
