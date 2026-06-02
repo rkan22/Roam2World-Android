@@ -7,6 +7,8 @@ data class MobilePackageCatalog(
 
 data class MobilePackage(
     val id: String?,
+    val provider: String?,
+    val packageType: String?,
     val name: String,
     val country: String,
     val countryCode: String?,

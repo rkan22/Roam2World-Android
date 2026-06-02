@@ -52,6 +52,35 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         parsePackageCatalog(packageResponse, featuredResponse, session.role)
     }
 
+    suspend fun purchasePackage(
+        session: AuthSession,
+        request: MobilePackagePurchaseRequest
+    ): MobilePackagePurchaseResult = withContext(Dispatchers.IO) {
+        val amount = moneyAmount(request.price)
+        val body = JSONObject()
+            .put("payment_method", "wallet")
+            .put("quantity", 1)
+            .put("order_type", "esim")
+            .put("order_source", request.role ?: "app")
+            .put("product_name", request.packageName)
+            .put("unit_price", amount)
+            .put("subtotal", amount)
+            .put("tax_amount", "0.00")
+            .put("delivery_fee", "0.00")
+            .put("total_amount", amount)
+            .put("price", amount)
+        request.packageId?.let { body.put("package_id", it) }
+        request.provider?.let { body.put("provider", it) }
+        request.packageDescription?.let { body.put("product_description", it) }
+        request.country?.let { body.put("delivery_country", it) }
+
+        parsePurchaseResult(
+            postJson(MOBILE_ORDER_PATH, body, session.authorizationHeader),
+            request.packageName,
+            request.price
+        )
+    }
+
     private fun getJson(path: String, authorization: String? = null): JSONObject =
         requestJson(path, method = "GET", authorization = authorization)
 
@@ -227,8 +256,10 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
             wallet.optString("credit")
         ) ?: "0"
 
+        val transactionArray = transactionResponse.optJSONArray("data")
         val transactionData = transactionResponse.optJSONObject("data") ?: transactionResponse
         val transactions = firstArray(
+            transactionArray,
             transactionData.optJSONArray("transactions"),
             transactionData.optJSONArray("recent_transactions"),
             transactionData.optJSONArray("recentTransactions"),
@@ -261,9 +292,11 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     }
 
     private fun parsePackageList(response: JSONObject, fallbackFeatured: Boolean): List<MobilePackage> {
+        val dataArray = response.optJSONArray("data")
         val data = response.optJSONObject("data") ?: response
         val packageObject = data.optJSONObject("packages") ?: response.optJSONObject("packages")
         val packages = firstArray(
+            dataArray,
             data.optJSONArray("packages"),
             data.optJSONArray("featured_packages"),
             data.optJSONArray("featuredPackages"),
@@ -308,6 +341,22 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
             packageJson.optString("duration_days"),
             packageJson.optString("durationDays")
         )
+        val dataQuantity = firstNotBlank(
+            packageJson.optString("data_quantity"),
+            packageJson.optString("dataQuantity"),
+            packageJson.optString("data_quota"),
+            packageJson.optString("dataQuota")
+        )
+        val dataUnit = firstNotBlank(
+            packageJson.optString("data_unit"),
+            packageJson.optString("dataUnit")
+        )
+        val validityUnit = firstNotBlank(
+            packageJson.optString("validity_unit"),
+            packageJson.optString("validityUnit"),
+            packageJson.optString("package_validity_unit"),
+            packageJson.optString("packageValidityUnit")
+        )
 
         return MobilePackage(
             id = firstNotBlank(
@@ -316,6 +365,15 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
                 packageJson.optString("packageId"),
                 packageJson.optString("plan_id"),
                 packageJson.optString("planId")
+            ),
+            provider = firstNotBlank(
+                packageJson.optString("provider"),
+                packageJson.optString("source")
+            ) ?: "esimcard",
+            packageType = firstNotBlank(
+                packageJson.optString("package_type"),
+                packageJson.optString("packageType"),
+                packageJson.optString("type")
             ),
             name = firstNotBlank(
                 packageJson.optString("name"),
@@ -334,12 +392,16 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
                 packageJson.optString("data_allowance"),
                 packageJson.optString("dataAllowance"),
                 packageJson.optString("quota")
-            ) ?: dataGb?.let { "$it GB" },
+            ) ?: quantityWithUnit(dataQuantity, dataUnit)
+                ?: dataGb?.let { "$it GB" },
             validity = firstNotBlank(
                 packageJson.optString("validity"),
                 packageJson.optString("duration"),
-                packageJson.optString("period")
-            ) ?: validityDays?.let { "$it days" },
+                packageJson.optString("period"),
+                packageJson.optString("package_validity"),
+                packageJson.optString("packageValidity")
+            )?.let { quantityWithUnit(it, validityUnit) ?: it }
+                ?: validityDays?.let { "$it days" },
             basePrice = priceValue(
                 packageJson,
                 currency,
@@ -396,12 +458,18 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
             packageJson.optJSONArray("coverage_countries"),
             packageJson.optJSONArray("coverageCountries")
         )
+        val countryCodes = countryLabels(
+            firstArray(
+                packageJson.optJSONArray("country_codes"),
+                packageJson.optJSONArray("countryCodes")
+            )
+        )
         val countryLabels = countryLabels(countries)
         if (countryLabels.size > 1) {
             return Triple("Multi-country", null, countryLabels.joinToString(", "))
         }
         if (countryLabels.size == 1) {
-            return Triple(countryLabels.first(), null, null)
+            return Triple(countryLabels.first(), countryCodes.firstOrNull(), null)
         }
 
         val country = packageJson.optJSONObject("country")
@@ -420,7 +488,8 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
             country?.optString("isoCode"),
             packageJson.optString("country_code"),
             packageJson.optString("countryCode"),
-            packageJson.optString("iso2")
+            packageJson.optString("iso2"),
+            countryCodes.firstOrNull()
         )
 
         return Triple(name, code, null)
@@ -445,6 +514,134 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         val trimmed = value.trim()
         if (currency.isNullOrBlank() || trimmed.any { it.isLetter() || it == '$' }) return trimmed
         return "$currency $trimmed"
+    }
+
+    private fun quantityWithUnit(quantity: String?, unit: String?): String? {
+        if (quantity.isNullOrBlank()) return null
+        return listOfNotNull(quantity, unit)
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+    }
+
+    private fun parsePurchaseResult(
+        response: JSONObject,
+        fallbackPackageName: String,
+        fallbackPrice: String
+    ): MobilePackagePurchaseResult {
+        val data = response.optJSONObject("data") ?: response
+        val order = firstObject(
+            data.optJSONObject("order"),
+            data.optJSONObject("purchase"),
+            data.optJSONObject("result"),
+            data
+        ) ?: data
+        val activationSource = firstObject(
+            data.optJSONObject("activation"),
+            data.optJSONObject("activation_details"),
+            data.optJSONObject("activationDetails"),
+            data.optJSONObject("esim"),
+            data.optJSONObject("eSIM"),
+            data.optJSONObject("qr"),
+            order.optJSONObject("activation"),
+            order.optJSONObject("activation_details"),
+            order.optJSONObject("activationDetails"),
+            order.optJSONObject("esim"),
+            order.optJSONObject("eSIM"),
+            order.optJSONObject("qr"),
+            data
+        ) ?: data
+
+        val qrCode = firstNotBlank(
+            activationSource.optString("qr_code"),
+            activationSource.optString("qrCode"),
+            activationSource.optString("qr"),
+            data.optString("qr_code"),
+            data.optString("qrCode")
+        )
+        val activationCode = firstNotBlank(
+            activationSource.optString("lpa_code"),
+            activationSource.optString("lpaCode"),
+            activationSource.optString("lpa"),
+            activationSource.optString("lpa_string"),
+            activationSource.optString("lpaString"),
+            activationSource.optString("activation_code"),
+            activationSource.optString("activationCode"),
+            data.optString("activation_code"),
+            data.optString("activationCode"),
+            qrCode?.takeIf { it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$") }
+        )
+        val lpaCode = activationCode?.takeIf {
+            it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$")
+        }
+        val matchingId = firstNotBlank(
+            activationSource.optString("matching_id"),
+            activationSource.optString("matchingId"),
+            activationSource.optString("matchingID"),
+            activationSource.optString("activation_code"),
+            activationSource.optString("activationCode")
+        )?.takeUnless { it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$") }
+
+        return MobilePackagePurchaseResult(
+            orderId = firstNotBlank(order.optString("id"), order.optString("order_id"), order.optString("orderId")),
+            orderNumber = firstNotBlank(
+                order.optString("order_number"),
+                order.optString("orderNumber"),
+                order.optString("reference"),
+                data.optString("order_number"),
+                data.optString("orderNumber")
+            ),
+            status = firstNotBlank(order.optString("status"), data.optString("status")),
+            packageName = firstNotBlank(
+                order.optString("product_name"),
+                order.optString("productName"),
+                data.optString("package_name"),
+                data.optString("packageName")
+            ) ?: fallbackPackageName,
+            price = firstNotBlank(
+                order.optString("total_amount"),
+                order.optString("totalAmount"),
+                order.optString("price"),
+                data.optString("price")
+            ) ?: fallbackPrice,
+            balanceAfter = firstNotBlank(
+                data.optString("balance_after"),
+                data.optString("balanceAfter"),
+                data.optString("current_balance"),
+                data.optString("currentBalance"),
+                data.optString("current_credit"),
+                data.optString("currentCredit")
+            ),
+            activation = MobileActivationDetails(
+                lpaCode = lpaCode,
+                smdpAddress = firstNotBlank(
+                    activationSource.optString("smdp_address"),
+                    activationSource.optString("smdpAddress"),
+                    activationSource.optString("smdp"),
+                    activationSource.optString("sm_dp_plus_address"),
+                    activationSource.optString("smDpPlusAddress")
+                ),
+                matchingId = matchingId,
+                confirmationCodeRequired = optionalBoolean(
+                    activationSource,
+                    "confirmation_code_required",
+                    "confirmationCodeRequired"
+                ) ?: false,
+                qrCode = qrCode,
+                qrCodeUrl = firstNotBlank(
+                    activationSource.optString("qr_code_url"),
+                    activationSource.optString("qrCodeUrl"),
+                    activationSource.optString("qr_url"),
+                    activationSource.optString("qrUrl")
+                ),
+                iccid = firstNotBlank(activationSource.optString("iccid"), data.optString("iccid")),
+                esimId = firstNotBlank(
+                    activationSource.optString("esim_id"),
+                    activationSource.optString("esimId"),
+                    data.optString("esim_id"),
+                    data.optString("esimId")
+                )
+            )
+        )
     }
 
     private fun visibleForRole(packageJson: JSONObject, role: String): Boolean {
@@ -602,6 +799,17 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
     private fun firstArray(vararg values: JSONArray?): JSONArray? =
         values.firstOrNull { it != null }
 
+    private fun firstObject(vararg values: JSONObject?): JSONObject? =
+        values.firstOrNull { it != null }
+
+    private fun moneyAmount(value: String): String {
+        val raw = value.trim()
+        val numeric = raw
+            .replace(",", ".")
+            .replace(Regex("[^0-9.-]"), "")
+        return numeric.ifBlank { raw.ifBlank { "0.00" } }
+    }
+
     companion object {
         private const val MOBILE_LOGIN_PATH = "api/v1/mobile/auth/login/"
         private const val DASHBOARD_PATH = "api/v1/mobile/dashboard/"
@@ -609,6 +817,7 @@ class Roam2WorldAuthApi(private val baseUrl: String) {
         private const val TRANSACTIONS_PATH = "api/v1/mobile/transactions/"
         private const val PACKAGES_PATH = "api/v1/mobile/packages/"
         private const val FEATURED_PACKAGES_PATH = "api/v1/mobile/packages/featured/"
+        private const val MOBILE_ORDER_PATH = "api/v1/mobile/orders/"
         private const val REFRESH_PATH = "api/v1/auth/refresh/"
         private const val LOGOUT_PATH = "api/v1/auth/logout/"
         private const val TIMEOUT_MS = 30_000
