@@ -14,6 +14,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -38,6 +39,8 @@ class WalletActivity : AppCompatActivity() {
     private lateinit var balance: TextView
     private lateinit var error: TextView
     private lateinit var transactions: LinearLayout
+    private lateinit var requestBalance: MaterialButton
+    private lateinit var requestHistory: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -51,10 +54,13 @@ class WalletActivity : AppCompatActivity() {
         balance = requireViewById(R.id.wallet_balance)
         error = requireViewById(R.id.wallet_error)
         transactions = requireViewById(R.id.wallet_transactions)
+        requestBalance = requireViewById(R.id.wallet_request_balance)
+        requestHistory = requireViewById(R.id.wallet_request_history)
 
         setupInsets()
         setupBottomNavigation()
         setupRefresh()
+        setupActions()
         renderPlaceholders()
         loadWallet()
     }
@@ -133,6 +139,15 @@ class WalletActivity : AppCompatActivity() {
     private fun setupRefresh() {
         refresh.setOnRefreshListener {
             loadWallet()
+        }
+    }
+
+    private fun setupActions() {
+        requestBalance.setOnClickListener {
+            startActivity(Intent(this, WalletRequestActivity::class.java))
+        }
+        requestHistory.setOnClickListener {
+            startActivity(Intent(this, WalletRequestHistoryActivity::class.java))
         }
     }
 

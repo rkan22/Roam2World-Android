@@ -57,6 +57,28 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseWallet(walletResponse, transactionResponse)
     }
 
+    suspend fun walletRequests(session: AuthSession): List<MobileWalletRequest> = withContext(Dispatchers.IO) {
+        parseWalletRequests(getJson(WALLET_REQUESTS_ENDPOINT, session.authorizationHeader))
+    }
+
+    suspend fun createWalletRequest(
+        session: AuthSession,
+        amount: String,
+        currency: String,
+        note: String
+    ): MobileWalletRequest = withContext(Dispatchers.IO) {
+        parseWalletRequest(
+            postJson(
+                WALLET_REQUESTS_ENDPOINT,
+                JSONObject()
+                    .put("amount", amount)
+                    .put("currency", currency)
+                    .put("note", note),
+                session.authorizationHeader
+            )
+        )
+    }
+
     suspend fun packages(session: AuthSession): MobilePackageCatalog = withContext(Dispatchers.IO) {
         val packageResponse = getJson(PACKAGES_ENDPOINT, session.authorizationHeader)
         val featuredResponse = getJson(FEATURED_PACKAGES_ENDPOINT, session.authorizationHeader)
@@ -188,6 +210,14 @@ class Roam2WorldAuthApi(baseUrl: String) {
         if (responseText.isBlank()) return JSONObject()
 
         val trimmed = responseText.trimStart()
+        if (trimmed.startsWith("[")) {
+            return try {
+                JSONObject().put("data", JSONArray(responseText))
+            } catch (e: JSONException) {
+                throw AuthApiException("$endpointLabel returned invalid JSON from $requestUrl (HTTP $status): ${e.message}")
+            }
+        }
+
         if (!trimmed.startsWith("{")) {
             val responseType = contentType?.takeIf { it.isNotBlank() } ?: "unknown content type"
             throw AuthApiException(
@@ -660,6 +690,58 @@ class Roam2WorldAuthApi(baseUrl: String) {
         return MobileWalletData(
             currentBalance = balance,
             transactions = parseTransactions(transactions)
+        )
+    }
+
+    private fun parseWalletRequests(response: JSONObject): List<MobileWalletRequest> {
+        val data = response.optJSONObject("data") ?: response
+        val requests = firstArray(
+            response.optJSONArray("data"),
+            data.optJSONArray("requests"),
+            data.optJSONArray("results"),
+            response.optJSONArray("requests"),
+            response.optJSONArray("results")
+        ) ?: return if (response.has("id")) listOf(parseWalletRequest(response)) else emptyList()
+
+        return (0 until requests.length()).mapNotNull { index ->
+            requests.optJSONObject(index)?.let { parseWalletRequest(it) }
+        }
+    }
+
+    private fun parseWalletRequest(response: JSONObject): MobileWalletRequest {
+        val data = response.optJSONObject("data") ?: response
+        val item = data.optJSONObject("request")
+            ?: data.optJSONObject("wallet_request")
+            ?: data
+        return MobileWalletRequest(
+            id = firstNotBlank(
+                item.optString("id"),
+                item.optString("request_id"),
+                item.optString("requestId")
+            ),
+            amount = firstNotBlank(
+                item.optString("amount"),
+                item.optString("requested_amount"),
+                item.optString("requestedAmount")
+            ) ?: "0",
+            currency = firstNotBlank(item.optString("currency")) ?: "USD",
+            status = firstNotBlank(item.optString("status")) ?: "pending",
+            note = firstNotBlank(
+                item.optString("note"),
+                item.optString("dealer_notes"),
+                item.optString("payment_notes"),
+                item.optString("notes")
+            ),
+            createdAt = firstNotBlank(
+                item.optString("created_at"),
+                item.optString("createdAt")
+            ),
+            reviewedAt = firstNotBlank(
+                item.optString("reviewed_at"),
+                item.optString("reviewedAt"),
+                item.optString("processed_at"),
+                item.optString("processedAt")
+            )
         )
     }
 
@@ -1213,6 +1295,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private val MOBILE_LOGIN_ENDPOINT = ApiEndpoint("mobile login", "api/v1/mobile/auth/login/")
         private val DASHBOARD_ENDPOINT = ApiEndpoint("mobile dashboard", "api/v1/mobile/dashboard/")
         private val WALLET_ENDPOINT = ApiEndpoint("mobile wallet", "api/v1/mobile/wallet/")
+        private val WALLET_REQUESTS_ENDPOINT = ApiEndpoint("mobile wallet requests", "api/v1/mobile/wallet/requests/")
         private val TRANSACTIONS_ENDPOINT = ApiEndpoint("mobile transactions", "api/v1/mobile/transactions/")
         private val PACKAGES_ENDPOINT = ApiEndpoint("mobile packages", "api/v1/mobile/packages/")
         private val FEATURED_PACKAGES_ENDPOINT = ApiEndpoint("mobile featured packages", "api/v1/mobile/packages/featured/")
@@ -1226,6 +1309,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
             MOBILE_ORDERS_ENDPOINT,
             PACKAGES_ENDPOINT,
             WALLET_ENDPOINT,
+            WALLET_REQUESTS_ENDPOINT,
             MOBILE_ESIMS_ENDPOINT,
             TRANSACTIONS_ENDPOINT,
             FEATURED_PACKAGES_ENDPOINT,
