@@ -63,6 +63,14 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parsePackageCatalog(packageResponse, featuredResponse, session.role)
     }
 
+    suspend fun orders(session: AuthSession): MobileOrderHistory = withContext(Dispatchers.IO) {
+        parseMobileOrders(getJson(MOBILE_ORDERS_ENDPOINT, session.authorizationHeader))
+    }
+
+    suspend fun esims(session: AuthSession): MobileEsimList = withContext(Dispatchers.IO) {
+        parseMobileEsims(getJson(MOBILE_ESIMS_ENDPOINT, session.authorizationHeader))
+    }
+
     suspend fun purchasePackage(
         session: AuthSession,
         request: MobilePackagePurchaseRequest
@@ -294,6 +302,270 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 status = status
             )
         }
+    }
+
+    internal fun parseMobileOrders(response: JSONObject): MobileOrderHistory {
+        val dataArray = response.optJSONArray("data")
+        val data = response.optJSONObject("data") ?: response
+        val orderObject = firstObject(
+            data.optJSONObject("order"),
+            data.optJSONObject("purchase"),
+            response.optJSONObject("order")
+        )
+        val orders = firstArray(
+            dataArray,
+            data.optJSONArray("orders"),
+            data.optJSONArray("recent_orders"),
+            data.optJSONArray("recentOrders"),
+            data.optJSONArray("results"),
+            data.optJSONArray("items"),
+            response.optJSONArray("orders"),
+            response.optJSONArray("results"),
+            response.optJSONArray("items")
+        )
+
+        if (orders == null && (orderObject != null || data.has("id") || data.has("order_number"))) {
+            return MobileOrderHistory(listOfNotNull(parseMobileOrder(orderObject ?: data)))
+        }
+
+        return MobileOrderHistory(parseMobileOrderList(orders))
+    }
+
+    private fun parseMobileOrderList(orders: JSONArray?): List<MobileOrder> {
+        if (orders == null) return emptyList()
+        return (0 until orders.length()).mapNotNull { index ->
+            parseMobileOrder(orders.optJSONObject(index))
+        }
+    }
+
+    private fun parseMobileOrder(orderJson: JSONObject?): MobileOrder? {
+        orderJson ?: return null
+        val packageObject = firstObject(
+            orderJson.optJSONObject("package"),
+            orderJson.optJSONObject("plan"),
+            orderJson.optJSONObject("product")
+        )
+        return MobileOrder(
+            id = firstNotBlank(
+                orderJson.optString("id"),
+                orderJson.optString("order_id"),
+                orderJson.optString("orderId")
+            ),
+            orderNumber = firstNotBlank(
+                orderJson.optString("order_number"),
+                orderJson.optString("orderNumber"),
+                orderJson.optString("reference"),
+                orderJson.optString("reference_number"),
+                orderJson.optString("referenceNumber")
+            ),
+            packageName = firstNotBlank(
+                orderJson.optString("package_name"),
+                orderJson.optString("packageName"),
+                orderJson.optString("plan_name"),
+                orderJson.optString("planName"),
+                orderJson.optString("product_name"),
+                orderJson.optString("productName"),
+                packageObject?.optString("name"),
+                packageObject?.optString("package_name"),
+                packageObject?.optString("packageName")
+            ) ?: "Package",
+            price = firstNotBlank(
+                orderJson.optString("price"),
+                orderJson.optString("amount"),
+                orderJson.optString("total_amount"),
+                orderJson.optString("totalAmount"),
+                orderJson.optString("subtotal")
+            ),
+            status = firstNotBlank(
+                orderJson.optString("status"),
+                orderJson.optString("state"),
+                orderJson.optString("order_status"),
+                orderJson.optString("orderStatus")
+            ),
+            createdAt = firstNotBlank(
+                orderJson.optString("created_at"),
+                orderJson.optString("createdAt"),
+                orderJson.optString("created"),
+                orderJson.optString("date"),
+                orderJson.optString("updated_at"),
+                orderJson.optString("updatedAt")
+            )
+        )
+    }
+
+    internal fun parseMobileEsims(response: JSONObject): MobileEsimList {
+        val dataArray = response.optJSONArray("data")
+        val data = response.optJSONObject("data") ?: response
+        val esimObject = firstObject(
+            data.optJSONObject("esim"),
+            data.optJSONObject("eSIM"),
+            response.optJSONObject("esim"),
+            response.optJSONObject("eSIM")
+        )
+        val esims = firstArray(
+            dataArray,
+            data.optJSONArray("esims"),
+            data.optJSONArray("eSIMs"),
+            data.optJSONArray("profiles"),
+            data.optJSONArray("results"),
+            data.optJSONArray("items"),
+            response.optJSONArray("esims"),
+            response.optJSONArray("eSIMs"),
+            response.optJSONArray("results"),
+            response.optJSONArray("items")
+        )
+
+        if (esims == null && (esimObject != null || data.has("iccid") || data.has("activation_code"))) {
+            return MobileEsimList(listOfNotNull(parseMobileEsim(esimObject ?: data)))
+        }
+
+        return MobileEsimList(parseMobileEsimList(esims))
+    }
+
+    private fun parseMobileEsimList(esims: JSONArray?): List<MobileEsim> {
+        if (esims == null) return emptyList()
+        return (0 until esims.length()).mapNotNull { index ->
+            parseMobileEsim(esims.optJSONObject(index))
+        }
+    }
+
+    private fun parseMobileEsim(esimJson: JSONObject?): MobileEsim? {
+        esimJson ?: return null
+        val activation = firstObject(
+            esimJson.optJSONObject("activation"),
+            esimJson.optJSONObject("activation_details"),
+            esimJson.optJSONObject("activationDetails"),
+            esimJson.optJSONObject("qr")
+        )
+        val packageObject = firstObject(
+            esimJson.optJSONObject("package"),
+            esimJson.optJSONObject("plan"),
+            esimJson.optJSONObject("product")
+        )
+        val orderObject = esimJson.optJSONObject("order")
+        val qrCode = firstNotBlank(
+            activation?.optString("qr_code"),
+            activation?.optString("qrCode"),
+            activation?.optString("qr"),
+            esimJson.optString("qr_code"),
+            esimJson.optString("qrCode"),
+            esimJson.optString("qr")
+        )
+        val activationCode = firstNotBlank(
+            activation?.optString("activation_code"),
+            activation?.optString("activationCode"),
+            esimJson.optString("activation_code"),
+            esimJson.optString("activationCode"),
+            qrCode?.takeIf { it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$") }
+        )
+        val lpaCode = firstNotBlank(
+            activation?.optString("lpa_code"),
+            activation?.optString("lpaCode"),
+            activation?.optString("lpa"),
+            activation?.optString("lpa_string"),
+            activation?.optString("lpaString"),
+            esimJson.optString("lpa_code"),
+            esimJson.optString("lpaCode"),
+            esimJson.optString("lpa"),
+            esimJson.optString("lpa_string"),
+            esimJson.optString("lpaString"),
+            activationCode?.takeIf { it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$") }
+        )
+        val matchingId = firstNotBlank(
+            activation?.optString("matching_id"),
+            activation?.optString("matchingId"),
+            activation?.optString("matchingID"),
+            esimJson.optString("matching_id"),
+            esimJson.optString("matchingId"),
+            esimJson.optString("matchingID")
+        )?.takeUnless { it.startsWith("LPA:", ignoreCase = true) || it.startsWith("1\$") }
+
+        return MobileEsim(
+            id = firstNotBlank(
+                esimJson.optString("id"),
+                esimJson.optString("esim_id"),
+                esimJson.optString("esimId"),
+                activation?.optString("esim_id"),
+                activation?.optString("esimId")
+            ),
+            iccid = firstNotBlank(
+                esimJson.optString("iccid"),
+                activation?.optString("iccid")
+            ),
+            provider = firstNotBlank(
+                esimJson.optString("provider"),
+                esimJson.optString("source"),
+                esimJson.optString("carrier"),
+                activation?.optString("provider")
+            ),
+            packageName = firstNotBlank(
+                esimJson.optString("package_name"),
+                esimJson.optString("packageName"),
+                esimJson.optString("plan_name"),
+                esimJson.optString("planName"),
+                esimJson.optString("product_name"),
+                esimJson.optString("productName"),
+                packageObject?.optString("name"),
+                packageObject?.optString("package_name"),
+                packageObject?.optString("packageName"),
+                orderObject?.optString("package_name"),
+                orderObject?.optString("packageName"),
+                orderObject?.optString("product_name"),
+                orderObject?.optString("productName")
+            ),
+            status = firstNotBlank(
+                esimJson.optString("status"),
+                esimJson.optString("state"),
+                esimJson.optString("profile_status"),
+                esimJson.optString("profileStatus")
+            ),
+            activationCode = activationCode,
+            lpaCode = lpaCode,
+            smdpAddress = firstNotBlank(
+                activation?.optString("smdp_address"),
+                activation?.optString("smdpAddress"),
+                activation?.optString("smdp"),
+                activation?.optString("sm_dp_plus_address"),
+                activation?.optString("smDpPlusAddress"),
+                esimJson.optString("smdp_address"),
+                esimJson.optString("smdpAddress"),
+                esimJson.optString("smdp"),
+                esimJson.optString("sm_dp_plus_address"),
+                esimJson.optString("smDpPlusAddress")
+            ),
+            matchingId = matchingId,
+            confirmationCodeRequired = optionalBoolean(
+                activation ?: esimJson,
+                "confirmation_code_required",
+                "confirmationCodeRequired"
+            ) ?: false,
+            qrCode = qrCode,
+            qrCodeUrl = firstNotBlank(
+                activation?.optString("qr_code_url"),
+                activation?.optString("qrCodeUrl"),
+                activation?.optString("qr_url"),
+                activation?.optString("qrUrl"),
+                esimJson.optString("qr_code_url"),
+                esimJson.optString("qrCodeUrl"),
+                esimJson.optString("qr_url"),
+                esimJson.optString("qrUrl")
+            ),
+            createdAt = firstNotBlank(
+                esimJson.optString("created_at"),
+                esimJson.optString("createdAt"),
+                esimJson.optString("assigned_at"),
+                esimJson.optString("assignedAt"),
+                esimJson.optString("activated_at"),
+                esimJson.optString("activatedAt")
+            ),
+            orderNumber = firstNotBlank(
+                esimJson.optString("order_number"),
+                esimJson.optString("orderNumber"),
+                orderObject?.optString("order_number"),
+                orderObject?.optString("orderNumber"),
+                orderObject?.optString("reference")
+            )
+        )
     }
 
     private fun parseWallet(walletResponse: JSONObject, transactionResponse: JSONObject): MobileWalletData {

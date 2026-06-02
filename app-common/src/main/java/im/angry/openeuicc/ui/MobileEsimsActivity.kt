@@ -1,6 +1,7 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -17,8 +18,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileTransaction
-import im.angry.openeuicc.auth.MobileWalletData
+import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -29,60 +29,55 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class WalletActivity : AppCompatActivity() {
+class MobileEsimsActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var bottomNav: BottomNavigationView
-    private lateinit var balance: TextView
+    private lateinit var esims: LinearLayout
+    private lateinit var empty: TextView
     private lateinit var error: TextView
-    private lateinit var transactions: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet)
+        setContentView(R.layout.activity_mobile_esims)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.wallet_title)
+        supportActionBar?.title = getString(R.string.mobile_esims_title)
 
-        refresh = requireViewById(R.id.wallet_refresh)
-        bottomNav = requireViewById(R.id.wallet_bottom_nav)
-        balance = requireViewById(R.id.wallet_balance)
-        error = requireViewById(R.id.wallet_error)
-        transactions = requireViewById(R.id.wallet_transactions)
+        refresh = requireViewById(R.id.mobile_esims_refresh)
+        bottomNav = requireViewById(R.id.mobile_esims_bottom_nav)
+        esims = requireViewById(R.id.mobile_esims_list)
+        empty = requireViewById(R.id.mobile_esims_empty)
+        error = requireViewById(R.id.mobile_esims_error)
 
         setupInsets()
         setupBottomNavigation()
-        setupRefresh()
-        renderPlaceholders()
-        loadWallet()
+        refresh.setOnRefreshListener { loadEsims() }
+        renderEsims(emptyList())
+        loadEsims()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_wallet
+        bottomNav.selectedItemId = R.id.nav_esims
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.activity_dashboard, menu)
+        menuInflater.inflate(R.menu.activity_mobile_esims, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.reload -> {
-                loadWallet()
+                loadEsims()
                 true
             }
 
-            R.id.purchase_history -> {
-                openPurchaseHistoryActivity()
-                true
-            }
-
-            R.id.logout -> {
-                logout()
+            R.id.open_device_esim_manager -> {
+                openNativeEsimActivity()
                 true
             }
 
@@ -119,42 +114,30 @@ class WalletActivity : AppCompatActivity() {
                     openPackagesActivity()
                     false
                 }
-                R.id.nav_wallet -> true
-                R.id.nav_esims -> {
-                    openEsimActivity()
+                R.id.nav_wallet -> {
+                    openWalletActivity()
                     false
                 }
+                R.id.nav_esims -> true
                 else -> false
             }
         }
-        bottomNav.selectedItemId = R.id.nav_wallet
+        bottomNav.selectedItemId = R.id.nav_esims
     }
 
-    private fun setupRefresh() {
-        refresh.setOnRefreshListener {
-            loadWallet()
-        }
-    }
-
-    private fun renderPlaceholders() {
-        balance.text = "--"
-        renderTransactions(emptyList())
-    }
-
-    private fun loadWallet() {
+    private fun loadEsims() {
         lifecycleScope.launch {
             error.visibility = View.GONE
+            empty.visibility = View.GONE
             setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            val result = runCatching {
-                authApi.wallet(session)
-            }
+            val result = runCatching { authApi.esims(session) }
             setLoading(false)
 
             result
-                .onSuccess { renderWallet(it) }
+                .onSuccess { renderEsims(it.esims) }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.wallet_load_failed)
+                    error.text = it.message ?: getString(R.string.mobile_esims_load_failed)
                     error.visibility = View.VISIBLE
                 }
         }
@@ -177,34 +160,27 @@ class WalletActivity : AppCompatActivity() {
         return refreshed
     }
 
-    private fun renderWallet(data: MobileWalletData) {
-        balance.text = data.currentBalance
-        renderTransactions(data.transactions)
-    }
-
-    private fun renderTransactions(transactionData: List<MobileTransaction>) {
-        transactions.removeAllViews()
-        if (transactionData.isEmpty()) {
-            TextView(this).apply {
-                text = getString(R.string.wallet_empty_transactions)
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                transactions.addView(this)
-            }
-            return
-        }
+    private fun renderEsims(esimData: List<MobileEsim>) {
+        esims.removeAllViews()
+        empty.visibility = if (esimData.isEmpty()) View.VISIBLE else View.GONE
+        if (esimData.isEmpty()) return
 
         val inflater = LayoutInflater.from(this)
-        transactionData.forEach { transaction ->
-            val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
-            item.requireViewById<TextView>(R.id.transaction_title).text = transaction.title
-            item.requireViewById<TextView>(R.id.transaction_subtitle).text = transaction.subtitle
-            item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
-            item.requireViewById<TextView>(R.id.transaction_status).apply {
-                text = transaction.status.orEmpty()
-                visibility = if (transaction.status.isNullOrBlank()) View.GONE else View.VISIBLE
+        esimData.forEach { esim ->
+            val item = inflater.inflate(R.layout.mobile_esim_list_item, esims, false)
+            item.requireViewById<TextView>(R.id.mobile_esim_title).text = esim.title()
+            item.requireViewById<TextView>(R.id.mobile_esim_subtitle).text = listOfNotNull(
+                esim.iccid?.let { getString(R.string.mobile_esim_iccid_format, it) },
+                esim.provider
+            ).joinToString(" - ")
+            item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
+                text = esim.statusLabel().orEmpty()
+                visibility = if (esim.status.isNullOrBlank()) View.GONE else View.VISIBLE
             }
-            transactions.addView(item)
+            item.setOnClickListener {
+                startActivity(MobileEsimDetailActivity.createIntent(this, esim))
+            }
+            esims.addView(item)
         }
     }
 
@@ -220,6 +196,14 @@ class WalletActivity : AppCompatActivity() {
         )
     }
 
+    private fun openWalletActivity() {
+        startActivity(
+            Intent(this, WalletActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
+    }
+
     private fun openPackagesActivity() {
         startActivity(
             Intent(this, PackagesActivity::class.java).apply {
@@ -228,47 +212,29 @@ class WalletActivity : AppCompatActivity() {
         )
     }
 
-    private fun openEsimActivity() {
-        startActivity(
-            Intent(this, MobileEsimsActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openPurchaseHistoryActivity() {
-        startActivity(Intent(this, PurchaseHistoryActivity::class.java))
-    }
-
-    private fun logout() {
-        lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) {
-                tokenStore.getSession().also {
-                    tokenStore.clear()
-                }
-            }
-            session?.let {
-                runCatching {
-                    authApi.logout(it)
-                }
-            }
-            openLoginActivity()
+    private fun openNativeEsimActivity() {
+        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
+        if (target.isNullOrBlank()) {
+            error.text = getString(R.string.dashboard_missing_esim_target)
+            error.visibility = View.VISIBLE
+            return
         }
+        startActivity(Intent().setClassName(this, target))
     }
 
     private fun redirectToLogin(): AuthSession? {
         tokenStore.clear()
-        openLoginActivity()
-        return null
-    }
-
-    private fun openLoginActivity() {
         startActivity(
             Intent(this, LoginActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
         )
         finish()
+        return null
     }
 
+    private fun targetActivityName(key: String): String? {
+        val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+        return appInfo.metaData?.getString(key)
+    }
 }

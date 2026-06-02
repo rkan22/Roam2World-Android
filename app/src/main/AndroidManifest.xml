@@ -63,6 +63,18 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.PurchaseHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.PrivilegedMainActivity"
             android:exported="false" />
 
