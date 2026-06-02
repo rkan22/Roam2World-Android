@@ -12,14 +12,17 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.textfield.TextInputEditText
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileTransaction
-import im.angry.openeuicc.auth.MobileWalletData
+import im.angry.openeuicc.auth.MobilePackage
+import im.angry.openeuicc.auth.MobilePackageCatalog
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -30,39 +33,49 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class WalletActivity : AppCompatActivity() {
+class PackagesActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var bottomNav: BottomNavigationView
-    private lateinit var balance: TextView
+    private lateinit var search: TextInputEditText
+    private lateinit var featuredTitle: TextView
+    private lateinit var featuredPackages: LinearLayout
+    private lateinit var packageList: LinearLayout
+    private lateinit var empty: TextView
     private lateinit var error: TextView
-    private lateinit var transactions: LinearLayout
+
+    private var catalog = MobilePackageCatalog(emptyList(), emptyList())
+    private var userRole: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet)
+        setContentView(R.layout.activity_packages)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.wallet_title)
+        supportActionBar?.title = getString(R.string.packages_title)
 
-        refresh = requireViewById(R.id.wallet_refresh)
-        bottomNav = requireViewById(R.id.wallet_bottom_nav)
-        balance = requireViewById(R.id.wallet_balance)
-        error = requireViewById(R.id.wallet_error)
-        transactions = requireViewById(R.id.wallet_transactions)
+        refresh = requireViewById(R.id.packages_refresh)
+        bottomNav = requireViewById(R.id.packages_bottom_nav)
+        search = requireViewById(R.id.packages_search)
+        featuredTitle = requireViewById(R.id.packages_featured_title)
+        featuredPackages = requireViewById(R.id.packages_featured)
+        packageList = requireViewById(R.id.packages_list)
+        empty = requireViewById(R.id.packages_empty)
+        error = requireViewById(R.id.packages_error)
 
         setupInsets()
         setupBottomNavigation()
+        setupSearch()
         setupRefresh()
-        renderPlaceholders()
-        loadWallet()
+        renderCatalog()
+        loadPackages()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_wallet
+        bottomNav.selectedItemId = R.id.nav_packages
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -73,7 +86,7 @@ class WalletActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.reload -> {
-                loadWallet()
+                loadPackages()
                 true
             }
 
@@ -111,11 +124,11 @@ class WalletActivity : AppCompatActivity() {
                     openDashboardActivity()
                     false
                 }
-                R.id.nav_packages -> {
-                    openPackagesActivity()
+                R.id.nav_packages -> true
+                R.id.nav_wallet -> {
+                    openWalletActivity()
                     false
                 }
-                R.id.nav_wallet -> true
                 R.id.nav_esims -> {
                     openEsimActivity()
                     false
@@ -123,34 +136,39 @@ class WalletActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        bottomNav.selectedItemId = R.id.nav_wallet
+        bottomNav.selectedItemId = R.id.nav_packages
+    }
+
+    private fun setupSearch() {
+        search.addTextChangedListener {
+            renderCatalog()
+        }
     }
 
     private fun setupRefresh() {
         refresh.setOnRefreshListener {
-            loadWallet()
+            loadPackages()
         }
     }
 
-    private fun renderPlaceholders() {
-        balance.text = "--"
-        renderTransactions(emptyList())
-    }
-
-    private fun loadWallet() {
+    private fun loadPackages() {
         lifecycleScope.launch {
             error.visibility = View.GONE
             setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
+            userRole = session.role
             val result = runCatching {
-                authApi.wallet(session)
+                authApi.packages(session)
             }
             setLoading(false)
 
             result
-                .onSuccess { renderWallet(it) }
+                .onSuccess {
+                    catalog = it
+                    renderCatalog()
+                }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.wallet_load_failed)
+                    error.text = it.message ?: getString(R.string.packages_load_failed)
                     error.visibility = View.VISIBLE
                 }
         }
@@ -173,35 +191,60 @@ class WalletActivity : AppCompatActivity() {
         return refreshed
     }
 
-    private fun renderWallet(data: MobileWalletData) {
-        balance.text = data.currentBalance
-        renderTransactions(data.transactions)
+    private fun renderCatalog() {
+        val query = search.text?.toString().orEmpty()
+        val featured = catalog.featuredPackages.filter { it.matches(query) }
+        val packages = catalog.packages.filter { it.matches(query) }
+
+        renderFeatured(featured)
+        renderPackages(packages)
+        empty.visibility = if (featured.isEmpty() && packages.isEmpty()) View.VISIBLE else View.GONE
     }
 
-    private fun renderTransactions(transactionData: List<MobileTransaction>) {
-        transactions.removeAllViews()
-        if (transactionData.isEmpty()) {
-            TextView(this).apply {
-                text = getString(R.string.wallet_empty_transactions)
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                transactions.addView(this)
-            }
-            return
+    private fun renderFeatured(packageData: List<MobilePackage>) {
+        featuredPackages.removeAllViews()
+        featuredTitle.visibility = if (packageData.isEmpty()) View.GONE else View.VISIBLE
+        featuredPackages.visibility = if (packageData.isEmpty()) View.GONE else View.VISIBLE
+        packageData.forEach { mobilePackage ->
+            featuredPackages.addView(createPackageCard(mobilePackage))
         }
+    }
 
-        val inflater = LayoutInflater.from(this)
-        transactionData.forEach { transaction ->
-            val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
-            item.requireViewById<TextView>(R.id.transaction_title).text = transaction.title
-            item.requireViewById<TextView>(R.id.transaction_subtitle).text = transaction.subtitle
-            item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
-            item.requireViewById<TextView>(R.id.transaction_status).apply {
-                text = transaction.status.orEmpty()
-                visibility = if (transaction.status.isNullOrBlank()) View.GONE else View.VISIBLE
+    private fun renderPackages(packageData: List<MobilePackage>) {
+        packageList.removeAllViews()
+        packageData
+            .groupBy { it.country.ifBlank { getString(R.string.packages_global_country) } }
+            .toSortedMap()
+            .forEach { (country, packages) ->
+                TextView(this).apply {
+                    text = country
+                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleSmall)
+                    setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+                    packageList.addView(this)
+                }
+                packages.forEach { mobilePackage ->
+                    packageList.addView(createPackageCard(mobilePackage))
+                }
             }
-            transactions.addView(item)
+    }
+
+    private fun createPackageCard(mobilePackage: MobilePackage): View {
+        val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
+        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.name
+        item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
+            mobilePackage.country,
+            mobilePackage.countryCode?.takeIf { it.isNotBlank() }
+        ).joinToString(" - ")
+        item.requireViewById<TextView>(R.id.package_specs).apply {
+            text = mobilePackage.specs()
+            visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
+        item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
+        item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.visibilityLabel()
+        item.setOnClickListener {
+            startActivity(PackageDetailActivity.createIntent(this, mobilePackage, userRole))
+        }
+        return item
     }
 
     private fun setLoading(loading: Boolean) {
@@ -216,9 +259,9 @@ class WalletActivity : AppCompatActivity() {
         )
     }
 
-    private fun openPackagesActivity() {
+    private fun openWalletActivity() {
         startActivity(
-            Intent(this, PackagesActivity::class.java).apply {
+            Intent(this, WalletActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
         )

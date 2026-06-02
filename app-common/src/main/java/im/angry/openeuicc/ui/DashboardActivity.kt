@@ -115,6 +115,10 @@ class DashboardActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_dashboard -> true
+                R.id.nav_packages -> {
+                    openPackagesActivity()
+                    false
+                }
                 R.id.nav_wallet -> {
                     openWalletActivity()
                     false
@@ -226,6 +230,14 @@ class DashboardActivity : AppCompatActivity() {
     private fun openWalletActivity() {
         startActivity(
             Intent(this, WalletActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
+    }
+
+    private fun openPackagesActivity() {
+        startActivity(
+            Intent(this, PackagesActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
         )
