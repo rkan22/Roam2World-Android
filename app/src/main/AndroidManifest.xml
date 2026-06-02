@@ -67,11 +67,23 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.MobileOrderDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
             android:exported="false" />
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimQrActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
             android:exported="false" />
 
         <activity

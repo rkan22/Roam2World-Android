@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_esim_qr_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
+
+    <ImageButton
+        android:id="@+id/mobile_esim_qr_close"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/mobile_esim_qr_close"
+        android:padding="12dp"
+        android:src="@drawable/ic_x_black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorOnSurface" />
+
+    <TextView
+        android:id="@+id/mobile_esim_qr_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="12dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintEnd_toStartOf="@id/mobile_esim_qr_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/mobile_esim_qr_close" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mobile_esim_qr_close">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="28dp">
+
+            <ImageView
+                android:id="@+id/mobile_esim_qr_full_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@android:color/white"
+                android:contentDescription="@string/mobile_esim_qr_title"
+                android:maxHeight="460dp"
+                android:padding="16dp"
+                android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/mobile_esim_qr_activation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:id="@+id/mobile_esim_qr_smdp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mobile_esim_qr_copy_activation"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="22dp"
+                android:text="@string/mobile_esim_copy_activation"
+                app:cornerRadius="28dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/mobile_esim_qr_copy_smdp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/mobile_esim_copy_smdp"
+                app:cornerRadius="28dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

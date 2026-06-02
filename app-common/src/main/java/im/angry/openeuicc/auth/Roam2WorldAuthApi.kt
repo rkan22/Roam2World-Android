@@ -67,8 +67,26 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseMobileOrders(getJson(MOBILE_ORDERS_ENDPOINT, session.authorizationHeader))
     }
 
+    suspend fun order(session: AuthSession, orderId: String): MobileOrder = withContext(Dispatchers.IO) {
+        parseMobileOrders(
+            getJson(
+                ApiEndpoint("mobile order detail", "api/v1/mobile/orders/$orderId/"),
+                session.authorizationHeader
+            )
+        ).orders.firstOrNull() ?: throw AuthApiException("Order detail was unavailable")
+    }
+
     suspend fun esims(session: AuthSession): MobileEsimList = withContext(Dispatchers.IO) {
         parseMobileEsims(getJson(MOBILE_ESIMS_ENDPOINT, session.authorizationHeader))
+    }
+
+    suspend fun esim(session: AuthSession, esimId: String): MobileEsim = withContext(Dispatchers.IO) {
+        parseMobileEsims(
+            getJson(
+                ApiEndpoint("mobile eSIM detail", "api/v1/mobile/esims/$esimId/"),
+                session.authorizationHeader
+            )
+        ).esims.firstOrNull() ?: throw AuthApiException("eSIM detail was unavailable")
     }
 
     suspend fun purchasePackage(
@@ -310,7 +328,8 @@ class Roam2WorldAuthApi(baseUrl: String) {
         val orderObject = firstObject(
             data.optJSONObject("order"),
             data.optJSONObject("purchase"),
-            response.optJSONObject("order")
+            response.optJSONObject("order"),
+            response.optJSONObject("purchase")
         )
         val orders = firstArray(
             dataArray,
@@ -344,6 +363,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
             orderJson.optJSONObject("package"),
             orderJson.optJSONObject("plan"),
             orderJson.optJSONObject("product")
+        )
+        val esimObject = firstObject(
+            orderJson.optJSONObject("esim"),
+            orderJson.optJSONObject("eSIM")
         )
         return MobileOrder(
             id = firstNotBlank(
@@ -389,7 +412,20 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 orderJson.optString("date"),
                 orderJson.optString("updated_at"),
                 orderJson.optString("updatedAt")
-            )
+            ),
+            provider = firstNotBlank(
+                orderJson.optString("provider"),
+                orderJson.optString("source"),
+                esimObject?.optString("provider")
+            ),
+            esimId = firstNotBlank(
+                orderJson.optString("esim_id"),
+                orderJson.optString("esimId"),
+                esimObject?.optString("id"),
+                esimObject?.optString("esim_id"),
+                esimObject?.optString("esimId")
+            ),
+            esim = parseMobileEsim(esimObject)
         )
     }
 
@@ -399,8 +435,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
         val esimObject = firstObject(
             data.optJSONObject("esim"),
             data.optJSONObject("eSIM"),
+            data.optJSONObject("profile"),
             response.optJSONObject("esim"),
-            response.optJSONObject("eSIM")
+            response.optJSONObject("eSIM"),
+            response.optJSONObject("profile")
         )
         val esims = firstArray(
             dataArray,
@@ -564,6 +602,33 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 orderObject?.optString("order_number"),
                 orderObject?.optString("orderNumber"),
                 orderObject?.optString("reference")
+            ),
+            expiresAt = firstNotBlank(
+                esimJson.optString("expires_at"),
+                esimJson.optString("expiresAt"),
+                esimJson.optString("expiry_date"),
+                esimJson.optString("expiryDate"),
+                esimJson.optString("expiration_date"),
+                esimJson.optString("expirationDate")
+            ),
+            dataRemaining = firstNotBlank(
+                esimJson.optString("data_remaining"),
+                esimJson.optString("dataRemaining"),
+                esimJson.optString("remaining_data"),
+                esimJson.optString("remainingData")
+            ),
+            dataUsed = firstNotBlank(
+                esimJson.optString("data_used"),
+                esimJson.optString("dataUsed"),
+                esimJson.optString("used_data"),
+                esimJson.optString("usedData")
+            ),
+            orderId = firstNotBlank(
+                esimJson.optString("order_id"),
+                esimJson.optString("orderId"),
+                orderObject?.optString("id"),
+                orderObject?.optString("order_id"),
+                orderObject?.optString("orderId")
             )
         )
     }

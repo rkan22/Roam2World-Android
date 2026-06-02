@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" fill="#f8fafb"/>
+  <rect y="0" width="390" height="64" fill="#ffffff"/>
+  <path d="M28 32h18M34 24l-8 8 8 8" fill="none" stroke="#172026" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="62" y="38" font-family="Inter, Roboto, Arial, sans-serif" font-size="18" font-weight="600" fill="#172026">Installation</text>
+
+  <circle cx="195" cy="190" r="54" fill="#dff4e8"/>
+  <path d="M170 190l18 18 36-44" fill="none" stroke="#137a3d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="80" y="292" font-family="Inter, Roboto, Arial, sans-serif" font-size="25" font-weight="700" fill="#172026">eSIM installed</text>
+  <text x="58" y="330" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" fill="#5d6972">Your profile was downloaded successfully.</text>
+
+  <rect x="20" y="392" width="350" height="180" rx="8" fill="#eef3f6" stroke="#d7e0e6"/>
+  <text x="38" y="432" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Profile</text>
+  <text x="160" y="432" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">Europe 5GB</text>
+  <text x="38" y="474" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">Provider</text>
+  <text x="160" y="474" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">Orange Balance</text>
+  <text x="38" y="516" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" font-weight="700" fill="#172026">ICCID</text>
+  <text x="160" y="516" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#25323a">8931440400000001101</text>
+
+  <rect x="20" y="642" width="350" height="56" rx="28" fill="#0b57d0"/>
+  <text x="165" y="676" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Done</text>
+</svg>
