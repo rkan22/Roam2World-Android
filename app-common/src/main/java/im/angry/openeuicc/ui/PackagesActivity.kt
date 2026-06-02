@@ -12,14 +12,17 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.textfield.TextInputEditText
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileDashboardData
-import im.angry.openeuicc.auth.MobileDashboardOrder
+import im.angry.openeuicc.auth.MobilePackage
+import im.angry.openeuicc.auth.MobilePackageCatalog
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -30,46 +33,49 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DashboardActivity : AppCompatActivity() {
+class PackagesActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var scroll: View
+    private lateinit var refresh: SwipeRefreshLayout
     private lateinit var bottomNav: BottomNavigationView
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var greeting: TextView
-    private lateinit var account: TextView
-    private lateinit var balance: TextView
-    private lateinit var activeEsims: TextView
+    private lateinit var search: TextInputEditText
+    private lateinit var featuredTitle: TextView
+    private lateinit var featuredPackages: LinearLayout
+    private lateinit var packageList: LinearLayout
+    private lateinit var empty: TextView
     private lateinit var error: TextView
-    private lateinit var orders: LinearLayout
+
+    private var catalog = MobilePackageCatalog(emptyList(), emptyList())
+    private var userRole: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
+        setContentView(R.layout.activity_packages)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.dashboard_title)
+        supportActionBar?.title = getString(R.string.packages_title)
 
-        scroll = requireViewById(R.id.dashboard_scroll)
-        bottomNav = requireViewById(R.id.dashboard_bottom_nav)
-        progress = requireViewById(R.id.dashboard_progress)
-        greeting = requireViewById(R.id.dashboard_greeting)
-        account = requireViewById(R.id.dashboard_account)
-        balance = requireViewById(R.id.dashboard_balance)
-        activeEsims = requireViewById(R.id.dashboard_active_esims)
-        error = requireViewById(R.id.dashboard_error)
-        orders = requireViewById(R.id.dashboard_orders)
+        refresh = requireViewById(R.id.packages_refresh)
+        bottomNav = requireViewById(R.id.packages_bottom_nav)
+        search = requireViewById(R.id.packages_search)
+        featuredTitle = requireViewById(R.id.packages_featured_title)
+        featuredPackages = requireViewById(R.id.packages_featured)
+        packageList = requireViewById(R.id.packages_list)
+        empty = requireViewById(R.id.packages_empty)
+        error = requireViewById(R.id.packages_error)
 
         setupInsets()
         setupBottomNavigation()
-        renderPlaceholders()
-        loadDashboard()
+        setupSearch()
+        setupRefresh()
+        renderCatalog()
+        loadPackages()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_dashboard
+        bottomNav.selectedItemId = R.id.nav_packages
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -80,7 +86,7 @@ class DashboardActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.reload -> {
-                loadDashboard()
+                loadPackages()
                 true
             }
 
@@ -97,7 +103,7 @@ class DashboardActivity : AppCompatActivity() {
             window.decorView.rootView,
             arrayOf(
                 this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll),
+                mainViewPaddingInsetHandler(refresh),
                 { insets ->
                     bottomNav.updatePadding(
                         insets.left,
@@ -114,11 +120,11 @@ class DashboardActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_dashboard -> true
-                R.id.nav_packages -> {
-                    openPackagesActivity()
+                R.id.nav_dashboard -> {
+                    openDashboardActivity()
                     false
                 }
+                R.id.nav_packages -> true
                 R.id.nav_wallet -> {
                     openWalletActivity()
                     false
@@ -130,33 +136,39 @@ class DashboardActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        bottomNav.selectedItemId = R.id.nav_dashboard
+        bottomNav.selectedItemId = R.id.nav_packages
     }
 
-    private fun renderPlaceholders() {
-        greeting.text = getString(R.string.dashboard_greeting)
-        account.text = ""
-        balance.text = "--"
-        activeEsims.text = "--"
-        renderOrders(emptyList())
+    private fun setupSearch() {
+        search.addTextChangedListener {
+            renderCatalog()
+        }
     }
 
-    private fun loadDashboard() {
+    private fun setupRefresh() {
+        refresh.setOnRefreshListener {
+            loadPackages()
+        }
+    }
+
+    private fun loadPackages() {
         lifecycleScope.launch {
             error.visibility = View.GONE
             setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            renderSession(session)
-
+            userRole = session.role
             val result = runCatching {
-                authApi.dashboard(session)
+                authApi.packages(session)
             }
             setLoading(false)
 
             result
-                .onSuccess { renderDashboard(it) }
+                .onSuccess {
+                    catalog = it
+                    renderCatalog()
+                }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.dashboard_load_failed)
+                    error.text = it.message ?: getString(R.string.packages_load_failed)
                     error.visibility = View.VISIBLE
                 }
         }
@@ -179,52 +191,72 @@ class DashboardActivity : AppCompatActivity() {
         return refreshed
     }
 
-    private fun renderSession(session: AuthSession) {
-        greeting.text = session.displayName?.let { "Welcome, $it" }
-            ?: getString(R.string.dashboard_greeting)
-        account.text = listOfNotNull(
-            session.role?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-            session.email
+    private fun renderCatalog() {
+        val query = search.text?.toString().orEmpty()
+        val featured = catalog.featuredPackages.filter { it.matches(query) }
+        val packages = catalog.packages.filter { it.matches(query) }
+
+        renderFeatured(featured)
+        renderPackages(packages)
+        empty.visibility = if (featured.isEmpty() && packages.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun renderFeatured(packageData: List<MobilePackage>) {
+        featuredPackages.removeAllViews()
+        featuredTitle.visibility = if (packageData.isEmpty()) View.GONE else View.VISIBLE
+        featuredPackages.visibility = if (packageData.isEmpty()) View.GONE else View.VISIBLE
+        packageData.forEach { mobilePackage ->
+            featuredPackages.addView(createPackageCard(mobilePackage))
+        }
+    }
+
+    private fun renderPackages(packageData: List<MobilePackage>) {
+        packageList.removeAllViews()
+        packageData
+            .groupBy { it.country.ifBlank { getString(R.string.packages_global_country) } }
+            .toSortedMap()
+            .forEach { (country, packages) ->
+                TextView(this).apply {
+                    text = country
+                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleSmall)
+                    setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+                    packageList.addView(this)
+                }
+                packages.forEach { mobilePackage ->
+                    packageList.addView(createPackageCard(mobilePackage))
+                }
+            }
+    }
+
+    private fun createPackageCard(mobilePackage: MobilePackage): View {
+        val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
+        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.name
+        item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
+            mobilePackage.country,
+            mobilePackage.countryCode?.takeIf { it.isNotBlank() }
         ).joinToString(" - ")
-    }
-
-    private fun renderDashboard(data: MobileDashboardData) {
-        balance.text = data.currentBalance
-        activeEsims.text = data.activeEsimCount
-        renderOrders(data.recentOrders)
-    }
-
-    private fun renderOrders(orderData: List<MobileDashboardOrder>) {
-        orders.removeAllViews()
-        if (orderData.isEmpty()) {
-            TextView(this).apply {
-                text = getString(R.string.dashboard_empty_orders)
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                orders.addView(this)
-            }
-            return
+        item.requireViewById<TextView>(R.id.package_specs).apply {
+            text = mobilePackage.specs()
+            visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
-
-        val inflater = LayoutInflater.from(this)
-        orderData.forEach { order ->
-            val item = inflater.inflate(R.layout.dashboard_order_item, orders, false)
-            item.requireViewById<TextView>(R.id.order_title).text = order.title
-            item.requireViewById<TextView>(R.id.order_subtitle).text = order.subtitle
-            item.requireViewById<TextView>(R.id.order_amount).apply {
-                text = order.amount.orEmpty()
-                visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.order_status).apply {
-                text = order.status.orEmpty()
-                visibility = if (order.status.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            orders.addView(item)
+        item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
+        item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.visibilityLabel()
+        item.setOnClickListener {
+            startActivity(PackageDetailActivity.createIntent(this, mobilePackage, userRole))
         }
+        return item
     }
 
     private fun setLoading(loading: Boolean) {
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
+        refresh.isRefreshing = loading
+    }
+
+    private fun openDashboardActivity() {
+        startActivity(
+            Intent(this, DashboardActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
     }
 
     private fun openWalletActivity() {
@@ -235,16 +267,8 @@ class DashboardActivity : AppCompatActivity() {
         )
     }
 
-    private fun openPackagesActivity() {
-        startActivity(
-            Intent(this, PackagesActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
     private fun openEsimActivity() {
-        val target = targetActivityName(META_ESIM_ACTIVITY)
+        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
         if (target.isNullOrBlank()) {
             error.text = getString(R.string.dashboard_missing_esim_target)
             error.visibility = View.VISIBLE
@@ -287,9 +311,5 @@ class DashboardActivity : AppCompatActivity() {
     private fun targetActivityName(key: String): String? {
         val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         return appInfo.metaData?.getString(key)
-    }
-
-    companion object {
-        const val META_ESIM_ACTIVITY = "im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
     }
 }

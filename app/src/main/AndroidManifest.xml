@@ -47,6 +47,18 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.WalletActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackagesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackageDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.PrivilegedMainActivity"
             android:exported="false" />
 

@@ -6,6 +6,16 @@
         android:title="@string/dashboard_title" />
 
     <item
+        android:id="@+id/nav_packages"
+        android:icon="@drawable/ic_packages"
+        android:title="@string/packages_title" />
+
+    <item
+        android:id="@+id/nav_wallet"
+        android:icon="@drawable/ic_wallet"
+        android:title="@string/wallet_title" />
+
+    <item
         android:id="@+id/nav_esims"
         android:icon="@drawable/ic_task_sim_card_download"
         android:title="@string/dashboard_nav_esims" />
