@@ -1,7 +1,6 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -87,6 +86,11 @@ class PackagesActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.reload -> {
                 loadPackages()
+                true
+            }
+
+            R.id.purchase_history -> {
+                openPurchaseHistoryActivity()
                 true
             }
 
@@ -268,13 +272,15 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun openEsimActivity() {
-        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
-        if (target.isNullOrBlank()) {
-            error.text = getString(R.string.dashboard_missing_esim_target)
-            error.visibility = View.VISIBLE
-            return
-        }
-        startActivity(Intent().setClassName(this, target))
+        startActivity(
+            Intent(this, MobileEsimsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
+    }
+
+    private fun openPurchaseHistoryActivity() {
+        startActivity(Intent(this, PurchaseHistoryActivity::class.java))
     }
 
     private fun logout() {
@@ -308,8 +314,4 @@ class PackagesActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun targetActivityName(key: String): String? {
-        val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-        return appInfo.metaData?.getString(key)
-    }
 }
