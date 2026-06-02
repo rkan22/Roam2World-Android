@@ -64,6 +64,21 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/wallet_request_balance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/wallet_request_balance" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/wallet_request_history"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/wallet_request_history" />
+
                 <TextView
                     android:id="@+id/wallet_error"
                     android:layout_width="match_parent"

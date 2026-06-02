@@ -17,6 +17,7 @@ class Roam2WorldAuthApiTest {
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/orders/", endpoints["mobile orders"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/packages/", endpoints["mobile packages"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/wallet/", endpoints["mobile wallet"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/wallet/requests/", endpoints["mobile wallet requests"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/esims/", endpoints["mobile eSIMs"])
     }
 

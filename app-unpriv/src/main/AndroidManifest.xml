@@ -44,6 +44,14 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestHistoryActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.PackagesActivity"
             android:exported="false" />
 
