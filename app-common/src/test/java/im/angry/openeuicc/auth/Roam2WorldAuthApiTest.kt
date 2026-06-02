@@ -10,6 +10,17 @@ class Roam2WorldAuthApiTest {
     }
 
     @Test
+    fun mobileEndpointUrlsIncludeDashboardSurface() {
+        val endpoints = Roam2WorldAuthApi(BACKEND_BASE_URL).mobileEndpointUrls
+
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/dashboard/", endpoints["mobile dashboard"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/orders/", endpoints["mobile orders"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/packages/", endpoints["mobile packages"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/wallet/", endpoints["mobile wallet"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/esims/", endpoints["mobile eSIMs"])
+    }
+
+    @Test
     fun loginEndpointDropsApiPathFromConfiguredBaseUrl() {
         assertEquals(EXPECTED_LOGIN_URL, Roam2WorldAuthApi("$BACKEND_BASE_URL/api/v1").loginEndpointUrl)
     }

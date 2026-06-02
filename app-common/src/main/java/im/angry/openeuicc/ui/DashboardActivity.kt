@@ -64,6 +64,7 @@ class DashboardActivity : AppCompatActivity() {
         setupInsets()
         setupBottomNavigation()
         renderPlaceholders()
+        authApi.logMobileEndpointConfiguration()
         loadDashboard()
     }
 

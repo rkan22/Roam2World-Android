@@ -14,11 +14,14 @@ class Roam2WorldAuthApi(baseUrl: String) {
     private val apiBaseUrl = normalizeBaseUrl(baseUrl)
 
     val loginEndpointUrl: String
-        get() = resolve(MOBILE_LOGIN_PATH)
+        get() = resolve(MOBILE_LOGIN_ENDPOINT.path)
+
+    val mobileEndpointUrls: Map<String, String>
+        get() = MOBILE_ENDPOINTS.associate { it.label to resolve(it.path) }
 
     suspend fun login(email: String, password: String): AuthSession = withContext(Dispatchers.IO) {
         val response = postJson(
-            MOBILE_LOGIN_PATH,
+            MOBILE_LOGIN_ENDPOINT,
             JSONObject()
                 .put("email", email)
                 .put("password", password)
@@ -29,7 +32,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
     suspend fun refresh(session: AuthSession): AuthSession = withContext(Dispatchers.IO) {
         val refreshToken = session.refreshToken ?: throw AuthApiException("Refresh token is unavailable")
         val response = postJson(
-            REFRESH_PATH,
+            REFRESH_ENDPOINT,
             JSONObject().put("refresh_token", refreshToken)
         )
         parseSession(response, session)
@@ -37,7 +40,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
 
     suspend fun logout(session: AuthSession) = withContext(Dispatchers.IO) {
         postJson(
-            LOGOUT_PATH,
+            LOGOUT_ENDPOINT,
             JSONObject().put("refresh_token", session.refreshToken),
             session.authorizationHeader
         )
@@ -45,18 +48,18 @@ class Roam2WorldAuthApi(baseUrl: String) {
     }
 
     suspend fun dashboard(session: AuthSession): MobileDashboardData = withContext(Dispatchers.IO) {
-        parseDashboard(getJson(DASHBOARD_PATH, session.authorizationHeader))
+        parseDashboard(getJson(DASHBOARD_ENDPOINT, session.authorizationHeader))
     }
 
     suspend fun wallet(session: AuthSession): MobileWalletData = withContext(Dispatchers.IO) {
-        val walletResponse = getJson(WALLET_PATH, session.authorizationHeader)
-        val transactionResponse = getJson(TRANSACTIONS_PATH, session.authorizationHeader)
+        val walletResponse = getJson(WALLET_ENDPOINT, session.authorizationHeader)
+        val transactionResponse = getJson(TRANSACTIONS_ENDPOINT, session.authorizationHeader)
         parseWallet(walletResponse, transactionResponse)
     }
 
     suspend fun packages(session: AuthSession): MobilePackageCatalog = withContext(Dispatchers.IO) {
-        val packageResponse = getJson(PACKAGES_PATH, session.authorizationHeader)
-        val featuredResponse = getJson(FEATURED_PACKAGES_PATH, session.authorizationHeader)
+        val packageResponse = getJson(PACKAGES_ENDPOINT, session.authorizationHeader)
+        val featuredResponse = getJson(FEATURED_PACKAGES_ENDPOINT, session.authorizationHeader)
         parsePackageCatalog(packageResponse, featuredResponse, session.role)
     }
 
@@ -83,27 +86,34 @@ class Roam2WorldAuthApi(baseUrl: String) {
         request.country?.let { body.put("delivery_country", it) }
 
         parsePurchaseResult(
-            postJson(MOBILE_ORDER_PATH, body, session.authorizationHeader),
+            postJson(MOBILE_ORDERS_ENDPOINT, body, session.authorizationHeader),
             request.packageName,
             request.price
         )
     }
 
-    private fun getJson(path: String, authorization: String? = null): JSONObject =
-        requestJson(path, method = "GET", authorization = authorization)
+    fun logMobileEndpointConfiguration() {
+        if (!BuildConfig.DEBUG) return
+        mobileEndpointUrls.forEach { (label, url) ->
+            Log.d(TAG, "Configured $label endpoint: $url")
+        }
+    }
 
-    private fun postJson(path: String, body: JSONObject, authorization: String? = null): JSONObject {
-        return requestJson(path, method = "POST", body = body, authorization = authorization)
+    private fun getJson(endpoint: ApiEndpoint, authorization: String? = null): JSONObject =
+        requestJson(endpoint, method = "GET", authorization = authorization)
+
+    private fun postJson(endpoint: ApiEndpoint, body: JSONObject, authorization: String? = null): JSONObject {
+        return requestJson(endpoint, method = "POST", body = body, authorization = authorization)
     }
 
     private fun requestJson(
-        path: String,
+        endpoint: ApiEndpoint,
         method: String,
         body: JSONObject? = null,
         authorization: String? = null
     ): JSONObject {
-        val requestUrl = resolve(path)
-        logRequest(method, requestUrl)
+        val requestUrl = resolve(endpoint.path)
+        logRequest(method, endpoint.label, requestUrl)
         val connection = (URL(requestUrl).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = TIMEOUT_MS
@@ -128,10 +138,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 connection.errorStream
             })?.bufferedReader()?.use { it.readText() }).orEmpty()
 
-            logRawResponse(method, requestUrl, status, connection.contentType, responseText)
-            val response = parseJsonResponse(responseText, status, connection.contentType, requestUrl)
+            logRawResponse(method, endpoint.label, requestUrl, status, connection.contentType, responseText)
+            val response = parseJsonResponse(responseText, status, connection.contentType, endpoint.label, requestUrl)
             if (status !in 200..299 || response.optBoolean("success", true) == false) {
-                throw AuthApiException(response.errorMessage(status))
+                throw AuthApiException("${endpoint.label}: ${response.errorMessage(status)}")
             }
             response
         } finally {
@@ -146,6 +156,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         responseText: String,
         status: Int,
         contentType: String?,
+        endpointLabel: String,
         requestUrl: String
     ): JSONObject {
         if (responseText.isBlank()) return JSONObject()
@@ -154,7 +165,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         if (!trimmed.startsWith("{")) {
             val responseType = contentType?.takeIf { it.isNotBlank() } ?: "unknown content type"
             throw AuthApiException(
-                "Backend returned non-JSON response from $requestUrl " +
+                "$endpointLabel returned non-JSON response from $requestUrl " +
                     "(HTTP $status, $responseType). Check that ROAM2WORLD_API_BASE_URL points to the mobile API backend."
             )
         }
@@ -162,7 +173,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         return try {
             JSONObject(responseText)
         } catch (e: JSONException) {
-            throw AuthApiException("Backend returned invalid JSON from $requestUrl (HTTP $status): ${e.message}")
+            throw AuthApiException("$endpointLabel returned invalid JSON from $requestUrl (HTTP $status): ${e.message}")
         }
     }
 
@@ -851,21 +862,37 @@ class Roam2WorldAuthApi(baseUrl: String) {
         return numeric.ifBlank { raw.ifBlank { "0.00" } }
     }
 
+    private data class ApiEndpoint(
+        val label: String,
+        val path: String
+    )
+
     companion object {
         private const val TAG = "Roam2WorldAuthApi"
         private const val DEFAULT_API_BASE_URL = "https://roam2world-panels-backend.onrender.com"
         private const val PARTNERS_FRONTEND_HOST = "partners.roam2world.com"
-        private const val MOBILE_LOGIN_PATH = "api/v1/mobile/auth/login/"
-        private const val DASHBOARD_PATH = "api/v1/mobile/dashboard/"
-        private const val WALLET_PATH = "api/v1/mobile/wallet/"
-        private const val TRANSACTIONS_PATH = "api/v1/mobile/transactions/"
-        private const val PACKAGES_PATH = "api/v1/mobile/packages/"
-        private const val FEATURED_PACKAGES_PATH = "api/v1/mobile/packages/featured/"
-        private const val MOBILE_ORDER_PATH = "api/v1/mobile/orders/"
-        private const val REFRESH_PATH = "api/v1/auth/refresh/"
-        private const val LOGOUT_PATH = "api/v1/auth/logout/"
         private const val TIMEOUT_MS = 30_000
         private const val LOG_CHUNK_SIZE = 3_500
+        private val MOBILE_LOGIN_ENDPOINT = ApiEndpoint("mobile login", "api/v1/mobile/auth/login/")
+        private val DASHBOARD_ENDPOINT = ApiEndpoint("mobile dashboard", "api/v1/mobile/dashboard/")
+        private val WALLET_ENDPOINT = ApiEndpoint("mobile wallet", "api/v1/mobile/wallet/")
+        private val TRANSACTIONS_ENDPOINT = ApiEndpoint("mobile transactions", "api/v1/mobile/transactions/")
+        private val PACKAGES_ENDPOINT = ApiEndpoint("mobile packages", "api/v1/mobile/packages/")
+        private val FEATURED_PACKAGES_ENDPOINT = ApiEndpoint("mobile featured packages", "api/v1/mobile/packages/featured/")
+        private val MOBILE_ORDERS_ENDPOINT = ApiEndpoint("mobile orders", "api/v1/mobile/orders/")
+        private val MOBILE_ESIMS_ENDPOINT = ApiEndpoint("mobile eSIMs", "api/v1/mobile/esims/")
+        private val REFRESH_ENDPOINT = ApiEndpoint("auth refresh", "api/v1/auth/refresh/")
+        private val LOGOUT_ENDPOINT = ApiEndpoint("auth logout", "api/v1/auth/logout/")
+        private val MOBILE_ENDPOINTS = listOf(
+            MOBILE_LOGIN_ENDPOINT,
+            DASHBOARD_ENDPOINT,
+            MOBILE_ORDERS_ENDPOINT,
+            PACKAGES_ENDPOINT,
+            WALLET_ENDPOINT,
+            MOBILE_ESIMS_ENDPOINT,
+            TRANSACTIONS_ENDPOINT,
+            FEATURED_PACKAGES_ENDPOINT,
+        )
 
         private fun normalizeBaseUrl(configuredBaseUrl: String): String {
             val trimmed = configuredBaseUrl.trim().ifBlank { DEFAULT_API_BASE_URL }
@@ -878,14 +905,15 @@ class Roam2WorldAuthApi(baseUrl: String) {
             return "${parsed.protocol}://${parsed.host}$port"
         }
 
-        private fun logRequest(method: String, requestUrl: String) {
+        private fun logRequest(method: String, endpointLabel: String, requestUrl: String) {
             if (BuildConfig.DEBUG) {
-                Log.d(TAG, "$method $requestUrl")
+                Log.d(TAG, "$method $endpointLabel $requestUrl")
             }
         }
 
         private fun logRawResponse(
             method: String,
+            endpointLabel: String,
             requestUrl: String,
             status: Int,
             contentType: String?,
@@ -893,7 +921,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         ) {
             if (!BuildConfig.DEBUG) return
 
-            Log.d(TAG, "HTTP $status $method $requestUrl contentType=${contentType.orEmpty()}")
+            Log.d(TAG, "HTTP $status $method $endpointLabel $requestUrl contentType=${contentType.orEmpty()}")
             if (responseText.isBlank()) {
                 Log.d(TAG, "Raw response body: <empty>")
                 return
