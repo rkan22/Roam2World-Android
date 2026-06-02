@@ -51,6 +51,27 @@
     <string name="package_detail_network_format">Network: %s</string>
     <string name="package_detail_coverage_format">Coverage: %s</string>
     <string name="package_detail_description_format">%s</string>
+    <string name="package_purchase_action">Buy with wallet</string>
+    <string name="package_purchase_wallet_failed">Could not check wallet balance.</string>
+    <string name="package_purchase_price_unavailable">Package price is unavailable.</string>
+    <string name="package_purchase_insufficient_balance">Insufficient wallet balance.</string>
+    <string name="package_purchase_failed">Could not complete purchase.</string>
+    <string name="purchase_confirmation_title">Purchase confirmation</string>
+    <string name="purchase_confirmation_heading">Purchase confirmed</string>
+    <string name="purchase_order_number_format">Order: %s</string>
+    <string name="purchase_status_format">Status: %s</string>
+    <string name="purchase_price_format">Paid: %s</string>
+    <string name="purchase_balance_after_format">Balance after purchase: %s</string>
+    <string name="purchase_activation_title">Activation details</string>
+    <string name="purchase_activation_code_format">Activation code: %s</string>
+    <string name="purchase_smdp_format">SM-DP+: %s</string>
+    <string name="purchase_matching_id_format">Matching ID: %s</string>
+    <string name="purchase_qr_code_format">QR content: %s</string>
+    <string name="purchase_qr_url_format">QR URL: %s</string>
+    <string name="purchase_iccid_format">ICCID: %s</string>
+    <string name="purchase_esim_id_format">eSIM ID: %s</string>
+    <string name="purchase_install_esim">Install eSIM</string>
+    <string name="purchase_install_unavailable">Installation data is not available for this order yet.</string>
 
     <string name="profile_reload_slots">Reload Slots</string>
     <string name="profile_no_enabled_profile">Unknown</string>

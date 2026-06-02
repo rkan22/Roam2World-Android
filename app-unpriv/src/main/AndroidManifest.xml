@@ -52,6 +52,10 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.PurchaseConfirmationActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.UnprivilegedMainActivity"
             android:exported="false" />
 
