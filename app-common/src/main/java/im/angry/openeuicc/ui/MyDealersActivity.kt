@@ -1,7 +1,6 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -12,7 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.color.MaterialColors
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -33,6 +31,7 @@ class MyDealersActivity : AppCompatActivity() {
 
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var dealers: LinearLayout
+    private lateinit var summary: TextView
     private lateinit var empty: TextView
     private lateinit var error: TextView
 
@@ -48,6 +47,7 @@ class MyDealersActivity : AppCompatActivity() {
 
         refresh = requireViewById(R.id.my_dealers_refresh)
         dealers = requireViewById(R.id.my_dealers_items)
+        summary = requireViewById(R.id.my_dealers_summary)
         empty = requireViewById(R.id.my_dealers_empty)
         error = requireViewById(R.id.my_dealers_error)
 
@@ -114,6 +114,7 @@ class MyDealersActivity : AppCompatActivity() {
 
     private fun renderDealers(dealerData: List<MobileDealer>) {
         dealers.removeAllViews()
+        summary.text = getString(R.string.dealers_summary_format, dealerData.size.toString())
         empty.visibility = if (dealerData.isEmpty()) View.VISIBLE else View.GONE
         if (dealerData.isEmpty()) return
 
@@ -127,10 +128,8 @@ class MyDealersActivity : AppCompatActivity() {
                 getString(R.string.dealer_orders_format, dealer.totalOrders)
             item.requireViewById<TextView>(R.id.dealer_item_revenue).text =
                 getString(R.string.dealer_revenue_format, dealer.revenue)
-            item.requireViewById<TextView>(R.id.dealer_item_status).apply {
-                text = dealer.statusLabel()
-                backgroundTintList = ColorStateList.valueOf(statusColor(dealer.status))
-            }
+            item.requireViewById<TextView>(R.id.dealer_item_status)
+                .applyRoamStatusChip(dealer.statusLabel(), dealer.status)
             item.setOnClickListener { openDealerDetail(dealer) }
             dealers.addView(item)
         }
@@ -144,13 +143,6 @@ class MyDealersActivity : AppCompatActivity() {
                 .putExtra(DealerDetailActivity.EXTRA_DEALER_NAME, dealer.name)
         )
     }
-
-    private fun statusColor(status: String): Int =
-        when (status.lowercase()) {
-            "active" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimaryContainer)
-            "suspended" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorErrorContainer)
-            else -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorSecondaryContainer)
-        }
 
     private fun setLoading(loading: Boolean) {
         refresh.isRefreshing = loading

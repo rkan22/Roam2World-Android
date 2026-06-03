@@ -54,8 +54,6 @@ dependencies {
     api("androidx.cardview:cardview:1.0.0")
     api("androidx.viewpager2:viewpager2:1.1.0")
     api("androidx.datastore:datastore-preferences:1.0.0")
-    // Dynamic colors support (Android 12+)
-    api("androidx.dynamiccolors:dynamiccolors:1.0.0")
     api("com.journeyapps:zxing-android-embedded:4.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

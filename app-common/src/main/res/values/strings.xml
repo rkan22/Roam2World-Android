@@ -20,17 +20,27 @@
     <string name="logout">Logout</string>
 
     <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_brand">Roam2World</string>
     <string name="dashboard_nav_esims">eSIMs</string>
     <string name="dashboard_refresh">Refresh</string>
     <string name="dashboard_greeting">Welcome</string>
     <string name="dashboard_current_balance">Current balance</string>
     <string name="dashboard_active_esims">Active eSIMs</string>
+    <string name="dashboard_orders_summary">Recent orders</string>
+    <string name="dashboard_dealer_summary">Dealer network</string>
+    <string name="dashboard_dealer_summary_value">Manage dealers</string>
+    <string name="dashboard_quick_actions">Quick actions</string>
+    <string name="dashboard_browse_packages">Browse packages</string>
+    <string name="dashboard_request_balance">Request balance</string>
+    <string name="dashboard_view_history">Purchase history</string>
+    <string name="dashboard_manage_dealers">Manage dealers</string>
     <string name="dashboard_recent_orders">Recent orders</string>
     <string name="dashboard_loading">Loading dashboard...</string>
     <string name="dashboard_empty_orders">No recent orders yet.</string>
     <string name="dashboard_load_failed">Could not load dashboard.</string>
     <string name="dashboard_missing_esim_target">eSIM target is not configured.</string>
     <string name="dealers_title">My dealers</string>
+    <string name="dealers_summary_format">%s dealers</string>
     <string name="dealers_empty">No dealers yet.</string>
     <string name="dealers_load_failed">Could not load dealers.</string>
     <string name="dealers_reseller_only">Dealer management is available for reseller accounts.</string>
@@ -57,6 +67,7 @@
     <string name="purchase_history_empty">No purchases yet.</string>
     <string name="purchase_history_load_failed">Could not load purchase history.</string>
     <string name="order_detail_title">Order detail</string>
+    <string name="order_detail_summary">Order summary</string>
     <string name="order_detail_missing">Order detail is unavailable.</string>
     <string name="order_detail_load_failed">Could not load order detail.</string>
     <string name="order_detail_package_fallback">Package</string>
@@ -71,7 +82,9 @@
     <string name="order_detail_esim_unavailable">This order does not have an eSIM assigned yet.</string>
     <string name="wallet_title">Wallet</string>
     <string name="wallet_current_balance">Current balance</string>
+    <string name="wallet_recent_requests">Recent requests</string>
     <string name="wallet_transactions">Transaction history</string>
+    <string name="wallet_recent_transactions">Recent transactions</string>
     <string name="wallet_empty_transactions">No wallet transactions yet.</string>
     <string name="wallet_load_failed">Could not load wallet.</string>
     <string name="wallet_pull_refresh">Pull to refresh wallet</string>
@@ -132,6 +145,8 @@
     <string name="mobile_esims_load_failed">Could not load eSIMs.</string>
     <string name="mobile_esims_open_device_manager">Device eSIM manager</string>
     <string name="mobile_esim_detail_title">eSIM detail</string>
+    <string name="mobile_esim_profile">Profile</string>
+    <string name="mobile_esim_activation_details">Activation details</string>
     <string name="mobile_esim_detail_missing">eSIM detail is unavailable.</string>
     <string name="mobile_esim_iccid_format">ICCID: %s</string>
     <string name="mobile_esim_provider_format">Provider: %s</string>

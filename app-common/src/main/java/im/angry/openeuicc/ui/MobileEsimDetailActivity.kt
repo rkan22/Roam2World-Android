@@ -152,9 +152,9 @@ class MobileEsimDetailActivity : AppCompatActivity() {
 
         requireViewById<TextView>(R.id.mobile_esim_detail_title).text = esim.title()
         setOptionalText(R.id.mobile_esim_detail_iccid, esim.iccid, R.string.mobile_esim_iccid_format)
-        setOptionalText(R.id.mobile_esim_detail_provider, esim.provider, R.string.mobile_esim_provider_format)
+        requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(esim.provider)
         setOptionalText(R.id.mobile_esim_detail_package, esim.packageName, R.string.mobile_esim_package_format)
-        setOptionalText(R.id.mobile_esim_detail_status, esim.statusLabel(), R.string.mobile_esim_status_format)
+        requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(esim.statusLabel(), esim.status)
         setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
         setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)
         setOptionalText(R.id.mobile_esim_detail_matching_id, esim.matchingId, R.string.mobile_esim_matching_id_format)
@@ -176,6 +176,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     }
 
     private fun renderActions(esim: MobileEsim) {
+        requireViewById<View>(R.id.mobile_esim_iccid_card).visibility =
+            if (esim.iccid.isNullOrBlank()) View.GONE else View.VISIBLE
         copyIccidButton.visibility = if (esim.iccid.isNullOrBlank()) View.GONE else View.VISIBLE
         copyIccidButton.setOnClickListener {
             copyToClipboard(
@@ -185,6 +187,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             )
         }
 
+        requireViewById<View>(R.id.mobile_esim_activation_card).visibility =
+            if (esim.activationCode.isNullOrBlank()) View.GONE else View.VISIBLE
         copyActivationButton.visibility = if (esim.activationCode.isNullOrBlank()) View.GONE else View.VISIBLE
         copyActivationButton.setOnClickListener {
             copyToClipboard(
@@ -194,6 +198,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             )
         }
 
+        requireViewById<View>(R.id.mobile_esim_smdp_card).visibility =
+            if (esim.smdpAddress.isNullOrBlank() && esim.matchingId.isNullOrBlank()) View.GONE else View.VISIBLE
         copySmdpButton.visibility = if (esim.smdpAddress.isNullOrBlank()) View.GONE else View.VISIBLE
         copySmdpButton.setOnClickListener {
             copyToClipboard(

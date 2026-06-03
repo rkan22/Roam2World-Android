@@ -1,7 +1,6 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -138,8 +137,7 @@ class DealerDetailActivity : AppCompatActivity() {
         supportActionBar?.title = dealer.name
         name.text = dealer.name
         email.text = dealer.email.orEmpty()
-        status.text = dealer.statusLabel()
-        status.backgroundTintList = ColorStateList.valueOf(statusColor(dealer.status))
+        status.applyRoamStatusChip(dealer.statusLabel(), dealer.status)
         balance.text = getString(R.string.dealer_balance_format, dealer.currentBalance)
         stats.text = getString(
             R.string.dealer_detail_stats_format,
@@ -174,7 +172,8 @@ class DealerDetailActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.history_package_name).text = order.packageName
             item.requireViewById<TextView>(R.id.history_created_date).text = order.createdAt.orEmpty()
             item.requireViewById<TextView>(R.id.history_price).text = order.price.orEmpty()
-            item.requireViewById<TextView>(R.id.history_status).text = order.statusLabel().orEmpty()
+            item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(order.provider)
+            item.requireViewById<TextView>(R.id.history_status).applyRoamStatusChip(order.statusLabel(), order.status)
             orders.addView(item)
         }
     }
@@ -212,13 +211,6 @@ class DealerDetailActivity : AppCompatActivity() {
                 }
         }
     }
-
-    private fun statusColor(status: String): Int =
-        when (status.lowercase()) {
-            "active" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimaryContainer)
-            "suspended" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorErrorContainer)
-            else -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorSecondaryContainer)
-        }
 
     private fun setLoading(loading: Boolean) {
         progress.visibility = if (loading) View.VISIBLE else View.GONE

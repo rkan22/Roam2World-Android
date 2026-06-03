@@ -1,6 +1,28 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.OpenEUICC" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/roam_primary</item>
+        <item name="colorOnPrimary">@color/roam_on_primary</item>
+        <item name="colorPrimaryContainer">@color/roam_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/roam_on_primary_container</item>
+        <item name="colorSecondary">@color/roam_secondary</item>
+        <item name="colorOnSecondary">@color/roam_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/roam_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/roam_on_secondary_container</item>
+        <item name="colorTertiary">@color/roam_tertiary</item>
+        <item name="colorOnTertiary">@color/roam_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/roam_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/roam_on_tertiary_container</item>
+        <item name="colorError">@color/roam_error</item>
+        <item name="colorOnError">@color/roam_on_error</item>
+        <item name="colorErrorContainer">@color/roam_error_container</item>
+        <item name="colorOnErrorContainer">@color/roam_on_error_container</item>
+        <item name="colorSurface">@color/roam_surface</item>
+        <item name="colorOnSurface">@color/roam_on_surface</item>
+        <item name="colorSurfaceVariant">@color/roam_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/roam_on_surface_variant</item>
+        <item name="colorOutline">@color/roam_outline</item>
+        <item name="colorOutlineVariant">@color/roam_outline_variant</item>
         <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -12,7 +34,9 @@
     </style>
 
     <style name="ToolbarTheme" parent="Widget.Material3.Toolbar">
-        <item name="android:background">?attr/colorSurfaceVariant</item>
+        <item name="android:background">?attr/colorSurface</item>
+        <item name="titleTextColor">?attr/colorOnSurface</item>
+        <item name="navigationIconTint">?attr/colorOnSurface</item>
     </style>
 
     <style name="AlertDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
