@@ -89,6 +89,53 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseMobileOrders(getJson(MOBILE_ORDERS_ENDPOINT, session.authorizationHeader))
     }
 
+    suspend fun dealers(session: AuthSession): MobileDealerList = withContext(Dispatchers.IO) {
+        parseMobileDealers(getJson(MOBILE_DEALERS_ENDPOINT, session.authorizationHeader))
+    }
+
+    suspend fun dealer(session: AuthSession, dealerId: String): MobileDealer = withContext(Dispatchers.IO) {
+        parseMobileDealers(
+            getJson(
+                ApiEndpoint("mobile dealer detail", "api/v1/mobile/dealers/$dealerId/"),
+                session.authorizationHeader
+            )
+        ).dealers.firstOrNull() ?: throw AuthApiException("Dealer detail was unavailable")
+    }
+
+    suspend fun allocateDealerBalance(
+        session: AuthSession,
+        dealerId: String,
+        amount: String
+    ): MobileDealerAllocationResult = withContext(Dispatchers.IO) {
+        parseMobileDealerAllocation(
+            postJson(
+                ApiEndpoint("mobile dealer balance allocation", "api/v1/mobile/dealers/$dealerId/allocate-balance/"),
+                JSONObject().put("amount", amount),
+                session.authorizationHeader
+            )
+        )
+    }
+
+    suspend fun suspendDealer(session: AuthSession, dealerId: String): MobileDealer = withContext(Dispatchers.IO) {
+        parseMobileDealers(
+            postJson(
+                ApiEndpoint("mobile dealer suspend", "api/v1/mobile/dealers/$dealerId/suspend/"),
+                JSONObject(),
+                session.authorizationHeader
+            )
+        ).dealers.firstOrNull() ?: throw AuthApiException("Dealer status was unavailable")
+    }
+
+    suspend fun activateDealer(session: AuthSession, dealerId: String): MobileDealer = withContext(Dispatchers.IO) {
+        parseMobileDealers(
+            postJson(
+                ApiEndpoint("mobile dealer activate", "api/v1/mobile/dealers/$dealerId/activate/"),
+                JSONObject(),
+                session.authorizationHeader
+            )
+        ).dealers.firstOrNull() ?: throw AuthApiException("Dealer status was unavailable")
+    }
+
     suspend fun order(session: AuthSession, orderId: String): MobileOrder = withContext(Dispatchers.IO) {
         parseMobileOrders(
             getJson(
@@ -385,6 +432,165 @@ class Roam2WorldAuthApi(baseUrl: String) {
         return (0 until orders.length()).mapNotNull { index ->
             parseMobileOrder(orders.optJSONObject(index))
         }
+    }
+
+    internal fun parseMobileDealers(response: JSONObject): MobileDealerList {
+        val dataArray = response.optJSONArray("data")
+        val data = response.optJSONObject("data") ?: response
+        val dealerObject = firstObject(
+            data.optJSONObject("dealer"),
+            data.optJSONObject("profile"),
+            response.optJSONObject("dealer"),
+            response.optJSONObject("profile")
+        )
+        val dealers = firstArray(
+            dataArray,
+            data.optJSONArray("dealers"),
+            data.optJSONArray("results"),
+            data.optJSONArray("items"),
+            response.optJSONArray("dealers"),
+            response.optJSONArray("results"),
+            response.optJSONArray("items")
+        )
+
+        if (dealers == null && (dealerObject != null || data.has("dealer_id") || data.has("id"))) {
+            return MobileDealerList(listOfNotNull(parseMobileDealer(dealerObject ?: data)))
+        }
+
+        return MobileDealerList(parseMobileDealerList(dealers))
+    }
+
+    private fun parseMobileDealerList(dealers: JSONArray?): List<MobileDealer> {
+        if (dealers == null) return emptyList()
+        return (0 until dealers.length()).mapNotNull { index ->
+            parseMobileDealer(dealers.optJSONObject(index))
+        }
+    }
+
+    private fun parseMobileDealer(dealerJson: JSONObject?): MobileDealer? {
+        dealerJson ?: return null
+        val profile = dealerJson.optJSONObject("profile")
+        val recentOrders = firstArray(
+            dealerJson.optJSONArray("recent_orders"),
+            dealerJson.optJSONArray("recentOrders"),
+            dealerJson.optJSONArray("orders"),
+            profile?.optJSONArray("recent_orders"),
+            profile?.optJSONArray("recentOrders")
+        )
+
+        return MobileDealer(
+            id = firstNotBlank(
+                dealerJson.optString("id"),
+                dealerJson.optString("dealer_id"),
+                dealerJson.optString("dealerId"),
+                profile?.optString("id")
+            ),
+            name = firstNotBlank(
+                dealerJson.optString("dealer_name"),
+                dealerJson.optString("dealerName"),
+                dealerJson.optString("name"),
+                dealerJson.optString("full_name"),
+                dealerJson.optString("fullName"),
+                profile?.optString("name"),
+                profile?.optString("full_name"),
+                profile?.optString("fullName"),
+                profile?.optString("email"),
+                dealerJson.optString("email")
+            ) ?: "Dealer",
+            email = firstNotBlank(
+                dealerJson.optString("email"),
+                profile?.optString("email")
+            ),
+            currentBalance = firstNotBlank(
+                dealerJson.optString("current_balance"),
+                dealerJson.optString("currentBalance"),
+                dealerJson.optString("balance"),
+                dealerJson.optString("available_balance"),
+                dealerJson.optString("availableBalance")
+            ) ?: "0",
+            status = firstNotBlank(
+                dealerJson.optString("status"),
+                dealerJson.optString("state")
+            ) ?: "active",
+            totalOrders = firstNotBlank(
+                dealerJson.optString("total_orders"),
+                dealerJson.optString("totalOrders"),
+                dealerJson.optString("order_count"),
+                dealerJson.optString("orderCount")
+            ) ?: "0",
+            revenue = firstNotBlank(
+                dealerJson.optString("revenue"),
+                dealerJson.optString("total_revenue"),
+                dealerJson.optString("totalRevenue")
+            ) ?: "0",
+            currency = firstNotBlank(dealerJson.optString("currency")) ?: "USD",
+            firstName = firstNotBlank(
+                dealerJson.optString("first_name"),
+                dealerJson.optString("firstName"),
+                profile?.optString("first_name"),
+                profile?.optString("firstName")
+            ),
+            lastName = firstNotBlank(
+                dealerJson.optString("last_name"),
+                dealerJson.optString("lastName"),
+                profile?.optString("last_name"),
+                profile?.optString("lastName")
+            ),
+            phoneNumber = firstNotBlank(
+                dealerJson.optString("phone_number"),
+                dealerJson.optString("phoneNumber"),
+                profile?.optString("phone_number"),
+                profile?.optString("phoneNumber")
+            ),
+            countryCode = firstNotBlank(
+                dealerJson.optString("country_code"),
+                dealerJson.optString("countryCode"),
+                profile?.optString("country_code"),
+                profile?.optString("countryCode")
+            ),
+            totalAllocated = firstNotBlank(
+                dealerJson.optString("total_allocated"),
+                dealerJson.optString("totalAllocated")
+            ),
+            totalSpent = firstNotBlank(
+                dealerJson.optString("total_spent"),
+                dealerJson.optString("totalSpent")
+            ),
+            createdAt = firstNotBlank(
+                dealerJson.optString("created_at"),
+                dealerJson.optString("createdAt"),
+                profile?.optString("created_at"),
+                profile?.optString("createdAt")
+            ),
+            suspensionReason = firstNotBlank(
+                dealerJson.optString("suspension_reason"),
+                dealerJson.optString("suspensionReason")
+            ),
+            recentOrders = parseMobileOrderList(recentOrders)
+        )
+    }
+
+    private fun parseMobileDealerAllocation(response: JSONObject): MobileDealerAllocationResult {
+        val data = response.optJSONObject("data") ?: response
+        val dealer = parseMobileDealer(data.optJSONObject("dealer") ?: response.optJSONObject("dealer"))
+            ?: throw AuthApiException("Dealer allocation response did not include dealer data")
+        return MobileDealerAllocationResult(
+            amount = firstNotBlank(
+                data.optString("amount"),
+                response.optString("amount")
+            ) ?: "0",
+            currency = firstNotBlank(
+                data.optString("currency"),
+                response.optString("currency")
+            ) ?: "USD",
+            resellerRemainingBalance = firstNotBlank(
+                data.optString("reseller_remaining_balance"),
+                data.optString("resellerRemainingBalance"),
+                data.optString("remaining_balance"),
+                data.optString("remainingBalance")
+            ),
+            dealer = dealer
+        )
     }
 
     private fun parseMobileOrder(orderJson: JSONObject?): MobileOrder? {
@@ -1301,11 +1507,13 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private val FEATURED_PACKAGES_ENDPOINT = ApiEndpoint("mobile featured packages", "api/v1/mobile/packages/featured/")
         private val MOBILE_ORDERS_ENDPOINT = ApiEndpoint("mobile orders", "api/v1/mobile/orders/")
         private val MOBILE_ESIMS_ENDPOINT = ApiEndpoint("mobile eSIMs", "api/v1/mobile/esims/")
+        private val MOBILE_DEALERS_ENDPOINT = ApiEndpoint("mobile dealers", "api/v1/mobile/dealers/")
         private val REFRESH_ENDPOINT = ApiEndpoint("auth refresh", "api/v1/auth/refresh/")
         private val LOGOUT_ENDPOINT = ApiEndpoint("auth logout", "api/v1/auth/logout/")
         private val MOBILE_ENDPOINTS = listOf(
             MOBILE_LOGIN_ENDPOINT,
             DASHBOARD_ENDPOINT,
+            MOBILE_DEALERS_ENDPOINT,
             MOBILE_ORDERS_ENDPOINT,
             PACKAGES_ENDPOINT,
             WALLET_ENDPOINT,

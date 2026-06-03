@@ -14,6 +14,7 @@ class Roam2WorldAuthApiTest {
         val endpoints = Roam2WorldAuthApi(BACKEND_BASE_URL).mobileEndpointUrls
 
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/dashboard/", endpoints["mobile dashboard"])
+        assertEquals("$BACKEND_BASE_URL/api/v1/mobile/dealers/", endpoints["mobile dealers"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/orders/", endpoints["mobile orders"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/packages/", endpoints["mobile packages"])
         assertEquals("$BACKEND_BASE_URL/api/v1/mobile/wallet/", endpoints["mobile wallet"])
