@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Component Styles - Roam2World -->
+
+    <!-- ============================================================ -->
+    <!-- CARDS -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Card - Default elevated card -->
+    <style name="Widget.Roam2World.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/roam2world_surface</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <!-- Outlined Card -->
+    <style name="Widget.Roam2World.CardView.Outlined" parent="Widget.Material3.CardView.Outlined">
+        <item name="strokeColor">@color/roam2world_outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- BUTTONS -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Button - Filled (Primary) -->
+    <style name="Widget.Roam2World.Button" parent="Widget.Material3.Button">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="backgroundTint">@color/roam2world_primary</item>
+        <item name="android:textColor">@color/roam2world_on_primary</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+    </style>
+
+    <!-- Filled Tonal Button (Secondary) -->
+    <style name="Widget.Roam2World.Button.TonalButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="backgroundTint">@color/roam2world_secondary_container</item>
+        <item name="android:textColor">@color/roam2world_on_secondary_container</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <!-- Outlined Button -->
+    <style name="Widget.Roam2World.Button.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="strokeColor">@color/roam2world_outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/roam2world_primary</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <!-- Text Button -->
+    <style name="Widget.Roam2World.Button.TextButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="android:textColor">@color/roam2world_primary</item>
+        <item name="cornerRadius">100dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- CHIPS -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Chip - Assist chip -->
+    <style name="Widget.Roam2World.Chip.Assist" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelMedium</item>
+        <item name="chipBackgroundColor">@color/roam2world_surface_variant</item>
+        <item name="chipStrokeColor">@color/roam2world_outline</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/roam2world_on_surface_variant</item>
+        <item name="chipCornerRadius">8dp</item>
+    </style>
+
+    <!-- Filter Chip -->
+    <style name="Widget.Roam2World.Chip.Filter" parent="Widget.Material3.Chip.Filter">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelMedium</item>
+        <item name="chipBackgroundColor">@color/roam2world_surface_variant</item>
+        <item name="chipStrokeColor">@color/roam2world_outline</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/roam2world_on_surface_variant</item>
+        <item name="chipCornerRadius">8dp</item>
+    </style>
+
+    <!-- Status Chip - Success -->
+    <style name="Widget.Roam2World.Chip.Status.Success" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelSmall</item>
+        <item name="chipBackgroundColor">@color/roam2world_success</item>
+        <item name="android:textColor">@color/roam2world_on_success</item>
+        <item name="chipCornerRadius">6dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <!-- Status Chip - Warning -->
+    <style name="Widget.Roam2World.Chip.Status.Warning" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelSmall</item>
+        <item name="chipBackgroundColor">@color/roam2world_warning</item>
+        <item name="android:textColor">@color/roam2world_on_warning</item>
+        <item name="chipCornerRadius">6dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <!-- Status Chip - Error -->
+    <style name="Widget.Roam2World.Chip.Status.Error" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelSmall</item>
+        <item name="chipBackgroundColor">@color/roam2world_error</item>
+        <item name="android:textColor">@color/roam2world_on_error</item>
+        <item name="chipCornerRadius">6dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <!-- Status Chip - Info -->
+    <style name="Widget.Roam2World.Chip.Status.Info" parent="Widget.Material3.Chip.Assist">
+        <item name="android:textAppearance">@style/TextAppearance.Roam2World.LabelSmall</item>
+        <item name="chipBackgroundColor">@color/roam2world_info</item>
+        <item name="android:textColor">@color/roam2world_on_info</item>
+        <item name="chipCornerRadius">6dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- TEXT INPUT / EDIT TEXT -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Text Input Layout -->
+    <style name="Widget.Roam2World.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/roam2world_surface</item>
+        <item name="boxStrokeColor">@color/roam2world_outline</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="android:textColorHint">@color/roam2world_on_surface_variant</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- DIALOGS -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Alert Dialog -->
+    <style name="Theme.Roam2World.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Roam2World.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.Roam2World.Button.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Roam2World.Button.TextButton</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- BOTTOM SHEET -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Bottom Sheet Dialog Theme -->
+    <style name="Theme.Roam2World.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Material3.BottomSheet</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- FLOATING ACTION BUTTON -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 FAB - Primary -->
+    <style name="Widget.Roam2World.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">@color/roam2world_primary</item>
+        <item name="tint">@color/roam2world_on_primary</item>
+        <item name="fabCustomSize">56dp</item>
+        <item name="elevation">4dp</item>
+    </style>
+
+    <!-- FAB - Secondary -->
+    <style name="Widget.Roam2World.FloatingActionButton.Secondary" parent="Widget.Material3.FloatingActionButton.Secondary">
+        <item name="backgroundTint">@color/roam2world_secondary</item>
+        <item name="tint">@color/roam2world_on_secondary</item>
+        <item name="fabCustomSize">56dp</item>
+    </style>
+
+    <!-- FAB - Tertiary -->
+    <style name="Widget.Roam2World.FloatingActionButton.Tertiary" parent="Widget.Material3.FloatingActionButton.Tertiary">
+        <item name="backgroundTint">@color/roam2world_tertiary</item>
+        <item name="tint">@color/roam2world_on_tertiary</item>
+        <item name="fabCustomSize">56dp</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- PROGRESS INDICATORS -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Linear Progress Indicator -->
+    <style name="Widget.Roam2World.LinearProgressIndicator" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="trackColor">@color/roam2world_surface_variant</item>
+        <item name="indicatorColor">@color/roam2world_primary</item>
+    </style>
+
+    <!-- Material 3 Circular Progress Indicator -->
+    <style name="Widget.Roam2World.CircularProgressIndicator" parent="Widget.Material3.CircularProgressIndicator">
+        <item name="indicatorColor">@color/roam2world_primary</item>
+        <item name="trackColor">@color/roam2world_surface_variant</item>
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- APPBAR / TOPBAR -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Small Top App Bar -->
+    <style name="Widget.Roam2World.TopAppBar" parent="Widget.Material3.AppBarLayout.Small">
+        <item name="materialNavigationViewStyle">@style/Widget.Material3.NavigationView</item>
+    </style>
+
+    <!-- Material 3 Center Aligned Top App Bar -->
+    <style name="Widget.Roam2World.TopAppBar.CenterAligned" parent="Widget.Material3.AppBarLayout.CenterAligned">
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- NAVIGATION -->
+    <!-- ============================================================ -->
+
+    <!-- Material 3 Bottom Navigation View -->
+    <style name="Widget.Roam2World.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconSize">24dp</item>
+        <item name="itemIconTint">@color/roam2world_on_surface_variant</item>
+        <item name="itemTextColor">@color/roam2world_on_surface_variant</item>
+    </style>
+
+    <!-- Material 3 Navigation Rail -->
+    <style name="Widget.Roam2World.NavigationRailView" parent="Widget.Material3.NavigationRailView">
+        <item name="itemIconSize">24dp</item>
+    </style>
+
+</resources>

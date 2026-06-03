@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Spacing Scale - Roam2World -->
+
+    <!-- Extra small: 4dp -->
+    <dimen name="spacing_xs">4dp</dimen>
+
+    <!-- Small: 8dp -->
+    <dimen name="spacing_sm">8dp</dimen>
+
+    <!-- Medium: 12dp -->
+    <dimen name="spacing_md">12dp</dimen>
+
+    <!-- Medium Large: 16dp -->
+    <dimen name="spacing_ml">16dp</dimen>
+
+    <!-- Large: 20dp -->
+    <dimen name="spacing_lg">20dp</dimen>
+
+    <!-- Extra Large: 24dp -->
+    <dimen name="spacing_xl">24dp</dimen>
+
+    <!-- 2XL: 32dp -->
+    <dimen name="spacing_2xl">32dp</dimen>
+
+    <!-- 3XL: 48dp -->
+    <dimen name="spacing_3xl">48dp</dimen>
+
+    <!-- Touch Target Minimum: 48dp (WCAG requirement) -->
+    <dimen name="touch_target_minimum">48dp</dimen>
+
+    <!-- Card Elevation: 1dp -->
+    <dimen name="card_elevation">1dp</dimen>
+
+    <!-- Button Corner Radius -->
+    <dimen name="button_corner_radius">100dp</dimen>
+
+    <!-- Card Corner Radius: 12dp -->
+    <dimen name="card_corner_radius">12dp</dimen>
+
+    <!-- Small Radius: 4dp -->
+    <dimen name="radius_small">4dp</dimen>
+
+    <!-- Medium Radius: 8dp -->
+    <dimen name="radius_medium">8dp</dimen>
+
+    <!-- Large Radius: 12dp -->
+    <dimen name="radius_large">12dp</dimen>
+
+    <!-- Extra Large Radius: 16dp -->
+    <dimen name="radius_xl">16dp</dimen>
+
+    <!-- Dashboard -->
+    <dimen name="dashboard_card_height">140dp</dimen>
+    <dimen name="dashboard_card_spacing">12dp</dimen>
+
+    <!-- Wallet -->
+    <dimen name="wallet_balance_text_size">32sp</dimen>
+    <dimen name="wallet_card_height">120dp</dimen>
+
+    <!-- Purchase History -->
+    <dimen name="order_card_height">100dp</dimen>
+    <dimen name="order_card_spacing">8dp</dimen>
+
+    <!-- eSIM Detail -->
+    <dimen name="qr_code_size">280dp</dimen>
+    <dimen name="esim_card_padding">20dp</dimen>
+
+    <!-- Dealers List -->
+    <dimen name="dealer_item_height">80dp</dimen>
+    <dimen name="dealer_icon_size">40dp</dimen>
+
+</resources>
