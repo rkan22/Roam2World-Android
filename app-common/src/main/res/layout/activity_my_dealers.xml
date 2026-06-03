@@ -50,7 +50,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="104dp"
                     android:layout_marginTop="18dp"
-                    app:cardBackgroundColor="?attr/colorSecondaryContainer"
+                    app:cardBackgroundColor="?attr/colorPrimaryContainer"
                     app:cardCornerRadius="8dp"
                     app:strokeWidth="0dp">
 
@@ -66,7 +66,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/dashboard_dealer_summary"
                             android:textAppearance="?attr/textAppearanceLabelLarge"
-                            android:textColor="?attr/colorOnSecondaryContainer" />
+                            android:textColor="?attr/colorOnPrimaryContainer" />
 
                         <TextView
                             android:id="@+id/my_dealers_summary"
@@ -74,7 +74,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="?attr/colorOnSecondaryContainer" />
+                            android:textColor="?attr/colorOnPrimaryContainer" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

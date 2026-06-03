@@ -6,7 +6,7 @@
     <string name="notification_help">Help</string>
 
     <string name="login_logo_content_description">Roam2World eSIM</string>
-    <string name="login_title">Roam2World</string>
+    <string name="login_title">Roam2World B2B</string>
     <string name="login_subtitle">Sign in with your reseller or dealer account.</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
@@ -20,7 +20,7 @@
     <string name="logout">Logout</string>
 
     <string name="dashboard_title">Dashboard</string>
-    <string name="dashboard_brand">Roam2World</string>
+    <string name="dashboard_brand">Roam2World B2B</string>
     <string name="dashboard_nav_esims">eSIMs</string>
     <string name="dashboard_refresh">Refresh</string>
     <string name="dashboard_greeting">Welcome</string>
