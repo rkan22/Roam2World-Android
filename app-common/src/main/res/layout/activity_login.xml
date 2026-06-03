@@ -31,7 +31,7 @@
                 android:layout_height="64dp"
                 android:contentDescription="@string/login_logo_content_description"
                 android:padding="12dp"
-                android:src="@drawable/ic_task_sim_card_download"
+                android:src="@drawable/ic_roam2world_logo"
                 app:tint="?attr/colorPrimary" />
 
             <TextView

@@ -16,16 +16,20 @@ fun TextView.applyRoamStatusChip(label: String?, rawStatus: String? = label) {
     val normalized = rawStatus.orEmpty().trim().lowercase()
     val (containerAttr, onContainerAttr) = when (normalized) {
         "active", "approved", "complete", "completed", "confirmed" ->
-            com.google.android.material.R.attr.colorPrimaryContainer to
-                com.google.android.material.R.attr.colorOnPrimaryContainer
+            com.google.android.material.R.attr.colorTertiaryContainer to
+                com.google.android.material.R.attr.colorOnTertiaryContainer
 
         "failed", "failure", "rejected", "cancelled", "canceled", "suspended" ->
             com.google.android.material.R.attr.colorErrorContainer to
                 com.google.android.material.R.attr.colorOnErrorContainer
 
         "refunded", "refund", "pending_provider_balance" ->
-            com.google.android.material.R.attr.colorTertiaryContainer to
-                com.google.android.material.R.attr.colorOnTertiaryContainer
+            com.google.android.material.R.attr.colorSecondaryContainer to
+                com.google.android.material.R.attr.colorOnSecondaryContainer
+
+        "pending", "processing", "expiring", "expiring soon" ->
+            com.google.android.material.R.attr.colorPrimaryContainer to
+                com.google.android.material.R.attr.colorOnPrimaryContainer
 
         else ->
             com.google.android.material.R.attr.colorSecondaryContainer to
