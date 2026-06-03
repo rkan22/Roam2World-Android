@@ -1401,7 +1401,9 @@ class Roam2WorldAuthApi(baseUrl: String) {
     private fun dedupePackages(packages: List<MobilePackage>): List<MobilePackage> {
         val seen = mutableSetOf<String>()
         return packages.filter { mobilePackage ->
-            val key = mobilePackage.id ?: "${mobilePackage.name}|${mobilePackage.country}|${mobilePackage.basePrice}"
+            val provider = mobilePackage.provider?.lowercase().orEmpty()
+            val key = mobilePackage.id?.let { "$provider|$it" }
+                ?: "$provider|${mobilePackage.name}|${mobilePackage.country}|${mobilePackage.basePrice}"
             seen.add(key)
         }
     }
