@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Roam2World Brand Colors - Dark Mode -->
+    <!-- Primary Brand Blue (Light variant for dark mode) -->
+    <color name="roam2world_primary">#B0D4FF</color>
+    <color name="roam2world_on_primary">#003399</color>
+    <color name="roam2world_primary_container">#0043B0</color>
+    <color name="roam2world_on_primary_container">#D9E1FF</color>
+
+    <!-- Secondary - Accent (Light variant for dark mode) -->
+    <color name="roam2world_secondary">#A8E6D1</color>
+    <color name="roam2world_on_secondary">#00563C</color>
+    <color name="roam2world_secondary_container">#1B7B57</color>
+    <color name="roam2world_on_secondary_container">#C1F2E0</color>
+
+    <!-- Tertiary - Supporting (Light variant for dark mode) -->
+    <color name="roam2world_tertiary">#FFB599</color>
+    <color name="roam2world_on_tertiary">#7A2F00</color>
+    <color name="roam2world_tertiary_container">#A64621</color>
+    <color name="roam2world_on_tertiary_container">#FFDCC9</color>
+
+    <!-- Neutral Colors - Dark Mode -->
+    <color name="roam2world_background">#1C1B1F</color>
+    <color name="roam2world_on_background">#E7E0E6</color>
+    <color name="roam2world_surface">#1C1B1F</color>
+    <color name="roam2world_on_surface">#E7E0E6</color>
+    <color name="roam2world_surface_variant">#49454E</color>
+    <color name="roam2world_on_surface_variant">#CAC4D0</color>
+
+    <!-- Outline -->
+    <color name="roam2world_outline">#938F99</color>
+    <color name="roam2world_outline_variant">#49454E</color>
+
+    <!-- Error & Status Colors - Dark Mode -->
+    <color name="roam2world_error">#F2B8B5</color>
+    <color name="roam2world_on_error">#601410</color>
+    <color name="roam2world_error_container">#8C1D18</color>
+    <color name="roam2world_on_error_container">#F9DEDC</color>
+
+    <!-- Status: Success -->
+    <color name="roam2world_success">#80D4AD</color>
+    <color name="roam2world_on_success">#00573D</color>
+
+    <!-- Status: Warning -->
+    <color name="roam2world_warning">#FFB84C</color>
+    <color name="roam2world_on_warning">#664500</color>
+
+    <!-- Status: Info -->
+    <color name="roam2world_info">#80C4FF</color>
+    <color name="roam2world_on_info">#003D99</color>
+
+    <!-- Shadows & Elevation -->
+    <color name="roam2world_shadow">#000000</color>
+</resources>

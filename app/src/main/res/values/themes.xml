@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Light Theme - Roam2World Branding -->
+    <style name="Theme.Roam2World.Light" parent="Theme.Material3.Light">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/roam2world_primary</item>
+        <item name="colorOnPrimary">@color/roam2world_on_primary</item>
+        <item name="colorPrimaryContainer">@color/roam2world_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/roam2world_on_primary_container</item>
+
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/roam2world_secondary</item>
+        <item name="colorOnSecondary">@color/roam2world_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/roam2world_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/roam2world_on_secondary_container</item>
+
+        <!-- Tertiary Colors -->
+        <item name="colorTertiary">@color/roam2world_tertiary</item>
+        <item name="colorOnTertiary">@color/roam2world_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/roam2world_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/roam2world_on_tertiary_container</item>
+
+        <!-- Background & Surface -->
+        <item name="android:colorBackground">@color/roam2world_background</item>
+        <item name="colorOnBackground">@color/roam2world_on_background</item>
+        <item name="colorSurface">@color/roam2world_surface</item>
+        <item name="colorOnSurface">@color/roam2world_on_surface</item>
+        <item name="colorSurfaceVariant">@color/roam2world_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/roam2world_on_surface_variant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/roam2world_outline</item>
+        <item name="colorOutlineVariant">@color/roam2world_outline_variant</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/roam2world_error</item>
+        <item name="colorOnError">@color/roam2world_on_error</item>
+        <item name="colorErrorContainer">@color/roam2world_error_container</item>
+        <item name="colorOnErrorContainer">@color/roam2world_on_error_container</item>
+
+        <!-- Typography - Material 3 -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.Roam2World.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.Roam2World.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Roam2World.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Roam2World.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Roam2World.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Roam2World.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Roam2World.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Roam2World.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Roam2World.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Roam2World.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Roam2World.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Roam2World.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Roam2World.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Roam2World.LabelSmall</item>
+
+        <!-- Component Shapes -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Roam2World.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Roam2World.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Roam2World.Large</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/roam2world_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor">@color/roam2world_surface</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <!-- Material 3 Dark Theme - Roam2World Branding -->
+    <style name="Theme.Roam2World.Dark" parent="Theme.Material3.Dark">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/roam2world_primary</item>
+        <item name="colorOnPrimary">@color/roam2world_on_primary</item>
+        <item name="colorPrimaryContainer">@color/roam2world_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/roam2world_on_primary_container</item>
+
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/roam2world_secondary</item>
+        <item name="colorOnSecondary">@color/roam2world_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/roam2world_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/roam2world_on_secondary_container</item>
+
+        <!-- Tertiary Colors -->
+        <item name="colorTertiary">@color/roam2world_tertiary</item>
+        <item name="colorOnTertiary">@color/roam2world_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/roam2world_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/roam2world_on_tertiary_container</item>
+
+        <!-- Background & Surface -->
+        <item name="android:colorBackground">@color/roam2world_background</item>
+        <item name="colorOnBackground">@color/roam2world_on_background</item>
+        <item name="colorSurface">@color/roam2world_surface</item>
+        <item name="colorOnSurface">@color/roam2world_on_surface</item>
+        <item name="colorSurfaceVariant">@color/roam2world_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/roam2world_on_surface_variant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/roam2world_outline</item>
+        <item name="colorOutlineVariant">@color/roam2world_outline_variant</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/roam2world_error</item>
+        <item name="colorOnError">@color/roam2world_on_error</item>
+        <item name="colorErrorContainer">@color/roam2world_error_container</item>
+        <item name="colorOnErrorContainer">@color/roam2world_on_error_container</item>
+
+        <!-- Typography - Material 3 -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.Roam2World.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.Roam2World.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Roam2World.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Roam2World.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Roam2World.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Roam2World.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Roam2World.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Roam2World.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Roam2World.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Roam2World.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Roam2World.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Roam2World.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Roam2World.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Roam2World.LabelSmall</item>
+
+        <!-- Component Shapes -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Roam2World.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Roam2World.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Roam2World.Large</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/roam2world_surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor">@color/roam2world_surface</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <!-- Adaptive Theme (Auto Light/Dark based on system) -->
+    <style name="Theme.Roam2World" parent="Theme.Material3.DayNight">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/roam2world_primary</item>
+        <item name="colorOnPrimary">@color/roam2world_on_primary</item>
+        <item name="colorPrimaryContainer">@color/roam2world_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/roam2world_on_primary_container</item>
+
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/roam2world_secondary</item>
+        <item name="colorOnSecondary">@color/roam2world_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/roam2world_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/roam2world_on_secondary_container</item>
+
+        <!-- Tertiary Colors -->
+        <item name="colorTertiary">@color/roam2world_tertiary</item>
+        <item name="colorOnTertiary">@color/roam2world_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/roam2world_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/roam2world_on_tertiary_container</item>
+
+        <!-- Background & Surface -->
+        <item name="android:colorBackground">@color/roam2world_background</item>
+        <item name="colorOnBackground">@color/roam2world_on_background</item>
+        <item name="colorSurface">@color/roam2world_surface</item>
+        <item name="colorOnSurface">@color/roam2world_on_surface</item>
+        <item name="colorSurfaceVariant">@color/roam2world_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/roam2world_on_surface_variant</item>
+
+        <!-- Outline -->
+        <item name="colorOutline">@color/roam2world_outline</item>
+        <item name="colorOutlineVariant">@color/roam2world_outline_variant</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/roam2world_error</item>
+        <item name="colorOnError">@color/roam2world_on_error</item>
+        <item name="colorErrorContainer">@color/roam2world_error_container</item>
+        <item name="colorOnErrorContainer">@color/roam2world_on_error_container</item>
+
+        <!-- Typography -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.Roam2World.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.Roam2World.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Roam2World.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Roam2World.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Roam2World.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Roam2World.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Roam2World.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Roam2World.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Roam2World.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Roam2World.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Roam2World.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Roam2World.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Roam2World.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Roam2World.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Roam2World.LabelSmall</item>
+
+        <!-- Component Shapes -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Roam2World.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Roam2World.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Roam2World.Large</item>
+    </style>
+</resources>
