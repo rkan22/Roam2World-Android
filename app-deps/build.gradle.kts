@@ -43,7 +43,8 @@ android {
 dependencies {
     api("androidx.core:core-ktx:1.12.0")
     api("androidx.appcompat:appcompat:1.6.1")
-    api("com.google.android.material:material:1.10.0")
+    // Material 3 - Updated for Phase 5A
+    api("com.google.android.material:material:1.12.0")
     api("androidx.constraintlayout:constraintlayout:2.1.4")
     //noinspection KtxExtensionAvailable
     api("androidx.preference:preference:1.2.1")
@@ -53,6 +54,8 @@ dependencies {
     api("androidx.cardview:cardview:1.0.0")
     api("androidx.viewpager2:viewpager2:1.1.0")
     api("androidx.datastore:datastore-preferences:1.0.0")
+    // Dynamic colors support (Android 12+)
+    api("androidx.dynamiccolors:dynamiccolors:1.0.0")
     api("com.journeyapps:zxing-android-embedded:4.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
