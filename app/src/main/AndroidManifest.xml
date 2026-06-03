@@ -59,6 +59,18 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.MyDealersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DealerDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.AllocateBalanceActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.PackagesActivity"
             android:exported="false" />
 

@@ -42,6 +42,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var activeEsims: TextView
     private lateinit var error: TextView
     private lateinit var orders: LinearLayout
+    private var currentRole: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -77,6 +78,11 @@ class DashboardActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.my_dealers)?.isVisible = currentRole?.lowercase() == "reseller"
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.reload -> {
@@ -86,6 +92,11 @@ class DashboardActivity : AppCompatActivity() {
 
             R.id.purchase_history -> {
                 openPurchaseHistoryActivity()
+                true
+            }
+
+            R.id.my_dealers -> {
+                openMyDealersActivity()
                 true
             }
 
@@ -185,6 +196,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun renderSession(session: AuthSession) {
+        currentRole = session.role
+        invalidateOptionsMenu()
         greeting.text = session.displayName?.let { "Welcome, $it" }
             ?: getString(R.string.dashboard_greeting)
         account.text = listOfNotNull(
@@ -258,6 +271,10 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun openPurchaseHistoryActivity() {
         startActivity(Intent(this, PurchaseHistoryActivity::class.java))
+    }
+
+    private fun openMyDealersActivity() {
+        startActivity(Intent(this, MyDealersActivity::class.java))
     }
 
     private fun logout() {
