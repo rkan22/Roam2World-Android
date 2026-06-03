@@ -20,6 +20,7 @@ import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileTransaction
 import im.angry.openeuicc.auth.MobileWalletData
+import im.angry.openeuicc.auth.MobileWalletRequest
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -38,6 +39,7 @@ class WalletActivity : AppCompatActivity() {
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var balance: TextView
     private lateinit var error: TextView
+    private lateinit var requests: LinearLayout
     private lateinit var transactions: LinearLayout
     private lateinit var requestBalance: MaterialButton
     private lateinit var requestHistory: MaterialButton
@@ -53,6 +55,7 @@ class WalletActivity : AppCompatActivity() {
         bottomNav = requireViewById(R.id.wallet_bottom_nav)
         balance = requireViewById(R.id.wallet_balance)
         error = requireViewById(R.id.wallet_error)
+        requests = requireViewById(R.id.wallet_requests)
         transactions = requireViewById(R.id.wallet_transactions)
         requestBalance = requireViewById(R.id.wallet_request_balance)
         requestHistory = requireViewById(R.id.wallet_request_history)
@@ -153,6 +156,7 @@ class WalletActivity : AppCompatActivity() {
 
     private fun renderPlaceholders() {
         balance.text = "--"
+        renderRequests(emptyList())
         renderTransactions(emptyList())
     }
 
@@ -161,17 +165,23 @@ class WalletActivity : AppCompatActivity() {
             error.visibility = View.GONE
             setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            val result = runCatching {
+            val walletResult = runCatching {
                 authApi.wallet(session)
+            }
+            val requestResult = runCatching {
+                authApi.walletRequests(session)
             }
             setLoading(false)
 
-            result
+            walletResult
                 .onSuccess { renderWallet(it) }
                 .onFailure {
                     error.text = it.message ?: getString(R.string.wallet_load_failed)
                     error.visibility = View.VISIBLE
                 }
+            requestResult
+                .onSuccess { renderRequests(it.take(3)) }
+                .onFailure { renderRequests(emptyList(), it.message ?: getString(R.string.wallet_request_history_failed)) }
         }
     }
 
@@ -197,6 +207,50 @@ class WalletActivity : AppCompatActivity() {
         renderTransactions(data.transactions)
     }
 
+    private fun renderRequests(requestData: List<MobileWalletRequest>, errorText: String? = null) {
+        requests.removeAllViews()
+        if (!errorText.isNullOrBlank()) {
+            TextView(this).apply {
+                text = errorText
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorError))
+                requests.addView(this)
+            }
+            return
+        }
+        if (requestData.isEmpty()) {
+            TextView(this).apply {
+                text = getString(R.string.wallet_request_history_empty)
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                requests.addView(this)
+            }
+            return
+        }
+
+        val inflater = LayoutInflater.from(this)
+        requestData.forEach { request ->
+            val item = inflater.inflate(R.layout.wallet_request_history_item, requests, false)
+            item.requireViewById<TextView>(R.id.wallet_request_item_amount).text =
+                getString(R.string.wallet_request_amount_currency, request.amount, request.currency)
+            item.requireViewById<TextView>(R.id.wallet_request_item_status)
+                .applyRoamStatusChip(request.statusLabel(), request.status)
+            item.requireViewById<TextView>(R.id.wallet_request_item_created).apply {
+                text = request.createdAt.orEmpty()
+                visibility = if (request.createdAt.isNullOrBlank()) View.GONE else View.VISIBLE
+            }
+            item.requireViewById<TextView>(R.id.wallet_request_item_note).apply {
+                text = request.note.orEmpty()
+                visibility = if (request.note.isNullOrBlank()) View.GONE else View.VISIBLE
+            }
+            item.requireViewById<TextView>(R.id.wallet_request_item_reviewed).apply {
+                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, it) }.orEmpty()
+                visibility = if (request.reviewedAt.isNullOrBlank()) View.GONE else View.VISIBLE
+            }
+            requests.addView(item)
+        }
+    }
+
     private fun renderTransactions(transactionData: List<MobileTransaction>) {
         transactions.removeAllViews()
         if (transactionData.isEmpty()) {
@@ -216,8 +270,7 @@ class WalletActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.transaction_subtitle).text = transaction.subtitle
             item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
             item.requireViewById<TextView>(R.id.transaction_status).apply {
-                text = transaction.status.orEmpty()
-                visibility = if (transaction.status.isNullOrBlank()) View.GONE else View.VISIBLE
+                applyRoamStatusChip(transaction.status, transaction.status)
             }
             transactions.addView(item)
         }

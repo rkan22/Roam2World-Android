@@ -174,8 +174,7 @@ class MobileEsimsActivity : AppCompatActivity() {
                 esim.provider
             ).joinToString(" - ")
             item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
-                text = esim.statusLabel().orEmpty()
-                visibility = if (esim.status.isNullOrBlank()) View.GONE else View.VISIBLE
+                applyRoamStatusChip(esim.statusLabel(), esim.status)
             }
             item.setOnClickListener {
                 startActivity(MobileEsimDetailActivity.createIntent(this, esim))

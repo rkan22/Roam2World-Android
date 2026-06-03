@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -40,6 +41,10 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var account: TextView
     private lateinit var balance: TextView
     private lateinit var activeEsims: TextView
+    private lateinit var ordersSummary: TextView
+    private lateinit var dealerSummaryCard: View
+    private lateinit var dealerSummary: TextView
+    private lateinit var manageDealers: MaterialButton
     private lateinit var error: TextView
     private lateinit var orders: LinearLayout
     private var currentRole: String? = null
@@ -58,11 +63,16 @@ class DashboardActivity : AppCompatActivity() {
         account = requireViewById(R.id.dashboard_account)
         balance = requireViewById(R.id.dashboard_balance)
         activeEsims = requireViewById(R.id.dashboard_active_esims)
+        ordersSummary = requireViewById(R.id.dashboard_orders_summary)
+        dealerSummaryCard = requireViewById(R.id.dashboard_dealer_summary_card)
+        dealerSummary = requireViewById(R.id.dashboard_dealer_summary)
+        manageDealers = requireViewById(R.id.dashboard_manage_dealers)
         error = requireViewById(R.id.dashboard_error)
         orders = requireViewById(R.id.dashboard_orders)
 
         setupInsets()
         setupBottomNavigation()
+        setupQuickActions()
         renderPlaceholders()
         authApi.logMobileEndpointConfiguration()
         loadDashboard()
@@ -149,11 +159,30 @@ class DashboardActivity : AppCompatActivity() {
         bottomNav.selectedItemId = R.id.nav_dashboard
     }
 
+    private fun setupQuickActions() {
+        requireViewById<MaterialButton>(R.id.dashboard_browse_packages).setOnClickListener {
+            openPackagesActivity()
+        }
+        requireViewById<MaterialButton>(R.id.dashboard_request_balance).setOnClickListener {
+            startActivity(Intent(this, WalletRequestActivity::class.java))
+        }
+        requireViewById<MaterialButton>(R.id.dashboard_view_history).setOnClickListener {
+            openPurchaseHistoryActivity()
+        }
+        manageDealers.setOnClickListener {
+            openMyDealersActivity()
+        }
+    }
+
     private fun renderPlaceholders() {
         greeting.text = getString(R.string.dashboard_greeting)
         account.text = ""
         balance.text = "--"
         activeEsims.text = "--"
+        ordersSummary.text = "--"
+        dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
+        dealerSummaryCard.visibility = View.GONE
+        manageDealers.visibility = View.GONE
         renderOrders(emptyList())
     }
 
@@ -198,6 +227,9 @@ class DashboardActivity : AppCompatActivity() {
     private fun renderSession(session: AuthSession) {
         currentRole = session.role
         invalidateOptionsMenu()
+        val isReseller = session.role?.lowercase() == "reseller"
+        dealerSummaryCard.visibility = if (isReseller) View.VISIBLE else View.GONE
+        manageDealers.visibility = if (isReseller) View.VISIBLE else View.GONE
         greeting.text = session.displayName?.let { "Welcome, $it" }
             ?: getString(R.string.dashboard_greeting)
         account.text = listOfNotNull(
@@ -209,6 +241,7 @@ class DashboardActivity : AppCompatActivity() {
     private fun renderDashboard(data: MobileDashboardData) {
         balance.text = data.currentBalance
         activeEsims.text = data.activeEsimCount
+        ordersSummary.text = data.recentOrders.size.toString()
         renderOrders(data.recentOrders)
     }
 
@@ -234,8 +267,7 @@ class DashboardActivity : AppCompatActivity() {
                 visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.order_status).apply {
-                text = order.status.orEmpty()
-                visibility = if (order.status.isNullOrBlank()) View.GONE else View.VISIBLE
+                applyRoamStatusChip(order.status, order.status)
             }
             orders.addView(item)
         }

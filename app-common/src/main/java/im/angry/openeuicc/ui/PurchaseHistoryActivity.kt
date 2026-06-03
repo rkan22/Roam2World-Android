@@ -129,10 +129,9 @@ class PurchaseHistoryActivity : AppCompatActivity() {
                 text = order.price.orEmpty()
                 visibility = if (order.price.isNullOrBlank()) View.GONE else View.VISIBLE
             }
-            item.requireViewById<TextView>(R.id.history_status).apply {
-                text = order.statusLabel().orEmpty()
-                visibility = if (order.status.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
+            item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(order.provider)
+            item.requireViewById<TextView>(R.id.history_status)
+                .applyRoamStatusChip(order.statusLabel(), order.status)
             item.setOnClickListener {
                 startActivity(MobileOrderDetailActivity.createIntent(this, order))
             }

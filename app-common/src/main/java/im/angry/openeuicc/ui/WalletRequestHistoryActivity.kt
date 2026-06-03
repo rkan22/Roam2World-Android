@@ -1,7 +1,6 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -12,7 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.color.MaterialColors
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -120,20 +118,11 @@ class WalletRequestHistoryActivity : AppCompatActivity() {
                 text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, it) }.orEmpty()
                 visibility = if (request.reviewedAt.isNullOrBlank()) View.GONE else View.VISIBLE
             }
-            item.requireViewById<TextView>(R.id.wallet_request_item_status).apply {
-                text = request.statusLabel()
-                backgroundTintList = ColorStateList.valueOf(statusColor(request.status))
-            }
+            item.requireViewById<TextView>(R.id.wallet_request_item_status)
+                .applyRoamStatusChip(request.statusLabel(), request.status)
             requests.addView(item)
         }
     }
-
-    private fun statusColor(status: String): Int =
-        when (status.lowercase()) {
-            "approved", "completed" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimaryContainer)
-            "rejected", "cancelled" -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorErrorContainer)
-            else -> MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorSecondaryContainer)
-        }
 
     private fun setLoading(loading: Boolean) {
         refresh.isRefreshing = loading
