@@ -22,7 +22,7 @@
         android:localeConfig="@xml/locale_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OpenEUICC"
+        android:theme="@style/Theme.Roam2World"
         tools:targetApi="tiramisu">
         <meta-data
             android:name="im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
