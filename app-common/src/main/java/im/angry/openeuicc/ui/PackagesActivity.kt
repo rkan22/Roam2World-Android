@@ -1,5 +1,6 @@
 package im.angry.openeuicc.ui
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Typeface
@@ -9,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -267,84 +267,110 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun addFilterPanel(parent: LinearLayout) {
-        TextView(this).apply {
-            text = "Filter Plans"
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-            setTypeface(typeface, Typeface.BOLD)
-            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
-            setPadding(0, 0, 0, dp(8))
-            parent.addView(this)
-        }
-        addFilterRow(parent, "Region", REGION_FILTERS, selectedRegion) { selectedRegion = it }
-        addFilterRow(parent, "Provider", PROVIDER_FILTERS, selectedProvider) { selectedProvider = it }
-        addFilterRow(parent, "Data", DATA_FILTERS, selectedData) { selectedData = it }
-        addFilterRow(parent, "Validity", VALIDITY_FILTERS, selectedValidity) { selectedValidity = it }
-    }
-
-    private fun addFilterRow(
-        parent: LinearLayout,
-        title: String,
-        options: List<String>,
-        selected: String,
-        onSelect: (String) -> Unit
-    ) {
-        TextView(this).apply {
-            text = title
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-            setPadding(0, dp(10), 0, dp(6))
-            parent.addView(this)
-        }
-
-        val row = LinearLayout(this).apply {
+        val titleRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 0, 0, dp(10))
         }
-        options.forEach { option ->
-            row.addView(createFilterChip(option, option == selected) {
-                onSelect(option)
-                renderCatalog()
-            })
-        }
-        parent.addView(
-            HorizontalScrollView(this).apply {
-                isHorizontalScrollBarEnabled = false
-                overScrollMode = View.OVER_SCROLL_NEVER
-                addView(row)
+
+        titleRow.addView(
+            TextView(this).apply {
+                text = "Filter Plans"
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+                setTypeface(typeface, Typeface.BOLD)
+                setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
             },
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         )
+
+        if (!filtersAreDefault()) {
+            titleRow.addView(
+                TextView(this).apply {
+                    text = "Clear"
+                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+                    setTypeface(typeface, Typeface.BOLD)
+                    setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary))
+                    setPadding(dp(12), dp(8), dp(12), dp(8))
+                    setOnClickListener {
+                        selectedRegion = FILTER_ALL
+                        selectedProvider = FILTER_ALL
+                        selectedData = FILTER_ALL
+                        selectedValidity = FILTER_ALL
+                        renderCatalog()
+                    }
+                }
+            )
+        }
+        parent.addView(titleRow)
+
+        val rowOne = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            baselineAligned = false
+        }
+        rowOne.addView(createFilterButton("Region", selectedRegion) {
+            showFilterDialog("Region", REGION_FILTERS, selectedRegion) { selectedRegion = it }
+        }, filterButtonParams(end = 6))
+        rowOne.addView(createFilterButton("Provider", selectedProvider) {
+            showFilterDialog("Provider", PROVIDER_FILTERS, selectedProvider) { selectedProvider = it }
+        }, filterButtonParams(start = 6))
+        parent.addView(rowOne)
+
+        val rowTwo = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            baselineAligned = false
+            setPadding(0, dp(10), 0, dp(12))
+        }
+        rowTwo.addView(createFilterButton("Data", selectedData) {
+            showFilterDialog("Data", DATA_FILTERS, selectedData) { selectedData = it }
+        }, filterButtonParams(end = 6))
+        rowTwo.addView(createFilterButton("Validity", selectedValidity) {
+            showFilterDialog("Validity", VALIDITY_FILTERS, selectedValidity) { selectedValidity = it }
+        }, filterButtonParams(start = 6))
+        parent.addView(rowTwo)
     }
 
-    private fun createFilterChip(label: String, selected: Boolean, onClick: () -> Unit): TextView {
+    private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
+        val selected = value != FILTER_ALL
         val anchor = window.decorView
         val primary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorPrimary)
         val onPrimary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnPrimary)
         val secondaryText = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnSurfaceVariant)
         return TextView(this).apply {
-            text = label
+            text = "$label: $value  ▼"
             gravity = Gravity.CENTER
+            maxLines = 1
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
             setTypeface(typeface, Typeface.BOLD)
             setTextColor(if (selected) onPrimary else secondaryText)
-            setPadding(dp(13), dp(8), dp(13), dp(8))
+            setPadding(dp(10), dp(10), dp(10), dp(10))
             setBackgroundResource(R.drawable.wallet_request_status_badge)
             backgroundTintList = ColorStateList.valueOf(if (selected) primary else getColor(R.color.r2w_card))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(0, 0, dp(8), dp(4))
-            }
             setOnClickListener { onClick() }
         }
     }
+
+    private fun showFilterDialog(
+        title: String,
+        options: List<String>,
+        currentValue: String,
+        onSelected: (String) -> Unit
+    ) {
+        val currentIndex = options.indexOf(currentValue).coerceAtLeast(0)
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setSingleChoiceItems(options.toTypedArray(), currentIndex) { dialog, which ->
+                onSelected(options[which])
+                dialog.dismiss()
+                renderCatalog()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun filterButtonParams(start: Int = 0, end: Int = 0): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+            setMargins(dp(start), 0, dp(end), 0)
+        }
 
     private fun createPackageCard(mobilePackage: MobilePackage): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
