@@ -268,11 +268,10 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun addFilterPanel(parent: LinearLayout) {
         val titleRow = LinearLayout(this).apply {
-            orientatgit add app-common/src/main/java/im/angry/openeuicc/ui/PackagesActivity.kt
-            git commit -m "merge main into store local filters"
-            git push origin feat/store-local-filters-v2ion = LinearLayout.HORIZONTAL
+            orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 0, 0, dp(10))
+        }
         }
 
         titleRow.addView(
@@ -331,19 +330,12 @@ class PackagesActivity : AppCompatActivity() {
         parent.addView(rowTwo)
     }
 
-<<<<<<< HEAD
-    private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
-        val selected = value != FILTER_ALL
-        val anchor = window.decorView
-        val primary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorPrimary)
-        val onPrimary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnPrimary)
-        val secondaryText = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnSurfaceVariant)
-=======
-    private fun createFilterChip(label: String, selected: Boolean, onClick: () -> Unit): TextView {
-        val primary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimary)
-        val onPrimary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnPrimary)
-        val secondaryText = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant)
->>>>>>> origin/main
+private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
+    val selected = value != FILTER_ALL
+    val anchor = window.decorView
+    val primary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorPrimary)
+    val onPrimary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnPrimary)
+    val secondaryText = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnSurfaceVariant)
         return TextView(this).apply {
             text = "$label: $value  ▼"
             gravity = Gravity.CENTER
