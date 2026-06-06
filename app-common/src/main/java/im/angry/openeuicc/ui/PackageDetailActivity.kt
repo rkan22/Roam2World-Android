@@ -53,7 +53,7 @@ class PackageDetailActivity : AppCompatActivity() {
         progress = requireViewById(R.id.package_purchase_progress)
         error = requireViewById(R.id.package_purchase_error)
         purchaseButton.setOnClickListener {
-            purchasePackage()
+            startActivity(CustomerInfoActivity.createIntent(this, intent))
         }
         renderDetails()
     }
