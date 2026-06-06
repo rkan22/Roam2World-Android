@@ -1,5 +1,6 @@
 package im.angry.openeuicc.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -8,16 +9,28 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import im.angry.openeuicc.auth.AuthSession
+import im.angry.openeuicc.auth.AuthTokenStore
+import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.activityToolbarInsetHandler
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
 import im.angry.openeuicc.util.setupRootViewSystemBarInsets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class TgtSimRechargeActivity : AppCompatActivity() {
+    private val tokenStore by lazy { AuthTokenStore(this) }
+
     private lateinit var scroll: View
     private lateinit var selectedPackage: TextView
     private lateinit var iccidLayout: TextInputLayout
@@ -89,13 +102,91 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private fun setupActivation() {
         activate.setOnClickListener {
             if (!validateForm()) return@setOnClickListener
-
-            Toast.makeText(
-                this,
-                "TGT recharge request ready: $selectedPackageName",
-                Toast.LENGTH_LONG
-            ).show()
+            submitRechargeRequest()
         }
+    }
+
+    private fun submitRechargeRequest() {
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+            if (session == null) {
+                startActivity(
+                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    }
+                )
+                finish()
+                return@launch
+            }
+
+            setSubmitting(true)
+            val result = runCatching {
+                withContext(Dispatchers.IO) { postTgtRecharge(session) }
+            }
+            setSubmitting(false)
+
+            result
+                .onSuccess { message ->
+                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    finish()
+                }
+                .onFailure { error ->
+                    Toast.makeText(
+                        this@TgtSimRechargeActivity,
+                        error.message ?: "TGT recharge request failed",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+        }
+    }
+
+    private fun postTgtRecharge(session: AuthSession): String {
+        val requestUrl = "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/recharge/"
+        val body = JSONObject()
+            .put("package_name", selectedPackageName)
+            .put("iccid", iccid.text?.toString()?.trim().orEmpty())
+            .put("customer_name", customerName.text?.toString()?.trim().orEmpty())
+            .put("customer_phone", customerPhone.text?.toString()?.trim().orEmpty())
+            .put("provider", "Orange Balkans")
+            .put("source", "android")
+
+        val connection = (URL(requestUrl).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = 30_000
+            readTimeout = 30_000
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Authorization", session.authorizationHeader)
+            doOutput = true
+        }
+
+        return try {
+            connection.outputStream.use { stream ->
+                stream.write(body.toString().toByteArray(Charsets.UTF_8))
+            }
+            val status = connection.responseCode
+            val responseText = ((if (status in 200..299) connection.inputStream else connection.errorStream)
+                ?.bufferedReader()
+                ?.use { it.readText() })
+                .orEmpty()
+            val response = responseText.takeIf { it.isNotBlank() }?.let { JSONObject(it) }
+            if (status !in 200..299 || response?.optBoolean("success", true) == false) {
+                val message = response?.optString("message")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: response?.optString("detail")?.takeIf { it.isNotBlank() }
+                    ?: "TGT recharge request failed with HTTP $status"
+                throw IllegalStateException(message)
+            }
+            response?.optString("message")?.takeIf { it.isNotBlank() }
+                ?: "TGT recharge request submitted"
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun setSubmitting(submitting: Boolean) {
+        activate.isEnabled = !submitting
+        activate.text = if (submitting) "Submitting..." else getString(R.string.r2w_activate)
     }
 
     private fun renderSelectedPackage() {
