@@ -11,11 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileActivationDetails
-import im.angry.openeuicc.auth.MobilePackage
 import im.angry.openeuicc.auth.MobilePackagePurchaseRequest
 import im.angry.openeuicc.auth.MobilePackagePurchaseResult
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
@@ -30,32 +31,45 @@ import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.util.UUID
 
-class PackageDetailActivity : AppCompatActivity() {
+class CustomerInfoActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var purchaseButton: MaterialButton
+    private lateinit var firstNameLayout: TextInputLayout
+    private lateinit var lastNameLayout: TextInputLayout
+    private lateinit var phoneLayout: TextInputLayout
+    private lateinit var firstName: TextInputEditText
+    private lateinit var lastName: TextInputEditText
+    private lateinit var phone: TextInputEditText
+    private lateinit var continueButton: MaterialButton
     private lateinit var progress: LinearProgressIndicator
     private lateinit var error: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_package_detail)
+        setContentView(R.layout.activity_customer_info)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.apply {
-            title = getString(R.string.package_detail_title)
+            title = "Customer Info"
             setDisplayHomeAsUpEnabled(true)
         }
 
         setupInsets()
-        purchaseButton = requireViewById(R.id.package_purchase_button)
-        progress = requireViewById(R.id.package_purchase_progress)
-        error = requireViewById(R.id.package_purchase_error)
-        purchaseButton.setOnClickListener {
-            startActivity(CustomerInfoActivity.createIntent(this, intent))
+        firstNameLayout = requireViewById(R.id.customer_first_name_layout)
+        lastNameLayout = requireViewById(R.id.customer_last_name_layout)
+        phoneLayout = requireViewById(R.id.customer_phone_layout)
+        firstName = requireViewById(R.id.customer_first_name)
+        lastName = requireViewById(R.id.customer_last_name)
+        phone = requireViewById(R.id.customer_phone)
+        continueButton = requireViewById(R.id.customer_continue_button)
+        progress = requireViewById(R.id.customer_info_progress)
+        error = requireViewById(R.id.customer_info_error)
+
+        renderPackageSummary()
+        continueButton.setOnClickListener {
+            validateAndPurchase()
         }
-        renderDetails()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
@@ -64,7 +78,6 @@ class PackageDetailActivity : AppCompatActivity() {
                 finish()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
 
@@ -73,39 +86,55 @@ class PackageDetailActivity : AppCompatActivity() {
             window.decorView.rootView,
             arrayOf(
                 this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(requireViewById(R.id.package_detail_scroll))
+                mainViewPaddingInsetHandler(requireViewById(R.id.customer_info_scroll))
             ),
             consume = false
         )
     }
 
-    private fun renderDetails() {
-        requireViewById<TextView>(R.id.package_detail_name).text = intent.getStringExtra(EXTRA_NAME)
-            ?: getString(R.string.package_detail_title)
-        requireViewById<TextView>(R.id.package_detail_country).text = listOfNotNull(
-            intent.getStringExtra(EXTRA_COUNTRY),
-            intent.getStringExtra(EXTRA_COUNTRY_CODE)?.takeIf { it.isNotBlank() }
-        ).joinToString(" - ")
-        requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
-            ?: "0"
-        requireViewById<TextView>(R.id.package_detail_visibility).text =
-            getString(
-                R.string.package_detail_visibility_format,
-                intent.getStringExtra(EXTRA_VISIBILITY) ?: ""
-            )
-
-        setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
-        setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
-        setOptionalText(R.id.package_detail_network, intent.getStringExtra(EXTRA_NETWORK), R.string.package_detail_network_format)
-        setOptionalText(R.id.package_detail_coverage, intent.getStringExtra(EXTRA_COVERAGE), R.string.package_detail_coverage_format)
-        setOptionalText(R.id.package_detail_description, intent.getStringExtra(EXTRA_DESCRIPTION), R.string.package_detail_description_format)
+    private fun renderPackageSummary() {
+        requireViewById<TextView>(R.id.customer_package_name).text =
+            intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title)
+        requireViewById<TextView>(R.id.customer_package_meta).text = listOfNotNull(
+            intent.getStringExtra(EXTRA_DATA),
+            intent.getStringExtra(EXTRA_VALIDITY),
+            intent.getStringExtra(EXTRA_COUNTRY)
+        ).filter { it.isNotBlank() }.joinToString("  •  ")
+        requireViewById<TextView>(R.id.customer_package_price).text =
+            intent.getStringExtra(EXTRA_PRICE) ?: "0"
     }
 
-    private fun purchasePackage() {
-        lifecycleScope.launch {
-            error.visibility = View.GONE
-            setLoading(true)
+    private fun validateAndPurchase() {
+        firstNameLayout.error = null
+        lastNameLayout.error = null
+        phoneLayout.error = null
+        error.visibility = View.GONE
 
+        val first = firstName.text?.toString()?.trim().orEmpty()
+        val last = lastName.text?.toString()?.trim().orEmpty()
+        val phoneNumber = phone.text?.toString()?.trim().orEmpty()
+
+        var valid = true
+        if (first.isBlank()) {
+            firstNameLayout.error = "First name is required"
+            valid = false
+        }
+        if (last.isBlank()) {
+            lastNameLayout.error = "Last name is required"
+            valid = false
+        }
+        if (phoneNumber.isBlank()) {
+            phoneLayout.error = "Phone number is required"
+            valid = false
+        }
+        if (!valid) return
+
+        purchasePackage(first, last, phoneNumber)
+    }
+
+    private fun purchasePackage(customerFirstName: String, customerLastName: String, customerPhone: String) {
+        lifecycleScope.launch {
+            setLoading(true)
             val session = activeSessionOrReturnToLogin()
             if (session == null) {
                 setLoading(false)
@@ -121,7 +150,7 @@ class PackageDetailActivity : AppCompatActivity() {
 
             if (isDemoPackage()) {
                 setLoading(false)
-                startActivity(PurchaseConfirmationActivity.createIntent(this@PackageDetailActivity, demoPurchaseResult(price)))
+                startActivity(PurchaseConfirmationActivity.createIntent(this@CustomerInfoActivity, demoPurchaseResult(price)))
                 return@launch
             }
 
@@ -144,12 +173,14 @@ class PackageDetailActivity : AppCompatActivity() {
                     MobilePackagePurchaseRequest(
                         packageId = intent.getStringExtra(EXTRA_ID),
                         provider = intent.getStringExtra(EXTRA_PROVIDER),
-                        packageName = intent.getStringExtra(EXTRA_NAME)
-                            ?: getString(R.string.package_detail_title),
+                        packageName = intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title),
                         packageDescription = intent.getStringExtra(EXTRA_DESCRIPTION),
                         country = intent.getStringExtra(EXTRA_COUNTRY),
                         price = price,
-                        role = intent.getStringExtra(EXTRA_ROLE)
+                        role = intent.getStringExtra(EXTRA_ROLE),
+                        customerFirstName = customerFirstName,
+                        customerLastName = customerLastName,
+                        customerPhone = customerPhone
                     )
                 )
             }
@@ -157,7 +188,7 @@ class PackageDetailActivity : AppCompatActivity() {
             setLoading(false)
             purchase
                 .onSuccess {
-                    startActivity(PurchaseConfirmationActivity.createIntent(this@PackageDetailActivity, it))
+                    startActivity(PurchaseConfirmationActivity.createIntent(this@CustomerInfoActivity, it))
                 }
                 .onFailure {
                     error.text = it.message ?: getString(R.string.package_purchase_failed)
@@ -190,7 +221,7 @@ class PackageDetailActivity : AppCompatActivity() {
     }
 
     private fun setLoading(loading: Boolean) {
-        purchaseButton.isEnabled = !loading
+        continueButton.isEnabled = !loading
         progress.visibility = if (loading) View.VISIBLE else View.GONE
     }
 
@@ -237,13 +268,6 @@ class PackageDetailActivity : AppCompatActivity() {
         return null
     }
 
-    private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
-        requireViewById<TextView>(viewId).apply {
-            text = value?.let { getString(formatResId, it) }.orEmpty()
-            visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
-        }
-    }
-
     companion object {
         private const val EXTRA_ID = "package.id"
         private const val EXTRA_PROVIDER = "package.provider"
@@ -260,22 +284,26 @@ class PackageDetailActivity : AppCompatActivity() {
         private const val EXTRA_COVERAGE = "package.coverage"
         private const val EXTRA_DESCRIPTION = "package.description"
 
-        fun createIntent(context: Context, mobilePackage: MobilePackage, role: String?): Intent =
-            Intent(context, PackageDetailActivity::class.java).apply {
-                putExtra(EXTRA_ID, mobilePackage.id)
-                putExtra(EXTRA_PROVIDER, mobilePackage.provider)
-                putExtra(EXTRA_TYPE, mobilePackage.packageType)
-                putExtra(EXTRA_NAME, mobilePackage.name)
-                putExtra(EXTRA_COUNTRY, mobilePackage.country)
-                putExtra(EXTRA_COUNTRY_CODE, mobilePackage.countryCode)
-                putExtra(EXTRA_PRICE, mobilePackage.priceFor(role))
-                putExtra(EXTRA_ROLE, role)
-                putExtra(EXTRA_VISIBILITY, mobilePackage.visibilityLabel())
-                putExtra(EXTRA_DATA, mobilePackage.dataAmount)
-                putExtra(EXTRA_VALIDITY, mobilePackage.validity)
-                putExtra(EXTRA_NETWORK, mobilePackage.network)
-                putExtra(EXTRA_COVERAGE, mobilePackage.coverage)
-                putExtra(EXTRA_DESCRIPTION, mobilePackage.description)
+        fun createIntent(context: Context, packageIntent: Intent): Intent =
+            Intent(context, CustomerInfoActivity::class.java).apply {
+                listOf(
+                    EXTRA_ID,
+                    EXTRA_PROVIDER,
+                    EXTRA_TYPE,
+                    EXTRA_NAME,
+                    EXTRA_COUNTRY,
+                    EXTRA_COUNTRY_CODE,
+                    EXTRA_PRICE,
+                    EXTRA_ROLE,
+                    EXTRA_VISIBILITY,
+                    EXTRA_DATA,
+                    EXTRA_VALIDITY,
+                    EXTRA_NETWORK,
+                    EXTRA_COVERAGE,
+                    EXTRA_DESCRIPTION
+                ).forEach { key ->
+                    putExtra(key, packageIntent.getStringExtra(key))
+                }
             }
     }
 }
