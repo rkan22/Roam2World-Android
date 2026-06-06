@@ -79,6 +79,10 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.CustomerInfoActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.PurchaseConfirmationActivity"
             android:exported="false" />
 
