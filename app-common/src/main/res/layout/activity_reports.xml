@@ -8,6 +8,7 @@
     <include layout="@layout/toolbar_activity" />
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/reports_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,46 +31,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/reports_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Revenue, sales, profit, provider usage and dealer performance"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="Today" />
-
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="7 Days" />
-
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="30 Days" />
-
-                    <com.google.android.material.chip.Chip
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Custom" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -101,18 +69,20 @@
                             android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
+                            android:id="@+id/reports_revenue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="€78,650"
+                            android:text="--"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/reports_revenue_delta"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="+12.4%"
+                            android:text="Live wallet/orders"
                             android:textColor="@color/r2w_success" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -140,18 +110,20 @@
                             android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
+                            android:id="@+id/reports_sales"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="1,256"
+                            android:text="--"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/reports_sales_delta"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="+8.1%"
+                            android:text="Live orders"
                             android:textColor="@color/r2w_success" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -183,14 +155,15 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Profit"
+                            android:text="Profit est."
                             android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
+                            android:id="@+id/reports_profit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="€18,420"
+                            android:text="--"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
@@ -216,14 +189,15 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Active Dealers"
+                            android:text="Active eSIMs"
                             android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
+                            android:id="@+id/reports_active_esims"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="84"
+                            android:text="--"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
@@ -233,7 +207,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
+                android:layout_height="220dp"
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="16dp"
                 app:strokeColor="@color/r2w_border"
@@ -254,11 +228,12 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/reports_sales_overview"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="▁ ▃ ▅ ▇ ▆ ▅ ▇\nDaily revenue trend"
+                        android:text="No sales data yet"
                         android:textAlignment="center"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="@color/r2w_primary" />
@@ -288,43 +263,12 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/reports_provider_usage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Orange Europe • 42%"
+                        android:text="No provider usage yet"
                         android:textColor="@color/r2w_text_primary" />
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:progress="42" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:text="Orange Balkans • 28%"
-                        android:textColor="@color/r2w_text_primary" />
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:progress="28" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:text="Roam2World Turkey • 18%"
-                        android:textColor="@color/r2w_text_primary" />
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:progress="18" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -351,24 +295,11 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/reports_dealer_performance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="1. Global Telecom Ltd. • €12,450"
-                        android:textColor="@color/r2w_text_primary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="2. Balkan Connect • €9,870"
-                        android:textColor="@color/r2w_text_primary" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="3. Travel Data Pro • €7,340"
+                        android:text="Dealer performance data unavailable"
                         android:textColor="@color/r2w_text_primary" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
