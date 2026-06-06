@@ -323,9 +323,9 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun createFilterChip(label: String, selected: Boolean, onClick: () -> Unit): TextView {
-        val primary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary)
-        val onPrimary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
-        val secondaryText = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        val primary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimary)
+        val onPrimary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnPrimary)
+        val secondaryText = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant)
         return TextView(this).apply {
             text = label
             gravity = Gravity.CENTER
