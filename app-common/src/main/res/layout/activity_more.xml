@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Roam2World B2B"
+                android:text="More"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="@color/r2w_text_primary"
                 android:textStyle="bold" />
@@ -34,32 +34,80 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Enterprise telecom operations"
+                android:text="Roam2World B2B telecom control center"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="16dp"
+                app:strokeColor="@color/r2w_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@color/r2w_primary"
+                        android:gravity="center"
+                        android:text="R2W"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Roam2World B2B"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Admin • Reseller • Dealer workspace"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="@color/r2w_text_secondary" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Business Operations"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/r2w_text_primary"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_profile"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_profile"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/more_esim_history"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
                     android:gravity="center_vertical"
                     android:text="@string/dashboard_view_history"
                     app:cornerRadius="16dp"
@@ -106,6 +154,32 @@
                     android:layout_marginTop="10dp"
                     android:gravity="center_vertical"
                     android:text="@string/r2w_reports"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Account"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/r2w_text_primary"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_profile"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_profile"
                     app:cornerRadius="16dp"
                     app:icon="@drawable/ic_dashboard" />
 
