@@ -159,8 +159,7 @@
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
                 app:boxCornerRadiusTopEnd="18dp"
-                app:boxCornerRadiusTopStart="18dp"
-                app:startIconDrawable="@drawable/ic_profile">
+                app:boxCornerRadiusTopStart="18dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/customer_first_name"
@@ -182,8 +181,7 @@
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
                 app:boxCornerRadiusTopEnd="18dp"
-                app:boxCornerRadiusTopStart="18dp"
-                app:startIconDrawable="@drawable/ic_profile">
+                app:boxCornerRadiusTopStart="18dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/customer_last_name"
