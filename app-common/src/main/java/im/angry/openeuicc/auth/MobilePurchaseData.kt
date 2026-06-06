@@ -7,7 +7,10 @@ data class MobilePackagePurchaseRequest(
     val packageDescription: String?,
     val country: String?,
     val price: String,
-    val role: String?
+    val role: String?,
+    val customerFirstName: String? = null,
+    val customerLastName: String? = null,
+    val customerPhone: String? = null
 )
 
 data class MobilePackagePurchaseResult(
