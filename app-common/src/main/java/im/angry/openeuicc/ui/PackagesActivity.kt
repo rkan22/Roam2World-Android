@@ -1,11 +1,15 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -48,6 +52,10 @@ class PackagesActivity : AppCompatActivity() {
     private var catalog = MobilePackageCatalog(emptyList(), emptyList())
     private var userRole: String? = null
     private var lastEmptyReason: String? = null
+    private var selectedRegion = FILTER_ALL
+    private var selectedProvider = FILTER_ALL
+    private var selectedData = FILTER_ALL
+    private var selectedValidity = FILTER_ALL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -211,14 +219,18 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun renderCatalog() {
         val query = search.text?.toString().orEmpty()
-        val featured = catalog.featuredPackages.filter { it.matches(query) }
-        val packages = catalog.packages.filter { it.matches(query) }
+        val featured = catalog.featuredPackages.filter { it.matches(query) && it.matchesSelectedFilters() }
+        val packages = catalog.packages.filter { it.matches(query) && it.matchesSelectedFilters() }
         val isEmpty = featured.isEmpty() && packages.isEmpty()
 
         renderFeatured(featured)
         renderPackages(packages)
         empty.text = if (isEmpty) {
-            if (query.isBlank()) lastEmptyReason ?: LIVE_CATALOG_EMPTY_MESSAGE else "No packages match your search."
+            if (query.isBlank() && filtersAreDefault()) {
+                lastEmptyReason ?: LIVE_CATALOG_EMPTY_MESSAGE
+            } else {
+                "No packages match your filters."
+            }
         } else {
             ""
         }
@@ -236,6 +248,7 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun renderPackages(packageData: List<MobilePackage>) {
         packageList.removeAllViews()
+        addFilterPanel(packageList)
         packageData
             .groupBy { it.country.ifBlank { getString(R.string.packages_global_country) } }
             .toSortedMap()
@@ -244,12 +257,92 @@ class PackagesActivity : AppCompatActivity() {
                     text = country
                     setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleSmall)
                     setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+                    setPadding(0, dp(12), 0, dp(8))
                     packageList.addView(this)
                 }
                 packages.forEach { mobilePackage ->
                     packageList.addView(createPackageCard(mobilePackage))
                 }
             }
+    }
+
+    private fun addFilterPanel(parent: LinearLayout) {
+        TextView(this).apply {
+            text = "Filter Plans"
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+            setPadding(0, 0, 0, dp(8))
+            parent.addView(this)
+        }
+        addFilterRow(parent, "Region", REGION_FILTERS, selectedRegion) { selectedRegion = it }
+        addFilterRow(parent, "Provider", PROVIDER_FILTERS, selectedProvider) { selectedProvider = it }
+        addFilterRow(parent, "Data", DATA_FILTERS, selectedData) { selectedData = it }
+        addFilterRow(parent, "Validity", VALIDITY_FILTERS, selectedValidity) { selectedValidity = it }
+    }
+
+    private fun addFilterRow(
+        parent: LinearLayout,
+        title: String,
+        options: List<String>,
+        selected: String,
+        onSelect: (String) -> Unit
+    ) {
+        TextView(this).apply {
+            text = title
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            setPadding(0, dp(10), 0, dp(6))
+            parent.addView(this)
+        }
+
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        options.forEach { option ->
+            row.addView(createFilterChip(option, option == selected) {
+                onSelect(option)
+                renderCatalog()
+            })
+        }
+        parent.addView(
+            HorizontalScrollView(this).apply {
+                isHorizontalScrollBarEnabled = false
+                overScrollMode = View.OVER_SCROLL_NEVER
+                addView(row)
+            },
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+    }
+
+    private fun createFilterChip(label: String, selected: Boolean, onClick: () -> Unit): TextView {
+        val primary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary)
+        val onPrimary = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
+        val secondaryText = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        return TextView(this).apply {
+            text = label
+            gravity = Gravity.CENTER
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(if (selected) onPrimary else secondaryText)
+            setPadding(dp(13), dp(8), dp(13), dp(8))
+            setBackgroundResource(R.drawable.wallet_request_status_badge)
+            backgroundTintList = ColorStateList.valueOf(if (selected) primary else getColor(R.color.r2w_card))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, dp(8), dp(4))
+            }
+            setOnClickListener { onClick() }
+        }
     }
 
     private fun createPackageCard(mobilePackage: MobilePackage): View {
@@ -270,6 +363,73 @@ class PackagesActivity : AppCompatActivity() {
         }
         return item
     }
+
+    private fun MobilePackage.matchesSelectedFilters(): Boolean =
+        matchesRegion(selectedRegion) && matchesProvider(selectedProvider) && matchesData(selectedData) && matchesValidity(selectedValidity)
+
+    private fun MobilePackage.matchesRegion(region: String): Boolean {
+        if (region == FILTER_ALL) return true
+        val text = searchableText()
+        return when (region) {
+            "Turkey" -> text.contains("turkey") || text.contains(" tr ") || countryCode.equals("TR", ignoreCase = true)
+            "Europe" -> text.contains("europe") || text.contains("europa") || text.contains(" eu ")
+            "Europe Balkans" -> text.contains("balkan") || text.contains("balkans")
+            "Global" -> text.contains("global") || text.contains("world") || text.contains("worldwide")
+            else -> text.contains(region.lowercase())
+        }
+    }
+
+    private fun MobilePackage.matchesProvider(providerFilter: String): Boolean {
+        if (providerFilter == FILTER_ALL) return true
+        val providerText = provider.orEmpty().lowercase()
+        return when (providerFilter) {
+            "TraveRoam" -> providerText.contains("traveroam") || providerText.contains("travelroam")
+            "TGT" -> providerText.contains("tgt")
+            "Flexnet" -> providerText.contains("flexnet")
+            "AirHub" -> providerText.contains("airhub") || providerText.contains("airhubapp")
+            "eSIMCard" -> providerText.contains("esimcard") || providerText.contains("esim_card")
+            else -> providerText.contains(providerFilter.lowercase())
+        }
+    }
+
+    private fun MobilePackage.matchesData(dataFilter: String): Boolean {
+        if (dataFilter == FILTER_ALL) return true
+        val text = searchableText()
+        if (dataFilter == "Unlimited") {
+            return text.contains("unlimited") || text.contains(" ul ") || text.contains("_ul_")
+        }
+        val gb = dataFilter.removeSuffix("GB").trim().toIntOrNull() ?: return true
+        val compact = text.replace(" ", "")
+        return compact.contains("${gb}gb") || text.contains("${gb * 1000} mb") || text.contains("${gb * 1024} mb")
+    }
+
+    private fun MobilePackage.matchesValidity(validityFilter: String): Boolean {
+        if (validityFilter == FILTER_ALL) return true
+        val days = validityFilter.substringBefore(" ").toIntOrNull() ?: return true
+        val text = searchableText()
+        val compact = text.replace(" ", "")
+        return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
+    }
+
+    private fun MobilePackage.searchableText(): String =
+        listOfNotNull(
+            provider,
+            packageType,
+            name,
+            country,
+            countryCode,
+            dataAmount,
+            validity,
+            description,
+            network,
+            coverage,
+            specs()
+        ).joinToString(" ").lowercase()
+
+    private fun filtersAreDefault(): Boolean =
+        selectedRegion == FILTER_ALL && selectedProvider == FILTER_ALL && selectedData == FILTER_ALL && selectedValidity == FILTER_ALL
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun setLoading(loading: Boolean) {
         refresh.isRefreshing = loading
@@ -348,5 +508,15 @@ class PackagesActivity : AppCompatActivity() {
     private companion object {
         private const val LIVE_CATALOG_EMPTY_MESSAGE =
             "No live packages available. Please configure packages in Roam2World backend."
+        private const val FILTER_ALL = "All"
+        private val REGION_FILTERS = listOf("All", "Turkey", "Europe", "Europe Balkans", "Global")
+        private val PROVIDER_FILTERS = listOf("All", "TraveRoam", "TGT", "Flexnet", "AirHub", "eSIMCard")
+        private val DATA_FILTERS = listOf(
+            "All", "1GB", "2GB", "3GB", "5GB", "10GB", "20GB", "30GB", "50GB",
+            "60GB", "100GB", "135GB", "200GB", "300GB", "400GB", "500GB", "Unlimited"
+        )
+        private val VALIDITY_FILTERS = listOf(
+            "All", "1 Day", "3 Days", "5 Days", "7 Days", "10 Days", "15 Days", "30 Days", "60 Days", "90 Days"
+        )
     }
 }
