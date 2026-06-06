@@ -144,14 +144,7 @@ class MoreActivity : AppCompatActivity() {
             when (role) {
                 "admin" -> showAllBusinessItems()
                 "reseller" -> showAllBusinessItems()
-                "dealer" -> {
-                    reports.visibility = View.GONE
-                    openEuicc.visibility = View.VISIBLE
-                    tgtRecharge.visibility = View.VISIBLE
-                    esimHistory.visibility = View.VISIBLE
-                    orders.visibility = View.VISIBLE
-                    support.visibility = View.VISIBLE
-                }
+                "dealer" -> showAllBusinessItems()
                 else -> showAllBusinessItems()
             }
         }
