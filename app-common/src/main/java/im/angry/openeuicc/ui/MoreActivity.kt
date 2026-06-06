@@ -92,7 +92,7 @@ class MoreActivity : AppCompatActivity() {
 
     private fun setupActions() {
         requireViewById<MaterialButton>(R.id.more_profile).setOnClickListener {
-            startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
         requireViewById<MaterialButton>(R.id.more_esim_history).setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
