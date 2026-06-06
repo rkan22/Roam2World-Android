@@ -2,6 +2,7 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,9 @@ import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.common.R
+import im.angry.openeuicc.util.activityToolbarInsetHandler
+import im.angry.openeuicc.util.mainViewPaddingInsetHandler
+import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +21,7 @@ import kotlinx.coroutines.withContext
 class ProfileActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
+    private lateinit var scroll: View
     private lateinit var avatar: TextView
     private lateinit var name: TextView
     private lateinit var email: TextView
@@ -31,11 +36,14 @@ class ProfileActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.r2w_profile)
 
+        scroll = requireViewById(R.id.profile_scroll)
         avatar = requireViewById(R.id.profile_avatar)
         name = requireViewById(R.id.profile_name)
         email = requireViewById(R.id.profile_email)
         role = requireViewById(R.id.profile_role)
         permissions = requireViewById(R.id.profile_permissions)
+
+        setupInsets()
 
         requireViewById<MaterialButton>(R.id.profile_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -50,6 +58,17 @@ class ProfileActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    private fun setupInsets() {
+        setupRootViewSystemBarInsets(
+            window.decorView.rootView,
+            arrayOf(
+                this::activityToolbarInsetHandler,
+                mainViewPaddingInsetHandler(scroll)
+            ),
+            consume = false
+        )
     }
 
     private fun loadProfile() {
