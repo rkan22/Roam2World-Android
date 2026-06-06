@@ -1,7 +1,6 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -116,7 +115,7 @@ class MoreActivity : AppCompatActivity() {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
         openEuicc.setOnClickListener {
-            openNativeOpenEuicc()
+            startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
         }
         tgtRecharge.setOnClickListener {
             startActivity(Intent(this, TgtSimRechargeActivity::class.java))
@@ -157,17 +156,6 @@ class MoreActivity : AppCompatActivity() {
         orders.visibility = View.VISIBLE
         reports.visibility = View.VISIBLE
         support.visibility = View.VISIBLE
-    }
-
-    private fun openNativeOpenEuicc() {
-        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
-        if (target.isNullOrBlank()) return
-        startActivity(Intent().setClassName(this, target))
-    }
-
-    private fun targetActivityName(key: String): String? {
-        val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-        return appInfo.metaData?.getString(key)
     }
 
     private fun logout() {
