@@ -27,102 +27,191 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
                 android:paddingBottom="28dp">
 
-                <TextView
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="190dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="0dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/dashboard_hero_gradient"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="24dp"
+                        android:paddingTop="24dp"
+                        android:paddingBottom="30dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Store"
+                            android:textAppearance="?attr/textAppearanceDisplaySmall"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Live Roam2World eSIM catalog with provider pricing and coverage."
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
+                            android:textColor="#DDEBFF" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="18dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/wallet_request_status_badge"
+                                android:backgroundTint="#22FFFFFF"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="7dp"
+                                android:text="Live API"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/wallet_request_status_badge"
+                                android:backgroundTint="#22FFFFFF"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="7dp"
+                                android:text="B2B Pricing"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Store"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="@color/r2w_text_primary"
-                    android:textStyle="bold" />
+                    android:orientation="vertical"
+                    android:paddingHorizontal="20dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Browse enterprise eSIM packages by provider, data size and coverage."
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/packages_search_layout"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:hint="@string/packages_search_hint"
-                    app:boxBackgroundColor="@color/r2w_card"
-                    app:boxCornerRadiusBottomEnd="18dp"
-                    app:boxCornerRadiusBottomStart="18dp"
-                    app:boxCornerRadiusTopEnd="18dp"
-                    app:boxCornerRadiusTopStart="18dp"
-                    app:endIconMode="clear_text"
-                    app:startIconDrawable="@drawable/ic_packages">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/packages_search"
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:imeOptions="actionSearch"
-                        android:inputType="text"
-                        android:maxLines="1" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="-26dp"
+                        app:cardBackgroundColor="@color/r2w_card"
+                        app:cardCornerRadius="22dp"
+                        app:cardElevation="7dp"
+                        app:strokeColor="@color/r2w_border"
+                        app:strokeWidth="1dp">
 
-                <TextView
-                    android:id="@+id/packages_error"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_danger"
-                    android:visibility="gone" />
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/packages_search_layout"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/packages_search_hint"
+                            android:paddingHorizontal="14dp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp"
+                            app:boxBackgroundColor="@color/r2w_card"
+                            app:boxCornerRadiusBottomEnd="18dp"
+                            app:boxCornerRadiusBottomStart="18dp"
+                            app:boxCornerRadiusTopEnd="18dp"
+                            app:boxCornerRadiusTopStart="18dp"
+                            app:endIconMode="clear_text"
+                            app:startIconDrawable="@drawable/ic_packages"
+                            app:strokeColor="@color/r2w_border">
 
-                <TextView
-                    android:id="@+id/packages_featured_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="Featured Packages"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
-                    android:textStyle="bold" />
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/packages_search"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:imeOptions="actionSearch"
+                                android:inputType="text"
+                                android:maxLines="1" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                <LinearLayout
-                    android:id="@+id/packages_featured"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical" />
+                    <TextView
+                        android:id="@+id/packages_error"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_danger"
+                        android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/packages_catalog_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="26dp"
-                    android:text="All Plans"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
-                    android:textStyle="bold" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="26dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/packages_empty"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/packages_empty"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary"
-                    android:visibility="gone" />
+                        <TextView
+                            android:id="@+id/packages_featured_title"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Featured Packages"
+                            android:textAppearance="?attr/textAppearanceTitleLarge"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textStyle="bold" />
 
-                <LinearLayout
-                    android:id="@+id/packages_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Priority"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:textColor="@color/r2w_primary"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/packages_featured"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical" />
+
+                    <TextView
+                        android:id="@+id/packages_catalog_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="28dp"
+                        android:text="All Live Plans"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/packages_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@color/r2w_card"
+                        android:padding="18dp"
+                        android:text="@string/packages_empty"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_text_secondary"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/packages_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
