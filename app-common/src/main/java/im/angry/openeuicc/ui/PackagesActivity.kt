@@ -272,7 +272,7 @@ class PackagesActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 0, 0, dp(10))
         }
-        }
+
 
         titleRow.addView(
             TextView(this).apply {
@@ -306,7 +306,6 @@ class PackagesActivity : AppCompatActivity() {
 
         val rowOne = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
         }
         rowOne.addView(createFilterButton("Region", selectedRegion) {
             showFilterDialog("Region", REGION_FILTERS, selectedRegion) { selectedRegion = it }
@@ -318,7 +317,6 @@ class PackagesActivity : AppCompatActivity() {
 
         val rowTwo = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
             setPadding(0, dp(10), 0, dp(12))
         }
         rowTwo.addView(createFilterButton("Data", selectedData) {
