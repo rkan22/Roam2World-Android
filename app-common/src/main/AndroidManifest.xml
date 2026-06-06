@@ -23,6 +23,11 @@
             android:label="@string/r2w_profile" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.SupportActivity"
+            android:exported="false"
+            android:label="@string/r2w_support" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.TgtSimRechargeActivity"
             android:exported="false"
             android:label="@string/r2w_tgt_recharge" />
