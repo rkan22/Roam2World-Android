@@ -179,6 +179,12 @@ class Roam2WorldAuthApi(baseUrl: String) {
         request.provider?.let { body.put("provider", it) }
         request.packageDescription?.let { body.put("product_description", it) }
         request.country?.let { body.put("delivery_country", it) }
+        request.customerFirstName?.let { body.put("customer_first_name", it) }
+        request.customerLastName?.let { body.put("customer_last_name", it) }
+        request.customerPhone?.let {
+            body.put("customer_phone", it)
+            body.put("phone_number", it)
+        }
 
         parsePurchaseResult(
             postJson(MOBILE_ORDERS_ENDPOINT, body, session.authorizationHeader),
