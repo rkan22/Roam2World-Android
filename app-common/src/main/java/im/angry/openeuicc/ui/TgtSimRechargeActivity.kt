@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
@@ -37,7 +38,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.r2w_tgt_recharge)
 
-        scroll = contentRoot().getChildAt(1)
+        scroll = requireNestedScrollView()
         selectedPackage = requireViewById(R.id.tgt_selected_package)
         iccidLayout = requireViewById(R.id.tgt_iccid_layout)
         customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
@@ -134,6 +135,17 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         customerPhoneLayout.error = null
     }
 
-    private fun contentRoot(): ViewGroup =
-        (findViewById<ViewGroup>(android.R.id.content).getChildAt(0) as ViewGroup)
+    private fun requireNestedScrollView(): NestedScrollView =
+        findNestedScrollView(findViewById(android.R.id.content))
+            ?: error("TgtSimRechargeActivity requires a NestedScrollView")
+
+    private fun findNestedScrollView(view: View): NestedScrollView? {
+        if (view is NestedScrollView) return view
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                findNestedScrollView(view.getChildAt(index))?.let { return it }
+            }
+        }
+        return null
+    }
 }

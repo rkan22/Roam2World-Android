@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.activityToolbarInsetHandler
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
@@ -21,7 +22,7 @@ class ReportsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.r2w_reports)
 
-        scroll = contentRoot().getChildAt(1)
+        scroll = requireNestedScrollView()
         setupInsets()
     }
 
@@ -41,6 +42,17 @@ class ReportsActivity : AppCompatActivity() {
         )
     }
 
-    private fun contentRoot(): ViewGroup =
-        (findViewById<ViewGroup>(android.R.id.content).getChildAt(0) as ViewGroup)
+    private fun requireNestedScrollView(): NestedScrollView =
+        findNestedScrollView(findViewById(android.R.id.content))
+            ?: error("ReportsActivity requires a NestedScrollView")
+
+    private fun findNestedScrollView(view: View): NestedScrollView? {
+        if (view is NestedScrollView) return view
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                findNestedScrollView(view.getChildAt(index))?.let { return it }
+            }
+        }
+        return null
+    }
 }
