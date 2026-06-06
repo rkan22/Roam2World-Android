@@ -156,6 +156,17 @@
                     android:text="@string/r2w_reports"
                     app:cornerRadius="16dp"
                     app:icon="@drawable/ic_dashboard" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_support"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_support"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
             </LinearLayout>
 
             <TextView
