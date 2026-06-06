@@ -109,6 +109,9 @@ class MoreActivity : AppCompatActivity() {
         requireViewById<MaterialButton>(R.id.more_reports).setOnClickListener {
             startActivity(Intent(this, ReportsActivity::class.java))
         }
+        requireViewById<MaterialButton>(R.id.more_support).setOnClickListener {
+            startActivity(Intent(this, SupportActivity::class.java))
+        }
         requireViewById<MaterialButton>(R.id.more_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
