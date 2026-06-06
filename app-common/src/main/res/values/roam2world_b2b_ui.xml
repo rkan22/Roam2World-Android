@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="r2w_primary">#0A66FF</color>
+    <color name="r2w_primary_dark">#0047CC</color>
+    <color name="r2w_secondary">#1E88E5</color>
+    <color name="r2w_success">#16A34A</color>
+    <color name="r2w_warning">#F59E0B</color>
+    <color name="r2w_danger">#DC2626</color>
+    <color name="r2w_background">#F5F8FC</color>
+    <color name="r2w_card">#FFFFFF</color>
+    <color name="r2w_text_primary">#0F172A</color>
+    <color name="r2w_text_secondary">#64748B</color>
+    <color name="r2w_border">#E2E8F0</color>
+
+    <dimen name="r2w_space_1">8dp</dimen>
+    <dimen name="r2w_space_2">16dp</dimen>
+    <dimen name="r2w_space_3">24dp</dimen>
+    <dimen name="r2w_radius_card">16dp</dimen>
+    <dimen name="r2w_radius_button">14dp</dimen>
+
+    <string name="r2w_more">More</string>
+    <string name="r2w_store">Store</string>
+    <string name="r2w_profile">Profile</string>
+    <string name="r2w_tgt_recharge">TGT SIM Recharge</string>
+    <string name="r2w_reports">Reports</string>
+    <string name="r2w_orders">Orders</string>
+    <string name="r2w_support">Support</string>
+    <string name="r2w_settings">Settings</string>
+    <string name="r2w_open_native_openeuicc">Open Native OpenEUICC</string>
+    <string name="r2w_enter_iccid">Enter ICCID</string>
+    <string name="r2w_customer_information">Customer Information</string>
+    <string name="r2w_activate">Activate</string>
+</resources>

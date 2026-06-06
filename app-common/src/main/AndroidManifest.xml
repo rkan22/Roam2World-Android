@@ -13,6 +13,21 @@
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu">
         <activity
+            android:name="im.angry.openeuicc.ui.MoreActivity"
+            android:exported="false"
+            android:label="@string/r2w_more" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.TgtSimRechargeActivity"
+            android:exported="false"
+            android:label="@string/r2w_tgt_recharge" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.ReportsActivity"
+            android:exported="false"
+            android:label="@string/r2w_reports" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.SettingsActivity"
             android:label="@string/pref_settings" />
 

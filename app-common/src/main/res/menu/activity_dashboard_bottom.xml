@@ -8,7 +8,7 @@
     <item
         android:id="@+id/nav_packages"
         android:icon="@drawable/ic_packages"
-        android:title="@string/packages_title" />
+        android:title="@string/r2w_store" />
 
     <item
         android:id="@+id/nav_wallet"
@@ -19,4 +19,9 @@
         android:id="@+id/nav_esims"
         android:icon="@drawable/ic_task_sim_card_download"
         android:title="@string/dashboard_nav_esims" />
+
+    <item
+        android:id="@+id/nav_more"
+        android:icon="@drawable/ic_dashboard"
+        android:title="@string/r2w_more" />
 </menu>
