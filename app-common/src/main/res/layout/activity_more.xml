@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/r2w_background">
+
+    <include layout="@layout/toolbar_activity" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/more_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/more_bottom_nav"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Roam2World B2B"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="@color/r2w_text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Enterprise telecom operations"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/r2w_text_secondary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_profile"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/profile"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_esim_history"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/dashboard_view_history"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_checkmark_outline" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_openeuicc"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_open_native_openeuicc"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_task_sim_card_download" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_tgt_recharge"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_tgt_recharge"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_packages" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_orders"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_orders"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_wallet" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_reports"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_reports"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_settings"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/r2w_settings"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/more_logout"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/logout"
+                    android:textColor="@color/r2w_danger"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_dashboard"
+                    app:iconTint="@color/r2w_danger" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/more_bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/activity_dashboard_bottom" />
+</androidx.constraintlayout.widget.ConstraintLayout>
