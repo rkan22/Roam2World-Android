@@ -38,17 +38,6 @@
                 android:textColor="@color/r2w_text_secondary" />
 
             <TextView
-                android:id="@+id/tgt_api_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@color/r2w_card"
-                android:padding="12dp"
-                android:text="API target: checking..."
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="@color/r2w_text_secondary" />
-
-            <TextView
                 android:id="@+id/tgt_selected_package"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

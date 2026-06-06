@@ -32,7 +32,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
     private lateinit var scroll: View
-    private lateinit var apiStatus: TextView
     private lateinit var selectedPackage: TextView
     private lateinit var iccidLayout: TextInputLayout
     private lateinit var customerNameLayout: TextInputLayout
@@ -53,7 +52,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.r2w_tgt_recharge)
 
         scroll = requireNestedScrollView()
-        apiStatus = requireViewById(R.id.tgt_api_status)
         selectedPackage = requireViewById(R.id.tgt_selected_package)
         iccidLayout = requireViewById(R.id.tgt_iccid_layout)
         customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
@@ -67,7 +65,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         setupPackageSelection()
         setupActivation()
         renderSelectedPackage()
-        renderApiStatus("API target: ${tgtRechargeUrl()}")
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -113,7 +110,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
             if (session == null) {
-                renderApiStatus("No active session. Redirecting to login.")
                 startActivity(
                     Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -123,7 +119,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 return@launch
             }
 
-            renderApiStatus("POST ${tgtRechargeUrl()}")
             setSubmitting(true)
             val result = runCatching {
                 withContext(Dispatchers.IO) { postTgtRecharge(session) }
@@ -132,16 +127,13 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
             result
                 .onSuccess { message ->
-                    renderApiStatus(message)
                     Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
                     finish()
                 }
                 .onFailure { error ->
-                    val message = error.message ?: "TGT recharge request failed"
-                    renderApiStatus(message)
                     Toast.makeText(
                         this@TgtSimRechargeActivity,
-                        message,
+                        error.message ?: "TGT recharge request failed",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -183,10 +175,10 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                     ?.takeIf { it.isNotBlank() }
                     ?: response?.optString("detail")?.takeIf { it.isNotBlank() }
                     ?: "TGT recharge request failed with HTTP $status"
-                throw IllegalStateException("HTTP $status: $message")
+                throw IllegalStateException(message)
             }
             response?.optString("message")?.takeIf { it.isNotBlank() }
-                ?: "HTTP $status: TGT recharge request submitted"
+                ?: "TGT recharge request submitted"
         } finally {
             connection.disconnect()
         }
@@ -199,10 +191,6 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
     private fun renderSelectedPackage() {
         selectedPackage.text = "Selected package: $selectedPackageName"
-    }
-
-    private fun renderApiStatus(message: String) {
-        apiStatus.text = message
     }
 
     private fun tgtRechargeUrl(): String =
