@@ -42,21 +42,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/r2w_border"
-                app:strokeWidth="1dp">
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="5dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/dashboard_hero_gradient"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:background="@color/r2w_primary"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:background="@drawable/wallet_request_status_badge"
+                        android:backgroundTint="#33FFFFFF"
                         android:gravity="center"
                         android:text="R2W"
                         android:textColor="@android:color/white"
@@ -74,7 +77,7 @@
                             android:layout_height="wrap_content"
                             android:text="Roam2World B2B"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@android:color/white"
                             android:textStyle="bold" />
 
                         <TextView
@@ -83,7 +86,7 @@
                             android:layout_marginTop="4dp"
                             android:text="Admin • Reseller • Dealer workspace"
                             android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="@color/r2w_text_secondary" />
+                            android:textColor="#DDEBFF" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -100,73 +103,121 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:orientation="vertical">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_esim_history"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/dashboard_view_history"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_checkmark_outline" />
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_openeuicc"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_open_native_openeuicc"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_task_sim_card_download" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_esim_history"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="eSIM History\nPurchases"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_checkmark_outline"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_tgt_recharge"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_tgt_recharge"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_packages" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_openeuicc"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="OpenEUICC\nProfiles"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_task_sim_card_download"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
+                </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_orders"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_orders"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_wallet" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_reports"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_reports"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_tgt_recharge"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="TGT SIM\nRecharge"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_packages"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_support"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_orders"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Orders\nStatus"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_wallet"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_support"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_reports"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Reports\nAnalytics"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_dashboard"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/more_support"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Support\nHelpdesk"
+                        android:textAlignment="center"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_dashboard"
+                        app:iconGravity="top"
+                        app:iconPadding="6dp" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -181,43 +232,49 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical">
+                android:layout_marginTop="12dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/more_profile"
                     style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_profile"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
+                    android:layout_width="0dp"
+                    android:layout_height="74dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Profile"
+                    app:cornerRadius="18dp"
+                    app:icon="@drawable/ic_dashboard"
+                    app:iconGravity="top" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/more_settings"
                     style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/r2w_settings"
-                    app:cornerRadius="16dp"
-                    app:icon="@drawable/ic_dashboard" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_logout"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="18dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/logout"
-                    android:textColor="@color/r2w_danger"
-                    app:cornerRadius="16dp"
+                    android:layout_width="0dp"
+                    android:layout_height="74dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Settings"
+                    app:cornerRadius="18dp"
                     app:icon="@drawable/ic_dashboard"
-                    app:iconTint="@color/r2w_danger" />
+                    app:iconGravity="top" />
             </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/more_logout"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="18dp"
+                android:gravity="center_vertical"
+                android:text="@string/logout"
+                android:textColor="@color/r2w_danger"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_dashboard"
+                app:iconTint="@color/r2w_danger" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -225,7 +282,7 @@
         android:id="@+id/more_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@color/r2w_card"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
