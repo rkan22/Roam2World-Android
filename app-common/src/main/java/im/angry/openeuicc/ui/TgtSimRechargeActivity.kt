@@ -1,6 +1,8 @@
 package im.angry.openeuicc.ui
 
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -10,8 +12,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.common.R
+import im.angry.openeuicc.util.activityToolbarInsetHandler
+import im.angry.openeuicc.util.mainViewPaddingInsetHandler
+import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 
 class TgtSimRechargeActivity : AppCompatActivity() {
+    private lateinit var scroll: View
     private lateinit var selectedPackage: TextView
     private lateinit var iccidLayout: TextInputLayout
     private lateinit var customerNameLayout: TextInputLayout
@@ -31,6 +37,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.r2w_tgt_recharge)
 
+        scroll = contentRoot().getChildAt(1)
         selectedPackage = requireViewById(R.id.tgt_selected_package)
         iccidLayout = requireViewById(R.id.tgt_iccid_layout)
         customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
@@ -40,6 +47,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         customerPhone = requireViewById(R.id.tgt_customer_phone)
         activate = requireViewById(R.id.tgt_activate)
 
+        setupInsets()
         setupPackageSelection()
         setupActivation()
         renderSelectedPackage()
@@ -48,6 +56,17 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    private fun setupInsets() {
+        setupRootViewSystemBarInsets(
+            window.decorView.rootView,
+            arrayOf(
+                this::activityToolbarInsetHandler,
+                mainViewPaddingInsetHandler(scroll)
+            ),
+            consume = false
+        )
     }
 
     private fun setupPackageSelection() {
@@ -114,4 +133,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         customerNameLayout.error = null
         customerPhoneLayout.error = null
     }
+
+    private fun contentRoot(): ViewGroup =
+        (findViewById<ViewGroup>(android.R.id.content).getChildAt(0) as ViewGroup)
 }
