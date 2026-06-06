@@ -14,8 +14,10 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
+import im.angry.openeuicc.auth.MobileActivationDetails
 import im.angry.openeuicc.auth.MobilePackage
 import im.angry.openeuicc.auth.MobilePackagePurchaseRequest
+import im.angry.openeuicc.auth.MobilePackagePurchaseResult
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -26,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import java.util.UUID
 
 class PackageDetailActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -116,6 +119,12 @@ class PackageDetailActivity : AppCompatActivity() {
                 return@launch
             }
 
+            if (isDemoPackage()) {
+                setLoading(false)
+                startActivity(PurchaseConfirmationActivity.createIntent(this@PackageDetailActivity, demoPurchaseResult(price)))
+                return@launch
+            }
+
             val wallet = runCatching {
                 authApi.wallet(session)
             }.getOrElse {
@@ -193,6 +202,29 @@ class PackageDetailActivity : AppCompatActivity() {
             ?.takeIf { it.isNotBlank() }
         return normalized?.toBigDecimalOrNull()
     }
+
+    private fun isDemoPackage(): Boolean =
+        intent.getStringExtra(EXTRA_ID)?.startsWith("demo-") == true
+
+    private fun demoPurchaseResult(price: String): MobilePackagePurchaseResult =
+        MobilePackagePurchaseResult(
+            orderId = "demo-${UUID.randomUUID()}",
+            orderNumber = "DEMO-${System.currentTimeMillis().toString().takeLast(6)}",
+            status = "demo_success",
+            packageName = intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title),
+            price = price,
+            balanceAfter = null,
+            activation = MobileActivationDetails(
+                lpaCode = null,
+                smdpAddress = null,
+                matchingId = null,
+                confirmationCodeRequired = false,
+                qrCode = null,
+                qrCodeUrl = null,
+                iccid = "DEMO-ICCID",
+                esimId = intent.getStringExtra(EXTRA_ID)
+            )
+        )
 
     private fun redirectToLogin(): AuthSession? {
         tokenStore.clear()
