@@ -18,6 +18,9 @@ sealed class B2BScreen(val route: String) {
     object PurchaseSuccess : B2BScreen("purchase_success/{iccid}") {
         fun createRoute(iccid: String) = "purchase_success/$iccid"
     }
+    object Inventory : B2BScreen("inventory")
+    object Wallet : B2BScreen("wallet")
+    object DeviceManager : B2BScreen("device_manager")
 }
 
 @Composable
@@ -27,7 +30,12 @@ fun B2BNavGraph(navController: NavHostController) {
         startDestination = B2BScreen.Dashboard.route
     ) {
         composable(B2BScreen.Dashboard.route) {
-            DashboardScreen() // In real app, pass navigation actions
+            DashboardScreen(
+                onBuyEsimClick = { navController.navigate(B2BScreen.Store.route) },
+                onWalletClick = { navController.navigate(B2BScreen.Wallet.route) },
+                onInventoryClick = { navController.navigate(B2BScreen.Inventory.route) },
+                onDeviceManagerClick = { navController.navigate(B2BScreen.DeviceManager.route) }
+            )
         }
         
         composable(B2BScreen.Store.route) {
@@ -73,6 +81,21 @@ fun B2BNavGraph(navController: NavHostController) {
                 },
                 onInstallClick = { /* Trigger OpenEUICC Installation */ }
             )
+        }
+
+        composable(B2BScreen.Inventory.route) {
+            EsimInventoryScreen(
+                onBackClick = { navController.popBackStack() },
+                onEsimClick = { /* Navigate to eSIM Detail */ }
+            )
+        }
+
+        composable(B2BScreen.Wallet.route) {
+            WalletDetailScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable(B2BScreen.DeviceManager.route) {
+            OpenEuiccManagerScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
