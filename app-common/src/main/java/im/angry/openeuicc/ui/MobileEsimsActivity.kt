@@ -119,6 +119,10 @@ class MobileEsimsActivity : AppCompatActivity() {
                     false
                 }
                 R.id.nav_esims -> true
+                R.id.nav_more -> {
+                    openMoreActivity()
+                    false
+                }
                 else -> false
             }
         }
@@ -206,6 +210,14 @@ class MobileEsimsActivity : AppCompatActivity() {
     private fun openPackagesActivity() {
         startActivity(
             Intent(this, PackagesActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
+    }
+
+    private fun openMoreActivity() {
+        startActivity(
+            Intent(this, MoreActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
         )
