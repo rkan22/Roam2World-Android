@@ -153,6 +153,10 @@ class DashboardActivity : AppCompatActivity() {
                     openEsimActivity()
                     false
                 }
+                R.id.nav_more -> {
+                    openMoreActivity()
+                    false
+                }
                 else -> false
             }
         }
@@ -296,6 +300,14 @@ class DashboardActivity : AppCompatActivity() {
     private fun openEsimActivity() {
         startActivity(
             Intent(this, MobileEsimsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+        )
+    }
+
+    private fun openMoreActivity() {
+        startActivity(
+            Intent(this, MoreActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
         )
