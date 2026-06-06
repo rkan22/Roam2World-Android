@@ -199,7 +199,7 @@
                         android:text="Reports\nAnalytics"
                         android:textAlignment="center"
                         app:cornerRadius="18dp"
-                        app:icon="@drawable/ic_dashboard"
+                        app:icon="@drawable/ic_bar_chart"
                         app:iconGravity="top"
                         app:iconPadding="6dp" />
 
@@ -214,7 +214,7 @@
                         android:text="Support\nHelpdesk"
                         android:textAlignment="center"
                         app:cornerRadius="18dp"
-                        app:icon="@drawable/ic_dashboard"
+                        app:icon="@drawable/ic_support"
                         app:iconGravity="top"
                         app:iconPadding="6dp" />
                 </LinearLayout>
@@ -246,7 +246,7 @@
                     android:gravity="center"
                     android:text="Profile"
                     app:cornerRadius="18dp"
-                    app:icon="@drawable/ic_dashboard"
+                    app:icon="@drawable/ic_person"
                     app:iconGravity="top" />
 
                 <com.google.android.material.button.MaterialButton
@@ -259,7 +259,7 @@
                     android:gravity="center"
                     android:text="Settings"
                     app:cornerRadius="18dp"
-                    app:icon="@drawable/ic_dashboard"
+                    app:icon="@drawable/ic_settings"
                     app:iconGravity="top" />
             </LinearLayout>
 
@@ -273,7 +273,7 @@
                 android:text="@string/logout"
                 android:textColor="@color/r2w_danger"
                 app:cornerRadius="16dp"
-                app:icon="@drawable/ic_dashboard"
+                app:icon="@drawable/ic_logout"
                 app:iconTint="@color/r2w_danger" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -403,7 +403,7 @@
                             android:textColor="@color/r2w_text_primary"
                             android:visibility="gone"
                             app:cornerRadius="20dp"
-                            app:icon="@drawable/ic_dashboard"
+                            app:icon="@drawable/ic_group"
                             app:iconGravity="top"
                             app:iconPadding="6dp"
                             app:strokeColor="@color/r2w_border" />
