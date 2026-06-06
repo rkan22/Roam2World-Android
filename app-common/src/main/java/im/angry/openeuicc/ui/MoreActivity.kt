@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
@@ -24,6 +23,15 @@ class MoreActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private lateinit var scroll: View
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var profile: MaterialButton
+    private lateinit var esimHistory: MaterialButton
+    private lateinit var openEuicc: MaterialButton
+    private lateinit var tgtRecharge: MaterialButton
+    private lateinit var orders: MaterialButton
+    private lateinit var reports: MaterialButton
+    private lateinit var support: MaterialButton
+    private lateinit var settings: MaterialButton
+    private lateinit var logoutButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -34,10 +42,20 @@ class MoreActivity : AppCompatActivity() {
 
         scroll = requireViewById(R.id.more_scroll)
         bottomNav = requireViewById(R.id.more_bottom_nav)
+        profile = requireViewById(R.id.more_profile)
+        esimHistory = requireViewById(R.id.more_esim_history)
+        openEuicc = requireViewById(R.id.more_openeuicc)
+        tgtRecharge = requireViewById(R.id.more_tgt_recharge)
+        orders = requireViewById(R.id.more_orders)
+        reports = requireViewById(R.id.more_reports)
+        support = requireViewById(R.id.more_support)
+        settings = requireViewById(R.id.more_settings)
+        logoutButton = requireViewById(R.id.more_logout)
 
         setupInsets()
         setupBottomNavigation()
         setupActions()
+        applyRoleVisibility()
     }
 
     override fun onResume() {
@@ -91,33 +109,61 @@ class MoreActivity : AppCompatActivity() {
     }
 
     private fun setupActions() {
-        requireViewById<MaterialButton>(R.id.more_profile).setOnClickListener {
+        profile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_esim_history).setOnClickListener {
+        esimHistory.setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_openeuicc).setOnClickListener {
+        openEuicc.setOnClickListener {
             openNativeOpenEuicc()
         }
-        requireViewById<MaterialButton>(R.id.more_tgt_recharge).setOnClickListener {
+        tgtRecharge.setOnClickListener {
             startActivity(Intent(this, TgtSimRechargeActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_orders).setOnClickListener {
+        orders.setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_reports).setOnClickListener {
+        reports.setOnClickListener {
             startActivity(Intent(this, ReportsActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_support).setOnClickListener {
+        support.setOnClickListener {
             startActivity(Intent(this, SupportActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_settings).setOnClickListener {
+        settings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        requireViewById<MaterialButton>(R.id.more_logout).setOnClickListener {
+        logoutButton.setOnClickListener {
             logout()
         }
+    }
+
+    private fun applyRoleVisibility() {
+        lifecycleScope.launch {
+            val role = withContext(Dispatchers.IO) { tokenStore.getSession()?.role.orEmpty().lowercase() }
+            when (role) {
+                "admin" -> showAllBusinessItems()
+                "reseller" -> showAllBusinessItems()
+                "dealer" -> {
+                    reports.visibility = View.GONE
+                    openEuicc.visibility = View.VISIBLE
+                    tgtRecharge.visibility = View.VISIBLE
+                    esimHistory.visibility = View.VISIBLE
+                    orders.visibility = View.VISIBLE
+                    support.visibility = View.VISIBLE
+                }
+                else -> showAllBusinessItems()
+            }
+        }
+    }
+
+    private fun showAllBusinessItems() {
+        esimHistory.visibility = View.VISIBLE
+        openEuicc.visibility = View.VISIBLE
+        tgtRecharge.visibility = View.VISIBLE
+        orders.visibility = View.VISIBLE
+        reports.visibility = View.VISIBLE
+        support.visibility = View.VISIBLE
     }
 
     private fun openNativeOpenEuicc() {
