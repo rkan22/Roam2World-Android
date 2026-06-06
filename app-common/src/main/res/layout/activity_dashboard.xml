@@ -22,336 +22,426 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="18dp"
             android:paddingBottom="28dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/wallet_request_status_badge"
-                    android:backgroundTint="@color/r2w_primary"
-                    android:contentDescription="@string/login_logo_content_description"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_roam2world_logo"
-                    app:tint="@android:color/white" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Roam2World B2B"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="@color/r2w_primary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/dashboard_greeting"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:maxLines="2"
-                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                        android:textColor="@color/r2w_text_primary"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/dashboard_account"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_text_secondary" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/dashboard_progress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:indeterminate="true"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/dashboard_error"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_danger"
-                android:visibility="gone" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="164dp"
-                android:layout_marginTop="20dp"
+                android:layout_height="230dp"
+                android:layout_marginHorizontal="0dp"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="6dp"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/dashboard_hero_gradient"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="22dp">
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="28dp">
+
+                    <ImageView
+                        android:id="@+id/dashboard_brand_icon"
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/wallet_request_status_badge"
+                        android:backgroundTint="#33FFFFFF"
+                        android:contentDescription="@string/login_logo_content_description"
+                        android:padding="9dp"
+                        android:src="@drawable/ic_roam2world_logo"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@android:color/white" />
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Current Balance"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="@android:color/white" />
+                        android:layout_marginStart="12dp"
+                        android:text="Roam2World B2B"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/dashboard_brand_icon"
+                        app:layout_constraintEnd_toStartOf="@id/dashboard_profile_dot"
+                        app:layout_constraintStart_toEndOf="@id/dashboard_brand_icon"
+                        app:layout_constraintTop_toTopOf="@id/dashboard_brand_icon" />
 
                     <TextView
-                        android:id="@+id/dashboard_balance"
-                        android:layout_width="match_parent"
+                        android:id="@+id/dashboard_profile_dot"
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/wallet_request_status_badge"
+                        android:backgroundTint="#EAF2FF"
+                        android:gravity="center"
+                        android:text="R2W"
+                        android:textAppearance="?attr/textAppearanceLabelSmall"
+                        android:textColor="@color/r2w_primary"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/dashboard_greeting"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="42dp"
+                        android:maxLines="2"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/dashboard_brand_icon" />
+
+                    <TextView
+                        android:id="@+id/dashboard_account"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:textAppearance="?attr/textAppearanceDisplaySmall"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="Available for eSIM purchases, dealer allocation and recharge workflows"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="#DDEBFF" />
-                </LinearLayout>
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="#DDEBFF"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/dashboard_greeting" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp">
+
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/dashboard_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/dashboard_error"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_danger"
+                    android:visibility="gone" />
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="112dp"
-                    android:layout_marginEnd="7dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="128dp"
+                    android:layout_marginTop="-34dp"
                     app:cardBackgroundColor="@color/r2w_card"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="8dp"
                     app:strokeColor="@color/r2w_border"
                     app:strokeWidth="1dp">
 
-                    <LinearLayout
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:maxLines="2"
-                            android:text="Monthly Sales"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="@color/r2w_text_secondary" />
+                            android:id="@+id/dashboard_wallet_icon"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:background="@drawable/wallet_request_status_badge"
+                            android:backgroundTint="#EAF2FF"
+                            android:gravity="center"
+                            android:text="▣"
+                            android:textColor="@color/r2w_primary"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <TextView
-                            android:id="@+id/dashboard_orders_summary"
-                            android:layout_width="match_parent"
+                            android:id="@+id/dashboard_balance_label"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:maxLines="1"
-                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                            android:textColor="@color/r2w_text_primary"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="112dp"
-                    android:layout_marginStart="7dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/r2w_card"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:strokeColor="@color/r2w_border"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                            android:layout_marginStart="18dp"
+                            android:text="Wallet Balance"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="@color/r2w_text_secondary"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/dashboard_wallet_icon"
+                            app:layout_constraintTop_toTopOf="@id/dashboard_wallet_icon" />
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:id="@+id/dashboard_balance"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:maxLines="2"
-                            android:text="Active eSIMs"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="@color/r2w_text_secondary" />
-
-                        <TextView
-                            android:id="@+id/dashboard_active_esims"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
                             android:layout_marginTop="8dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textAppearance="?attr/textAppearanceDisplaySmall"
+                            android:textColor="@color/r2w_primary"
+                            android:textStyle="bold"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/dashboard_wallet_icon"
+                            app:layout_constraintTop_toBottomOf="@id/dashboard_balance_label" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="96dp"
+                        android:layout_marginEnd="7dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="@color/r2w_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="3dp"
+                        app:strokeColor="@color/r2w_border"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Monthly Sales"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="@color/r2w_text_secondary" />
+
+                            <TextView
+                                android:id="@+id/dashboard_orders_summary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:maxLines="1"
+                                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                                android:textColor="@color/r2w_text_primary"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="96dp"
+                        android:layout_marginStart="7dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="@color/r2w_card"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="3dp"
+                        app:strokeColor="@color/r2w_border"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Active eSIMs"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="@color/r2w_text_secondary" />
+
+                            <TextView
+                                android:id="@+id/dashboard_active_esims"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                                android:textColor="@color/r2w_text_primary"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/dashboard_dealer_summary_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="@color/r2w_card"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_border"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Dealer Network"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:textColor="@color/r2w_text_secondary" />
+
+                        <TextView
+                            android:id="@+id/dashboard_dealer_summary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/dashboard_dealer_summary_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="@color/r2w_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeColor="@color/r2w_border"
-                app:strokeWidth="1dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    android:text="Quick Actions"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dealer Network"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="@color/r2w_text_secondary" />
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/dashboard_dealer_summary"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dashboard_browse_packages"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="82dp"
+                            android:layout_marginEnd="7dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Buy eSIM"
+                            android:textAlignment="center"
+                            android:textColor="@color/r2w_text_primary"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_packages"
+                            app:iconGravity="top"
+                            app:iconPadding="6dp"
+                            app:strokeColor="@color/r2w_border" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dashboard_request_balance"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="82dp"
+                            android:layout_marginStart="7dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Wallet Request"
+                            android:textAlignment="center"
+                            android:textColor="@color/r2w_text_primary"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_wallet"
+                            app:iconGravity="top"
+                            app:iconPadding="6dp"
+                            app:strokeColor="@color/r2w_border" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:layout_marginTop="12dp"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dashboard_view_history"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="82dp"
+                            android:layout_marginEnd="7dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="eSIM History"
+                            android:textAlignment="center"
+                            android:textColor="@color/r2w_text_primary"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_checkmark_outline"
+                            app:iconGravity="top"
+                            app:iconPadding="6dp"
+                            app:strokeColor="@color/r2w_border" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/dashboard_manage_dealers"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="82dp"
+                            android:layout_marginStart="7dp"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="Dealers"
+                            android:textAlignment="center"
+                            android:textColor="@color/r2w_text_primary"
+                            android:visibility="gone"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_dashboard"
+                            app:iconGravity="top"
+                            app:iconPadding="6dp"
+                            app:strokeColor="@color/r2w_border" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Recent Purchases"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="@color/r2w_text_primary"
                         android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="Quick Actions"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_browse_packages"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:text="Buy eSIM"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/ic_packages" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_request_balance"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="Wallet Request"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/ic_wallet" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="View All"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="@color/r2w_primary"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/dashboard_orders"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_view_history"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:text="eSIM History"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/ic_checkmark_outline" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/dashboard_manage_dealers"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:text="Dealers"
-                        android:visibility="gone"
-                        app:cornerRadius="16dp"
-                        app:icon="@drawable/ic_dashboard" />
-                </LinearLayout>
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="Recent Orders"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/dashboard_orders"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
