@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_background">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -24,7 +24,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
             android:paddingTop="18dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="28dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,14 +33,14 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:background="@drawable/wallet_request_status_badge"
-                    android:backgroundTint="?attr/colorPrimaryContainer"
+                    android:backgroundTint="@color/r2w_primary"
                     android:contentDescription="@string/login_logo_content_description"
                     android:padding="10dp"
                     android:src="@drawable/ic_roam2world_logo"
-                    app:tint="?attr/colorOnPrimaryContainer" />
+                    app:tint="@android:color/white" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -52,9 +52,10 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/dashboard_brand"
+                        android:text="Roam2World B2B"
                         android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="?attr/colorPrimary" />
+                        android:textColor="@color/r2w_primary"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/dashboard_greeting"
@@ -63,7 +64,8 @@
                         android:layout_marginTop="2dp"
                         android:maxLines="2"
                         android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_text_primary"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/dashboard_account"
@@ -73,7 +75,7 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_text_secondary" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -91,40 +93,51 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorError"
+                android:textColor="@color/r2w_danger"
                 android:visibility="gone" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="148dp"
+                android:layout_height="164dp"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="?attr/colorPrimaryContainer"
-                app:cardCornerRadius="8dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="6dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:background="@drawable/dashboard_hero_gradient"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="22dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/dashboard_current_balance"
+                        android:text="Current Balance"
                         android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="?attr/colorOnPrimaryContainer" />
+                        android:textColor="@android:color/white" />
 
                     <TextView
                         android:id="@+id/dashboard_balance"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="10dp"
                         android:ellipsize="end"
                         android:maxLines="2"
                         android:textAppearance="?attr/textAppearanceDisplaySmall"
-                        android:textColor="?attr/colorOnPrimaryContainer" />
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Available for eSIM purchases, dealer allocation and recharge workflows"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="#DDEBFF" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -140,9 +153,10 @@
                     android:layout_height="112dp"
                     android:layout_marginEnd="7dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                    app:cardCornerRadius="8dp"
-                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:cardBackgroundColor="@color/r2w_card"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/r2w_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -156,9 +170,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:maxLines="2"
-                            android:text="@string/dashboard_orders_summary"
+                            android:text="Monthly Sales"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
                             android:id="@+id/dashboard_orders_summary"
@@ -167,7 +181,8 @@
                             android:layout_marginTop="8dp"
                             android:maxLines="1"
                             android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="@color/r2w_text_primary"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -176,9 +191,10 @@
                     android:layout_height="112dp"
                     android:layout_marginStart="7dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                    app:cardCornerRadius="8dp"
-                    app:strokeColor="?attr/colorOutlineVariant"
+                    app:cardBackgroundColor="@color/r2w_card"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/r2w_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -192,9 +208,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:maxLines="2"
-                            android:text="@string/dashboard_active_esims"
+                            android:text="Active eSIMs"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="?attr/colorOnSurfaceVariant" />
+                            android:textColor="@color/r2w_text_secondary" />
 
                         <TextView
                             android:id="@+id/dashboard_active_esims"
@@ -204,7 +220,8 @@
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="@color/r2w_text_primary"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -215,9 +232,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_card"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/r2w_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -229,9 +247,9 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/dashboard_dealer_summary"
+                        android:text="Dealer Network"
                         android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_text_secondary" />
 
                     <TextView
                         android:id="@+id/dashboard_dealer_summary"
@@ -239,7 +257,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_text_primary"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -247,9 +266,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
-                android:text="@string/dashboard_quick_actions"
+                android:text="Quick Actions"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/r2w_text_primary"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -257,53 +277,74 @@
                 android:layout_marginTop="12dp"
                 android:orientation="vertical">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_browse_packages"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="@string/dashboard_browse_packages"
-                    app:cornerRadius="28dp"
-                    app:icon="@drawable/ic_packages" />
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_request_balance"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/dashboard_request_balance"
-                    app:cornerRadius="28dp"
-                    app:icon="@drawable/ic_wallet" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_browse_packages"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:text="Buy eSIM"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_packages" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_view_history"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/dashboard_view_history"
-                    app:cornerRadius="28dp"
-                    app:icon="@drawable/ic_checkmark_outline" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_request_balance"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:text="Wallet Request"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_wallet" />
+                </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dashboard_manage_dealers"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="@string/dashboard_manage_dealers"
-                    android:visibility="gone"
-                    app:cornerRadius="28dp"
-                    app:icon="@drawable/ic_dashboard" />
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_view_history"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:text="eSIM History"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_checkmark_outline" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dashboard_manage_dealers"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:text="Dealers"
+                        android:visibility="gone"
+                        app:cornerRadius="16dp"
+                        app:icon="@drawable/ic_dashboard" />
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
-                android:text="@string/dashboard_recent_orders"
+                android:text="Recent Orders"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/r2w_text_primary"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/dashboard_orders"
@@ -318,7 +359,7 @@
         android:id="@+id/dashboard_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@color/r2w_card"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
