@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Orange Balkans SIM"
+                android:text="TGT Recharge"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="@color/r2w_text_primary"
                 android:textStyle="bold" />
@@ -33,162 +33,258 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="TGT SIM Card products only"
+                android:text="Manage physical SIM recharge and TGT eSIM renewal"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
 
-            <TextView
-                android:id="@+id/tgt_selected_package"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/tgt_mode_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="@color/r2w_card"
-                android:padding="16dp"
-                android:text="Selected package: 10GB / 30 Days"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="@color/r2w_primary"
-                android:textStyle="bold" />
+                android:layout_marginTop="18dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="30 Days Packages"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
-                android:textStyle="bold" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/tgt_package_group"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/tgt_mode_sim"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
+                    android:checked="true"
+                    android:text="TGT SIM" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_10gb_30d"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="10GB / 30D" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_20gb_30d"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="20GB / 30D" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_30gb_30d"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="30GB / 30D" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_50gb_30d"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="50GB / 30D" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="60 Days Packages"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
-                android:textStyle="bold" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/tgt_mode_esim_renewal"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:text="eSIM Renewal" />
+            </com.google.android.material.chip.ChipGroup>
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_20gb_60d"
+            <LinearLayout
+                android:id="@+id/tgt_sim_recharge_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tgt_selected_package"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@color/r2w_card"
+                    android:padding="16dp"
+                    android:text="Selected package: 10GB / 30 Days"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor="@color/r2w_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="30 Days Packages"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/tgt_package_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="20GB / 60D" />
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/tgt_package_60gb_60d"
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_10gb_30d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="10GB / 30D" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_20gb_30d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="20GB / 30D" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_30gb_30d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30GB / 30D" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_50gb_30d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50GB / 30D" />
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="60 Days Packages"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_20gb_60d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="20GB / 60D" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_package_60gb_60d"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="60GB / 60D" />
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_iccid_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:hint="@string/r2w_enter_iccid">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_iccid"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="60GB / 60D" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tgt_iccid_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:hint="@string/r2w_enter_iccid">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tgt_iccid"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginTop="24dp"
+                    android:text="@string/r2w_customer_information"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/r2w_customer_information"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tgt_customer_name_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Customer name">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tgt_customer_name"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_customer_name_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginTop="8dp"
+                    android:hint="Customer name">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tgt_customer_phone_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Phone number">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_customer_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tgt_customer_phone"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_customer_phone_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="phone" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginTop="12dp"
+                    android:hint="Phone number">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/tgt_activate"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_customer_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/tgt_activate"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/r2w_activate"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tgt_esim_renewal_section"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/r2w_activate"
-                app:cornerRadius="16dp" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="TGT eSIM Renewal"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Search by ICCID to find the customer eSIM quickly before renewal."
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_text_secondary" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_esim_search_iccid_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:hint="Search ICCID">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_esim_search_iccid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/tgt_esim_search_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="14dp"
+                    android:text="Find TGT eSIM"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:id="@+id/tgt_esim_search_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/r2w_card"
+                    android:padding="16dp"
+                    android:text="Enter ICCID to search TGT eSIMs."
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_text_secondary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/tgt_esim_renew_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:enabled="false"
+                    android:text="Continue Renewal"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
