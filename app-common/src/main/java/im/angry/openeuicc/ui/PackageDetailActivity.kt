@@ -80,12 +80,13 @@ class PackageDetailActivity : AppCompatActivity() {
     }
 
     private fun renderDetails() {
+        val country = intent.getStringExtra(EXTRA_COUNTRY)
+        val countryCode = intent.getStringExtra(EXTRA_COUNTRY_CODE)
+        val coverage = intent.getStringExtra(EXTRA_COVERAGE)
+
         requireViewById<TextView>(R.id.package_detail_name).text = intent.getStringExtra(EXTRA_NAME)
             ?: getString(R.string.package_detail_title)
-        requireViewById<TextView>(R.id.package_detail_country).text = listOfNotNull(
-            intent.getStringExtra(EXTRA_COUNTRY),
-            intent.getStringExtra(EXTRA_COUNTRY_CODE)?.takeIf { it.isNotBlank() }
-        ).joinToString(" - ")
+        requireViewById<TextView>(R.id.package_detail_country).text = flaggedCountryDisplay(country, countryCode, coverage)
         requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
             ?: "0"
         requireViewById<TextView>(R.id.package_detail_visibility).text =
@@ -97,7 +98,7 @@ class PackageDetailActivity : AppCompatActivity() {
         setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
         setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
         setOptionalText(R.id.package_detail_network, intent.getStringExtra(EXTRA_NETWORK), R.string.package_detail_network_format)
-        setOptionalText(R.id.package_detail_coverage, intent.getStringExtra(EXTRA_COVERAGE), R.string.package_detail_coverage_format)
+        setOptionalText(R.id.package_detail_coverage, flaggedCoverageDisplay(coverage), R.string.package_detail_coverage_format)
         setOptionalText(R.id.package_detail_description, intent.getStringExtra(EXTRA_DESCRIPTION), R.string.package_detail_description_format)
     }
 
@@ -244,6 +245,45 @@ class PackageDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun flaggedCountryDisplay(country: String?, countryCode: String?, coverage: String?): String {
+        val cleanCountry = country?.takeIf { it.isNotBlank() } ?: "Global"
+        if (cleanCountry.equals("Multi-country", ignoreCase = true)) {
+            return flaggedCoverageDisplay(coverage)?.let { "🌍 Multi-country\n$it" } ?: "🌍 Multi-country"
+        }
+        val flag = countryCode?.let { codeToFlag(it) } ?: countryNameToFlag(cleanCountry) ?: "🌍"
+        val code = countryCode?.takeIf { it.isNotBlank() }?.uppercase()?.let { " - $it" }.orEmpty()
+        return "$flag $cleanCountry$code"
+    }
+
+    private fun flaggedCoverageDisplay(coverage: String?): String? {
+        val items = coverage
+            ?.split(",", "\n")
+            ?.map { it.trim() }
+            ?.filter { it.isNotBlank() }
+            ?.distinct()
+            .orEmpty()
+        if (items.isEmpty()) return null
+        return items.joinToString(", ") { name ->
+            val flag = countryNameToFlag(name) ?: codeToFlagOrNull(name) ?: "🌍"
+            "$flag $name"
+        }
+    }
+
+    private fun codeToFlagOrNull(value: String): String? {
+        val code = value.trim().uppercase()
+        return if (code.length == 2 && code.all { it in 'A'..'Z' }) codeToFlag(code) else null
+    }
+
+    private fun codeToFlag(code: String): String {
+        val normalized = code.trim().uppercase()
+        if (normalized.length != 2 || normalized.any { it !in 'A'..'Z' }) return "🌍"
+        val first = Character.codePointAt(normalized, 0) - 'A'.code + 0x1F1E6
+        val second = Character.codePointAt(normalized, 1) - 'A'.code + 0x1F1E6
+        return String(Character.toChars(first)) + String(Character.toChars(second))
+    }
+
+    private fun countryNameToFlag(name: String): String? = COUNTRY_NAME_TO_CODE[name.trim().lowercase()]?.let { codeToFlag(it) }
+
     companion object {
         private const val EXTRA_ID = "package.id"
         private const val EXTRA_PROVIDER = "package.provider"
@@ -259,6 +299,61 @@ class PackageDetailActivity : AppCompatActivity() {
         private const val EXTRA_NETWORK = "package.network"
         private const val EXTRA_COVERAGE = "package.coverage"
         private const val EXTRA_DESCRIPTION = "package.description"
+
+        private val COUNTRY_NAME_TO_CODE = mapOf(
+            "albania" to "AL",
+            "andorra" to "AD",
+            "austria" to "AT",
+            "belarus" to "BY",
+            "belgium" to "BE",
+            "bosnia and herzegovina" to "BA",
+            "bulgaria" to "BG",
+            "croatia" to "HR",
+            "cyprus" to "CY",
+            "czech republic" to "CZ",
+            "czechia" to "CZ",
+            "denmark" to "DK",
+            "estonia" to "EE",
+            "finland" to "FI",
+            "france" to "FR",
+            "germany" to "DE",
+            "greece" to "GR",
+            "hungary" to "HU",
+            "iceland" to "IS",
+            "ireland" to "IE",
+            "italy" to "IT",
+            "kosovo" to "XK",
+            "latvia" to "LV",
+            "liechtenstein" to "LI",
+            "lithuania" to "LT",
+            "luxembourg" to "LU",
+            "malta" to "MT",
+            "moldova" to "MD",
+            "monaco" to "MC",
+            "montenegro" to "ME",
+            "netherlands" to "NL",
+            "north macedonia" to "MK",
+            "norway" to "NO",
+            "poland" to "PL",
+            "portugal" to "PT",
+            "romania" to "RO",
+            "san marino" to "SM",
+            "serbia" to "RS",
+            "slovakia" to "SK",
+            "slovenia" to "SI",
+            "spain" to "ES",
+            "sweden" to "SE",
+            "switzerland" to "CH",
+            "turkey" to "TR",
+            "türkiye" to "TR",
+            "ukraine" to "UA",
+            "united kingdom" to "GB",
+            "united states" to "US",
+            "usa" to "US",
+            "canada" to "CA",
+            "australia" to "AU",
+            "global" to ""
+        )
 
         fun createIntent(context: Context, mobilePackage: MobilePackage, role: String?): Intent =
             Intent(context, PackageDetailActivity::class.java).apply {
