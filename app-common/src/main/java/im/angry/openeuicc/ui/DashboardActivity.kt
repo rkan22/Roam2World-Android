@@ -364,7 +364,7 @@ class DashboardActivity : AppCompatActivity() {
         val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
+            setBaselineAligned(false)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
