@@ -31,7 +31,7 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="190dp"
+                    android:layout_height="220dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
@@ -45,7 +45,7 @@
                         android:orientation="vertical"
                         android:paddingHorizontal="24dp"
                         android:paddingTop="24dp"
-                        android:paddingBottom="30dp">
+                        android:paddingBottom="44dp">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -59,23 +59,23 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Live Roam2World eSIM catalog with provider pricing and coverage."
+                            android:text="Find the best eSIM plan for your customer. Search, filter and compare live B2B pricing."
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="#DDEBFF" />
+                            android:textColor="#EAF2FF" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="18dp"
+                            android:layout_marginTop="20dp"
                             android:orientation="horizontal">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#22FFFFFF"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="7dp"
+                                android:backgroundTint="#26FFFFFF"
+                                android:paddingHorizontal="13dp"
+                                android:paddingVertical="8dp"
                                 android:text="Live API"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="@android:color/white"
@@ -86,10 +86,23 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#22FFFFFF"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="7dp"
-                                android:text="B2B Pricing"
+                                android:backgroundTint="#26FFFFFF"
+                                android:paddingHorizontal="13dp"
+                                android:paddingVertical="8dp"
+                                android:text="Filtered"
+                                android:textAppearance="?attr/textAppearanceLabelMedium"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/wallet_request_status_badge"
+                                android:backgroundTint="#26FFFFFF"
+                                android:paddingHorizontal="13dp"
+                                android:paddingVertical="8dp"
+                                android:text="B2B Price"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="@android:color/white"
                                 android:textStyle="bold" />
@@ -106,10 +119,10 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="-26dp"
+                        android:layout_marginTop="-38dp"
                         app:cardBackgroundColor="@color/r2w_card"
-                        app:cardCornerRadius="22dp"
-                        app:cardElevation="7dp"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="9dp"
                         app:strokeColor="@color/r2w_border"
                         app:strokeWidth="1dp">
 
@@ -118,15 +131,15 @@
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/packages_search_hint"
+                            android:hint="Search country, package, provider or ICCID-ready plan"
                             android:paddingHorizontal="14dp"
-                            android:paddingTop="6dp"
-                            android:paddingBottom="6dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
                             app:boxBackgroundColor="@color/r2w_card"
-                            app:boxCornerRadiusBottomEnd="18dp"
-                            app:boxCornerRadiusBottomStart="18dp"
-                            app:boxCornerRadiusTopEnd="18dp"
-                            app:boxCornerRadiusTopStart="18dp"
+                            app:boxCornerRadiusBottomEnd="20dp"
+                            app:boxCornerRadiusBottomStart="20dp"
+                            app:boxCornerRadiusTopEnd="20dp"
+                            app:boxCornerRadiusTopStart="20dp"
                             app:endIconMode="clear_text"
                             app:startIconDrawable="@drawable/ic_packages"
                             app:strokeColor="@color/r2w_border">
@@ -153,7 +166,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="26dp"
+                        android:layout_marginTop="24dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -162,7 +175,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Featured Packages"
+                            android:text="Recommended Plans"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="@color/r2w_text_primary"
                             android:textStyle="bold" />
@@ -170,8 +183,12 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Priority"
-                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:background="@drawable/wallet_request_status_badge"
+                            android:backgroundTint="#EAF2FF"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="7dp"
+                            android:text="Best Match"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="@color/r2w_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -188,7 +205,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="28dp"
-                        android:text="All Live Plans"
+                        android:text="All Store Packages"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="@color/r2w_text_primary"
                         android:textStyle="bold" />
@@ -200,7 +217,7 @@
                         android:layout_marginTop="12dp"
                         android:background="@color/r2w_card"
                         android:padding="18dp"
-                        android:text="@string/packages_empty"
+                        android:text="No matching packages found. Try clearing filters or searching another country."
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@color/r2w_text_secondary"
                         android:visibility="gone" />
