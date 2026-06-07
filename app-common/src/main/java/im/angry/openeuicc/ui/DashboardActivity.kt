@@ -14,12 +14,14 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileDashboardData
 import im.angry.openeuicc.auth.MobileDashboardOrder
+import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -29,12 +31,15 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 
 class DashboardActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private lateinit var scroll: View
+    private lateinit var content: LinearLayout
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var progress: LinearProgressIndicator
     private lateinit var greeting: TextView
@@ -42,6 +47,9 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var balance: TextView
     private lateinit var activeEsims: TextView
     private lateinit var ordersSummary: TextView
+    private lateinit var expiredSoonCard: MaterialCardView
+    private lateinit var expiredSoonValue: TextView
+    private lateinit var expiredSoonSubtitle: TextView
     private lateinit var dealerSummaryCard: View
     private lateinit var dealerSummary: TextView
     private lateinit var manageDealers: MaterialButton
@@ -57,6 +65,7 @@ class DashboardActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.dashboard_title)
 
         scroll = requireViewById(R.id.dashboard_scroll)
+        content = requireViewById(R.id.dashboard_content)
         bottomNav = requireViewById(R.id.dashboard_bottom_nav)
         progress = requireViewById(R.id.dashboard_progress)
         greeting = requireViewById(R.id.dashboard_greeting)
@@ -72,6 +81,7 @@ class DashboardActivity : AppCompatActivity() {
 
         setupInsets()
         setupBottomNavigation()
+        setupDashboardAdditions()
         setupQuickActions()
         renderPlaceholders()
         authApi.logMobileEndpointConfiguration()
@@ -163,6 +173,11 @@ class DashboardActivity : AppCompatActivity() {
         bottomNav.selectedItemId = R.id.nav_dashboard
     }
 
+    private fun setupDashboardAdditions() {
+        addExpiredSoonKpiCard()
+        addRenewalQuickActions()
+    }
+
     private fun setupQuickActions() {
         requireViewById<MaterialButton>(R.id.dashboard_browse_packages).setOnClickListener {
             openPackagesActivity()
@@ -184,6 +199,8 @@ class DashboardActivity : AppCompatActivity() {
         balance.text = "--"
         activeEsims.text = "--"
         ordersSummary.text = "--"
+        expiredSoonValue.text = "--"
+        expiredSoonSubtitle.text = "Loading expiring eSIMs"
         dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
         dealerSummaryCard.visibility = View.GONE
         manageDealers.visibility = View.GONE
@@ -200,6 +217,9 @@ class DashboardActivity : AppCompatActivity() {
             val result = runCatching {
                 authApi.dashboard(session)
             }
+            val esimsResult = runCatching {
+                authApi.esims(session).esims
+            }
             setLoading(false)
 
             result
@@ -208,6 +228,7 @@ class DashboardActivity : AppCompatActivity() {
                     error.text = it.message ?: getString(R.string.dashboard_load_failed)
                     error.visibility = View.VISIBLE
                 }
+            esimsResult.onSuccess { renderExpiredSoon(it) }
         }
     }
 
@@ -249,6 +270,25 @@ class DashboardActivity : AppCompatActivity() {
         renderOrders(data.recentOrders)
     }
 
+    private fun renderExpiredSoon(esimData: List<MobileEsim>) {
+        val now = OffsetDateTime.now()
+        val expiring = esimData.mapNotNull { esim ->
+            val expires = esim.expiresAt?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() } ?: return@mapNotNull null
+            val days = ChronoUnit.DAYS.between(now, expires)
+            if (days in 0..7 && esim.status?.equals("expired", ignoreCase = true) != true) esim to days else null
+        }.sortedBy { it.second }
+
+        expiredSoonValue.text = expiring.size.toString()
+        expiredSoonSubtitle.text = if (expiring.isEmpty()) {
+            "No eSIMs expiring in 7 days"
+        } else {
+            expiring.take(3).joinToString("\n") { (esim, days) ->
+                val label = esim.iccid?.takeLast(6)?.let { "*$it" } ?: esim.title()
+                "$label - ${days.coerceAtLeast(0)}d left"
+            }
+        }
+    }
+
     private fun renderOrders(orderData: List<MobileDashboardOrder>) {
         orders.removeAllViews()
         if (orderData.isEmpty()) {
@@ -276,6 +316,82 @@ class DashboardActivity : AppCompatActivity() {
             orders.addView(item)
         }
     }
+
+    private fun addExpiredSoonKpiCard() {
+        val parent = activeEsims.parent?.parent?.parent as? LinearLayout ?: return
+        expiredSoonCard = MaterialCardView(this).apply {
+            radius = dp(18).toFloat()
+            cardElevation = dp(3).toFloat()
+            strokeWidth = dp(1)
+            setStrokeColor(getColor(R.color.r2w_border))
+            setCardBackgroundColor(getColor(R.color.r2w_card))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = dp(14)
+            }
+        }
+        val body = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+        }
+        body.addView(TextView(this).apply {
+            text = "Expired Soon"
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+        })
+        expiredSoonValue = TextView(this).apply {
+            text = "--"
+            setPadding(0, dp(6), 0, 0)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(getColor(R.color.r2w_text_primary))
+        }
+        body.addView(expiredSoonValue)
+        expiredSoonSubtitle = TextView(this).apply {
+            text = "Loading expiring eSIMs"
+            setPadding(0, dp(4), 0, 0)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+        }
+        body.addView(expiredSoonSubtitle)
+        expiredSoonCard.addView(body)
+        parent.addView(expiredSoonCard)
+    }
+
+    private fun addRenewalQuickActions() {
+        val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            baselineAligned = false
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(12) }
+        }
+        row.addView(createQuickActionButton("TGT\nRecharge") {
+            startActivity(Intent(this, TgtSimRechargeActivity::class.java))
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        row.addView(createQuickActionButton("Vodafone\nRenewal") {
+            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        quickActions.addView(row)
+    }
+
+    private fun createQuickActionButton(label: String, action: () -> Unit): MaterialButton =
+        MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+            text = label
+            gravity = android.view.Gravity.CENTER
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+            setTextColor(getColor(R.color.r2w_text_primary))
+            cornerRadius = dp(20)
+            icon = getDrawable(R.drawable.ic_packages)
+            iconGravity = MaterialButton.ICON_GRAVITY_TOP
+            iconPadding = dp(6)
+            strokeColor = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_border))
+            setOnClickListener { action() }
+        }
 
     private fun setLoading(loading: Boolean) {
         progress.visibility = if (loading) View.VISIBLE else View.GONE
@@ -351,6 +467,8 @@ class DashboardActivity : AppCompatActivity() {
         )
         finish()
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     companion object {
         const val META_ESIM_ACTIVITY = "im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
