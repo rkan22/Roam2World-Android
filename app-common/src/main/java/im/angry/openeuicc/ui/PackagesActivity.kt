@@ -272,7 +272,6 @@ class PackagesActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, 0, 0, dp(10))
         }
-        }
 
         titleRow.addView(
             TextView(this).apply {
@@ -302,40 +301,66 @@ class PackagesActivity : AppCompatActivity() {
                 }
             )
         }
+
         parent.addView(titleRow)
 
         val rowOne = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
         }
-        rowOne.addView(createFilterButton("Region", selectedRegion) {
-            showFilterDialog("Region", REGION_FILTERS, selectedRegion) { selectedRegion = it }
-        }, filterButtonParams(end = 6))
-        rowOne.addView(createFilterButton("Provider", selectedProvider) {
-            showFilterDialog("Provider", PROVIDER_FILTERS, selectedProvider) { selectedProvider = it }
-        }, filterButtonParams(start = 6))
+
+        rowOne.addView(
+            createFilterButton("Region", selectedRegion) {
+                showFilterDialog("Region", REGION_FILTERS, selectedRegion) {
+                    selectedRegion = it
+                }
+            },
+            filterButtonParams(end = 6)
+        )
+
+        rowOne.addView(
+            createFilterButton("Provider", selectedProvider) {
+                showFilterDialog("Provider", PROVIDER_FILTERS, selectedProvider) {
+                    selectedProvider = it
+                }
+            },
+            filterButtonParams(start = 6)
+        )
+
         parent.addView(rowOne)
 
         val rowTwo = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
             setPadding(0, dp(10), 0, dp(12))
         }
-        rowTwo.addView(createFilterButton("Data", selectedData) {
-            showFilterDialog("Data", DATA_FILTERS, selectedData) { selectedData = it }
-        }, filterButtonParams(end = 6))
-        rowTwo.addView(createFilterButton("Validity", selectedValidity) {
-            showFilterDialog("Validity", VALIDITY_FILTERS, selectedValidity) { selectedValidity = it }
-        }, filterButtonParams(start = 6))
+
+        rowTwo.addView(
+            createFilterButton("Data", selectedData) {
+                showFilterDialog("Data", DATA_FILTERS, selectedData) {
+                    selectedData = it
+                }
+            },
+            filterButtonParams(end = 6)
+        )
+
+        rowTwo.addView(
+            createFilterButton("Validity", selectedValidity) {
+                showFilterDialog("Validity", VALIDITY_FILTERS, selectedValidity) {
+                    selectedValidity = it
+                }
+            },
+            filterButtonParams(start = 6)
+        )
+
         parent.addView(rowTwo)
     }
 
-private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
-    val selected = value != FILTER_ALL
-    val anchor = window.decorView
-    val primary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorPrimary)
-    val onPrimary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnPrimary)
-    val secondaryText = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnSurfaceVariant)
+    private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
+        val selected = value != FILTER_ALL
+        val anchor = window.decorView
+        val primary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorPrimary)
+        val onPrimary = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnPrimary)
+        val secondaryText = MaterialColors.getColor(anchor, com.google.android.material.R.attr.colorOnSurfaceVariant)
+
         return TextView(this).apply {
             text = "$label: $value  ▼"
             gravity = Gravity.CENTER
@@ -345,7 +370,9 @@ private fun createFilterButton(label: String, value: String, onClick: () -> Unit
             setTextColor(if (selected) onPrimary else secondaryText)
             setPadding(dp(10), dp(10), dp(10), dp(10))
             setBackgroundResource(R.drawable.wallet_request_status_badge)
-            backgroundTintList = ColorStateList.valueOf(if (selected) primary else getColor(R.color.r2w_card))
+            backgroundTintList = ColorStateList.valueOf(
+                if (selected) primary else getColor(R.color.r2w_card)
+            )
             setOnClickListener { onClick() }
         }
     }
@@ -372,6 +399,7 @@ private fun createFilterButton(label: String, value: String, onClick: () -> Unit
         LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
             setMargins(dp(start), 0, dp(end), 0)
         }
+
 
     private fun createPackageCard(mobilePackage: MobilePackage): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
