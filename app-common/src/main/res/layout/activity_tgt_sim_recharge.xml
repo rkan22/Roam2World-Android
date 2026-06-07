@@ -239,7 +239,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Search by ICCID to find the customer eSIM quickly before renewal."
+                    android:text="Search by ICCID, select package, then submit renewal."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary" />
 
@@ -275,6 +275,106 @@
                     android:text="Enter ICCID to search TGT eSIMs."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Renewal Package"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/tgt_esim_renewal_package_group"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_esim_renewal_10gb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="10GB" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_esim_renewal_20gb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="20GB" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_esim_renewal_30gb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30GB" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/tgt_esim_renewal_50gb"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50GB" />
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Customer Information"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_esim_customer_name_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Customer name">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_esim_customer_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_esim_customer_phone_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Phone number">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_esim_customer_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tgt_esim_customer_email_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Email optional">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tgt_esim_customer_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/tgt_esim_renew_button"
