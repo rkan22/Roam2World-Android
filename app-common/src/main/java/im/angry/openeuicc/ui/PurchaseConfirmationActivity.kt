@@ -19,6 +19,9 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 
 class PurchaseConfirmationActivity : AppCompatActivity() {
     private lateinit var installButton: MaterialButton
+    private lateinit var openOpenEuiccButton: MaterialButton
+    private lateinit var viewDetailButton: MaterialButton
+    private lateinit var dashboardButton: MaterialButton
     private lateinit var installUnavailable: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,26 +30,29 @@ class PurchaseConfirmationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_purchase_confirmation)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.apply {
-            title = getString(R.string.purchase_confirmation_title)
+            title = "Purchase Successful"
             setDisplayHomeAsUpEnabled(true)
         }
 
         setupInsets()
         installButton = requireViewById(R.id.purchase_install_button)
+        openOpenEuiccButton = requireViewById(R.id.purchase_open_openeuicc_button)
+        viewDetailButton = requireViewById(R.id.purchase_view_detail_button)
+        dashboardButton = requireViewById(R.id.purchase_dashboard_button)
         installUnavailable = requireViewById(R.id.purchase_install_unavailable)
         renderConfirmation()
-        installButton.setOnClickListener {
-            launchInstallFlow()
-        }
+        installButton.setOnClickListener { launchInstallFlow() }
+        openOpenEuiccButton.setOnClickListener { openOpenEuicc() }
+        viewDetailButton.setOnClickListener { openEsimDetail() }
+        dashboardButton.setOnClickListener { openDashboard() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             android.R.id.home -> {
-                finish()
+                openDashboard()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
 
@@ -63,45 +69,57 @@ class PurchaseConfirmationActivity : AppCompatActivity() {
 
     private fun renderConfirmation() {
         requireViewById<TextView>(R.id.purchase_package_name).text =
-            intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: getString(R.string.packages_title)
-        setOptionalText(R.id.purchase_order_number, intent.getStringExtra(EXTRA_ORDER_NUMBER), R.string.purchase_order_number_format)
-        setOptionalText(R.id.purchase_order_status, intent.getStringExtra(EXTRA_STATUS), R.string.purchase_status_format)
-        setOptionalText(R.id.purchase_price, intent.getStringExtra(EXTRA_PRICE), R.string.purchase_price_format)
-        setOptionalText(R.id.purchase_balance_after, intent.getStringExtra(EXTRA_BALANCE_AFTER), R.string.purchase_balance_after_format)
-
-        setOptionalText(R.id.purchase_activation_code, intent.getStringExtra(EXTRA_LPA_CODE), R.string.purchase_activation_code_format)
-        setOptionalText(R.id.purchase_smdp, intent.getStringExtra(EXTRA_SMDP), R.string.purchase_smdp_format)
-        setOptionalText(R.id.purchase_matching_id, intent.getStringExtra(EXTRA_MATCHING_ID), R.string.purchase_matching_id_format)
-        setOptionalText(R.id.purchase_qr_code, intent.getStringExtra(EXTRA_QR_CODE), R.string.purchase_qr_code_format)
-        setOptionalText(R.id.purchase_qr_url, intent.getStringExtra(EXTRA_QR_URL), R.string.purchase_qr_url_format)
-        setOptionalText(R.id.purchase_iccid, intent.getStringExtra(EXTRA_ICCID), R.string.purchase_iccid_format)
-        setOptionalText(R.id.purchase_esim_id, intent.getStringExtra(EXTRA_ESIM_ID), R.string.purchase_esim_id_format)
+            "Package        ${intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: getString(R.string.packages_title)}"
+        setPlainText(R.id.purchase_order_number, intent.getStringExtra(EXTRA_ORDER_NUMBER), "Order No")
+        setPlainText(R.id.purchase_order_status, intent.getStringExtra(EXTRA_STATUS), "Activation")
+        setPlainText(R.id.purchase_price, intent.getStringExtra(EXTRA_PRICE), "Price")
+        setPlainText(R.id.purchase_balance_after, intent.getStringExtra(EXTRA_BALANCE_AFTER), "Balance After")
+        setPlainText(R.id.purchase_iccid, intent.getStringExtra(EXTRA_ICCID), "ICCID")
+        setPlainText(R.id.purchase_esim_id, intent.getStringExtra(EXTRA_ESIM_ID), "eSIM ID")
+        setPlainText(R.id.purchase_activation_code, intent.getStringExtra(EXTRA_LPA_CODE), "Activation Code")
+        setPlainText(R.id.purchase_smdp, intent.getStringExtra(EXTRA_SMDP), "SM-DP+")
+        setPlainText(R.id.purchase_matching_id, intent.getStringExtra(EXTRA_MATCHING_ID), "Matching ID")
+        setPlainText(R.id.purchase_qr_code, intent.getStringExtra(EXTRA_QR_CODE), "QR")
+        setPlainText(R.id.purchase_qr_url, intent.getStringExtra(EXTRA_QR_URL), "QR URL")
 
         val canInstall = !intent.getStringExtra(EXTRA_INSTALL_CODE).isNullOrBlank()
         installButton.isEnabled = canInstall
         installUnavailable.visibility = if (canInstall) View.GONE else View.VISIBLE
     }
 
-    private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
+    private fun setPlainText(viewId: Int, value: String?, label: String) {
         requireViewById<TextView>(viewId).apply {
-            text = value?.let { getString(formatResId, it) }.orEmpty()
+            text = value?.let { "$label        $it" }.orEmpty()
             visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
         }
     }
 
     private fun launchInstallFlow() {
         val installCode = intent.getStringExtra(EXTRA_INSTALL_CODE) ?: return
-        val lpaUri = if (installCode.startsWith("LPA:", ignoreCase = true)) {
-            installCode
-        } else {
-            "LPA:$installCode"
-        }
+        val lpaUri = if (installCode.startsWith("LPA:", ignoreCase = true)) installCode else "LPA:$installCode"
         startActivity(
             DownloadWizardActivity.newIntent(this).apply {
                 action = Intent.ACTION_VIEW
                 data = lpaUri.toUri()
             }
         )
+    }
+
+    private fun openOpenEuicc() {
+        startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
+    }
+
+    private fun openEsimDetail() {
+        startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+    }
+
+    private fun openDashboard() {
+        startActivity(
+            Intent(this, DashboardActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+        )
+        finish()
     }
 
     companion object {
