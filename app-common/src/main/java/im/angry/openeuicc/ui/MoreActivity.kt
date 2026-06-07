@@ -26,6 +26,7 @@ class MoreActivity : AppCompatActivity() {
     private lateinit var esimHistory: MaterialButton
     private lateinit var openEuicc: MaterialButton
     private lateinit var tgtRecharge: MaterialButton
+    private lateinit var vodafoneRenewal: MaterialButton
     private lateinit var orders: MaterialButton
     private lateinit var reports: MaterialButton
     private lateinit var support: MaterialButton
@@ -45,6 +46,7 @@ class MoreActivity : AppCompatActivity() {
         esimHistory = requireViewById(R.id.more_esim_history)
         openEuicc = requireViewById(R.id.more_openeuicc)
         tgtRecharge = requireViewById(R.id.more_tgt_recharge)
+        vodafoneRenewal = requireViewById(R.id.more_vodafone_renewal)
         orders = requireViewById(R.id.more_orders)
         reports = requireViewById(R.id.more_reports)
         support = requireViewById(R.id.more_support)
@@ -120,6 +122,9 @@ class MoreActivity : AppCompatActivity() {
         tgtRecharge.setOnClickListener {
             startActivity(Intent(this, TgtSimRechargeActivity::class.java))
         }
+        vodafoneRenewal.setOnClickListener {
+            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
+        }
         orders.setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
@@ -153,6 +158,7 @@ class MoreActivity : AppCompatActivity() {
         esimHistory.visibility = View.VISIBLE
         openEuicc.visibility = View.VISIBLE
         tgtRecharge.visibility = View.VISIBLE
+        vodafoneRenewal.visibility = View.VISIBLE
         orders.visibility = View.VISIBLE
         reports.visibility = View.VISIBLE
         support.visibility = View.VISIBLE
