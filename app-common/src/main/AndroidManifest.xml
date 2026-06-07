@@ -38,6 +38,11 @@
             android:label="Vodafone Renewal" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.PurchaseReviewActivity"
+            android:exported="false"
+            android:label="Confirm Purchase" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
             android:label="OpenEUICC" />
@@ -73,17 +78,10 @@
             android:label="@string/download_wizard">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- Accepts URIs that begin with "lpa:" -->
-                <!-- for example: "LPA:1$..." -->
-                <!-- refs: https://www.iana.org/assignments/uri-schemes/prov/lpa -->
                 <data android:scheme="lpa" />
-                <data
-                    android:scheme="LPA"
-                    tools:ignore="AppLinkUrlError" />
+                <data android:scheme="LPA" tools:ignore="AppLinkUrlError" />
                 <data android:sspPrefix="1$" />
             </intent-filter>
         </activity>
