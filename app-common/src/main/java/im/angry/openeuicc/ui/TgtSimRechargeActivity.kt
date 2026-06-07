@@ -43,16 +43,23 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private lateinit var customerNameLayout: TextInputLayout
     private lateinit var customerPhoneLayout: TextInputLayout
     private lateinit var esimSearchIccidLayout: TextInputLayout
+    private lateinit var esimCustomerNameLayout: TextInputLayout
+    private lateinit var esimCustomerPhoneLayout: TextInputLayout
+    private lateinit var esimCustomerEmailLayout: TextInputLayout
     private lateinit var iccid: TextInputEditText
     private lateinit var customerName: TextInputEditText
     private lateinit var customerPhone: TextInputEditText
     private lateinit var esimSearchIccid: TextInputEditText
+    private lateinit var esimCustomerName: TextInputEditText
+    private lateinit var esimCustomerPhone: TextInputEditText
+    private lateinit var esimCustomerEmail: TextInputEditText
     private lateinit var esimSearchButton: MaterialButton
     private lateinit var esimRenewButton: MaterialButton
     private lateinit var esimSearchResult: TextView
     private lateinit var activate: MaterialButton
 
     private var selectedPackageName = "10GB / 30 Days"
+    private var selectedRenewalDataGb = "10"
     private var selectedRenewalEsim: MobileEsim? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,10 +78,16 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
         customerPhoneLayout = requireViewById(R.id.tgt_customer_phone_layout)
         esimSearchIccidLayout = requireViewById(R.id.tgt_esim_search_iccid_layout)
+        esimCustomerNameLayout = requireViewById(R.id.tgt_esim_customer_name_layout)
+        esimCustomerPhoneLayout = requireViewById(R.id.tgt_esim_customer_phone_layout)
+        esimCustomerEmailLayout = requireViewById(R.id.tgt_esim_customer_email_layout)
         iccid = requireViewById(R.id.tgt_iccid)
         customerName = requireViewById(R.id.tgt_customer_name)
         customerPhone = requireViewById(R.id.tgt_customer_phone)
         esimSearchIccid = requireViewById(R.id.tgt_esim_search_iccid)
+        esimCustomerName = requireViewById(R.id.tgt_esim_customer_name)
+        esimCustomerPhone = requireViewById(R.id.tgt_esim_customer_phone)
+        esimCustomerEmail = requireViewById(R.id.tgt_esim_customer_email)
         esimSearchButton = requireViewById(R.id.tgt_esim_search_button)
         esimRenewButton = requireViewById(R.id.tgt_esim_renew_button)
         esimSearchResult = requireViewById(R.id.tgt_esim_search_result)
@@ -83,6 +96,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         setupInsets()
         setupModeTabs()
         setupPackageSelection()
+        setupRenewalPackageSelection()
         setupActivation()
         setupEsimRenewal()
         renderSelectedPackage()
@@ -135,6 +149,19 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupRenewalPackageSelection() {
+        listOf(
+            R.id.tgt_esim_renewal_10gb to "10",
+            R.id.tgt_esim_renewal_20gb to "20",
+            R.id.tgt_esim_renewal_30gb to "30",
+            R.id.tgt_esim_renewal_50gb to "50"
+        ).forEach { (chipId, dataGb) ->
+            requireViewById<Chip>(chipId).setOnClickListener {
+                selectedRenewalDataGb = dataGb
+            }
+        }
+    }
+
     private fun setupActivation() {
         activate.setOnClickListener {
             if (!validateForm()) return@setOnClickListener
@@ -147,12 +174,13 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             searchTgtEsimForRenewal()
         }
         esimRenewButton.setOnClickListener {
+            if (!validateEsimRenewalForm()) return@setOnClickListener
             submitEsimRenewalRequest()
         }
     }
 
     private fun searchTgtEsimForRenewal() {
-        esimSearchIccidLayout.error = null
+        clearEsimRenewalErrors()
         val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
         if (query.length < 6) {
             esimSearchIccidLayout.error = "Enter ICCID or at least 6 digits"
@@ -191,7 +219,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                         esimSearchResult.text = listOf(
                             "TGT eSIM found",
                             "ICCID: ${esim.iccid.orEmpty()}",
-                            "Plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+                            "Current plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+                            "Selected renewal: ${selectedRenewalDataGb}GB",
                             "Status: ${esim.statusLabel()}"
                         ).joinToString("\n")
                         esimRenewButton.isEnabled = true
@@ -299,8 +328,14 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         val requestUrl = tgtEsimRenewalUrl()
         val body = JSONObject()
             .put("iccid", esim.iccid.orEmpty())
+            .put("renewal_data_gb", selectedRenewalDataGb)
+            .put("customer_name", esimCustomerName.text?.toString()?.trim().orEmpty())
+            .put("customer_phone", esimCustomerPhone.text?.toString()?.trim().orEmpty())
             .put("source", "android")
 
+        esimCustomerEmail.text?.toString()?.trim()?.takeIf { it.isNotBlank() }?.let {
+            body.put("email", it)
+        }
         esim.id?.takeIf { it.isNotBlank() }?.let { body.put("esim_id", it) }
 
         return postJsonRequest(
@@ -409,10 +444,45 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         return valid
     }
 
+    private fun validateEsimRenewalForm(): Boolean {
+        clearEsimRenewalErrors()
+        var valid = true
+
+        if (selectedRenewalEsim == null) {
+            esimSearchIccidLayout.error = "Find a TGT eSIM first"
+            valid = false
+        }
+
+        if (esimCustomerName.text?.toString()?.trim().isNullOrBlank()) {
+            esimCustomerNameLayout.error = "Customer name is required"
+            valid = false
+        }
+
+        if ((esimCustomerPhone.text?.toString()?.trim()?.length ?: 0) < 6) {
+            esimCustomerPhoneLayout.error = "Enter a valid phone number"
+            valid = false
+        }
+
+        val email = esimCustomerEmail.text?.toString()?.trim().orEmpty()
+        if (email.isNotBlank() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            esimCustomerEmailLayout.error = "Enter a valid email"
+            valid = false
+        }
+
+        return valid
+    }
+
     private fun clearErrors() {
         iccidLayout.error = null
         customerNameLayout.error = null
         customerPhoneLayout.error = null
+    }
+
+    private fun clearEsimRenewalErrors() {
+        esimSearchIccidLayout.error = null
+        esimCustomerNameLayout.error = null
+        esimCustomerPhoneLayout.error = null
+        esimCustomerEmailLayout.error = null
     }
 
     private fun requireNestedScrollView(): NestedScrollView =
