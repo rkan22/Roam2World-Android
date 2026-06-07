@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +17,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
+import im.angry.openeuicc.auth.MobileEsim
+import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.activityToolbarInsetHandler
@@ -30,18 +33,27 @@ import java.net.URL
 
 class TgtSimRechargeActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
+    private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private lateinit var scroll: View
+    private lateinit var simRechargeSection: LinearLayout
+    private lateinit var esimRenewalSection: LinearLayout
     private lateinit var selectedPackage: TextView
     private lateinit var iccidLayout: TextInputLayout
     private lateinit var customerNameLayout: TextInputLayout
     private lateinit var customerPhoneLayout: TextInputLayout
+    private lateinit var esimSearchIccidLayout: TextInputLayout
     private lateinit var iccid: TextInputEditText
     private lateinit var customerName: TextInputEditText
     private lateinit var customerPhone: TextInputEditText
+    private lateinit var esimSearchIccid: TextInputEditText
+    private lateinit var esimSearchButton: MaterialButton
+    private lateinit var esimRenewButton: MaterialButton
+    private lateinit var esimSearchResult: TextView
     private lateinit var activate: MaterialButton
 
     private var selectedPackageName = "10GB / 30 Days"
+    private var selectedRenewalEsim: MobileEsim? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -52,19 +64,29 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.r2w_tgt_recharge)
 
         scroll = requireNestedScrollView()
+        simRechargeSection = requireViewById(R.id.tgt_sim_recharge_section)
+        esimRenewalSection = requireViewById(R.id.tgt_esim_renewal_section)
         selectedPackage = requireViewById(R.id.tgt_selected_package)
         iccidLayout = requireViewById(R.id.tgt_iccid_layout)
         customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
         customerPhoneLayout = requireViewById(R.id.tgt_customer_phone_layout)
+        esimSearchIccidLayout = requireViewById(R.id.tgt_esim_search_iccid_layout)
         iccid = requireViewById(R.id.tgt_iccid)
         customerName = requireViewById(R.id.tgt_customer_name)
         customerPhone = requireViewById(R.id.tgt_customer_phone)
+        esimSearchIccid = requireViewById(R.id.tgt_esim_search_iccid)
+        esimSearchButton = requireViewById(R.id.tgt_esim_search_button)
+        esimRenewButton = requireViewById(R.id.tgt_esim_renew_button)
+        esimSearchResult = requireViewById(R.id.tgt_esim_search_result)
         activate = requireViewById(R.id.tgt_activate)
 
         setupInsets()
+        setupModeTabs()
         setupPackageSelection()
         setupActivation()
+        setupEsimRenewal()
         renderSelectedPackage()
+        renderMode(isEsimRenewal = false)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -81,6 +103,20 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             ),
             consume = false
         )
+    }
+
+    private fun setupModeTabs() {
+        requireViewById<Chip>(R.id.tgt_mode_sim).setOnClickListener {
+            renderMode(isEsimRenewal = false)
+        }
+        requireViewById<Chip>(R.id.tgt_mode_esim_renewal).setOnClickListener {
+            renderMode(isEsimRenewal = true)
+        }
+    }
+
+    private fun renderMode(isEsimRenewal: Boolean) {
+        simRechargeSection.visibility = if (isEsimRenewal) View.GONE else View.VISIBLE
+        esimRenewalSection.visibility = if (isEsimRenewal) View.VISIBLE else View.GONE
     }
 
     private fun setupPackageSelection() {
@@ -103,6 +139,74 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         activate.setOnClickListener {
             if (!validateForm()) return@setOnClickListener
             submitRechargeRequest()
+        }
+    }
+
+    private fun setupEsimRenewal() {
+        esimSearchButton.setOnClickListener {
+            searchTgtEsimForRenewal()
+        }
+        esimRenewButton.setOnClickListener {
+            val esim = selectedRenewalEsim ?: return@setOnClickListener
+            Toast.makeText(
+                this,
+                "TGT eSIM renewal endpoint will be connected next for ${esim.iccid.orEmpty()}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun searchTgtEsimForRenewal() {
+        esimSearchIccidLayout.error = null
+        val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
+        if (query.length < 6) {
+            esimSearchIccidLayout.error = "Enter ICCID or at least 6 digits"
+            return
+        }
+
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+            if (session == null) {
+                startActivity(
+                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    }
+                )
+                finish()
+                return@launch
+            }
+
+            setEsimSearching(true)
+            val result = runCatching {
+                withContext(Dispatchers.IO) { authApi.esims(session).esims }
+                    .firstOrNull { esim ->
+                        esim.provider?.contains("tgt", ignoreCase = true) == true &&
+                            esim.iccid?.contains(query, ignoreCase = true) == true
+                    }
+            }
+            setEsimSearching(false)
+
+            result
+                .onSuccess { esim ->
+                    selectedRenewalEsim = esim
+                    if (esim == null) {
+                        esimSearchResult.text = "No TGT eSIM found for ICCID: $query"
+                        esimRenewButton.isEnabled = false
+                    } else {
+                        esimSearchResult.text = listOf(
+                            "TGT eSIM found",
+                            "ICCID: ${esim.iccid.orEmpty()}",
+                            "Plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+                            "Status: ${esim.statusLabel()}"
+                        ).joinToString("\n")
+                        esimRenewButton.isEnabled = true
+                    }
+                }
+                .onFailure { error ->
+                    selectedRenewalEsim = null
+                    esimRenewButton.isEnabled = false
+                    esimSearchResult.text = error.message ?: "TGT eSIM search failed"
+                }
         }
     }
 
@@ -187,6 +291,15 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private fun setSubmitting(submitting: Boolean) {
         activate.isEnabled = !submitting
         activate.text = if (submitting) "Submitting..." else getString(R.string.r2w_activate)
+    }
+
+    private fun setEsimSearching(searching: Boolean) {
+        esimSearchButton.isEnabled = !searching
+        esimSearchButton.text = if (searching) "Searching..." else "Find TGT eSIM"
+        if (searching) {
+            selectedRenewalEsim = null
+            esimRenewButton.isEnabled = false
+        }
     }
 
     private fun renderSelectedPackage() {
