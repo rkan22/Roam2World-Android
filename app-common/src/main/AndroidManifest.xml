@@ -33,6 +33,11 @@
             android:label="@string/r2w_tgt_recharge" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.VodafoneRenewalActivity"
+            android:exported="false"
+            android:label="Vodafone Renewal" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
             android:label="OpenEUICC" />
