@@ -147,12 +147,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             searchTgtEsimForRenewal()
         }
         esimRenewButton.setOnClickListener {
-            val esim = selectedRenewalEsim ?: return@setOnClickListener
-            Toast.makeText(
-                this,
-                "TGT eSIM renewal endpoint will be connected next for ${esim.iccid.orEmpty()}",
-                Toast.LENGTH_LONG
-            ).show()
+            submitEsimRenewalRequest()
         }
     }
 
@@ -210,6 +205,43 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         }
     }
 
+    private fun submitEsimRenewalRequest() {
+        val esim = selectedRenewalEsim ?: return
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+            if (session == null) {
+                startActivity(
+                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    }
+                )
+                finish()
+                return@launch
+            }
+
+            setEsimRenewing(true)
+            val result = runCatching {
+                withContext(Dispatchers.IO) { postTgtEsimRenewal(session, esim) }
+            }
+            setEsimRenewing(false)
+
+            result
+                .onSuccess { message ->
+                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    esimSearchResult.text = message
+                    selectedRenewalEsim = null
+                    esimRenewButton.isEnabled = false
+                }
+                .onFailure { error ->
+                    Toast.makeText(
+                        this@TgtSimRechargeActivity,
+                        error.message ?: "TGT eSIM renewal request failed",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+        }
+    }
+
     private fun submitRechargeRequest() {
         lifecycleScope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -254,13 +286,46 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             .put("provider", "Orange Balkans")
             .put("source", "android")
 
+        return postJsonRequest(
+            requestUrl = requestUrl,
+            authorizationHeader = session.authorizationHeader,
+            body = body,
+            fallbackMessage = "TGT recharge request submitted",
+            fallbackError = "TGT recharge request failed"
+        )
+    }
+
+    private fun postTgtEsimRenewal(session: AuthSession, esim: MobileEsim): String {
+        val requestUrl = tgtEsimRenewalUrl()
+        val body = JSONObject()
+            .put("iccid", esim.iccid.orEmpty())
+            .put("source", "android")
+
+        esim.id?.takeIf { it.isNotBlank() }?.let { body.put("esim_id", it) }
+
+        return postJsonRequest(
+            requestUrl = requestUrl,
+            authorizationHeader = session.authorizationHeader,
+            body = body,
+            fallbackMessage = "TGT eSIM renewal submitted",
+            fallbackError = "TGT eSIM renewal request failed"
+        )
+    }
+
+    private fun postJsonRequest(
+        requestUrl: String,
+        authorizationHeader: String,
+        body: JSONObject,
+        fallbackMessage: String,
+        fallbackError: String
+    ): String {
         val connection = (URL(requestUrl).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 30_000
             readTimeout = 30_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Authorization", session.authorizationHeader)
+            setRequestProperty("Authorization", authorizationHeader)
             doOutput = true
         }
 
@@ -277,12 +342,12 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             if (status !in 200..299 || response?.optBoolean("success", true) == false) {
                 val message = response?.optString("message")
                     ?.takeIf { it.isNotBlank() }
+                    ?: response?.optString("error")?.takeIf { it.isNotBlank() }
                     ?: response?.optString("detail")?.takeIf { it.isNotBlank() }
-                    ?: "TGT recharge request failed with HTTP $status"
+                    ?: "$fallbackError with HTTP $status"
                 throw IllegalStateException(message)
             }
-            response?.optString("message")?.takeIf { it.isNotBlank() }
-                ?: "TGT recharge request submitted"
+            response?.optString("message")?.takeIf { it.isNotBlank() } ?: fallbackMessage
         } finally {
             connection.disconnect()
         }
@@ -302,12 +367,20 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setEsimRenewing(renewing: Boolean) {
+        esimRenewButton.isEnabled = !renewing && selectedRenewalEsim != null
+        esimRenewButton.text = if (renewing) "Submitting..." else "Continue Renewal"
+    }
+
     private fun renderSelectedPackage() {
         selectedPackage.text = "Selected package: $selectedPackageName"
     }
 
     private fun tgtRechargeUrl(): String =
         "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/recharge/"
+
+    private fun tgtEsimRenewalUrl(): String =
+        "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/esim/renew/"
 
     private fun validateForm(): Boolean {
         clearErrors()
