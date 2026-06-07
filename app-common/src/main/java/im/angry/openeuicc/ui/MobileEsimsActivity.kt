@@ -15,7 +15,6 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -181,21 +180,12 @@ class MobileEsimsActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
                 applyRoamStatusChip(esim.statusLabel(), esim.status)
             }
-            item.requireViewById<MaterialButton>(R.id.mobile_esim_renew).apply {
-                visibility = if (esim.isTgtProvider()) View.VISIBLE else View.GONE
-                setOnClickListener {
-                    startActivity(MobileEsimDetailActivity.createIntent(this@MobileEsimsActivity, esim))
-                }
-            }
             item.setOnClickListener {
                 startActivity(MobileEsimDetailActivity.createIntent(this, esim))
             }
             esims.addView(item)
         }
     }
-
-    private fun MobileEsim.isTgtProvider(): Boolean =
-        provider.equals("tgt", ignoreCase = true) || provider?.contains("tgt", ignoreCase = true) == true
 
     private fun setLoading(loading: Boolean) {
         refresh.isRefreshing = loading
