@@ -13,12 +13,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileActivationDetails
-import im.angry.openeuicc.auth.MobilePackagePurchaseRequest
-import im.angry.openeuicc.auth.MobilePackagePurchaseResult
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -28,8 +24,6 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.util.UUID
 
 class CustomerInfoActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -67,9 +61,7 @@ class CustomerInfoActivity : AppCompatActivity() {
         error = requireViewById(R.id.customer_info_error)
 
         renderPackageSummary()
-        continueButton.setOnClickListener {
-            validateAndPurchase()
-        }
+        continueButton.setOnClickListener { validateAndOpenReview() }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
@@ -104,7 +96,7 @@ class CustomerInfoActivity : AppCompatActivity() {
             intent.getStringExtra(EXTRA_PRICE) ?: "0"
     }
 
-    private fun validateAndPurchase() {
+    private fun validateAndOpenReview() {
         firstNameLayout.error = null
         lastNameLayout.error = null
         phoneLayout.error = null
@@ -129,143 +121,20 @@ class CustomerInfoActivity : AppCompatActivity() {
         }
         if (!valid) return
 
-        purchasePackage(first, last, phoneNumber)
-    }
-
-    private fun purchasePackage(customerFirstName: String, customerLastName: String, customerPhone: String) {
         lifecycleScope.launch {
             setLoading(true)
-            val session = activeSessionOrReturnToLogin()
-            if (session == null) {
-                setLoading(false)
-                return@launch
-            }
-
-            val price = intent.getStringExtra(EXTRA_PRICE) ?: "0"
-            val priceAmount = decimalAmount(price)
-            if (priceAmount == null) {
-                showPurchaseError(getString(R.string.package_purchase_price_unavailable))
-                return@launch
-            }
-
-            if (isDemoPackage()) {
-                setLoading(false)
-                startActivity(PurchaseConfirmationActivity.createIntent(this@CustomerInfoActivity, demoPurchaseResult(price)))
-                return@launch
-            }
-
-            val wallet = runCatching {
-                authApi.wallet(session)
-            }.getOrElse {
-                showPurchaseError(it.message ?: getString(R.string.package_purchase_wallet_failed))
-                return@launch
-            }
-
-            val balanceAmount = decimalAmount(wallet.currentBalance)
-            if (balanceAmount == null || balanceAmount < priceAmount) {
-                showPurchaseError(getString(R.string.package_purchase_insufficient_balance))
-                return@launch
-            }
-
-            val purchase = runCatching {
-                authApi.purchasePackage(
-                    session,
-                    MobilePackagePurchaseRequest(
-                        packageId = intent.getStringExtra(EXTRA_ID),
-                        provider = intent.getStringExtra(EXTRA_PROVIDER),
-                        packageName = intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title),
-                        packageDescription = intent.getStringExtra(EXTRA_DESCRIPTION),
-                        country = intent.getStringExtra(EXTRA_COUNTRY),
-                        price = price,
-                        role = intent.getStringExtra(EXTRA_ROLE),
-                        customerFirstName = customerFirstName,
-                        customerLastName = customerLastName,
-                        customerPhone = customerPhone
-                    )
-                )
-            }
-
+            val currentBalance = runCatching {
+                val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+                if (session == null || JwtUtils.isExpired(session.accessToken)) null else authApi.wallet(session).currentBalance
+            }.getOrNull()
             setLoading(false)
-            purchase
-                .onSuccess {
-                    startActivity(PurchaseConfirmationActivity.createIntent(this@CustomerInfoActivity, it))
-                }
-                .onFailure {
-                    error.text = it.message ?: getString(R.string.package_purchase_failed)
-                    error.visibility = View.VISIBLE
-                }
+            startActivity(PurchaseReviewActivity.createIntent(this@CustomerInfoActivity, intent, first, last, phoneNumber, currentBalance))
         }
-    }
-
-    private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) {
-            tokenStore.getSession()
-        } ?: return redirectToLogin()
-
-        if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
-
-        val refreshed = runCatching {
-            authApi.refresh(savedSession)
-        }.getOrNull() ?: return redirectToLogin()
-
-        withContext(Dispatchers.IO) {
-            tokenStore.save(refreshed)
-        }
-        return refreshed
-    }
-
-    private fun showPurchaseError(message: String) {
-        setLoading(false)
-        error.text = message
-        error.visibility = View.VISIBLE
     }
 
     private fun setLoading(loading: Boolean) {
         continueButton.isEnabled = !loading
         progress.visibility = if (loading) View.VISIBLE else View.GONE
-    }
-
-    private fun decimalAmount(value: String?): BigDecimal? {
-        val normalized = value
-            ?.trim()
-            ?.replace(",", ".")
-            ?.replace(Regex("[^0-9.-]"), "")
-            ?.takeIf { it.isNotBlank() }
-        return normalized?.toBigDecimalOrNull()
-    }
-
-    private fun isDemoPackage(): Boolean =
-        intent.getStringExtra(EXTRA_ID)?.startsWith("demo-") == true
-
-    private fun demoPurchaseResult(price: String): MobilePackagePurchaseResult =
-        MobilePackagePurchaseResult(
-            orderId = "demo-${UUID.randomUUID()}",
-            orderNumber = "DEMO-${System.currentTimeMillis().toString().takeLast(6)}",
-            status = "demo_success",
-            packageName = intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title),
-            price = price,
-            balanceAfter = null,
-            activation = MobileActivationDetails(
-                lpaCode = null,
-                smdpAddress = null,
-                matchingId = null,
-                confirmationCodeRequired = false,
-                qrCode = null,
-                qrCodeUrl = null,
-                iccid = "DEMO-ICCID",
-                esimId = intent.getStringExtra(EXTRA_ID)
-            )
-        )
-
-    private fun redirectToLogin(): AuthSession? {
-        tokenStore.clear()
-        startActivity(
-            Intent(this, LoginActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-        )
-        finish()
-        return null
     }
 
     companion object {
