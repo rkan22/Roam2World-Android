@@ -101,6 +101,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         setupEsimRenewal()
         renderSelectedPackage()
         renderMode(isEsimRenewal = false)
+        applyPrefilledIccid()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -131,6 +132,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private fun renderMode(isEsimRenewal: Boolean) {
         simRechargeSection.visibility = if (isEsimRenewal) View.GONE else View.VISIBLE
         esimRenewalSection.visibility = if (isEsimRenewal) View.VISIBLE else View.GONE
+        requireViewById<Chip>(R.id.tgt_mode_sim).isChecked = !isEsimRenewal
+        requireViewById<Chip>(R.id.tgt_mode_esim_renewal).isChecked = isEsimRenewal
     }
 
     private fun setupPackageSelection() {
@@ -179,6 +182,18 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         }
     }
 
+    private fun applyPrefilledIccid() {
+        val prefilled = intent.getStringExtra(EXTRA_RENEW_ICCID)
+            ?: intent.getStringExtra(EXTRA_ICCID)
+            ?: return
+        if (prefilled.isBlank()) return
+        renderMode(isEsimRenewal = true)
+        esimSearchIccid.setText(prefilled)
+        esimSearchIccid.setSelection(esimSearchIccid.text?.length ?: 0)
+        esimSearchResult.text = "Searching TGT eSIM for ICCID: $prefilled"
+        esimSearchIccid.post { searchTgtEsimForRenewal() }
+    }
+
     private fun searchTgtEsimForRenewal() {
         clearEsimRenewalErrors()
         val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
@@ -216,13 +231,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                         esimSearchResult.text = "No TGT eSIM found for ICCID: $query"
                         esimRenewButton.isEnabled = false
                     } else {
-                        esimSearchResult.text = listOf(
-                            "TGT eSIM found",
-                            "ICCID: ${esim.iccid.orEmpty()}",
-                            "Current plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
-                            "Selected renewal: ${selectedRenewalDataGb}GB",
-                            "Status: ${esim.statusLabel()}"
-                        ).joinToString("\n")
+                        renderFoundTgtEsim(esim)
                         esimRenewButton.isEnabled = true
                     }
                 }
@@ -232,6 +241,16 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                     esimSearchResult.text = error.message ?: "TGT eSIM search failed"
                 }
         }
+    }
+
+    private fun renderFoundTgtEsim(esim: MobileEsim) {
+        esimSearchResult.text = listOf(
+            "TGT eSIM found",
+            "ICCID: ${esim.iccid.orEmpty()}",
+            "Current plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+            "Selected renewal: ${selectedRenewalDataGb}GB",
+            "Status: ${esim.statusLabel()}"
+        ).joinToString("\n")
     }
 
     private fun submitEsimRenewalRequest() {
@@ -497,5 +516,10 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             }
         }
         return null
+    }
+
+    private companion object {
+        const val EXTRA_RENEW_ICCID = "renew.iccid"
+        const val EXTRA_ICCID = "iccid"
     }
 }
