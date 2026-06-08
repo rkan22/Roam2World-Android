@@ -40,9 +40,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="Customer records from mobile eSIM purchases"
+                    android:text="Search customer name, phone or ICCID"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/customers_search_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:hint="Search name, phone, ICCID or package"
+                    app:endIconMode="clear_text"
+                    app:startIconDrawable="@drawable/ic_person">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/customers_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:id="@+id/customers_error"
@@ -60,7 +79,7 @@
                     android:layout_marginTop="18dp"
                     android:background="@color/r2w_card"
                     android:padding="18dp"
-                    android:text="No customers found yet. New purchases with customer info will appear here."
+                    android:text="No customers found. Try another name, phone or ICCID."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary"
                     android:visibility="gone" />
