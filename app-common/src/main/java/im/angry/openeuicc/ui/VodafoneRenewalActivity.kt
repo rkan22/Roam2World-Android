@@ -75,6 +75,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         setupInsets()
         setupPackageSelection()
         setupActions()
+        applyPrefilledIccid()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -112,6 +113,17 @@ class VodafoneRenewalActivity : AppCompatActivity() {
             if (!validateForm()) return@setOnClickListener
             submitRenewal()
         }
+    }
+
+    private fun applyPrefilledIccid() {
+        val prefilled = intent.getStringExtra(EXTRA_RENEW_ICCID)
+            ?: intent.getStringExtra(EXTRA_ICCID)
+            ?: return
+        if (prefilled.isBlank()) return
+        searchIccid.setText(prefilled)
+        searchIccid.setSelection(searchIccid.text?.length ?: 0)
+        searchResult.text = "Searching Vodafone eSIM for ICCID: $prefilled"
+        searchIccid.post { searchVodafoneEsim() }
     }
 
     private fun searchVodafoneEsim() {
@@ -344,4 +356,9 @@ class VodafoneRenewalActivity : AppCompatActivity() {
 
     private fun vodafoneRenewalUrl(): String =
         "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/airhub/vodafone/renew/"
+
+    private companion object {
+        const val EXTRA_RENEW_ICCID = "renew.iccid"
+        const val EXTRA_ICCID = "iccid"
+    }
 }
