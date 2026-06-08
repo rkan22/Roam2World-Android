@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base style plus Roam2World shape scale. Parentless styles keep this compatible across Material Components versions. -->
+    <!-- Base styles plus Roam2World shape scale. Parentless styles keep this compatible across Material Components versions. -->
+
+    <style name="ShapeAppearance">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 
     <style name="ShapeAppearance.Roam2World">
         <item name="cornerFamily">rounded</item>
