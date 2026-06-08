@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material 3 Shape Scale - Roam2World -->
+    <!-- Roam2World shape scale. Keep these parentless so they work across Material Components versions. -->
 
-    <!-- Small Component: 4dp corner radius -->
-    <style name="ShapeAppearance.Roam2World.Small" parent="ShapeAppearance.Material3.Small">
+    <style name="ShapeAppearance.Roam2World.Small">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">4dp</item>
     </style>
 
-    <!-- Medium Component: 8dp corner radius -->
-    <style name="ShapeAppearance.Roam2World.Medium" parent="ShapeAppearance.Material3.Medium">
+    <style name="ShapeAppearance.Roam2World.Medium">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
 
-    <!-- Large Component: 12dp corner radius -->
-    <style name="ShapeAppearance.Roam2World.Large" parent="ShapeAppearance.Material3.Large">
+    <style name="ShapeAppearance.Roam2World.Large">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>
     </style>
 
-    <!-- Extra Large: 16dp corner radius -->
-    <style name="ShapeAppearance.Roam2World.ExtraLarge" parent="ShapeAppearance.Material3.ExtraLarge">
+    <style name="ShapeAppearance.Roam2World.ExtraLarge">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
     </style>
