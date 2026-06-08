@@ -30,8 +30,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -586,24 +584,32 @@ private fun DashboardBottomBar(
     onWallet: () -> Unit,
     onMore: () -> Unit
 ) {
-    NavigationBar(
-        modifier = Modifier.navigationBarsPadding(),
-        containerColor = Color.White
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .background(Color.White)
+            .padding(horizontal = 6.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        BottomItem(DashboardTab.Dashboard, selectedTab, "⌂", onDashboard)
-        BottomItem(DashboardTab.Esims, selectedTab, "SIM", onEsims)
-        BottomItem(DashboardTab.Store, selectedTab, "+", onStore)
-        BottomItem(DashboardTab.Wallet, selectedTab, "$", onWallet)
-        BottomItem(DashboardTab.More, selectedTab, "...", onMore)
+        BottomItem(DashboardTab.Dashboard, selectedTab, onDashboard, Modifier.weight(1f))
+        BottomItem(DashboardTab.Esims, selectedTab, onEsims, Modifier.weight(1f))
+        BottomItem(DashboardTab.Store, selectedTab, onStore, Modifier.weight(1f))
+        BottomItem(DashboardTab.Wallet, selectedTab, onWallet, Modifier.weight(1f))
+        BottomItem(DashboardTab.More, selectedTab, onMore, Modifier.weight(1f))
     }
 }
 
 @Composable
-private fun BottomItem(tab: DashboardTab, selectedTab: DashboardTab, iconText: String, onClick: () -> Unit) {
-    NavigationBarItem(
-        selected = selectedTab == tab,
-        onClick = onClick,
-        icon = { Text(iconText, fontWeight = FontWeight.Bold) },
-        label = { Text(tab.label) }
-    )
+private fun BottomItem(tab: DashboardTab, selectedTab: DashboardTab, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(onClick = onClick, modifier = modifier) {
+        Text(
+            text = tab.label,
+            color = if (selectedTab == tab) DashboardBlue else DashboardMuted,
+            fontWeight = if (selectedTab == tab) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
