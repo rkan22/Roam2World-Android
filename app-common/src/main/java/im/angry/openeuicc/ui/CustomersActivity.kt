@@ -151,13 +151,7 @@ class CustomersActivity : AppCompatActivity() {
 
     private fun applySearch() {
         val query = search.text?.toString()?.trim().orEmpty().lowercase()
-        val filtered = if (query.isBlank()) {
-            allCustomers
-        } else {
-            allCustomers.filter { customer ->
-                customer.searchText().lowercase().contains(query)
-            }
-        }
+        val filtered = if (query.isBlank()) allCustomers else allCustomers.filter { it.searchText().lowercase().contains(query) }
         renderCustomers(filtered)
     }
 
@@ -293,7 +287,7 @@ class CustomersActivity : AppCompatActivity() {
 
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            baselineAligned = false
+            setBaselineAligned(false)
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(14) }
         }
         row.addView(button("View Details") { showCustomerDetails(customer) }, LinearLayout.LayoutParams(0, dp(48), 1f).apply { rightMargin = dp(6) })
@@ -336,7 +330,7 @@ class CustomersActivity : AppCompatActivity() {
             ).apply { setPadding(0, dp(8), 0, 0) })
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
-                baselineAligned = false
+                setBaselineAligned(false)
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(10) }
             }
             row.addView(button("QR / Detail") { openEsimDetail(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { rightMargin = dp(5) })
