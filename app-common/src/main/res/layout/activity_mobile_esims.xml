@@ -67,10 +67,16 @@
                     app:singleSelection="true">
 
                     <com.google.android.material.chip.Chip
-                        android:id="@+id/mobile_esims_tab_active"
+                        android:id="@+id/mobile_esims_tab_all"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
+                        android:text="All" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_active"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="Active" />
 
                     <com.google.android.material.chip.Chip
@@ -84,12 +90,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Expired" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/mobile_esims_tab_all"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="All" />
                 </com.google.android.material.chip.ChipGroup>
 
                 <TextView
@@ -108,7 +108,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@color/r2w_card"
                     android:padding="18dp"
-                    android:text="No matching eSIMs found. Try another status tab or search term."
+                    android:text="No matching eSIMs found. Try clearing search or another status tab."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary"
                     android:visibility="gone" />
