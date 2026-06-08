@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -48,6 +49,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     private lateinit var copyActivationButton: MaterialButton
     private lateinit var copySmdpButton: MaterialButton
     private lateinit var showQrButton: MaterialButton
+    private lateinit var renewButton: MaterialButton
     private lateinit var installButton: MaterialButton
     private lateinit var installUnavailable: TextView
 
@@ -73,6 +75,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         showQrButton = requireViewById(R.id.mobile_esim_show_qr)
         installButton = requireViewById(R.id.mobile_esim_install_button)
         installUnavailable = requireViewById(R.id.mobile_esim_install_unavailable)
+        renewButton = createRenewButton()
 
         setupInsets()
         renderEsim(readIntentEsim())
@@ -98,6 +101,21 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             ),
             consume = false
         )
+    }
+
+    private fun createRenewButton(): MaterialButton {
+        val parent = installButton.parent as LinearLayout
+        val button = MaterialButton(this).apply {
+            text = "Renew eSIM"
+            visibility = View.GONE
+            cornerRadius = dp(28)
+            icon = getDrawable(R.drawable.ic_packages)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(56)).apply {
+                topMargin = dp(20)
+            }
+        }
+        parent.addView(button, parent.indexOfChild(installButton))
+        return button
     }
 
     private fun loadLatestDetails() {
@@ -217,6 +235,9 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             startActivity(MobileEsimQrActivity.createIntent(this, esim))
         }
 
+        renewButton.visibility = if (canRenew(esim)) View.VISIBLE else View.GONE
+        renewButton.setOnClickListener { openRenewal(esim) }
+
         val installCode = esim.installCode()
         installButton.isEnabled = !installCode.isNullOrBlank()
         installUnavailable.visibility = if (installCode.isNullOrBlank()) View.VISIBLE else View.GONE
@@ -231,6 +252,27 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             return
         }
         startActivity(MobileEsimInstallActivity.createIntent(this, esim))
+    }
+
+    private fun canRenew(esim: MobileEsim): Boolean {
+        val status = realStatus(esim).raw
+        if (status == "expired") return false
+        val provider = esim.provider.orEmpty().lowercase()
+        return provider.contains("tgt") || provider.contains("airhub") || provider.contains("vodafone")
+    }
+
+    private fun openRenewal(esim: MobileEsim) {
+        esim.iccid?.takeIf { it.isNotBlank() }?.let {
+            getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("ICCID", it))
+            Toast.makeText(this, "ICCID copied for renewal", Toast.LENGTH_SHORT).show()
+        }
+        val provider = esim.provider.orEmpty().lowercase()
+        val target = if (provider.contains("airhub") || provider.contains("vodafone")) {
+            VodafoneRenewalActivity::class.java
+        } else {
+            TgtSimRechargeActivity::class.java
+        }
+        startActivity(Intent(this, target).apply { putExtra("renew.iccid", esim.iccid) })
     }
 
     private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
@@ -312,6 +354,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         finish()
         return null
     }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun readIntentEsim(): MobileEsim? =
         if (listOf(
