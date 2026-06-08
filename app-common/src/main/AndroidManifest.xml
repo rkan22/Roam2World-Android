@@ -18,6 +18,11 @@
             android:label="@string/r2w_more" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.CustomersActivity"
+            android:exported="false"
+            android:label="Customers" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.ProfileActivity"
             android:exported="false"
             android:label="@string/r2w_profile" />
