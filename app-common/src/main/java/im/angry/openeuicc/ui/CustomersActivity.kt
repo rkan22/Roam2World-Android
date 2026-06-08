@@ -1,5 +1,7 @@
 package im.angry.openeuicc.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -8,6 +10,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -334,8 +337,11 @@ class CustomersActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(10) }
             }
             row.addView(button("QR / Detail") { openEsimDetail(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { rightMargin = dp(5) })
-            row.addView(button("Renew") { openRenewal(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { leftMargin = dp(5) })
+            row.addView(button("Copy ICCID") { copyIccid(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { leftMargin = dp(5) })
             body.addView(row)
+            body.addView(button("Renew") { openRenewal(record) }.apply {
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(44)).apply { topMargin = dp(8) }
+            })
             card.addView(body)
             content.addView(card)
         }
@@ -367,6 +373,7 @@ class CustomersActivity : AppCompatActivity() {
     }
 
     private fun openRenewal(record: CustomerEsimRecord) {
+        copyIccid(record, forRenewal = true)
         val provider = record.provider.orEmpty().lowercase()
         val target = if (provider.contains("airhub") || provider.contains("vodafone")) {
             VodafoneRenewalActivity::class.java
@@ -374,6 +381,21 @@ class CustomersActivity : AppCompatActivity() {
             TgtSimRechargeActivity::class.java
         }
         startActivity(Intent(this, target).apply { putExtra("renew.iccid", record.iccid) })
+    }
+
+    private fun copyIccid(record: CustomerEsimRecord, forRenewal: Boolean = false) {
+        val value = record.iccid?.takeIf { it.isNotBlank() }
+        if (value == null) {
+            Toast.makeText(this, "ICCID not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+        getSystemService(ClipboardManager::class.java)
+            .setPrimaryClip(ClipData.newPlainText("ICCID", value))
+        Toast.makeText(
+            this,
+            if (forRenewal) "ICCID copied for renewal" else "ICCID copied",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun isExpired(record: CustomerEsimRecord): Boolean {
