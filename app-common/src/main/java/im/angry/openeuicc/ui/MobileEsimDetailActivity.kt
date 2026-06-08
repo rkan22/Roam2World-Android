@@ -34,6 +34,7 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
 
 class MobileEsimDetailActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -150,11 +151,12 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             return
         }
 
+        val displayStatus = realStatus(esim)
         requireViewById<TextView>(R.id.mobile_esim_detail_title).text = esim.title()
         setOptionalText(R.id.mobile_esim_detail_iccid, esim.iccid, R.string.mobile_esim_iccid_format)
         requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(esim.provider)
         setOptionalText(R.id.mobile_esim_detail_package, esim.packageName, R.string.mobile_esim_package_format)
-        requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(esim.statusLabel(), esim.status)
+        requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(displayStatus.label, displayStatus.raw)
         setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
         setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)
         setOptionalText(R.id.mobile_esim_detail_matching_id, esim.matchingId, R.string.mobile_esim_matching_id_format)
@@ -237,6 +239,39 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
         }
     }
+
+    private fun realStatus(esim: MobileEsim): DisplayStatus {
+        val raw = esim.status.orEmpty().trim()
+        val normalized = raw.lowercase()
+        val expiresAt = parseDate(esim.expiresAt)
+        val isExpiredByDate = expiresAt?.isBefore(OffsetDateTime.now()) == true
+        val hasIccid = !esim.iccid.isNullOrBlank()
+        val hasInstallCode = !esim.installCode().isNullOrBlank() || !esim.qrPayload().isNullOrBlank()
+
+        return when {
+            normalized.contains("expired") || normalized.contains("depleted") || normalized.contains("terminated") || isExpiredByDate ->
+                DisplayStatus("Expired", "expired")
+            normalized.contains("active") || normalized.contains("activated") || normalized.contains("enabled") ->
+                DisplayStatus("Active", "active")
+            normalized.contains("pending") || normalized.contains("processing") || normalized.contains("waiting") || normalized.contains("ordered") ->
+                DisplayStatus("Pending", "pending")
+            hasIccid && hasInstallCode && expiresAt != null ->
+                DisplayStatus("Ready", "ready")
+            hasIccid && expiresAt != null ->
+                DisplayStatus("Active", "active")
+            hasIccid && hasInstallCode ->
+                DisplayStatus("Ready", "ready")
+            hasInstallCode ->
+                DisplayStatus("Ready to Install", "ready")
+            hasIccid ->
+                DisplayStatus("Provisioned", raw.ifBlank { "provisioned" })
+            else ->
+                DisplayStatus("Pending", "pending")
+        }
+    }
+
+    private fun parseDate(value: String?): OffsetDateTime? =
+        value?.takeIf { it.isNotBlank() }?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() }
 
     private fun copyToClipboard(label: String, value: String?, toastResId: Int) {
         if (value.isNullOrBlank()) return
@@ -325,6 +360,11 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             orderNumber to other.orderNumber,
             orderId to other.orderId
         ).any { (left, right) -> !left.isNullOrBlank() && left == right }
+
+    private data class DisplayStatus(
+        val label: String,
+        val raw: String
+    )
 
     companion object {
         private const val QR_SIZE = 720
