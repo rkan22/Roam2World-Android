@@ -33,6 +33,7 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
 
 class MobileEsimsActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -211,14 +212,15 @@ class MobileEsimsActivity : AppCompatActivity() {
     private fun applyFilters() {
         val query = search.text?.toString()?.trim().orEmpty().lowercase()
         val filtered = allEsims
-            .filter { selectedFilter.matches(it) }
+            .filter { selectedFilter.matches(realStatus(it)) }
             .filter { esim ->
                 query.isBlank() || listOfNotNull(
                     esim.iccid,
                     esim.provider,
                     esim.packageName,
                     esim.orderNumber,
-                    esim.status
+                    esim.status,
+                    realStatus(it = esim).label
                 ).any { it.lowercase().contains(query) }
             }
         renderEsims(filtered)
@@ -232,22 +234,23 @@ class MobileEsimsActivity : AppCompatActivity() {
         val inflater = LayoutInflater.from(this)
         esimData.forEach { esim ->
             val item = inflater.inflate(R.layout.mobile_esim_list_item, esims, false)
+            val displayStatus = realStatus(esim)
             item.requireViewById<TextView>(R.id.mobile_esim_subtitle).text = esim.iccid.orEmpty().ifBlank { "Pending ICCID" }
             item.requireViewById<TextView>(R.id.mobile_esim_title).text = esim.title()
             item.requireViewById<TextView>(R.id.mobile_esim_meta).text = listOfNotNull(
                 esim.provider?.takeIf { it.isNotBlank() },
                 esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: $it" },
                 esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" },
-                esim.status?.takeIf { it.isNotBlank() }?.let { "Status: $it" }
+                esim.status?.takeIf { it.isNotBlank() && it.lowercase() != displayStatus.raw.lowercase() }?.let { "Raw: $it" }
             ).joinToString("  •  ")
             item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
-                applyRoamStatusChip(esim.statusLabel() ?: "Unknown", esim.status)
+                applyRoamStatusChip(displayStatus.label, displayStatus.raw)
             }
             item.requireViewById<MaterialButton>(R.id.mobile_esim_view_detail).setOnClickListener {
                 startActivity(MobileEsimDetailActivity.createIntent(this, esim))
             }
             item.requireViewById<MaterialButton>(R.id.mobile_esim_renew).apply {
-                visibility = if (canRenew(esim)) View.VISIBLE else View.GONE
+                visibility = if (canRenew(esim, displayStatus)) View.VISIBLE else View.GONE
                 setOnClickListener { openRenewal(esim) }
             }
             item.setOnClickListener {
@@ -257,10 +260,42 @@ class MobileEsimsActivity : AppCompatActivity() {
         }
     }
 
-    private fun canRenew(esim: MobileEsim): Boolean {
+    private fun realStatus(esim: MobileEsim): DisplayStatus {
+        val raw = esim.status.orEmpty().trim()
+        val normalized = raw.lowercase()
+        val expiresAt = parseDate(esim.expiresAt)
+        val isExpiredByDate = expiresAt?.isBefore(OffsetDateTime.now()) == true
+        val hasIccid = !esim.iccid.isNullOrBlank()
+        val hasInstallCode = !esim.installCode().isNullOrBlank() || !esim.qrPayload().isNullOrBlank()
+
+        return when {
+            normalized.contains("expired") || normalized.contains("depleted") || normalized.contains("terminated") || isExpiredByDate ->
+                DisplayStatus("Expired", "expired")
+            normalized.contains("active") || normalized.contains("activated") || normalized.contains("enabled") ->
+                DisplayStatus("Active", "active")
+            normalized.contains("pending") || normalized.contains("processing") || normalized.contains("waiting") || normalized.contains("ordered") ->
+                DisplayStatus("Pending", "pending")
+            hasIccid && hasInstallCode && expiresAt != null ->
+                DisplayStatus("Ready", "ready")
+            hasIccid && expiresAt != null ->
+                DisplayStatus("Active", "active")
+            hasIccid && hasInstallCode ->
+                DisplayStatus("Ready", "ready")
+            hasInstallCode ->
+                DisplayStatus("Ready to Install", "ready")
+            hasIccid ->
+                DisplayStatus("Provisioned", raw.ifBlank { "provisioned" })
+            else ->
+                DisplayStatus("Pending", "pending")
+        }
+    }
+
+    private fun parseDate(value: String?): OffsetDateTime? =
+        value?.takeIf { it.isNotBlank() }?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() }
+
+    private fun canRenew(esim: MobileEsim, displayStatus: DisplayStatus = realStatus(esim)): Boolean {
         val provider = esim.provider.orEmpty().lowercase()
-        val status = esim.status.orEmpty().lowercase()
-        if (status.contains("expired")) return false
+        if (displayStatus.raw == "expired") return false
         return provider.contains("tgt") || provider.contains("airhub") || provider.contains("vodafone")
     }
 
@@ -339,20 +374,23 @@ class MobileEsimsActivity : AppCompatActivity() {
         return appInfo.metaData?.getString(key)
     }
 
+    private data class DisplayStatus(
+        val label: String,
+        val raw: String
+    )
+
     private enum class EsimFilter {
         ACTIVE,
         PENDING,
         EXPIRED,
         ALL;
 
-        fun matches(esim: MobileEsim): Boolean {
-            val status = esim.status.orEmpty().lowercase()
-            return when (this) {
-                ACTIVE -> status.isBlank() || status.contains("active") || status.contains("install") || status.contains("enabled") || status.contains("ready") || status.contains("success") || status.contains("completed")
-                PENDING -> status.contains("pending") || status.contains("created") || status.contains("processing") || status.contains("new") || status.contains("ordered") || status.contains("waiting")
-                EXPIRED -> status.contains("expired") || status.contains("depleted") || status.contains("terminated")
+        fun matches(status: DisplayStatus): Boolean =
+            when (this) {
+                ACTIVE -> status.raw == "active" || status.raw == "ready"
+                PENDING -> status.raw == "pending"
+                EXPIRED -> status.raw == "expired"
                 ALL -> true
             }
-        }
     }
 }
