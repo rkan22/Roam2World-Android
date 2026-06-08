@@ -17,7 +17,6 @@ import com.google.android.material.card.MaterialCardView
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -66,7 +65,7 @@ class CustomersActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_more
+        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
     }
 
     private fun setupInsets() {
@@ -100,14 +99,11 @@ class CustomersActivity : AppCompatActivity() {
                     startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
                     false
                 }
-                R.id.nav_more -> {
-                    startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
+                R.id.nav_more -> true
                 else -> false
             }
         }
-        bottomNav.selectedItemId = R.id.nav_more
+        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
     }
 
     private fun loadCustomers() {
