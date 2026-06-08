@@ -23,6 +23,7 @@ class MoreActivity : AppCompatActivity() {
     private lateinit var scroll: View
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var profile: MaterialButton
+    private lateinit var customers: MaterialButton
     private lateinit var esimHistory: MaterialButton
     private lateinit var openEuicc: MaterialButton
     private lateinit var tgtRecharge: MaterialButton
@@ -43,6 +44,7 @@ class MoreActivity : AppCompatActivity() {
         scroll = requireViewById(R.id.more_scroll)
         bottomNav = requireViewById(R.id.more_bottom_nav)
         profile = requireViewById(R.id.more_profile)
+        customers = requireViewById(R.id.more_customers)
         esimHistory = requireViewById(R.id.more_esim_history)
         openEuicc = requireViewById(R.id.more_openeuicc)
         tgtRecharge = requireViewById(R.id.more_tgt_recharge)
@@ -113,6 +115,9 @@ class MoreActivity : AppCompatActivity() {
         profile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
+        customers.setOnClickListener {
+            startActivity(Intent(this, CustomersActivity::class.java))
+        }
         esimHistory.setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
@@ -155,6 +160,7 @@ class MoreActivity : AppCompatActivity() {
     }
 
     private fun showAllBusinessItems() {
+        customers.visibility = View.VISIBLE
         esimHistory.visibility = View.VISIBLE
         openEuicc.visibility = View.VISIBLE
         tgtRecharge.visibility = View.VISIBLE
