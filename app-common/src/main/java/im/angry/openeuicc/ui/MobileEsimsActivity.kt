@@ -214,13 +214,14 @@ class MobileEsimsActivity : AppCompatActivity() {
         val filtered = allEsims
             .filter { selectedFilter.matches(realStatus(it)) }
             .filter { esim ->
+                val displayStatus = realStatus(esim)
                 query.isBlank() || listOfNotNull(
                     esim.iccid,
                     esim.provider,
                     esim.packageName,
                     esim.orderNumber,
                     esim.status,
-                    realStatus(it = esim).label
+                    displayStatus.label
                 ).any { it.lowercase().contains(query) }
             }
         renderEsims(filtered)
