@@ -3,6 +3,8 @@ package im.angry.openeuicc.ui
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +17,9 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.textfield.TextInputEditText
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -38,6 +43,10 @@ class MobileEsimsActivity : AppCompatActivity() {
     private lateinit var esims: LinearLayout
     private lateinit var empty: TextView
     private lateinit var error: TextView
+    private lateinit var search: TextInputEditText
+
+    private var allEsims: List<MobileEsim> = emptyList()
+    private var selectedFilter: EsimFilter = EsimFilter.ACTIVE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -51,9 +60,12 @@ class MobileEsimsActivity : AppCompatActivity() {
         esims = requireViewById(R.id.mobile_esims_list)
         empty = requireViewById(R.id.mobile_esims_empty)
         error = requireViewById(R.id.mobile_esims_error)
+        search = requireViewById(R.id.mobile_esims_search)
 
         setupInsets()
         setupBottomNavigation()
+        setupTabs()
+        setupSearch()
         refresh.setOnRefreshListener { loadEsims() }
         renderEsims(emptyList())
         loadEsims()
@@ -129,6 +141,35 @@ class MobileEsimsActivity : AppCompatActivity() {
         bottomNav.selectedItemId = R.id.nav_esims
     }
 
+    private fun setupTabs() {
+        requireViewById<Chip>(R.id.mobile_esims_tab_active).setOnClickListener {
+            selectedFilter = EsimFilter.ACTIVE
+            applyFilters()
+        }
+        requireViewById<Chip>(R.id.mobile_esims_tab_pending).setOnClickListener {
+            selectedFilter = EsimFilter.PENDING
+            applyFilters()
+        }
+        requireViewById<Chip>(R.id.mobile_esims_tab_expired).setOnClickListener {
+            selectedFilter = EsimFilter.EXPIRED
+            applyFilters()
+        }
+        requireViewById<Chip>(R.id.mobile_esims_tab_all).setOnClickListener {
+            selectedFilter = EsimFilter.ALL
+            applyFilters()
+        }
+    }
+
+    private fun setupSearch() {
+        search.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                applyFilters()
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
+    }
+
     private fun loadEsims() {
         lifecycleScope.launch {
             error.visibility = View.GONE
@@ -139,7 +180,10 @@ class MobileEsimsActivity : AppCompatActivity() {
             setLoading(false)
 
             result
-                .onSuccess { renderEsims(it.esims) }
+                .onSuccess {
+                    allEsims = it.esims
+                    applyFilters()
+                }
                 .onFailure {
                     error.text = it.message ?: getString(R.string.mobile_esims_load_failed)
                     error.visibility = View.VISIBLE
@@ -164,6 +208,22 @@ class MobileEsimsActivity : AppCompatActivity() {
         return refreshed
     }
 
+    private fun applyFilters() {
+        val query = search.text?.toString()?.trim().orEmpty().lowercase()
+        val filtered = allEsims
+            .filter { selectedFilter.matches(it) }
+            .filter { esim ->
+                query.isBlank() || listOfNotNull(
+                    esim.iccid,
+                    esim.provider,
+                    esim.packageName,
+                    esim.orderNumber,
+                    esim.status
+                ).any { it.lowercase().contains(query) }
+            }
+        renderEsims(filtered)
+    }
+
     private fun renderEsims(esimData: List<MobileEsim>) {
         esims.removeAllViews()
         empty.visibility = if (esimData.isEmpty()) View.VISIBLE else View.GONE
@@ -172,18 +232,47 @@ class MobileEsimsActivity : AppCompatActivity() {
         val inflater = LayoutInflater.from(this)
         esimData.forEach { esim ->
             val item = inflater.inflate(R.layout.mobile_esim_list_item, esims, false)
+            item.requireViewById<TextView>(R.id.mobile_esim_subtitle).text = esim.iccid.orEmpty().ifBlank { "Pending ICCID" }
             item.requireViewById<TextView>(R.id.mobile_esim_title).text = esim.title()
-            item.requireViewById<TextView>(R.id.mobile_esim_subtitle).text = listOfNotNull(
-                esim.iccid?.let { getString(R.string.mobile_esim_iccid_format, it) },
-                esim.provider
-            ).joinToString(" - ")
+            item.requireViewById<TextView>(R.id.mobile_esim_meta).text = listOfNotNull(
+                esim.provider?.takeIf { it.isNotBlank() },
+                esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: $it" },
+                esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" }
+            ).joinToString("  •  ")
             item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
                 applyRoamStatusChip(esim.statusLabel(), esim.status)
+            }
+            item.requireViewById<MaterialButton>(R.id.mobile_esim_view_detail).setOnClickListener {
+                startActivity(MobileEsimDetailActivity.createIntent(this, esim))
+            }
+            item.requireViewById<MaterialButton>(R.id.mobile_esim_renew).apply {
+                visibility = if (canRenew(esim)) View.VISIBLE else View.GONE
+                setOnClickListener { openRenewal(esim) }
             }
             item.setOnClickListener {
                 startActivity(MobileEsimDetailActivity.createIntent(this, esim))
             }
             esims.addView(item)
+        }
+    }
+
+    private fun canRenew(esim: MobileEsim): Boolean {
+        val provider = esim.provider.orEmpty().lowercase()
+        val status = esim.status.orEmpty().lowercase()
+        if (status.contains("expired")) return false
+        return provider.contains("tgt") || provider.contains("airhub") || provider.contains("vodafone")
+    }
+
+    private fun openRenewal(esim: MobileEsim) {
+        val provider = esim.provider.orEmpty().lowercase()
+        if (provider.contains("airhub") || provider.contains("vodafone")) {
+            startActivity(Intent(this, VodafoneRenewalActivity::class.java).apply {
+                putExtra("renew.iccid", esim.iccid)
+            })
+        } else {
+            startActivity(Intent(this, TgtSimRechargeActivity::class.java).apply {
+                putExtra("renew.iccid", esim.iccid)
+            })
         }
     }
 
@@ -247,5 +336,22 @@ class MobileEsimsActivity : AppCompatActivity() {
     private fun targetActivityName(key: String): String? {
         val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         return appInfo.metaData?.getString(key)
+    }
+
+    private enum class EsimFilter {
+        ACTIVE,
+        PENDING,
+        EXPIRED,
+        ALL;
+
+        fun matches(esim: MobileEsim): Boolean {
+            val status = esim.status.orEmpty().lowercase()
+            return when (this) {
+                ACTIVE -> status.contains("active") || status.contains("installed") || status.contains("activated")
+                PENDING -> status.contains("pending") || status.contains("created") || status.contains("processing") || status.contains("new")
+                EXPIRED -> status.contains("expired")
+                ALL -> true
+            }
+        }
     }
 }
