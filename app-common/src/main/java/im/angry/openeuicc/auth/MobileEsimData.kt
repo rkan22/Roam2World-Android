@@ -22,12 +22,23 @@ data class MobileEsim(
     val expiresAt: String? = null,
     val dataRemaining: String? = null,
     val dataUsed: String? = null,
-    val orderId: String? = null
+    val orderId: String? = null,
+    val customerFirstName: String? = null,
+    val customerLastName: String? = null,
+    val customerPhone: String? = null,
+    val customerEmail: String? = null
 ) {
     fun title(): String =
         packageName
             ?: iccid?.let { "eSIM $it" }
             ?: "Roam2World eSIM"
+
+    fun customerName(): String? =
+        listOfNotNull(customerFirstName, customerLastName)
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+            .takeIf { it.isNotBlank() }
 
     fun statusLabel(): String? {
         val normalized = status?.trim()?.lowercase() ?: return null
@@ -53,7 +64,7 @@ data class MobileEsim(
         } ?: firstNotBlank(qrCode, activationCode, qrCodeUrl)
 
     private fun String.isInstallCode(): Boolean =
-        startsWith("LPA:", ignoreCase = true) || startsWith("1\$")
+        startsWith("LPA:", ignoreCase = true) || startsWith("1$")
 
     private fun firstNotBlank(vararg values: String?): String? =
         values.firstOrNull { !it.isNullOrBlank() && it != "null" }
