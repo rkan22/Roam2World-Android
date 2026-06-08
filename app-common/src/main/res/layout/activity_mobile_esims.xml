@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_background">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -34,17 +34,63 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/dashboard_brand"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorPrimary" />
+                    android:text="eSIMs"
+                    android:textAppearance="?attr/textAppearanceDisplaySmall"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textStyle="bold" />
 
-                <TextView
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/mobile_esims_search_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/mobile_esims_title"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:layout_marginTop="18dp"
+                    android:hint="Search ICCID, provider or package"
+                    app:endIconMode="clear_text"
+                    app:startIconDrawable="@drawable/ic_packages">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/mobile_esims_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/mobile_esims_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_active"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Active" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_pending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_expired"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Expired" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="All" />
+                </com.google.android.material.chip.ChipGroup>
 
                 <TextView
                     android:id="@+id/mobile_esims_error"
@@ -52,7 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorError"
+                    android:textColor="@color/r2w_danger"
                     android:visibility="gone" />
 
                 <TextView
@@ -60,9 +106,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@string/mobile_esims_empty"
+                    android:background="@color/r2w_card"
+                    android:padding="18dp"
+                    android:text="No matching eSIMs found. Try another status tab or search term."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="@color/r2w_text_secondary"
                     android:visibility="gone" />
 
                 <LinearLayout
@@ -79,7 +127,7 @@
         android:id="@+id/mobile_esims_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@color/r2w_card"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
