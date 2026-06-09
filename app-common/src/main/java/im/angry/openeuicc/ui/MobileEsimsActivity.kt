@@ -24,6 +24,7 @@ import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileEsim
+import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -48,6 +49,7 @@ class MobileEsimsActivity : AppCompatActivity() {
 
     private var allEsims: List<MobileEsim> = emptyList()
     private var selectedFilter: EsimFilter = EsimFilter.ALL
+    private var initialFilter: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -62,6 +64,7 @@ class MobileEsimsActivity : AppCompatActivity() {
         empty = requireViewById(R.id.mobile_esims_empty)
         error = requireViewById(R.id.mobile_esims_error)
         search = requireViewById(R.id.mobile_esims_search)
+        initialFilter = intent.getStringExtra(MobileEsimFilters.FILTER_EXTRA_KEY)?.trim()
 
         setupInsets()
         setupBottomNavigation()
@@ -145,18 +148,22 @@ class MobileEsimsActivity : AppCompatActivity() {
     private fun setupTabs() {
         requireViewById<Chip>(R.id.mobile_esims_tab_all).setOnClickListener {
             selectedFilter = EsimFilter.ALL
+            initialFilter = null
             applyFilters()
         }
         requireViewById<Chip>(R.id.mobile_esims_tab_active).setOnClickListener {
             selectedFilter = EsimFilter.ACTIVE
+            initialFilter = null
             applyFilters()
         }
         requireViewById<Chip>(R.id.mobile_esims_tab_pending).setOnClickListener {
             selectedFilter = EsimFilter.PENDING
+            initialFilter = null
             applyFilters()
         }
         requireViewById<Chip>(R.id.mobile_esims_tab_expired).setOnClickListener {
             selectedFilter = EsimFilter.EXPIRED
+            initialFilter = null
             applyFilters()
         }
     }
@@ -211,7 +218,12 @@ class MobileEsimsActivity : AppCompatActivity() {
 
     private fun applyFilters() {
         val query = search.text?.toString()?.trim().orEmpty().lowercase()
-        val filtered = allEsims
+        val baseEsims = if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) {
+            allEsims.filter { MobileEsimFilters.isExpiredSoon(it) }
+        } else {
+            allEsims
+        }
+        val filtered = baseEsims
             .filter { selectedFilter.matches(realStatus(it)) }
             .filter { esim ->
                 val displayStatus = realStatus(esim)

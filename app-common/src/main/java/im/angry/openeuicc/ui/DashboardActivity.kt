@@ -22,6 +22,7 @@ import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileDashboardData
 import im.angry.openeuicc.auth.MobileDashboardOrder
 import im.angry.openeuicc.auth.MobileEsim
+import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -235,21 +236,13 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun renderExpiredSoon(esimData: List<MobileEsim>) {
-        val now = OffsetDateTime.now()
-        val expiring = esimData.mapNotNull { esim ->
-            val expires = esim.expiresAt?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() } ?: return@mapNotNull null
-            val days = ChronoUnit.DAYS.between(now, expires)
-            if (days in 0..7 && esim.status?.equals("expired", ignoreCase = true) != true) esim to days else null
-        }.sortedBy { it.second }
+        val expiring = esimData.filter { MobileEsimFilters.isExpiredSoon(it) }
 
         expiredSoonValue.text = expiring.size.toString()
         expiredSoonSubtitle.text = if (expiring.isEmpty()) {
             "No eSIMs expiring in 7 days"
         } else {
-            expiring.take(3).joinToString("\n") { (esim, days) ->
-                val label = esim.iccid?.takeLast(6)?.let { "*$it" } ?: esim.title()
-                "$label - ${days.coerceAtLeast(0)}d left"
-            }
+            "Tap to view expiring eSIMs"
         }
     }
 
@@ -287,6 +280,9 @@ class DashboardActivity : AppCompatActivity() {
             strokeWidth = dp(1)
             setStrokeColor(getColor(R.color.r2w_border))
             setCardBackgroundColor(getColor(R.color.r2w_card))
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { openExpiredSoonEsims() }
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 topMargin = dp(14)
             }
@@ -353,6 +349,15 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun setLoading(loading: Boolean) {
         progress.visibility = if (loading) View.VISIBLE else View.GONE
+    }
+
+    private fun openExpiredSoonEsims() {
+        startActivity(
+            Intent(this, MobileEsimsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                putExtra(MobileEsimFilters.FILTER_EXTRA_KEY, MobileEsimFilters.FILTER_EXPIRED_SOON)
+            }
+        )
     }
 
     private fun openWalletActivity() {
