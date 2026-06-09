@@ -709,6 +709,26 @@ class Roam2WorldAuthApi(baseUrl: String) {
         }
     }
 
+    private fun parseMobileEsimLastRenewal(json: JSONObject?): MobileEsimLastRenewal? {
+        json ?: return null
+        if (json.length() == 0) return null
+        return MobileEsimLastRenewal(
+            provider = firstNotBlank(json.optString("provider")),
+            success = if (json.has("success")) json.optBoolean("success") else null,
+            message = firstNotBlank(json.optString("message"), json.optString("msg")),
+            code = firstNotBlank(json.optString("code")),
+            orderNo = firstNotBlank(json.optString("order_no"), json.optString("orderNo")),
+            productName = firstNotBlank(json.optString("product_name"), json.optString("productName")),
+            productCode = firstNotBlank(json.optString("product_code"), json.optString("productCode")),
+            createdTime = firstNotBlank(json.optString("created_time"), json.optString("createdTime")),
+            activatedEndTime = firstNotBlank(json.optString("activated_end_time"), json.optString("activatedEndTime")),
+            renewExpirationTime = firstNotBlank(json.optString("renew_expiration_time"), json.optString("renewExpirationTime")),
+            latestActivationTime = firstNotBlank(json.optString("latest_activation_time"), json.optString("latestActivationTime")),
+            orderStatus = firstNotBlank(json.optString("order_status"), json.optString("orderStatus")),
+            profileStatus = firstNotBlank(json.optString("profile_status"), json.optString("profileStatus"))
+        )
+    }
+
     private fun parseMobileEsim(esimJson: JSONObject?): MobileEsim? {
         esimJson ?: return null
         val activation = firstObject(
@@ -859,6 +879,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 esimJson.optString("remaining_data"),
                 esimJson.optString("remainingData")
             ),
+            lastRenewal = parseMobileEsimLastRenewal(esimJson.optJSONObject("last_renewal") ?: esimJson.optJSONObject("lastRenewal")),
             dataUsed = firstNotBlank(
                 esimJson.optString("data_used"),
                 esimJson.optString("dataUsed"),

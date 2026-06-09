@@ -4,6 +4,22 @@ data class MobileEsimList(
     val esims: List<MobileEsim>
 )
 
+data class MobileEsimLastRenewal(
+    val provider: String? = null,
+    val success: Boolean? = null,
+    val message: String? = null,
+    val code: String? = null,
+    val orderNo: String? = null,
+    val productName: String? = null,
+    val productCode: String? = null,
+    val createdTime: String? = null,
+    val activatedEndTime: String? = null,
+    val renewExpirationTime: String? = null,
+    val latestActivationTime: String? = null,
+    val orderStatus: String? = null,
+    val profileStatus: String? = null
+)
+
 data class MobileEsim(
     val id: String?,
     val iccid: String?,
@@ -22,6 +38,7 @@ data class MobileEsim(
     val expiresAt: String? = null,
     val dataRemaining: String? = null,
     val dataUsed: String? = null,
+    val lastRenewal: MobileEsimLastRenewal? = null,
     val orderId: String? = null,
     val customerFirstName: String? = null,
     val customerLastName: String? = null,

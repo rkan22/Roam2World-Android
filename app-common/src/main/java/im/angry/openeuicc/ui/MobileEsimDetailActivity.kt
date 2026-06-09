@@ -17,6 +17,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -184,7 +185,65 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt, R.string.mobile_esim_created_format)
         setOptionalText(R.id.mobile_esim_detail_order, esim.orderNumber, R.string.mobile_esim_order_format)
         renderQr(esim)
+        renderLastRenewal(esim)
         renderActions(esim)
+    }
+
+    private fun renderLastRenewal(esim: MobileEsim) {
+        val renewal = esim.lastRenewal ?: return
+        val parent = requireViewById<View>(R.id.mobile_esim_detail_data_used).parent as? LinearLayout ?: return
+        val existing = parent.findViewWithTag<View>("last_renewal_card")
+        if (existing != null) parent.removeView(existing)
+
+        val details = listOfNotNull(
+            renewal.message?.let { "Status: $it" },
+            renewal.code?.let { "Code: $it" },
+            renewal.orderNo?.let { "Order: $it" },
+            renewal.productName?.let { "Package: $it" },
+            renewal.productCode?.let { "Product code: $it" },
+            renewal.createdTime?.let { "Created: $it" },
+            renewal.activatedEndTime?.let { "Activated end: $it" },
+            renewal.renewExpirationTime?.let { "Renew expiry: $it" },
+            renewal.latestActivationTime?.let { "Latest activation: $it" },
+            renewal.orderStatus?.let { "Order status: $it" },
+            renewal.profileStatus?.let { "Profile status: $it" }
+        ).joinToString("\n")
+
+        if (details.isBlank()) return
+
+        val card = MaterialCardView(this).apply {
+            tag = "last_renewal_card"
+            radius = dp(18).toFloat()
+            cardElevation = dp(3).toFloat()
+            strokeWidth = dp(1)
+            setStrokeColor(getColor(R.color.r2w_border))
+            setCardBackgroundColor(getColor(R.color.r2w_card))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(14) }
+        }
+        val body = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+        }
+        body.addView(TextView(this).apply {
+            text = "Last Renewal"
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(getColor(R.color.r2w_text_primary))
+        })
+        body.addView(TextView(this).apply {
+            text = details
+            setPadding(0, dp(8), 0, 0)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+        })
+        card.addView(body)
+
+        val anchor = requireViewById<View>(R.id.mobile_esim_detail_created)
+        val index = parent.indexOfChild(anchor)
+        parent.addView(card, if (index >= 0) index + 1 else parent.childCount)
     }
 
     private fun renderQr(esim: MobileEsim) {
@@ -393,9 +452,32 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 expiresAt = intent.getStringExtra(EXTRA_EXPIRES_AT),
                 dataRemaining = intent.getStringExtra(EXTRA_DATA_REMAINING),
                 dataUsed = intent.getStringExtra(EXTRA_DATA_USED),
-                orderId = intent.getStringExtra(EXTRA_ORDER_ID)
+                orderId = intent.getStringExtra(EXTRA_ORDER_ID),
+                lastRenewal = readIntentLastRenewal()
             )
         }
+
+    private fun readIntentLastRenewal(): im.angry.openeuicc.auth.MobileEsimLastRenewal? {
+        val orderNo = intent.getStringExtra(EXTRA_LAST_RENEWAL_ORDER_NO)
+        val message = intent.getStringExtra(EXTRA_LAST_RENEWAL_MESSAGE)
+        val productName = intent.getStringExtra(EXTRA_LAST_RENEWAL_PRODUCT_NAME)
+        if (orderNo.isNullOrBlank() && message.isNullOrBlank() && productName.isNullOrBlank()) return null
+        return im.angry.openeuicc.auth.MobileEsimLastRenewal(
+            provider = intent.getStringExtra(EXTRA_LAST_RENEWAL_PROVIDER),
+            success = if (intent.hasExtra(EXTRA_LAST_RENEWAL_SUCCESS)) intent.getBooleanExtra(EXTRA_LAST_RENEWAL_SUCCESS, false) else null,
+            message = message,
+            code = intent.getStringExtra(EXTRA_LAST_RENEWAL_CODE),
+            orderNo = orderNo,
+            productName = productName,
+            productCode = intent.getStringExtra(EXTRA_LAST_RENEWAL_PRODUCT_CODE),
+            createdTime = intent.getStringExtra(EXTRA_LAST_RENEWAL_CREATED_TIME),
+            activatedEndTime = intent.getStringExtra(EXTRA_LAST_RENEWAL_ACTIVATED_END_TIME),
+            renewExpirationTime = intent.getStringExtra(EXTRA_LAST_RENEWAL_RENEW_EXPIRATION_TIME),
+            latestActivationTime = intent.getStringExtra(EXTRA_LAST_RENEWAL_LATEST_ACTIVATION_TIME),
+            orderStatus = intent.getStringExtra(EXTRA_LAST_RENEWAL_ORDER_STATUS),
+            profileStatus = intent.getStringExtra(EXTRA_LAST_RENEWAL_PROFILE_STATUS)
+        )
+    }
 
     private fun MobileEsim.matches(other: MobileEsim): Boolean =
         listOf(
@@ -430,6 +512,19 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         private const val EXTRA_DATA_REMAINING = "mobile_esim.data_remaining"
         private const val EXTRA_DATA_USED = "mobile_esim.data_used"
         private const val EXTRA_ORDER_ID = "mobile_esim.order_id"
+        private const val EXTRA_LAST_RENEWAL_PROFILE_STATUS = "mobile_esim.last_renewal.profile_status"
+        private const val EXTRA_LAST_RENEWAL_ORDER_STATUS = "mobile_esim.last_renewal.order_status"
+        private const val EXTRA_LAST_RENEWAL_LATEST_ACTIVATION_TIME = "mobile_esim.last_renewal.latest_activation_time"
+        private const val EXTRA_LAST_RENEWAL_RENEW_EXPIRATION_TIME = "mobile_esim.last_renewal.renew_expiration_time"
+        private const val EXTRA_LAST_RENEWAL_ACTIVATED_END_TIME = "mobile_esim.last_renewal.activated_end_time"
+        private const val EXTRA_LAST_RENEWAL_CREATED_TIME = "mobile_esim.last_renewal.created_time"
+        private const val EXTRA_LAST_RENEWAL_PRODUCT_CODE = "mobile_esim.last_renewal.product_code"
+        private const val EXTRA_LAST_RENEWAL_PRODUCT_NAME = "mobile_esim.last_renewal.product_name"
+        private const val EXTRA_LAST_RENEWAL_ORDER_NO = "mobile_esim.last_renewal.order_no"
+        private const val EXTRA_LAST_RENEWAL_CODE = "mobile_esim.last_renewal.code"
+        private const val EXTRA_LAST_RENEWAL_MESSAGE = "mobile_esim.last_renewal.message"
+        private const val EXTRA_LAST_RENEWAL_SUCCESS = "mobile_esim.last_renewal.success"
+        private const val EXTRA_LAST_RENEWAL_PROVIDER = "mobile_esim.last_renewal.provider"
 
         fun createIntent(context: Context, esimId: String): Intent =
             Intent(context, MobileEsimDetailActivity::class.java).apply {
@@ -456,6 +551,19 @@ class MobileEsimDetailActivity : AppCompatActivity() {
                 putExtra(EXTRA_DATA_REMAINING, esim.dataRemaining)
                 putExtra(EXTRA_DATA_USED, esim.dataUsed)
                 putExtra(EXTRA_ORDER_ID, esim.orderId)
+                if (esim.lastRenewal?.success != null) putExtra(EXTRA_LAST_RENEWAL_SUCCESS, esim.lastRenewal.success)
+                putExtra(EXTRA_LAST_RENEWAL_PROVIDER, esim.lastRenewal?.provider)
+                putExtra(EXTRA_LAST_RENEWAL_MESSAGE, esim.lastRenewal?.message)
+                putExtra(EXTRA_LAST_RENEWAL_CODE, esim.lastRenewal?.code)
+                putExtra(EXTRA_LAST_RENEWAL_ORDER_NO, esim.lastRenewal?.orderNo)
+                putExtra(EXTRA_LAST_RENEWAL_PRODUCT_NAME, esim.lastRenewal?.productName)
+                putExtra(EXTRA_LAST_RENEWAL_PRODUCT_CODE, esim.lastRenewal?.productCode)
+                putExtra(EXTRA_LAST_RENEWAL_CREATED_TIME, esim.lastRenewal?.createdTime)
+                putExtra(EXTRA_LAST_RENEWAL_ACTIVATED_END_TIME, esim.lastRenewal?.activatedEndTime)
+                putExtra(EXTRA_LAST_RENEWAL_RENEW_EXPIRATION_TIME, esim.lastRenewal?.renewExpirationTime)
+                putExtra(EXTRA_LAST_RENEWAL_LATEST_ACTIVATION_TIME, esim.lastRenewal?.latestActivationTime)
+                putExtra(EXTRA_LAST_RENEWAL_ORDER_STATUS, esim.lastRenewal?.orderStatus)
+                putExtra(EXTRA_LAST_RENEWAL_PROFILE_STATUS, esim.lastRenewal?.profileStatus)
             }
     }
 }
