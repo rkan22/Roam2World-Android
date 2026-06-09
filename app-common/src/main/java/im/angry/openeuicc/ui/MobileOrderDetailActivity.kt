@@ -1,11 +1,14 @@
 package im.angry.openeuicc.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +35,7 @@ class MobileOrderDetailActivity : AppCompatActivity() {
     private lateinit var progress: LinearProgressIndicator
     private lateinit var error: TextView
     private lateinit var viewEsimButton: MaterialButton
+    private lateinit var copyIccidButton: MaterialButton
     private lateinit var esimUnavailable: TextView
 
     private var currentOrder: MobileOrder? = null
@@ -49,6 +53,7 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         progress = requireViewById(R.id.order_detail_progress)
         error = requireViewById(R.id.order_detail_error)
         viewEsimButton = requireViewById(R.id.order_detail_view_esim)
+        copyIccidButton = requireViewById(R.id.order_detail_copy_iccid)
         esimUnavailable = requireViewById(R.id.order_detail_esim_unavailable)
 
         setupInsets()
@@ -133,7 +138,41 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.order_detail_status).applyRoamStatusChip(order.statusLabel(), order.status)
         setOptionalText(R.id.order_detail_created, order.createdAt, R.string.order_detail_created_format)
         setOptionalText(R.id.order_detail_esim_id, order.esimId, R.string.order_detail_esim_id_format)
+        renderCustomerInfo(order)
+        renderLastRenewal(order)
         renderActions(order)
+    }
+
+    private fun renderCustomerInfo(order: MobileOrder) {
+        val esim = order.esim
+        val customerName = esim?.customerName()
+        val customerPhone = esim?.customerPhone
+        val customerEmail = esim?.customerEmail
+        val iccid = esim?.iccid
+
+        val hasCustomer = !customerName.isNullOrBlank() || !customerPhone.isNullOrBlank() || !customerEmail.isNullOrBlank() || !iccid.isNullOrBlank()
+        requireViewById<View>(R.id.order_detail_customer_card).visibility = if (hasCustomer) View.VISIBLE else View.GONE
+
+        setOptionalText(R.id.order_detail_customer_name, customerName, R.string.order_detail_customer_name_format)
+        setOptionalText(R.id.order_detail_customer_phone, customerPhone, R.string.order_detail_customer_phone_format)
+        setOptionalText(R.id.order_detail_customer_email, customerEmail, R.string.order_detail_customer_email_format)
+        setOptionalText(R.id.order_detail_iccid, iccid, R.string.order_detail_iccid_format)
+    }
+
+    private fun renderLastRenewal(order: MobileOrder) {
+        val renewal = order.esim?.lastRenewal
+        val details = if (renewal == null) "" else listOfNotNull(
+            renewal.message?.let { getString(R.string.order_detail_renewal_status_format, it) },
+            renewal.code?.let { getString(R.string.order_detail_renewal_code_format, it) },
+            renewal.orderNo?.let { getString(R.string.order_detail_renewal_order_format, it) },
+            renewal.productName?.let { getString(R.string.order_detail_renewal_package_format, it) },
+            renewal.renewExpirationTime?.let { getString(R.string.order_detail_renewal_expiry_format, it) },
+            renewal.latestActivationTime?.let { getString(R.string.order_detail_renewal_latest_activation_format, it) }
+        ).joinToString("\n")
+
+        requireViewById<View>(R.id.order_detail_renewal_card).visibility =
+            if (details.isBlank()) View.GONE else View.VISIBLE
+        requireViewById<TextView>(R.id.order_detail_renewal_details).text = details
     }
 
     private fun renderActions(order: MobileOrder) {
@@ -142,6 +181,17 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         val hasEsim = esim != null || !esimId.isNullOrBlank()
         viewEsimButton.visibility = if (hasEsim) View.VISIBLE else View.GONE
         esimUnavailable.visibility = if (hasEsim) View.GONE else View.VISIBLE
+
+        val iccid = esim?.iccid
+        copyIccidButton.visibility = if (iccid.isNullOrBlank()) View.GONE else View.VISIBLE
+        copyIccidButton.setOnClickListener {
+            if (!iccid.isNullOrBlank()) {
+                getSystemService(ClipboardManager::class.java)
+                    .setPrimaryClip(ClipData.newPlainText("ICCID", iccid))
+                Toast.makeText(this, R.string.toast_iccid_copied, Toast.LENGTH_SHORT).show()
+            }
+        }
+
         viewEsimButton.setOnClickListener {
             when {
                 esim != null -> startActivity(MobileEsimDetailActivity.createIntent(this, esim))
