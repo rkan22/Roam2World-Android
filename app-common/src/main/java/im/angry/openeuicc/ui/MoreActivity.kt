@@ -10,6 +10,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthTokenStore
+import im.angry.openeuicc.auth.Roam2WorldAuthApi
+import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.activityToolbarInsetHandler
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
@@ -20,6 +22,7 @@ import kotlinx.coroutines.withContext
 
 class MoreActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
+    private val api by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
     private lateinit var scroll: View
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var profile: MaterialButton
@@ -66,6 +69,28 @@ class MoreActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         bottomNav.selectedItemId = R.id.nav_more
+        loadNotificationBadge()
+    }
+
+
+
+    private fun loadNotificationBadge() {
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+            val unreadCount = if (session != null) {
+                withContext(Dispatchers.IO) {
+                    runCatching { api.mobileNotifications(session).unreadCount }.getOrDefault(0)
+                }
+            } else {
+                0
+            }
+
+            notifications.text = if (unreadCount > 0) {
+                "Notifications\nInbox ($unreadCount)"
+            } else {
+                "Notifications\nInbox"
+            }
+        }
     }
 
     private fun setupInsets() {
