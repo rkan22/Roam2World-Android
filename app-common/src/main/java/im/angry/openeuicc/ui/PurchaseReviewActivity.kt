@@ -121,7 +121,10 @@ class PurchaseReviewActivity : AppCompatActivity() {
         val description = intent.getStringExtra(EXTRA_DESCRIPTION).orEmpty()
         val haystack = "$id $name $description".lowercase()
         return provider.contains("tgt") &&
-            haystack.contains("e-185-sc-au-eo1-t")
+            (
+                haystack.contains("simcard】europe（41）") ||
+                    haystack.contains("simcard]europe(41)")
+            )
     }
 
     private fun simIccidOrNull(): String? =
@@ -138,7 +141,7 @@ class PurchaseReviewActivity : AppCompatActivity() {
             }
 
             if (requiresSimIccid() && simIccidOrNull() == null) {
-                simIccidLayout.error = "ICCID is required for this Orange Balkans SIM package"
+                simIccidLayout.error = "ICCID is required for this SIMCARD Europe package"
                 error.text = "Enter the ICCID printed on the SIM card to continue."
                 error.visibility = View.VISIBLE
                 setLoading(false)
