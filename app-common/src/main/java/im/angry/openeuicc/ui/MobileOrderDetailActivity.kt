@@ -138,9 +138,30 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.order_detail_status).applyRoamStatusChip(order.statusLabel(), order.status)
         setOptionalText(R.id.order_detail_created, order.createdAt, R.string.order_detail_created_format)
         setOptionalText(R.id.order_detail_esim_id, order.esimId, R.string.order_detail_esim_id_format)
+        renderTimeline(order)
         renderCustomerInfo(order)
         renderLastRenewal(order)
         renderActions(order)
+    }
+
+    private fun renderTimeline(order: MobileOrder) {
+        val status = order.status.orEmpty().lowercase()
+        val failed = listOf("failed", "cancel", "refund", "error", "reject").any { status.contains(it) }
+        val esim = order.esim
+        val hasEsim = esim != null || !order.esimId.isNullOrBlank()
+        val hasIccid = !esim?.iccid.isNullOrBlank()
+
+        setTimelineText(R.id.order_timeline_created, true, "Order Created")
+        setTimelineText(R.id.order_timeline_payment, !failed, if (failed) "Payment / Order Failed" else "Payment Completed")
+        setTimelineText(R.id.order_timeline_provider, !failed && (hasEsim || hasIccid), if (hasEsim || hasIccid) "Provider Processing Completed" else "Provider Processing")
+        setTimelineText(R.id.order_timeline_esim, hasEsim, if (hasEsim) "eSIM Assigned" else "Waiting for eSIM Assignment")
+
+        val qrReady = hasEsim && hasIccid
+        setTimelineText(R.id.order_timeline_qr, qrReady, if (qrReady) "QR / Install Info Ready" else "Waiting for QR / Install Info")
+    }
+
+    private fun setTimelineText(viewId: Int, done: Boolean, label: String) {
+        requireViewById<TextView>(viewId).text = "${if (done) "✓" else "•"} $label"
     }
 
     private fun renderCustomerInfo(order: MobileOrder) {
