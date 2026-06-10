@@ -93,7 +93,7 @@
                         android:id="@+id/purchase_history_tab_pending"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pending" />
+                        android:text="Processing" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/purchase_history_tab_completed"

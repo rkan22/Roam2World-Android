@@ -173,10 +173,16 @@ class PurchaseHistoryActivity : AppCompatActivity() {
     private fun renderOrders(orderData: List<MobileOrder>) {
         orders.removeAllViews()
         empty.visibility = if (orderData.isEmpty()) View.VISIBLE else View.GONE
-        val pending = allOrders.count { OrderFilter.PENDING.matches(it.status) }
+        val processing = allOrders.count { OrderFilter.PENDING.matches(it.status) }
         val completed = allOrders.count { OrderFilter.COMPLETED.matches(it.status) }
         val failed = allOrders.count { OrderFilter.FAILED.matches(it.status) }
-        summary.text = "${allOrders.size} orders - $pending pending - $completed completed - $failed failed"
+
+        requireViewById<Chip>(R.id.purchase_history_tab_all).text = "All (${allOrders.size})"
+        requireViewById<Chip>(R.id.purchase_history_tab_pending).text = "Processing ($processing)"
+        requireViewById<Chip>(R.id.purchase_history_tab_completed).text = "Completed ($completed)"
+        requireViewById<Chip>(R.id.purchase_history_tab_failed).text = "Failed ($failed)"
+
+        summary.text = "${allOrders.size} orders - $processing processing - $completed completed - $failed failed"
         if (orderData.isEmpty()) return
 
         val inflater = LayoutInflater.from(this)
