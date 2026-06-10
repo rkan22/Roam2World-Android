@@ -86,7 +86,7 @@ class CustomerInfoActivity : AppCompatActivity() {
 
     private fun renderPackageSummary() {
         requireViewById<TextView>(R.id.customer_package_name).text =
-            intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title)
+            PackageNameCleaner.clean(intent.getStringExtra(EXTRA_NAME))
         requireViewById<TextView>(R.id.customer_package_meta).text = listOfNotNull(
             intent.getStringExtra(EXTRA_DATA),
             intent.getStringExtra(EXTRA_VALIDITY),

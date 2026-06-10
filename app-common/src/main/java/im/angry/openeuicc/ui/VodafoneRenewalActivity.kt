@@ -157,7 +157,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
                             searchResult.text = listOf(
                                 "Vodafone eSIM found but cannot be renewed",
                                 "ICCID: ${esim.iccid.orEmpty()}",
-                                "Plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+                                "Plan: ${PackageNameCleaner.clean(esim.packageName)}",
                                 "Expires: ${esim.expiresAt.orEmpty().ifBlank { "Unknown" }}",
                                 "Reason: expired eSIMs cannot be renewed"
                             ).joinToString("\n")
@@ -181,7 +181,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         searchResult.text = listOf(
             "Vodafone eSIM found",
             "ICCID: ${esim.iccid.orEmpty()}",
-            "Current plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+            "Current plan: ${PackageNameCleaner.clean(esim.packageName)}",
             "Expires: ${esim.expiresAt.orEmpty().ifBlank { "Unknown" }}",
             "Selected renewal: ${selectedDataGb}GB / 30 days",
             "Status: ${esim.statusLabel().orEmpty().ifBlank { "Unknown" }}"

@@ -278,7 +278,7 @@ class CustomersActivity : AppCompatActivity() {
         body.addView(label("${customer.totalEsims} eSIMs • ${customer.activeEsims} active • ${customer.expiredEsims} expired", false).apply { setPadding(0, dp(12), 0, 0) })
         body.addView(label(
             listOfNotNull(
-                latest.packageName?.let { "Last package: $it" },
+                latest.packageName?.let { "Last package: ${PackageNameCleaner.clean(it)}" },
                 latest.dataRemaining?.let { "Remaining: $it" },
                 latest.iccid?.let { "ICCID: $it" },
                 latest.expiresAt?.let { "Expires: $it" },
@@ -318,7 +318,7 @@ class CustomersActivity : AppCompatActivity() {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(14), dp(12), dp(14), dp(12))
             }
-            body.addView(label(record.packageName ?: "eSIM Package", true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium))
+            body.addView(label(PackageNameCleaner.clean(record.packageName), true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium))
             body.addView(label(
                 listOfNotNull(
                     record.iccid?.let { "ICCID: $it" },

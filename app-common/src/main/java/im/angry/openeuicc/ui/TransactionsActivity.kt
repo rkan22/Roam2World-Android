@@ -188,7 +188,7 @@ class TransactionsActivity : AppCompatActivity() {
             setPadding(dp(18), dp(16), dp(18), dp(16))
         }
         body.addView(label(order.displayNumber(), true, com.google.android.material.R.style.TextAppearance_Material3_TitleLarge))
-        body.addView(label(order.packageName, true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium).apply { setPadding(0, dp(6), 0, 0) })
+        body.addView(label(PackageNameCleaner.clean(order.packageName), true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium).apply { setPadding(0, dp(6), 0, 0) })
         body.addView(label(
             listOfNotNull(
                 order.esim?.customerName()?.let { "Customer: $it" },

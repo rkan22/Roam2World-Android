@@ -162,7 +162,7 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun buildSalesOverview(orders: List<MobileOrder>, currentBalance: String?): String {
         val latest = orders.take(5).joinToString("\n") { order ->
-            "${order.displayNumber()} • ${order.packageName} • ${order.price ?: "--"}"
+            "${order.displayNumber()} • ${PackageNameCleaner.clean(order.packageName)} • ${order.price ?: "--"}"
         }
         return listOfNotNull(
             currentBalance?.let { "Current balance: $it" },

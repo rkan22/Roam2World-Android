@@ -132,7 +132,7 @@ class MobileOrderDetailActivity : AppCompatActivity() {
 
         requireViewById<TextView>(R.id.order_detail_heading).text = order.displayNumber()
         setOptionalText(R.id.order_detail_number, order.displayNumber(), R.string.order_detail_number_format)
-        setOptionalText(R.id.order_detail_package, order.packageName, R.string.order_detail_package_format)
+        setOptionalText(R.id.order_detail_package, PackageNameCleaner.clean(order.packageName), R.string.order_detail_package_format)
         setOptionalText(R.id.order_detail_price, order.price, R.string.order_detail_price_format)
         requireViewById<TextView>(R.id.order_detail_provider).applyRoamProviderChip(order.provider)
         requireViewById<TextView>(R.id.order_detail_status).applyRoamStatusChip(order.statusLabel(), order.status)

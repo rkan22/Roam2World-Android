@@ -174,7 +174,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.mobile_esim_detail_title).text = esim.title()
         setOptionalText(R.id.mobile_esim_detail_iccid, esim.iccid, R.string.mobile_esim_iccid_format)
         requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(esim.provider)
-        setOptionalText(R.id.mobile_esim_detail_package, esim.packageName, R.string.mobile_esim_package_format)
+        setOptionalText(R.id.mobile_esim_detail_package, PackageNameCleaner.clean(esim.packageName), R.string.mobile_esim_package_format)
         requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(displayStatus.label, displayStatus.raw)
         setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
         setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)

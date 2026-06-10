@@ -169,7 +169,7 @@ class DealerDetailActivity : AppCompatActivity() {
         orderData.forEach { order ->
             val item = inflater.inflate(R.layout.order_history_item, orders, false)
             item.requireViewById<TextView>(R.id.history_order_number).text = order.displayNumber()
-            item.requireViewById<TextView>(R.id.history_package_name).text = order.packageName
+            item.requireViewById<TextView>(R.id.history_package_name).text = PackageNameCleaner.clean(order.packageName)
             item.requireViewById<TextView>(R.id.history_created_date).text = order.createdAt.orEmpty()
             item.requireViewById<TextView>(R.id.history_price).text = order.price.orEmpty()
             item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(order.provider)

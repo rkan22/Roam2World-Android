@@ -230,7 +230,7 @@ class MobileEsimsActivity : AppCompatActivity() {
                 query.isBlank() || listOfNotNull(
                     esim.iccid,
                     esim.provider,
-                    esim.packageName,
+                    PackageNameCleaner.clean(esim.packageName),
                     esim.orderNumber,
                     esim.status,
                     displayStatus.label

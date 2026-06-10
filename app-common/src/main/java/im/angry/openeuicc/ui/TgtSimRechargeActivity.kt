@@ -247,7 +247,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         esimSearchResult.text = listOf(
             "TGT eSIM found",
             "ICCID: ${esim.iccid.orEmpty()}",
-            "Current plan: ${esim.packageName.orEmpty().ifBlank { "Unknown" }}",
+            "Current plan: ${PackageNameCleaner.clean(esim.packageName)}",
             "Selected renewal: ${selectedRenewalDataGb}GB",
             "Status: ${esim.statusLabel()}"
         ).joinToString("\n")
