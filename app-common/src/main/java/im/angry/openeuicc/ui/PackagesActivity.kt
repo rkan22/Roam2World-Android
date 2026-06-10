@@ -40,7 +40,8 @@ import kotlinx.coroutines.withContext
 
 private enum class StoreSection(val title: String) {
     ORANGE_EUROPE("Orange Europe"),
-    ORANGE_BALKANS("Orange Balkans"),
+    ORANGE_BALKANS_ESIM("Balkans eSIM"),
+    ORANGE_BALKANS_SIM("Balkans SIM Card"),
     TURKEY("Türkiye"),
     TGT("TGT"),
     VODAFONE("Vodafone"),
@@ -49,7 +50,8 @@ private enum class StoreSection(val title: String) {
 
 private val STORE_SECTIONS = listOf(
     StoreSection.ORANGE_EUROPE,
-    StoreSection.ORANGE_BALKANS,
+    StoreSection.ORANGE_BALKANS_ESIM,
+    StoreSection.ORANGE_BALKANS_SIM,
     StoreSection.TURKEY,
     StoreSection.TGT,
     StoreSection.VODAFONE,
@@ -385,7 +387,8 @@ class PackagesActivity : AppCompatActivity() {
     private fun sectionEmoji(section: StoreSection): String =
         when (section) {
             StoreSection.ORANGE_EUROPE -> "🇪🇺"
-            StoreSection.ORANGE_BALKANS -> "🌍"
+            StoreSection.ORANGE_BALKANS_ESIM -> "🌍"
+            StoreSection.ORANGE_BALKANS_SIM -> "💳"
             StoreSection.TURKEY -> "🇹🇷"
             StoreSection.TGT -> "📶"
             StoreSection.VODAFONE -> "📱"
@@ -723,6 +726,39 @@ class PackagesActivity : AppCompatActivity() {
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
     }
 
+    private fun MobilePackage.isEuropeBalkansPackage(): Boolean {
+        val text = searchableText()
+        val compact = text
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("（", "(")
+            .replace("）", ")")
+
+        return text.contains("balkan") ||
+            compact.contains("europe41") ||
+            compact.contains("europe(41)") ||
+            compact.contains("e185") ||
+            text.contains("europe-41") ||
+            text.contains("europe 41") ||
+            text.contains("41 countries")
+    }
+
+    private fun MobilePackage.isPhysicalSimPackage(): Boolean {
+        val text = searchableText()
+        val compact = text
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("（", "(")
+            .replace("）", ")")
+
+        return compact.contains("simcard") ||
+            compact.contains("e185sc") ||
+            text.contains("physical sim") ||
+            text.contains("sim card")
+    }
+
     private fun MobilePackage.isEurope33Package(): Boolean {
         val text = searchableText()
         val compact = text
@@ -767,9 +803,15 @@ class PackagesActivity : AppCompatActivity() {
                     !text.contains("balkan") &&
                     !isEurope33Package()
 
-            StoreSection.ORANGE_BALKANS ->
-                (providerText.contains("orange") || displayProviderText.contains("orange")) &&
-                    (text.contains("balkan") || text.contains("simcard】europe（41）") || text.contains("simcard]europe(41)"))
+            StoreSection.ORANGE_BALKANS_ESIM ->
+                isEuropeBalkansPackage() &&
+                    !isPhysicalSimPackage() &&
+                    !isEurope33Package()
+
+            StoreSection.ORANGE_BALKANS_SIM ->
+                isEuropeBalkansPackage() &&
+                    isPhysicalSimPackage() &&
+                    !isEurope33Package()
 
             StoreSection.TURKEY ->
                 text.contains("turkey") || text.contains("turkiye") || text.contains("türkiye")
