@@ -281,7 +281,10 @@ class PackagesActivity : AppCompatActivity() {
 
         val section = selectedStoreSection ?: StoreSection.ORANGE_EUROPE
         val sectionPackages = packageData
-            .filter { it.matchesStoreSection(section) }
+            .filter {
+                it.matchesStoreSection(section) ||
+                    (section == StoreSection.ORANGE_EUROPE && it.isOrangeEurope500gb90dPackage())
+            }
             .sortedBy { it.sortPriceValue() }
 
         addSectionTitle(packageList, section.title, "Lowest price first")
@@ -486,73 +489,12 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun addFilterPanel(parent: LinearLayout) {
-        val titleRow = LinearLayout(this).apply {
+        val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, 0, 0, dp(10))
+            setPadding(0, dp(8), 0, dp(12))
         }
 
-        titleRow.addView(
-            TextView(this).apply {
-                text = "Filter Plans"
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-                setTypeface(typeface, Typeface.BOLD)
-                setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
-            },
-            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        )
-
-        if (!filtersAreDefault()) {
-            titleRow.addView(
-                TextView(this).apply {
-                    text = "Clear"
-                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-                    setTypeface(typeface, Typeface.BOLD)
-                    setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary))
-                    setPadding(dp(12), dp(8), dp(12), dp(8))
-                    setOnClickListener {
-                        selectedRegion = FILTER_ALL
-                        selectedProvider = FILTER_ALL
-                        selectedData = FILTER_ALL
-                        selectedValidity = FILTER_ALL
-                        renderCatalog()
-                    }
-                }
-            )
-        }
-
-        parent.addView(titleRow)
-
-        val rowOne = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-        }
-
-        rowOne.addView(
-            createFilterButton("Region", selectedRegion) {
-                showFilterDialog("Region", REGION_FILTERS, selectedRegion) {
-                    selectedRegion = it
-                }
-            },
-            filterButtonParams(end = 6)
-        )
-
-        rowOne.addView(
-            createFilterButton("Provider", selectedProvider) {
-                showFilterDialog("Provider", PROVIDER_FILTERS, selectedProvider) {
-                    selectedProvider = it
-                }
-            },
-            filterButtonParams(start = 6)
-        )
-
-        parent.addView(rowOne)
-
-        val rowTwo = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, dp(10), 0, dp(12))
-        }
-
-        rowTwo.addView(
+        row.addView(
             createFilterButton("Data", selectedData) {
                 showFilterDialog("Data", DATA_FILTERS, selectedData) {
                     selectedData = it
@@ -561,7 +503,7 @@ class PackagesActivity : AppCompatActivity() {
             filterButtonParams(end = 6)
         )
 
-        rowTwo.addView(
+        row.addView(
             createFilterButton("Validity", selectedValidity) {
                 showFilterDialog("Validity", VALIDITY_FILTERS, selectedValidity) {
                     selectedValidity = it
@@ -570,7 +512,7 @@ class PackagesActivity : AppCompatActivity() {
             filterButtonParams(start = 6)
         )
 
-        parent.addView(rowTwo)
+        parent.addView(row)
     }
 
     private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
@@ -716,10 +658,42 @@ class PackagesActivity : AppCompatActivity() {
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
     }
 
+    private fun MobilePackage.isOrangeEurope500gb90dPackage(): Boolean {
+        val target = "e211esautteo290d60d500gb"
+        val compact = listOf(
+            id,
+            name,
+            provider,
+            providerLabel(),
+            searchableText()
+        )
+            .joinToString(" ")
+            .lowercase()
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("/", "")
+            .replace("（", "(")
+            .replace("）", ")")
+
+        return compact.contains(target) ||
+            (
+                compact.contains("e211") &&
+                    compact.contains("500gb") &&
+                    compact.contains("90d")
+            )
+    }
+
     private fun MobilePackage.isOrangeWorldPackage(): Boolean {
         val text = searchableText()
         val providerText = provider.orEmpty().lowercase()
         val displayProviderText = providerLabel().lowercase()
+        val compactText = text
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("（", "(")
+            .replace("）", ")")
 
         return text.contains("orange world") ||
             (
@@ -795,18 +769,32 @@ class PackagesActivity : AppCompatActivity() {
         val text = searchableText()
         val providerText = provider.orEmpty().lowercase()
         val displayProviderText = providerLabel().lowercase()
+        val compactText = text
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("（", "(")
+            .replace("）", ")")
 
         return when (section) {
             StoreSection.ORANGE_EUROPE ->
                 (
-                    text.contains("orange") ||
-                        text.contains("holiday") ||
-                        text.contains("e-211") ||
-                        text.contains("e211") ||
-                        (text.contains("500gb") && text.contains("90"))
-                    ) &&
-                    text.contains("europe") &&
-                    !text.contains("balkan") &&
+                    isOrangeEurope500gb90dPackage() ||
+                        text.contains("orange europe") ||
+                        text.contains("orange holiday") ||
+                        compactText.contains("e211") ||
+                        (
+                            text.contains("europe") &&
+                                compactText.contains("500gb") &&
+                                (
+                                    compactText.contains("90days") ||
+                                        compactText.contains("90day") ||
+                                        compactText.contains("90d")
+                                )
+                        )
+                ) &&
+                    !isOrangeWorldPackage() &&
+                    !isEuropeBalkansPackage() &&
                     !isEurope33Package()
 
             StoreSection.ORANGE_WORLD ->
