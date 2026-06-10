@@ -10,7 +10,8 @@ data class MobilePackagePurchaseRequest(
     val role: String?,
     val customerFirstName: String? = null,
     val customerLastName: String? = null,
-    val customerPhone: String? = null
+    val customerPhone: String? = null,
+    val simIccid: String? = null
 )
 
 data class MobilePackagePurchaseResult(

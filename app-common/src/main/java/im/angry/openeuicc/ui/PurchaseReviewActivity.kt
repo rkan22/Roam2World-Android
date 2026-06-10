@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -38,6 +40,8 @@ class PurchaseReviewActivity : AppCompatActivity() {
     private lateinit var cancelButton: MaterialButton
     private lateinit var progress: LinearProgressIndicator
     private lateinit var error: TextView
+    private lateinit var simIccidLayout: TextInputLayout
+    private lateinit var simIccidInput: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -54,6 +58,8 @@ class PurchaseReviewActivity : AppCompatActivity() {
         cancelButton = requireViewById(R.id.purchase_review_cancel)
         progress = requireViewById(R.id.purchase_review_progress)
         error = requireViewById(R.id.purchase_review_error)
+        simIccidLayout = requireViewById(R.id.purchase_review_sim_iccid_layout)
+        simIccidInput = requireViewById(R.id.purchase_review_sim_iccid)
 
         renderReview()
         confirmButton.setOnClickListener { confirmPurchase() }
@@ -96,7 +102,30 @@ class PurchaseReviewActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.review_total).text = "Total        ${money(total)}"
         requireViewById<TextView>(R.id.review_current_balance).text = "Current Balance        ${intent.getStringExtra(EXTRA_CURRENT_BALANCE) ?: "--"}"
         requireViewById<TextView>(R.id.review_balance_after).text = "Balance After Purchase ${after?.let { money(it) } ?: "--"}"
+        renderSimIccidRequirement()
     }
+
+    private fun renderSimIccidRequirement() {
+        val required = requiresSimIccid()
+        simIccidLayout.visibility = if (required) View.VISIBLE else View.GONE
+        if (!required) {
+            simIccidLayout.error = null
+            simIccidInput.setText("")
+        }
+    }
+
+    private fun requiresSimIccid(): Boolean {
+        val id = intent.getStringExtra(EXTRA_ID).orEmpty()
+        val provider = intent.getStringExtra(EXTRA_PROVIDER).orEmpty().lowercase()
+        val name = intent.getStringExtra(EXTRA_NAME).orEmpty()
+        val description = intent.getStringExtra(EXTRA_DESCRIPTION).orEmpty()
+        val haystack = "$id $name $description".lowercase()
+        return provider.contains("tgt") &&
+            haystack.contains("e-185-sc-au-eo1-t")
+    }
+
+    private fun simIccidOrNull(): String? =
+        simIccidInput.text?.toString()?.trim()?.takeIf { it.isNotBlank() }
 
     private fun confirmPurchase() {
         lifecycleScope.launch {
@@ -107,6 +136,15 @@ class PurchaseReviewActivity : AppCompatActivity() {
                 setLoading(false)
                 return@launch
             }
+
+            if (requiresSimIccid() && simIccidOrNull() == null) {
+                simIccidLayout.error = "ICCID is required for this Orange Balkans SIM package"
+                error.text = "Enter the ICCID printed on the SIM card to continue."
+                error.visibility = View.VISIBLE
+                setLoading(false)
+                return@launch
+            }
+            simIccidLayout.error = null
 
             val price = intent.getStringExtra(EXTRA_PRICE) ?: "0"
             if (isDemoPackage()) {
@@ -129,7 +167,8 @@ class PurchaseReviewActivity : AppCompatActivity() {
                         role = intent.getStringExtra(EXTRA_ROLE),
                         customerFirstName = intent.getStringExtra(EXTRA_CUSTOMER_FIRST_NAME),
                         customerLastName = intent.getStringExtra(EXTRA_CUSTOMER_LAST_NAME),
-                        customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE)
+                        customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE),
+                        simIccid = simIccidOrNull()
                     )
                 )
             }

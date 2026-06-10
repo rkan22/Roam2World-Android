@@ -185,6 +185,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
             body.put("customer_phone", it)
             body.put("phone_number", it)
         }
+        request.simIccid?.takeIf { it.isNotBlank() }?.let {
+            body.put("sim_iccid", it)
+            body.put("iccid", it)
+        }
 
         parsePurchaseResult(
             postJson(MOBILE_ORDERS_ENDPOINT, body, session.authorizationHeader),
