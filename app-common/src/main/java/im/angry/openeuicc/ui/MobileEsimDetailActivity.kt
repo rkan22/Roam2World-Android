@@ -185,8 +185,32 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt, R.string.mobile_esim_created_format)
         setOptionalText(R.id.mobile_esim_detail_order, esim.orderNumber, R.string.mobile_esim_order_format)
         renderQr(esim)
+        renderInstallAssistant(esim)
         renderLastRenewal(esim)
         renderActions(esim)
+    }
+
+    private fun renderInstallAssistant(esim: MobileEsim) {
+        val qrReady = !esim.qrPayload().isNullOrBlank()
+        val manualReady = !esim.smdpAddress.isNullOrBlank() && !esim.matchingId.isNullOrBlank()
+        val installReady = qrReady || manualReady || !esim.installCode().isNullOrBlank()
+
+        val status = when {
+            qrReady -> "✓ QR Ready"
+            manualReady -> "✓ Manual Install Ready"
+            installReady -> "✓ Install Info Ready"
+            else -> "• Waiting for Install Info"
+        }
+
+        val steps = listOf(
+            "${if (qrReady) "✓" else "•"} 1. Scan QR code or open QR view",
+            "${if (manualReady) "✓" else "•"} 2. Use SMDP + Matching ID for manual install",
+            "${if (installReady) "✓" else "•"} 3. Tap Install eSIM / OpenEUICC",
+            "• 4. Enable mobile data and data roaming after install"
+        ).joinToString("\n")
+
+        requireViewById<TextView>(R.id.mobile_esim_install_status).text = status
+        requireViewById<TextView>(R.id.mobile_esim_install_steps).text = steps
     }
 
     private fun renderLastRenewal(esim: MobileEsim) {
