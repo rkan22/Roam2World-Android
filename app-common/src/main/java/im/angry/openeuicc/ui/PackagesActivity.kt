@@ -638,7 +638,7 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun createPackageCard(mobilePackage: MobilePackage): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
-        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.name
+        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.cleanPackageTitle()
         item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
             mobilePackage.providerLabel().takeIf { it.isNotBlank() },
             mobilePackage.country.takeIf { it.isNotBlank() },
@@ -914,6 +914,86 @@ class PackagesActivity : AppCompatActivity() {
             text.replace(" ", "").contains(token)
         } || provider.orEmpty().lowercase().let {
             it.contains("tgt") || it.contains("airhub") || it.contains("traveroam")
+        }
+    }
+
+    private fun MobilePackage.cleanProviderTitle(): String =
+        providerLabel()
+            .takeIf { it.isNotBlank() }
+            ?: country.ifBlank { "Roam2World" }
+
+    private fun MobilePackage.cleanPackageTitle(): String {
+        val provider = cleanProviderTitle()
+        val data = cleanDataLabel()
+        return listOf(provider, data)
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+            .ifBlank { cleanRawName() }
+    }
+
+    private fun MobilePackage.cleanPackageSpecs(): String {
+        val validity = cleanValidityLabel()
+        val coverage = cleanCoverageLabel()
+        val type = packageType
+            ?.replace("_", " ")
+            ?.replace("-", " ")
+            ?.lowercase()
+            ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            .orEmpty()
+
+        return listOf(validity, coverage, type)
+            .filter { it.isNotBlank() }
+            .distinct()
+            .joinToString(" · ")
+    }
+
+    private fun MobilePackage.cleanRawName(): String =
+        name
+            .replace("【Esim】", "", ignoreCase = true)
+            .replace("【SIMCARD】", "SIM Card", ignoreCase = true)
+            .replace("—", " ")
+            .replace("–", " ")
+            .replace("  ", " ")
+            .trim()
+
+    private fun MobilePackage.cleanDataLabel(): String {
+        dataAmount?.takeIf { it.isNotBlank() }?.let { return it.trim() }
+
+        val text = listOf(name, description, specs()).joinToString(" ")
+        val match = Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(text)
+        return match?.value
+            ?.uppercase()
+            ?.replace("GB", " GB")
+            ?.replace(Regex("""\s+"""), " ")
+            ?.trim()
+            .orEmpty()
+    }
+
+    private fun MobilePackage.cleanValidityLabel(): String {
+        validity?.takeIf { it.isNotBlank() }?.let { raw ->
+            val days = Regex("""\d+""").find(raw)?.value
+            if (!days.isNullOrBlank()) return "$days Days"
+            return raw.trim()
+        }
+
+        val text = listOf(name, description, specs()).joinToString(" ")
+        val days = Regex("""(\d+)\s*(?:days|day|d|gün|gun)""", RegexOption.IGNORE_CASE)
+            .find(text)
+            ?.groupValues
+            ?.getOrNull(1)
+
+        return days?.let { "$it Days" }.orEmpty()
+    }
+
+    private fun MobilePackage.cleanCoverageLabel(): String {
+        coverage?.takeIf { it.isNotBlank() }?.let { return it.trim() }
+
+        return when {
+            providerLabel().contains("World", ignoreCase = true) -> "Global"
+            providerLabel().contains("Balkans", ignoreCase = true) -> "Europe Balkans"
+            providerLabel().contains("Europe", ignoreCase = true) -> "Europe"
+            country.isNotBlank() -> country
+            else -> ""
         }
     }
 
