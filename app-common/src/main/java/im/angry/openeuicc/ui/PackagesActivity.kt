@@ -471,9 +471,10 @@ class PackagesActivity : AppCompatActivity() {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
         item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.name
         item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
-            mobilePackage.country,
+            mobilePackage.providerLabel().takeIf { it.isNotBlank() },
+            mobilePackage.country.takeIf { it.isNotBlank() },
             mobilePackage.countryCode?.takeIf { it.isNotBlank() }
-        ).joinToString(" - ")
+        ).joinToString(" · ")
         item.requireViewById<TextView>(R.id.package_specs).apply {
             text = mobilePackage.specs()
             visibility = if (text.isBlank()) View.GONE else View.VISIBLE
@@ -504,13 +505,42 @@ class PackagesActivity : AppCompatActivity() {
     private fun MobilePackage.matchesProvider(providerFilter: String): Boolean {
         if (providerFilter == FILTER_ALL) return true
         val providerText = provider.orEmpty().lowercase()
+        val displayText = providerLabel().lowercase()
+        val text = searchableText()
+
         return when (providerFilter) {
-            "TraveRoam" -> providerText.contains("traveroam") || providerText.contains("travelroam")
-            "TGT" -> providerText.contains("tgt")
-            "Flexnet" -> providerText.contains("flexnet")
-            "AirHub" -> providerText.contains("airhub") || providerText.contains("airhubapp")
-            "eSIMCard" -> providerText.contains("esimcard") || providerText.contains("esim_card")
-            else -> providerText.contains(providerFilter.lowercase())
+            "Roam2World Turkey" ->
+                displayText.contains("roam2world turkey") ||
+                    (providerText.contains("traveroam") && (text.contains("turkey") || text.contains(" tr ")))
+
+            "Orange Balkans" ->
+                displayText.contains("orange balkans") ||
+                    text.contains("e-185") ||
+                    text.contains("eo1") ||
+                    text.contains("balkan")
+
+            "Orange Europe" ->
+                displayText.contains("orange europe") ||
+                    text.contains("e-211") ||
+                    text.contains("eo2")
+
+            "Vodafone Europe" ->
+                displayText.contains("vodafone europe") ||
+                    providerText.contains("airhub") ||
+                    providerText.contains("airhubapp")
+
+            "Orange Big Data" ->
+                displayText.contains("orange big data") ||
+                    providerText.contains("flexnet")
+
+            "Orange World" ->
+                displayText.contains("orange world") ||
+                    providerText.contains("esimcard") ||
+                    providerText.contains("esim_card") ||
+                    text.contains("global") ||
+                    text.contains("world")
+
+            else -> displayText.contains(providerFilter.lowercase()) || providerText.contains(providerFilter.lowercase())
         }
     }
 
@@ -553,6 +583,8 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun MobilePackage.searchableText(): String =
         listOfNotNull(
+            providerLabel(),
+            providerLabel(),
             provider,
             packageType,
             name,
@@ -650,7 +682,15 @@ class PackagesActivity : AppCompatActivity() {
             "No live packages available. Please configure packages in Roam2World backend."
         private const val FILTER_ALL = "All"
         private val REGION_FILTERS = listOf("All", "Turkey", "Europe", "Europe Balkans", "Global")
-        private val PROVIDER_FILTERS = listOf("All", "TraveRoam", "TGT", "Flexnet", "AirHub", "eSIMCard")
+        private val PROVIDER_FILTERS = listOf(
+            "All",
+            "Roam2World Turkey",
+            "Orange Balkans",
+            "Orange Europe",
+            "Vodafone Europe",
+            "Orange Big Data",
+            "Orange World"
+        )
         private val DATA_FILTERS = listOf(
             "All", "1GB", "2GB", "3GB", "5GB", "10GB", "20GB", "30GB", "50GB",
             "60GB", "100GB", "135GB", "200GB", "300GB", "400GB", "500GB", "Unlimited"

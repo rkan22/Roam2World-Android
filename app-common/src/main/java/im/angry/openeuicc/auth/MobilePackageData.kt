@@ -8,6 +8,7 @@ data class MobilePackageCatalog(
 data class MobilePackage(
     val id: String?,
     val provider: String?,
+    val displayProvider: String? = null,
     val packageType: String?,
     val name: String,
     val country: String,
@@ -24,6 +25,9 @@ data class MobilePackage(
     val visibleToDealer: Boolean,
     val featured: Boolean
 ) {
+    fun providerLabel(): String =
+        displayProvider?.takeIf { it.isNotBlank() } ?: provider.orEmpty()
+
     fun priceFor(role: String?): String =
         when (role?.lowercase()) {
             "reseller" -> resellerPrice ?: basePrice
@@ -43,6 +47,8 @@ data class MobilePackage(
         val normalized = query.trim().lowercase()
         return listOfNotNull(
             name,
+            providerLabel(),
+            provider,
             country,
             countryCode,
             dataAmount,

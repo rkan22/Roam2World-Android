@@ -1074,6 +1074,14 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 packageJson.optString("provider"),
                 packageJson.optString("source")
             ) ?: "esimcard",
+            displayProvider = firstNotBlank(
+                packageJson.optString("display_provider"),
+                packageJson.optString("displayProvider"),
+                packageJson.optString("network_label"),
+                packageJson.optString("networkLabel"),
+                packageJson.optString("display_brand"),
+                packageJson.optString("displayBrand")
+            ),
             packageType = firstNotBlank(
                 packageJson.optString("package_type"),
                 packageJson.optString("packageType"),
