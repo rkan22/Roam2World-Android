@@ -209,6 +209,7 @@ class WalletActivity : AppCompatActivity() {
     private fun renderWallet(data: MobileWalletData) {
         balance.text = data.currentBalance
         renderLowBalanceWarning(data.currentBalance)
+        renderQuickStats(data.transactions)
         renderTransactions(data.transactions)
     }
 
@@ -254,6 +255,19 @@ class WalletActivity : AppCompatActivity() {
             }
             requests.addView(item)
         }
+    }
+
+    private fun renderQuickStats(transactionData: List<MobileTransaction>) {
+        val totalTransactions = transactionData.size
+        val lastActivity = transactionData.firstOrNull()?.title?.takeIf { it.isNotBlank() } ?: "No activity yet"
+        val completedCount = transactionData.count {
+            it.status.orEmpty().lowercase().contains("complete") ||
+                it.status.orEmpty().lowercase().contains("success") ||
+                it.status.orEmpty().lowercase().contains("approved")
+        }
+
+        requireViewById<TextView>(R.id.wallet_quick_stats_text).text =
+            "Recent transactions: $totalTransactions\nCompleted: $completedCount\nLast activity: $lastActivity"
     }
 
     private fun renderLowBalanceWarning(balanceText: String?) {
