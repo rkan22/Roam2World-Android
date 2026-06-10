@@ -89,6 +89,28 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseMobileOrders(getJson(MOBILE_ORDERS_ENDPOINT, session.authorizationHeader))
     }
 
+    suspend fun mobileNotifications(session: AuthSession): MobileNotificationList = withContext(Dispatchers.IO) {
+        parseMobileNotifications(getJson(MOBILE_NOTIFICATIONS_ENDPOINT, session.authorizationHeader))
+    }
+
+    suspend fun markNotificationRead(session: AuthSession, notificationId: String): MobileNotification = withContext(Dispatchers.IO) {
+        parseMobileNotificationObject(
+            postJson(
+                ApiEndpoint("mobile notification read", "api/v1/mobile/notifications/$notificationId/read/"),
+                JSONObject(),
+                session.authorizationHeader
+            )
+        )
+    }
+
+    suspend fun markAllNotificationsRead(session: AuthSession): Int = withContext(Dispatchers.IO) {
+        postJson(
+            MOBILE_NOTIFICATIONS_READ_ALL_ENDPOINT,
+            JSONObject(),
+            session.authorizationHeader
+        ).optInt("updated", 0)
+    }
+
     suspend fun dealers(session: AuthSession): MobileDealerList = withContext(Dispatchers.IO) {
         parseMobileDealers(getJson(MOBILE_DEALERS_ENDPOINT, session.authorizationHeader))
     }
@@ -436,6 +458,30 @@ class Roam2WorldAuthApi(baseUrl: String) {
 
         return MobileOrderHistory(parseMobileOrderList(orders))
     }
+
+
+    private fun parseMobileNotifications(response: JSONObject): MobileNotificationList {
+        val notifications = response.optJSONArray("notifications") ?: JSONArray()
+        return MobileNotificationList(
+            unreadCount = response.optInt("unread_count", 0),
+            notifications = (0 until notifications.length()).mapNotNull { index ->
+                notifications.optJSONObject(index)?.let { parseMobileNotificationObject(it) }
+            }
+        )
+    }
+
+    private fun parseMobileNotificationObject(json: JSONObject): MobileNotification =
+        MobileNotification(
+            id = json.optString("id").takeIf { it.isNotBlank() },
+            title = json.optString("title").takeIf { it.isNotBlank() },
+            message = json.optString("message").takeIf { it.isNotBlank() },
+            type = json.optString("type").takeIf { it.isNotBlank() },
+            isRead = json.optBoolean("is_read", false),
+            readAt = json.optString("read_at").takeIf { it.isNotBlank() && it != "null" },
+            createdAt = json.optString("created_at").takeIf { it.isNotBlank() && it != "null" },
+            relatedOrderId = json.optString("related_order_id").takeIf { it.isNotBlank() && it != "null" },
+            relatedEsimId = json.optString("related_esim_id").takeIf { it.isNotBlank() && it != "null" }
+        )
 
     private fun parseMobileOrderList(orders: JSONArray?): List<MobileOrder> {
         if (orders == null) return emptyList()
@@ -1577,6 +1623,8 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private val PACKAGES_ENDPOINT = ApiEndpoint("mobile packages", "api/v1/mobile/packages/")
         private val FEATURED_PACKAGES_ENDPOINT = ApiEndpoint("mobile featured packages", "api/v1/mobile/packages/featured/")
         private val MOBILE_ORDERS_ENDPOINT = ApiEndpoint("mobile orders", "api/v1/mobile/orders/")
+        private val MOBILE_NOTIFICATIONS_ENDPOINT = ApiEndpoint("mobile notifications", "api/v1/mobile/notifications/")
+        private val MOBILE_NOTIFICATIONS_READ_ALL_ENDPOINT = ApiEndpoint("mobile notifications read all", "api/v1/mobile/notifications/read-all/")
         private val MOBILE_ESIMS_ENDPOINT = ApiEndpoint("mobile eSIMs", "api/v1/mobile/esims/")
         private val MOBILE_DEALERS_ENDPOINT = ApiEndpoint("mobile dealers", "api/v1/mobile/dealers/")
         private val REFRESH_ENDPOINT = ApiEndpoint("auth refresh", "api/v1/auth/refresh/")

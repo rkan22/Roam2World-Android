@@ -91,6 +91,10 @@
             android:exported="false" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.MobileOrderDetailActivity"
             android:exported="false" />
 

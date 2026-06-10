@@ -29,6 +29,7 @@ class MoreActivity : AppCompatActivity() {
     private lateinit var tgtRecharge: MaterialButton
     private lateinit var vodafoneRenewal: MaterialButton
     private lateinit var orders: MaterialButton
+    private lateinit var notifications: MaterialButton
     private lateinit var reports: MaterialButton
     private lateinit var support: MaterialButton
     private lateinit var settings: MaterialButton
@@ -50,6 +51,7 @@ class MoreActivity : AppCompatActivity() {
         tgtRecharge = requireViewById(R.id.more_tgt_recharge)
         vodafoneRenewal = requireViewById(R.id.more_vodafone_renewal)
         orders = requireViewById(R.id.more_orders)
+        notifications = requireViewById(R.id.more_notifications)
         reports = requireViewById(R.id.more_reports)
         support = requireViewById(R.id.more_support)
         settings = requireViewById(R.id.more_settings)
@@ -133,6 +135,9 @@ class MoreActivity : AppCompatActivity() {
         orders.setOnClickListener {
             startActivity(Intent(this, PurchaseHistoryActivity::class.java))
         }
+        notifications.setOnClickListener {
+            startActivity(Intent(this, MobileNotificationsActivity::class.java))
+        }
         reports.setOnClickListener {
             startActivity(Intent(this, ReportsActivity::class.java))
         }
@@ -166,6 +171,7 @@ class MoreActivity : AppCompatActivity() {
         tgtRecharge.visibility = View.VISIBLE
         vodafoneRenewal.visibility = View.VISIBLE
         orders.visibility = View.VISIBLE
+        notifications.visibility = View.VISIBLE
         reports.visibility = View.VISIBLE
         support.visibility = View.VISIBLE
     }
