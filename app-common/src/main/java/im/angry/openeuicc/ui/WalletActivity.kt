@@ -208,6 +208,7 @@ class WalletActivity : AppCompatActivity() {
 
     private fun renderWallet(data: MobileWalletData) {
         balance.text = data.currentBalance
+        renderLowBalanceWarning(data.currentBalance)
         renderTransactions(data.transactions)
     }
 
@@ -253,6 +254,17 @@ class WalletActivity : AppCompatActivity() {
             }
             requests.addView(item)
         }
+    }
+
+    private fun renderLowBalanceWarning(balanceText: String?) {
+        val card = requireViewById<View>(R.id.wallet_low_balance_card)
+        val balanceValue = balanceText
+            ?.replace(Regex("[^0-9.,-]"), "")
+            ?.replace(",", ".")
+            ?.toDoubleOrNull()
+
+        card.visibility =
+            if (balanceValue != null && balanceValue < 20.0) View.VISIBLE else View.GONE
     }
 
     private fun renderTransactions(transactionData: List<MobileTransaction>) {
