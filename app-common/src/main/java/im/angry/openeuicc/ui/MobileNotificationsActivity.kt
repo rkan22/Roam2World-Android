@@ -126,12 +126,38 @@ class MobileNotificationsActivity : AppCompatActivity() {
 
             item.alpha = if (notification.isRead) 0.72f else 1.0f
             item.setOnClickListener {
-                val id = notification.id
-                if (!notification.isRead && !id.isNullOrBlank()) {
-                    markRead(id)
-                }
+                openNotification(notification)
             }
             list.addView(item)
+        }
+    }
+
+
+    private fun openNotification(notification: MobileNotification) {
+        lifecycleScope.launch {
+            val session = activeSessionOrReturnToLogin() ?: return@launch
+            val notificationId = notification.id
+            if (!notification.isRead && !notificationId.isNullOrBlank()) {
+                runCatching { authApi.markNotificationRead(session, notificationId) }
+            }
+
+            val orderId = notification.relatedOrderId
+            val esimId = notification.relatedEsimId
+
+            when {
+                !orderId.isNullOrBlank() -> {
+                    startActivity(
+                        Intent(this@MobileNotificationsActivity, MobileOrderDetailActivity::class.java)
+                            .putExtra("mobile_order.id", orderId)
+                    )
+                }
+                !esimId.isNullOrBlank() -> {
+                    startActivity(MobileEsimDetailActivity.createIntent(this@MobileNotificationsActivity, esimId))
+                }
+                else -> {
+                    loadNotifications()
+                }
+            }
         }
     }
 
