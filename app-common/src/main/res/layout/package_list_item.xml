@@ -63,6 +63,20 @@
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceBodySmall"
                     android:textColor="@color/r2w_text_secondary" />
+
+                <TextView
+                    android:id="@+id/package_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/wallet_request_status_badge"
+                    android:backgroundTint="#FFF4D6"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:textAppearance="?attr/textAppearanceLabelSmall"
+                    android:textColor="@color/r2w_primary"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 

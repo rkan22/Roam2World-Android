@@ -302,7 +302,7 @@ class PackagesActivity : AppCompatActivity() {
         }
 
         sectionPackages.forEach { mobilePackage ->
-            packageList.addView(createPackageCard(mobilePackage))
+            packageList.addView(createPackageCard(mobilePackage, packageBadge(mobilePackage, sectionPackages)))
         }
     }
 
@@ -691,7 +691,26 @@ class PackagesActivity : AppCompatActivity() {
         }
 
 
-    private fun createPackageCard(mobilePackage: MobilePackage): View {
+    private fun packageBadge(mobilePackage: MobilePackage, packages: List<MobilePackage>): String? {
+        if (packages.size < 2) return null
+
+        val cheapest = packages.minByOrNull { it.sortPriceValue() }
+        val mostData = packages.maxByOrNull { it.dataSortValue() }
+        val longestValidity = packages.maxByOrNull { it.validitySortValue() }
+        val bestValue = packages
+            .filter { it.valueSortValue() != Double.MAX_VALUE }
+            .minByOrNull { it.valueSortValue() }
+
+        return when {
+            bestValue === mobilePackage -> "Best Value"
+            cheapest === mobilePackage -> "Cheapest"
+            mostData === mobilePackage && mobilePackage.dataSortValue() > 0.0 -> "Most Data"
+            longestValidity === mobilePackage && mobilePackage.validitySortValue() > 0 -> "Longest Validity"
+            else -> null
+        }
+    }
+
+    private fun createPackageCard(mobilePackage: MobilePackage, badge: String? = null): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
         item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.cleanPackageTitle()
         item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
@@ -704,6 +723,10 @@ class PackagesActivity : AppCompatActivity() {
             visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
         item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
+        item.requireViewById<TextView>(R.id.package_badge).apply {
+            text = badge.orEmpty()
+            visibility = if (badge.isNullOrBlank()) View.GONE else View.VISIBLE
+        }
         item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.visibilityLabel()
         item.setOnClickListener {
             startActivity(PackageDetailActivity.createIntent(this, mobilePackage, userRole))
