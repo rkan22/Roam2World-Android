@@ -89,6 +89,25 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseMobileOrders(getJson(MOBILE_ORDERS_ENDPOINT, session.authorizationHeader))
     }
 
+
+    suspend fun registerDeviceToken(
+        session: AuthSession,
+        token: String,
+        platform: String = "android",
+        appVersion: String = "",
+        deviceName: String = ""
+    ): Boolean = withContext(Dispatchers.IO) {
+        val body = JSONObject().apply {
+            put("token", token)
+            put("platform", platform)
+            put("app_version", appVersion)
+            put("device_name", deviceName)
+        }
+
+        val response = postJson(MOBILE_DEVICE_TOKEN_ENDPOINT, body, session.authorizationHeader)
+        response.optBoolean("is_active", true)
+    }
+
     suspend fun mobileNotifications(session: AuthSession): MobileNotificationList = withContext(Dispatchers.IO) {
         parseMobileNotifications(getJson(MOBILE_NOTIFICATIONS_ENDPOINT, session.authorizationHeader))
     }
@@ -1623,6 +1642,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private val PACKAGES_ENDPOINT = ApiEndpoint("mobile packages", "api/v1/mobile/packages/")
         private val FEATURED_PACKAGES_ENDPOINT = ApiEndpoint("mobile featured packages", "api/v1/mobile/packages/featured/")
         private val MOBILE_ORDERS_ENDPOINT = ApiEndpoint("mobile orders", "api/v1/mobile/orders/")
+        private val MOBILE_DEVICE_TOKEN_ENDPOINT = ApiEndpoint("mobile device token", "api/v1/mobile/device-token/")
         private val MOBILE_NOTIFICATIONS_ENDPOINT = ApiEndpoint("mobile notifications", "api/v1/mobile/notifications/")
         private val MOBILE_NOTIFICATIONS_READ_ALL_ENDPOINT = ApiEndpoint("mobile notifications read all", "api/v1/mobile/notifications/read-all/")
         private val MOBILE_ESIMS_ENDPOINT = ApiEndpoint("mobile eSIMs", "api/v1/mobile/esims/")
