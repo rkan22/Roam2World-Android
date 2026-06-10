@@ -297,13 +297,38 @@ class PackagesActivity : AppCompatActivity() {
         addSectionTitle(packageList, section.title, "Lowest price first")
 
         if (sectionPackages.isEmpty()) {
-            addSectionTitle(packageList, "No packages found", "Try another category or filter.")
+            addStoreEmptyState(packageList)
             return
         }
 
         sectionPackages.forEach { mobilePackage ->
             packageList.addView(createPackageCard(mobilePackage, packageBadge(mobilePackage, sectionPackages)))
         }
+    }
+
+    private fun addStoreEmptyState(parent: LinearLayout) {
+        addSectionTitle(parent, "No packages found", "Try clearing filters or choose another category.")
+
+        val clearButton = com.google.android.material.button.MaterialButton(this).apply {
+            text = "Clear Filters"
+            cornerRadius = dp(24)
+            setOnClickListener {
+                selectedData = FILTER_ALL
+                selectedValidity = FILTER_ALL
+                selectedSort = StoreSort.LOWEST_PRICE
+                renderCatalog()
+            }
+        }
+
+        parent.addView(
+            clearButton,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(52)
+            ).apply {
+                setMargins(0, dp(12), 0, dp(12))
+            }
+        )
     }
 
     private fun addStoreCategories(parent: LinearLayout, packageData: List<MobilePackage>) {
