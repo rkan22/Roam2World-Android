@@ -15,21 +15,29 @@ fun TextView.applyRoamStatusChip(label: String?, rawStatus: String? = label) {
     visibility = android.view.View.VISIBLE
     val normalized = rawStatus.orEmpty().trim().lowercase()
     val (containerAttr, onContainerAttr) = when (normalized) {
-        "active", "approved", "complete", "completed", "confirmed" ->
+        "active", "activated", "enabled", "in_use", "inuse",
+        "approved", "complete", "completed", "confirmed" ->
             com.google.android.material.R.attr.colorTertiaryContainer to
                 com.google.android.material.R.attr.colorOnTertiaryContainer
 
+        "ready", "assigned", "provisioned",
+        "ready_to_install", "ready to install", "installable" ->
+            com.google.android.material.R.attr.colorPrimaryContainer to
+                com.google.android.material.R.attr.colorOnPrimaryContainer
+
+        "pending", "processing", "ordered", "waiting",
+        "expiring", "expiring soon", "pending_provider_balance" ->
+            com.google.android.material.R.attr.colorSecondaryContainer to
+                com.google.android.material.R.attr.colorOnSecondaryContainer
+
+        "expired", "depleted", "terminated",
         "failed", "failure", "rejected", "cancelled", "canceled", "suspended" ->
             com.google.android.material.R.attr.colorErrorContainer to
                 com.google.android.material.R.attr.colorOnErrorContainer
 
-        "refunded", "refund", "pending_provider_balance" ->
+        "refunded", "refund" ->
             com.google.android.material.R.attr.colorSecondaryContainer to
                 com.google.android.material.R.attr.colorOnSecondaryContainer
-
-        "pending", "processing", "expiring", "expiring soon" ->
-            com.google.android.material.R.attr.colorPrimaryContainer to
-                com.google.android.material.R.attr.colorOnPrimaryContainer
 
         else ->
             com.google.android.material.R.attr.colorSecondaryContainer to
