@@ -84,8 +84,20 @@ class PackageDetailActivity : AppCompatActivity() {
         val countryCode = intent.getStringExtra(EXTRA_COUNTRY_CODE)
         val coverage = intent.getStringExtra(EXTRA_COVERAGE)
 
-        requireViewById<TextView>(R.id.package_detail_name).text = intent.getStringExtra(EXTRA_NAME)
-            ?: getString(R.string.package_detail_title)
+        val rawPackageName = intent.getStringExtra(EXTRA_NAME).orEmpty()
+        val cleanProviderName = cleanDetailProviderName(
+            intent.getStringExtra(EXTRA_NETWORK),
+            intent.getStringExtra(EXTRA_COVERAGE),
+            country
+        )
+        val cleanPackageName = cleanDetailPackageName(
+            rawPackageName,
+            intent.getStringExtra(EXTRA_DATA),
+            cleanProviderName
+        )
+
+        requireViewById<TextView>(R.id.package_detail_name).text =
+            cleanPackageName.ifBlank { getString(R.string.package_detail_title) }
         requireViewById<TextView>(R.id.package_detail_country).text = flaggedCountryDisplay(country, countryCode, coverage)
         requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
             ?: "0"
@@ -237,6 +249,55 @@ class PackageDetailActivity : AppCompatActivity() {
         finish()
         return null
     }
+
+    private fun cleanDetailProviderName(network: String?, coverage: String?, country: String?): String {
+        val joined = listOf(network, coverage, country)
+            .filterNotNull()
+            .joinToString(" ")
+            .lowercase()
+
+        return when {
+            joined.contains("orange world") || joined.contains("global") -> "Orange World"
+            joined.contains("orange balkans") || joined.contains("balkans") -> "Orange Balkans"
+            joined.contains("vodafone") -> "Vodafone Europe"
+            joined.contains("orange") || joined.contains("europe") -> "Orange Europe"
+            !country.isNullOrBlank() -> country
+            else -> "Roam2World"
+        }
+    }
+
+    private fun cleanDetailPackageName(rawName: String, data: String?, provider: String): String {
+        val dataLabel = cleanDetailDataLabel(rawName, data)
+        return listOf(provider, dataLabel)
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+            .ifBlank { cleanRawDetailName(rawName) }
+    }
+
+    private fun cleanDetailDataLabel(rawName: String, data: String?): String {
+        data?.takeIf { it.isNotBlank() }?.let { return normalizeGbLabel(it) }
+
+        val match = Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(rawName)
+        return match?.value?.let { normalizeGbLabel(it) }.orEmpty()
+    }
+
+    private fun normalizeGbLabel(value: String): String =
+        value
+            .uppercase()
+            .replace("GB", " GB")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+
+    private fun cleanRawDetailName(rawName: String): String =
+        rawName
+            .replace("【Esim】", "", ignoreCase = true)
+            .replace("【SIMCARD】", "SIM Card", ignoreCase = true)
+            .replace("—", " ")
+            .replace("–", " ")
+            .replace(Regex("""\(valid for .*?\)""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("""\([^)]*\)"""), "")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
 
     private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
         requireViewById<TextView>(viewId).apply {
