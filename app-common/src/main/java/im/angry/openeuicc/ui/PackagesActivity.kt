@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -240,10 +241,10 @@ class PackagesActivity : AppCompatActivity() {
     private fun renderCatalog() {
         val query = search.text?.toString().orEmpty()
         val featured = catalog.featuredPackages
-            .filter { it.matches(query) && it.matchesSelectedFilters() }
+            .filter { it.matches(query) && it.matchesSelectedFilters() && !it.isEurope33Package() }
             .sortedBy { it.sortPriceValue() }
         val packages = catalog.packages
-            .filter { it.matches(query) && it.matchesSelectedFilters() }
+            .filter { it.matches(query) && it.matchesSelectedFilters() && !it.isEurope33Package() }
             .sortedBy { it.sortPriceValue() }
         val isEmpty = featured.isEmpty() && packages.isEmpty()
 
@@ -276,7 +277,7 @@ class PackagesActivity : AppCompatActivity() {
         if (selectedStoreSection == null) {
             addStoreCategories(packageList, packageData)
             addFilterPanel(packageList)
-            addSectionTitle(packageList, "All packages", "Sorted from lowest to highest price.")
+            addSectionTitle(packageList, "Packages", "Lowest price first")
             packageData
                 .sortedBy { it.sortPriceValue() }
                 .forEach { mobilePackage ->
@@ -305,13 +306,91 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun addStoreCategories(parent: LinearLayout, packageData: List<MobilePackage>) {
-        addSectionTitle(parent, "Store Categories", "Choose a provider or destination.")
-
-        STORE_SECTIONS.forEach { section ->
-            val count = packageData.count { it.matchesStoreSection(section) }
-            parent.addView(createStoreCategoryCard(section, count))
+        val scroll = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            setPadding(0, 0, 0, dp(12))
         }
+
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, 0, 0, dp(2))
+        }
+
+        STORE_SECTIONS.forEachIndexed { index, section ->
+            val count = packageData.count { it.matchesStoreSection(section) }
+            row.addView(
+                createStoreCategoryChip(section, count),
+                LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    setMargins(if (index == 0) 0 else dp(8), 0, 0, 0)
+                }
+            )
+        }
+
+        scroll.addView(row)
+        parent.addView(scroll)
     }
+
+    private fun createStoreCategoryChip(section: StoreSection, count: Int): View {
+        val selected = selectedStoreSection == section || (selectedStoreSection == null && section == StoreSection.ALL)
+        val primary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimary)
+        val onPrimary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnPrimary)
+        val onSurface = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurface)
+        val surface = getColor(R.color.r2w_card)
+
+        val chip = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            minimumWidth = dp(106)
+            minimumHeight = dp(92)
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            setBackgroundResource(R.drawable.wallet_request_status_badge)
+            backgroundTintList = ColorStateList.valueOf(if (selected) primary else surface)
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                selectedStoreSection = if (section == StoreSection.ALL) null else section
+                renderCatalog()
+            }
+        }
+
+        chip.addView(TextView(this).apply {
+            text = sectionEmoji(section)
+            textSize = 24f
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, dp(6))
+        })
+
+        chip.addView(TextView(this).apply {
+            text = section.title
+            gravity = Gravity.CENTER
+            maxLines = 2
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(if (selected) onPrimary else onSurface)
+        })
+
+        chip.addView(TextView(this).apply {
+            text = if (section == StoreSection.ALL) "All" else "$count"
+            gravity = Gravity.CENTER
+            maxLines = 1
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelSmall)
+            setTextColor(if (selected) onPrimary else MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            setPadding(0, dp(3), 0, 0)
+        })
+
+        return chip
+    }
+
+    private fun sectionEmoji(section: StoreSection): String =
+        when (section) {
+            StoreSection.ORANGE_EUROPE -> "🇪🇺"
+            StoreSection.ORANGE_BALKANS -> "🌍"
+            StoreSection.TURKEY -> "🇹🇷"
+            StoreSection.TGT -> "📶"
+            StoreSection.VODAFONE -> "📱"
+            StoreSection.ALL -> "🛒"
+        }
 
     private fun addStoreSectionHeader(parent: LinearLayout, section: StoreSection) {
         TextView(this).apply {
@@ -354,7 +433,7 @@ class PackagesActivity : AppCompatActivity() {
                 "$count packages - lowest price first"
             }
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            setTextColor(MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant))
             setPadding(0, dp(4), 0, 0)
         })
 
@@ -406,7 +485,7 @@ class PackagesActivity : AppCompatActivity() {
             TextView(this).apply {
                 text = subtitle
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-                setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                setTextColor(MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant))
                 setPadding(0, 0, 0, dp(10))
                 parent.addView(this)
             }
@@ -644,6 +723,25 @@ class PackagesActivity : AppCompatActivity() {
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
     }
 
+    private fun MobilePackage.isEurope33Package(): Boolean {
+        val text = searchableText()
+        val compact = text
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("_", "")
+            .replace("（", "(")
+            .replace("）", ")")
+
+        return compact.contains("europe33") ||
+            compact.contains("eu33") ||
+            compact.contains("33europe") ||
+            compact.contains("e183") ||
+            compact.contains("e184") ||
+            text.contains("europe 33 countries") ||
+            text.contains("europe (33 countries)") ||
+            text.contains("europe-33")
+    }
+
     private fun MobilePackage.sortPriceValue(): Double =
         priceFor(userRole)
             .replace(Regex("[^0-9.]"), "")
@@ -658,9 +756,16 @@ class PackagesActivity : AppCompatActivity() {
 
         return when (section) {
             StoreSection.ORANGE_EUROPE ->
-                (providerText.contains("orange") || displayProviderText.contains("orange")) &&
+                (
+                    text.contains("orange") ||
+                        text.contains("holiday") ||
+                        text.contains("e-211") ||
+                        text.contains("e211") ||
+                        (text.contains("500gb") && text.contains("90"))
+                    ) &&
                     text.contains("europe") &&
-                    !text.contains("balkan")
+                    !text.contains("balkan") &&
+                    !isEurope33Package()
 
             StoreSection.ORANGE_BALKANS ->
                 (providerText.contains("orange") || displayProviderText.contains("orange")) &&
