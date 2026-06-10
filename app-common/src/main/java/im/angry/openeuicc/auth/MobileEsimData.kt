@@ -59,8 +59,15 @@ data class MobileEsim(
 
     fun statusLabel(): String? {
         val normalized = status?.trim()?.lowercase() ?: return null
-        return normalized.replace("_", " ").replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase() else it.toString()
+        return when (normalized) {
+            "active", "activated", "enabled", "in_use", "inuse" -> "Active"
+            "ready", "assigned", "provisioned" -> "Ready"
+            "ready_to_install", "installable" -> "Ready to install"
+            "pending", "processing", "ordered", "waiting" -> "Pending"
+            "expired", "depleted", "terminated" -> "Expired"
+            else -> normalized.replace("_", " ").replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase() else it.toString()
+            }
         }
     }
 
