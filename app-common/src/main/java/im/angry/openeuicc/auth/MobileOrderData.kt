@@ -13,8 +13,19 @@ data class MobileOrder(
     val createdAt: String?,
     val provider: String? = null,
     val esimId: String? = null,
+    val customerFirstName: String? = null,
+    val customerLastName: String? = null,
+    val customerPhone: String? = null,
+    val customerEmail: String? = null,
     val esim: MobileEsim? = null
 ) {
+    fun customerName(): String? =
+        listOfNotNull(customerFirstName, customerLastName)
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
+            .takeIf { it.isNotBlank() }
+
     fun displayNumber(): String =
         orderNumber?.let { "#$it" }
             ?: id?.let { "#$it" }
