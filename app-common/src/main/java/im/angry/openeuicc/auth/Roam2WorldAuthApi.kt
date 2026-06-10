@@ -671,6 +671,36 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 esimObject?.optString("esim_id"),
                 esimObject?.optString("esimId")
             ),
+            customerFirstName = firstNotBlank(
+                orderJson.optString("customer_first_name"),
+                orderJson.optString("customerFirstName"),
+                orderJson.optString("first_name"),
+                orderJson.optString("firstName"),
+                esimObject?.optString("customer_first_name"),
+                esimObject?.optString("customerFirstName")
+            ),
+            customerLastName = firstNotBlank(
+                orderJson.optString("customer_last_name"),
+                orderJson.optString("customerLastName"),
+                orderJson.optString("last_name"),
+                orderJson.optString("lastName"),
+                esimObject?.optString("customer_last_name"),
+                esimObject?.optString("customerLastName")
+            ),
+            customerPhone = firstNotBlank(
+                orderJson.optString("customer_phone"),
+                orderJson.optString("customerPhone"),
+                orderJson.optString("phone"),
+                esimObject?.optString("customer_phone"),
+                esimObject?.optString("customerPhone")
+            ),
+            customerEmail = firstNotBlank(
+                orderJson.optString("customer_email"),
+                orderJson.optString("customerEmail"),
+                orderJson.optString("email"),
+                esimObject?.optString("customer_email"),
+                esimObject?.optString("customerEmail")
+            ),
             esim = parseMobileEsim(esimObject)
         )
     }

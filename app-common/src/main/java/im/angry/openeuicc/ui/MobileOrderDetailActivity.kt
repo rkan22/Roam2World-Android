@@ -145,9 +145,9 @@ class MobileOrderDetailActivity : AppCompatActivity() {
 
     private fun renderCustomerInfo(order: MobileOrder) {
         val esim = order.esim
-        val customerName = esim?.customerName()
-        val customerPhone = esim?.customerPhone
-        val customerEmail = esim?.customerEmail
+        val customerName = esim?.customerName() ?: order.customerName()
+        val customerPhone = esim?.customerPhone ?: order.customerPhone
+        val customerEmail = esim?.customerEmail ?: order.customerEmail
         val iccid = esim?.iccid
 
         val hasCustomer = !customerName.isNullOrBlank() || !customerPhone.isNullOrBlank() || !customerEmail.isNullOrBlank() || !iccid.isNullOrBlank()
