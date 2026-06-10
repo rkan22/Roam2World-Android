@@ -78,6 +78,7 @@ class PackagesActivity : AppCompatActivity() {
     private var selectedProvider = FILTER_ALL
     private var selectedData = FILTER_ALL
     private var selectedValidity = FILTER_ALL
+    private var selectedSort = StoreSort.LOWEST_PRICE
     private var selectedStoreSection: StoreSection? = StoreSection.ORANGE_EUROPE
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -291,7 +292,7 @@ class PackagesActivity : AppCompatActivity() {
                 it.matchesStoreSection(section) ||
                     (section == StoreSection.ORANGE_EUROPE && it.isOrangeEurope500gb90dPackage())
             }
-            .sortedBy { it.sortPriceValue() }
+            .let { sortPackages(it) }
 
         addSectionTitle(packageList, section.title, "Lowest price first")
 
@@ -515,10 +516,64 @@ class PackagesActivity : AppCompatActivity() {
                     selectedValidity = it
                 }
             },
+            filterButtonParams(start = 6, end = 6)
+        )
+
+        row.addView(
+            createFilterButton("Sort", selectedSort.title) {
+                showSortDialog()
+            },
             filterButtonParams(start = 6)
         )
 
         parent.addView(row)
+    }
+
+    private fun showSortDialog() {
+        val options = StoreSort.entries.map { it.title }.toTypedArray()
+        val current = StoreSort.entries.indexOf(selectedSort).coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle("Sort")
+            .setSingleChoiceItems(options, current) { dialog, which ->
+                selectedSort = StoreSort.entries[which]
+                dialog.dismiss()
+                renderCatalog()
+            }
+            .show()
+    }
+
+    private fun sortPackages(packages: List<MobilePackage>): List<MobilePackage> =
+        when (selectedSort) {
+            StoreSort.LOWEST_PRICE -> packages.sortedBy { it.sortPriceValue() }
+            StoreSort.HIGHEST_DATA -> packages.sortedWith(
+                compareByDescending<MobilePackage> { it.dataSortValue() }
+                    .thenBy { it.sortPriceValue() }
+            )
+            StoreSort.LONGEST_VALIDITY -> packages.sortedWith(
+                compareByDescending<MobilePackage> { it.validitySortValue() }
+                    .thenBy { it.sortPriceValue() }
+            )
+            StoreSort.BEST_VALUE -> packages.sortedWith(
+                compareBy<MobilePackage> { it.valueSortValue() }
+                    .thenBy { it.sortPriceValue() }
+            )
+        }
+
+    private fun MobilePackage.dataSortValue(): Double =
+        dataFilterLabel()
+            ?.let { dataFilterSortValue(it) }
+            ?: 0.0
+
+    private fun MobilePackage.validitySortValue(): Int =
+        validityFilterLabel()
+            ?.let { validityFilterSortValue(it) }
+            ?: 0
+
+    private fun MobilePackage.valueSortValue(): Double {
+        val gb = dataSortValue()
+        val price = sortPriceValue()
+        return if (gb > 0.0 && price != Double.MAX_VALUE) price / gb else Double.MAX_VALUE
     }
 
     private fun resetUnavailableFilters(sectionPackages: List<MobilePackage>) {
@@ -1096,7 +1151,15 @@ class PackagesActivity : AppCompatActivity() {
     private companion object {
         private const val LIVE_CATALOG_EMPTY_MESSAGE =
             "No live packages available. Please configure packages in Roam2World backend."
-        private const val FILTER_ALL = "All"
+        
+private enum class StoreSort(val title: String) {
+    LOWEST_PRICE("Lowest Price"),
+    HIGHEST_DATA("Highest Data"),
+    LONGEST_VALIDITY("Longest Validity"),
+    BEST_VALUE("Best Value")
+}
+
+private const val FILTER_ALL = "All"
         private val REGION_FILTERS = listOf("All", "Turkey", "Europe", "Europe Balkans", "Global")
         private val PROVIDER_FILTERS = listOf(
             "All",
