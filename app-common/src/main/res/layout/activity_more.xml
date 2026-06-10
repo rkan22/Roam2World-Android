@@ -272,6 +272,20 @@
                 app:iconGravity="top"
                 app:iconPadding="6dp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/more_tgt_check_gb"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="74dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="TGT\nCheck GB"
+                android:textAlignment="center"
+                app:cornerRadius="18dp"
+                app:icon="@drawable/ic_packages"
+                app:iconGravity="top"
+                app:iconPadding="6dp" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

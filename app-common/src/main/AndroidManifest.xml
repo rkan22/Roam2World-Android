@@ -105,5 +105,8 @@
             android:name="im.angry.openeuicc.service.EuiccChannelManagerService"
             android:exported="false"
             android:foregroundServiceType="shortService" />
-    </application>
+            <activity
+            android:name="im.angry.openeuicc.ui.TgtCheckGbActivity"
+            android:exported="false" />
+</application>
 </manifest>
