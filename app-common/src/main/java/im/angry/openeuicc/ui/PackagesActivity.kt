@@ -36,6 +36,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
+private enum class StoreSection(val title: String) {
+    ORANGE_EUROPE("Orange Europe"),
+    ORANGE_BALKANS("Orange Balkans"),
+    TURKEY("Türkiye"),
+    TGT("TGT"),
+    VODAFONE("Vodafone"),
+    ALL("All Packages")
+}
+
+private val STORE_SECTIONS = listOf(
+    StoreSection.ORANGE_EUROPE,
+    StoreSection.ORANGE_BALKANS,
+    StoreSection.TURKEY,
+    StoreSection.TGT,
+    StoreSection.VODAFONE,
+    StoreSection.ALL
+)
+
 class PackagesActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
@@ -56,6 +75,7 @@ class PackagesActivity : AppCompatActivity() {
     private var selectedProvider = FILTER_ALL
     private var selectedData = FILTER_ALL
     private var selectedValidity = FILTER_ALL
+    private var selectedStoreSection: StoreSection? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -219,8 +239,12 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun renderCatalog() {
         val query = search.text?.toString().orEmpty()
-        val featured = catalog.featuredPackages.filter { it.matches(query) && it.matchesSelectedFilters() }
-        val packages = catalog.packages.filter { it.matches(query) && it.matchesSelectedFilters() }
+        val featured = catalog.featuredPackages
+            .filter { it.matches(query) && it.matchesSelectedFilters() }
+            .sortedBy { it.sortPriceValue() }
+        val packages = catalog.packages
+            .filter { it.matches(query) && it.matchesSelectedFilters() }
+            .sortedBy { it.sortPriceValue() }
         val isEmpty = featured.isEmpty() && packages.isEmpty()
 
         renderFeatured(featured)
@@ -248,43 +272,100 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun renderPackages(packageData: List<MobilePackage>) {
         packageList.removeAllViews()
-        addFilterPanel(packageList)
 
-        val recommended = packageData
-            .filter { it.isRecommendedPackage() }
-            .distinctBy { it.id ?: "${it.provider}-${it.name}-${it.priceFor(userRole)}" }
-            .take(6)
-
-        val popular = packageData
-            .filter { it.isPopularPackage() }
-            .distinctBy { it.id ?: "${it.provider}-${it.name}-${it.priceFor(userRole)}" }
-            .take(8)
-
-        addPackageSection(
-            parent = packageList,
-            title = "Recommended for you",
-            subtitle = "Best value packages for quick resale.",
-            packages = recommended
-        )
-
-        addPackageSection(
-            parent = packageList,
-            title = "Popular packages",
-            subtitle = "High-demand data bundles.",
-            packages = popular
-        )
-
-        addSectionTitle(packageList, "All packages", "Browse every available destination and provider.")
-
-        packageData
-            .groupBy { it.country.ifBlank { getString(R.string.packages_global_country) } }
-            .toSortedMap()
-            .forEach { (country, packages) ->
-                addSectionTitle(packageList, country, null, compact = true)
-                packages.forEach { mobilePackage ->
+        if (selectedStoreSection == null) {
+            addStoreCategories(packageList, packageData)
+            addFilterPanel(packageList)
+            addSectionTitle(packageList, "All packages", "Sorted from lowest to highest price.")
+            packageData
+                .sortedBy { it.sortPriceValue() }
+                .forEach { mobilePackage ->
                     packageList.addView(createPackageCard(mobilePackage))
                 }
+            return
+        }
+
+        val section = selectedStoreSection ?: return
+        addStoreSectionHeader(packageList, section)
+        addFilterPanel(packageList)
+
+        val sectionPackages = packageData
+            .filter { it.matchesStoreSection(section) }
+            .sortedBy { it.sortPriceValue() }
+
+        if (sectionPackages.isEmpty()) {
+            addSectionTitle(packageList, section.title, "No packages found in this category.")
+            return
+        }
+
+        addSectionTitle(packageList, section.title, "Sorted from lowest to highest price.")
+        sectionPackages.forEach { mobilePackage ->
+            packageList.addView(createPackageCard(mobilePackage))
+        }
+    }
+
+    private fun addStoreCategories(parent: LinearLayout, packageData: List<MobilePackage>) {
+        addSectionTitle(parent, "Store Categories", "Choose a provider or destination.")
+
+        STORE_SECTIONS.forEach { section ->
+            val count = packageData.count { it.matchesStoreSection(section) }
+            parent.addView(createStoreCategoryCard(section, count))
+        }
+    }
+
+    private fun addStoreSectionHeader(parent: LinearLayout, section: StoreSection) {
+        TextView(this).apply {
+            text = "← Store Categories"
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary))
+            setPadding(0, dp(6), 0, dp(14))
+            setOnClickListener {
+                selectedStoreSection = null
+                renderCatalog()
             }
+            parent.addView(this)
+        }
+    }
+
+    private fun createStoreCategoryCard(section: StoreSection, count: Int): View {
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(16), dp(14), dp(16), dp(14))
+            setBackgroundResource(R.drawable.wallet_request_status_badge)
+            backgroundTintList = ColorStateList.valueOf(getColor(R.color.r2w_card))
+            setOnClickListener {
+                selectedStoreSection = if (section == StoreSection.ALL) null else section
+                renderCatalog()
+            }
+        }
+
+        card.addView(TextView(this).apply {
+            text = section.title
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+        })
+
+        card.addView(TextView(this).apply {
+            text = if (section == StoreSection.ALL) {
+                "Browse every package, lowest price first"
+            } else {
+                "$count packages - lowest price first"
+            }
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+            setPadding(0, dp(4), 0, 0)
+        })
+
+        card.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, 0, 0, dp(10))
+        }
+
+        return card
     }
 
     private fun addPackageSection(
@@ -561,6 +642,41 @@ class PackagesActivity : AppCompatActivity() {
         val text = searchableText()
         val compact = text.replace(" ", "")
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
+    }
+
+    private fun MobilePackage.sortPriceValue(): Double =
+        priceFor(userRole)
+            .replace(Regex("[^0-9.]"), "")
+            .toDoubleOrNull()
+            ?: Double.MAX_VALUE
+
+    private fun MobilePackage.matchesStoreSection(section: StoreSection): Boolean {
+        if (section == StoreSection.ALL) return true
+        val text = searchableText()
+        val providerText = provider.orEmpty().lowercase()
+        val displayProviderText = providerLabel().lowercase()
+
+        return when (section) {
+            StoreSection.ORANGE_EUROPE ->
+                (providerText.contains("orange") || displayProviderText.contains("orange")) &&
+                    text.contains("europe") &&
+                    !text.contains("balkan")
+
+            StoreSection.ORANGE_BALKANS ->
+                (providerText.contains("orange") || displayProviderText.contains("orange")) &&
+                    (text.contains("balkan") || text.contains("simcard】europe（41）") || text.contains("simcard]europe(41)"))
+
+            StoreSection.TURKEY ->
+                text.contains("turkey") || text.contains("turkiye") || text.contains("türkiye")
+
+            StoreSection.TGT ->
+                providerText.contains("tgt") || displayProviderText.contains("tgt")
+
+            StoreSection.VODAFONE ->
+                providerText.contains("vodafone") || displayProviderText.contains("vodafone")
+
+            StoreSection.ALL -> true
+        }
     }
 
     private fun MobilePackage.isRecommendedPackage(): Boolean {
