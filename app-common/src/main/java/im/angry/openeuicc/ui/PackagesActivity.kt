@@ -276,10 +276,16 @@ class PackagesActivity : AppCompatActivity() {
     private fun renderPackages(packageData: List<MobilePackage>) {
         packageList.removeAllViews()
 
-        addStoreCategories(packageList, packageData)
-        addFilterPanel(packageList)
-
         val section = selectedStoreSection ?: StoreSection.ORANGE_EUROPE
+        val sectionFilterOptions = catalog.packages
+            .filter { it.matchesStoreSection(section) }
+            .sortedBy { it.sortPriceValue() }
+
+        resetUnavailableFilters(sectionFilterOptions)
+
+        addStoreCategories(packageList, packageData)
+        addFilterPanel(packageList, sectionFilterOptions)
+
         val sectionPackages = packageData
             .filter {
                 it.matchesStoreSection(section) ||
@@ -488,7 +494,7 @@ class PackagesActivity : AppCompatActivity() {
         }
     }
 
-    private fun addFilterPanel(parent: LinearLayout) {
+    private fun addFilterPanel(parent: LinearLayout, sectionPackages: List<MobilePackage>) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, dp(8), 0, dp(12))
@@ -496,7 +502,7 @@ class PackagesActivity : AppCompatActivity() {
 
         row.addView(
             createFilterButton("Data", selectedData) {
-                showFilterDialog("Data", DATA_FILTERS, selectedData) {
+                showFilterDialog("Data", dataFiltersFor(sectionPackages), selectedData) {
                     selectedData = it
                 }
             },
@@ -505,7 +511,7 @@ class PackagesActivity : AppCompatActivity() {
 
         row.addView(
             createFilterButton("Validity", selectedValidity) {
-                showFilterDialog("Validity", VALIDITY_FILTERS, selectedValidity) {
+                showFilterDialog("Validity", validityFiltersFor(sectionPackages), selectedValidity) {
                     selectedValidity = it
                 }
             },
@@ -514,6 +520,74 @@ class PackagesActivity : AppCompatActivity() {
 
         parent.addView(row)
     }
+
+    private fun resetUnavailableFilters(sectionPackages: List<MobilePackage>) {
+        val dataOptions = dataFiltersFor(sectionPackages).toSet()
+        val validityOptions = validityFiltersFor(sectionPackages).toSet()
+
+        if (selectedData !in dataOptions) {
+            selectedData = FILTER_ALL
+        }
+        if (selectedValidity !in validityOptions) {
+            selectedValidity = FILTER_ALL
+        }
+    }
+
+    private fun dataFiltersFor(sectionPackages: List<MobilePackage>): List<String> {
+        val values = sectionPackages
+            .mapNotNull { it.dataFilterLabel() }
+            .distinct()
+            .sortedWith(compareBy<String> { dataFilterSortValue(it) }.thenBy { it })
+
+        return listOf(FILTER_ALL) + values
+    }
+
+    private fun validityFiltersFor(sectionPackages: List<MobilePackage>): List<String> {
+        val values = sectionPackages
+            .mapNotNull { it.validityFilterLabel() }
+            .distinct()
+            .sortedWith(compareBy<String> { validityFilterSortValue(it) }.thenBy { it })
+
+        return listOf(FILTER_ALL) + values
+    }
+
+    private fun MobilePackage.dataFilterLabel(): String? {
+        val text = searchableText()
+        val gb = Regex("""(\d+(?:\.\d+)?)\s*gb""", RegexOption.IGNORE_CASE)
+            .find(text)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.trimEnd('0')
+            ?.trimEnd('.')
+
+        return gb?.let { "$it GB" }
+    }
+
+    private fun MobilePackage.validityFilterLabel(): String? {
+        val text = searchableText()
+        val days = Regex("""(\d+)\s*(?:days|day|gün|gun|d)""", RegexOption.IGNORE_CASE)
+            .find(text)
+            ?.groupValues
+            ?.getOrNull(1)
+
+        return days?.let { "$it Days" }
+    }
+
+    private fun dataFilterSortValue(value: String): Double =
+        Regex("""(\d+(?:\.\d+)?)""")
+            .find(value)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toDoubleOrNull()
+            ?: Double.MAX_VALUE
+
+    private fun validityFilterSortValue(value: String): Int =
+        Regex("""(\d+)""")
+            .find(value)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toIntOrNull()
+            ?: Int.MAX_VALUE
 
     private fun createFilterButton(label: String, value: String, onClick: () -> Unit): TextView {
         val selected = value != FILTER_ALL
