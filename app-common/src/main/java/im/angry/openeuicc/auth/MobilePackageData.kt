@@ -23,7 +23,9 @@ data class MobilePackage(
     val coverage: String?,
     val visibleToReseller: Boolean,
     val visibleToDealer: Boolean,
-    val featured: Boolean
+    val featured: Boolean,
+    val countries: List<String> = emptyList(),
+    val countryCodes: List<String> = emptyList()
 ) {
     fun providerLabel(): String =
         displayProvider?.takeIf { it.isNotBlank() } ?: provider.orEmpty()
@@ -55,7 +57,9 @@ data class MobilePackage(
             validity,
             description,
             network,
-            coverage
+            coverage,
+            countries.joinToString(" "),
+            countryCodes.joinToString(" ")
         ).any { it.lowercase().contains(normalized) }
     }
 
