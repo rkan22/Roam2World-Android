@@ -249,21 +249,87 @@ class PackagesActivity : AppCompatActivity() {
     private fun renderPackages(packageData: List<MobilePackage>) {
         packageList.removeAllViews()
         addFilterPanel(packageList)
+
+        val recommended = packageData
+            .filter { it.isRecommendedPackage() }
+            .distinctBy { it.id ?: "${it.provider}-${it.name}-${it.priceFor(userRole)}" }
+            .take(6)
+
+        val popular = packageData
+            .filter { it.isPopularPackage() }
+            .distinctBy { it.id ?: "${it.provider}-${it.name}-${it.priceFor(userRole)}" }
+            .take(8)
+
+        addPackageSection(
+            parent = packageList,
+            title = "Recommended for you",
+            subtitle = "Best value packages for quick resale.",
+            packages = recommended
+        )
+
+        addPackageSection(
+            parent = packageList,
+            title = "Popular packages",
+            subtitle = "High-demand data bundles.",
+            packages = popular
+        )
+
+        addSectionTitle(packageList, "All packages", "Browse every available destination and provider.")
+
         packageData
             .groupBy { it.country.ifBlank { getString(R.string.packages_global_country) } }
             .toSortedMap()
             .forEach { (country, packages) ->
-                TextView(this).apply {
-                    text = country
-                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleSmall)
-                    setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
-                    setPadding(0, dp(12), 0, dp(8))
-                    packageList.addView(this)
-                }
+                addSectionTitle(packageList, country, null, compact = true)
                 packages.forEach { mobilePackage ->
                     packageList.addView(createPackageCard(mobilePackage))
                 }
             }
+    }
+
+    private fun addPackageSection(
+        parent: LinearLayout,
+        title: String,
+        subtitle: String?,
+        packages: List<MobilePackage>
+    ) {
+        if (packages.isEmpty()) return
+        addSectionTitle(parent, title, subtitle)
+        packages.forEach { mobilePackage ->
+            parent.addView(createPackageCard(mobilePackage))
+        }
+    }
+
+    private fun addSectionTitle(
+        parent: LinearLayout,
+        title: String,
+        subtitle: String?,
+        compact: Boolean = false
+    ) {
+        TextView(this).apply {
+            text = title
+            setTextAppearance(
+                if (compact) {
+                    com.google.android.material.R.style.TextAppearance_Material3_TitleSmall
+                } else {
+                    com.google.android.material.R.style.TextAppearance_Material3_TitleMedium
+                }
+            )
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
+            setPadding(0, if (compact) dp(12) else dp(18), 0, if (subtitle.isNullOrBlank()) dp(8) else dp(2))
+            parent.addView(this)
+        }
+
+        if (!subtitle.isNullOrBlank()) {
+            TextView(this).apply {
+                text = subtitle
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+                setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                setPadding(0, 0, 0, dp(10))
+                parent.addView(this)
+            }
+        }
     }
 
     private fun addFilterPanel(parent: LinearLayout) {
@@ -465,6 +531,24 @@ class PackagesActivity : AppCompatActivity() {
         val text = searchableText()
         val compact = text.replace(" ", "")
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
+    }
+
+    private fun MobilePackage.isRecommendedPackage(): Boolean {
+        val text = searchableText()
+        val price = priceFor(userRole).replace("$", "").trim().toDoubleOrNull() ?: 0.0
+        return text.contains("europe") ||
+            text.contains("turkey") ||
+            text.contains("global") ||
+            price in 1.0..25.0
+    }
+
+    private fun MobilePackage.isPopularPackage(): Boolean {
+        val text = searchableText()
+        return listOf("10gb", "20gb", "30gb", "50gb", "100gb", "200gb", "500gb").any { token ->
+            text.replace(" ", "").contains(token)
+        } || provider.orEmpty().lowercase().let {
+            it.contains("tgt") || it.contains("airhub") || it.contains("traveroam")
+        }
     }
 
     private fun MobilePackage.searchableText(): String =
