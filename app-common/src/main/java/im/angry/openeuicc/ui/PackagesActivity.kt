@@ -809,6 +809,10 @@ class PackagesActivity : AppCompatActivity() {
                     !text.contains("balkan") &&
                     !isEurope33Package()
 
+            StoreSection.ORANGE_WORLD ->
+                isOrangeWorldPackage() &&
+                    !isEurope33Package()
+
             StoreSection.ORANGE_BALKANS_ESIM ->
                 isEuropeBalkansPackage() &&
                     !isPhysicalSimPackage() &&
