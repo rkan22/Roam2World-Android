@@ -40,8 +40,9 @@ import kotlinx.coroutines.withContext
 
 private enum class StoreSection(val title: String) {
     ORANGE_EUROPE("Orange Europe"),
-    ORANGE_BALKANS_ESIM("Balkans eSIM"),
-    ORANGE_BALKANS_SIM("Balkans SIM Card"),
+    ORANGE_WORLD("Orange World"),
+    ORANGE_BALKANS_ESIM("Orange Balkans eSIM"),
+    ORANGE_BALKANS_SIM("Orange Balkans SIM"),
     TURKEY("Türkiye"),
     TGT("TGT"),
     VODAFONE("Vodafone"),
@@ -50,12 +51,11 @@ private enum class StoreSection(val title: String) {
 
 private val STORE_SECTIONS = listOf(
     StoreSection.ORANGE_EUROPE,
-    StoreSection.ORANGE_BALKANS_ESIM,
+    StoreSection.ORANGE_WORLD,
     StoreSection.ORANGE_BALKANS_SIM,
+    StoreSection.ORANGE_BALKANS_ESIM,
     StoreSection.TURKEY,
-    StoreSection.TGT,
-    StoreSection.VODAFONE,
-    StoreSection.ALL
+    StoreSection.VODAFONE
 )
 
 class PackagesActivity : AppCompatActivity() {
@@ -78,7 +78,7 @@ class PackagesActivity : AppCompatActivity() {
     private var selectedProvider = FILTER_ALL
     private var selectedData = FILTER_ALL
     private var selectedValidity = FILTER_ALL
-    private var selectedStoreSection: StoreSection? = null
+    private var selectedStoreSection: StoreSection? = StoreSection.ORANGE_EUROPE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -276,32 +276,21 @@ class PackagesActivity : AppCompatActivity() {
     private fun renderPackages(packageData: List<MobilePackage>) {
         packageList.removeAllViews()
 
-        if (selectedStoreSection == null) {
-            addStoreCategories(packageList, packageData)
-            addFilterPanel(packageList)
-            addSectionTitle(packageList, "Packages", "Lowest price first")
-            packageData
-                .sortedBy { it.sortPriceValue() }
-                .forEach { mobilePackage ->
-                    packageList.addView(createPackageCard(mobilePackage))
-                }
-            return
-        }
-
-        val section = selectedStoreSection ?: return
-        addStoreSectionHeader(packageList, section)
+        addStoreCategories(packageList, packageData)
         addFilterPanel(packageList)
 
+        val section = selectedStoreSection ?: StoreSection.ORANGE_EUROPE
         val sectionPackages = packageData
             .filter { it.matchesStoreSection(section) }
             .sortedBy { it.sortPriceValue() }
 
+        addSectionTitle(packageList, section.title, "Lowest price first")
+
         if (sectionPackages.isEmpty()) {
-            addSectionTitle(packageList, section.title, "No packages found in this category.")
+            addSectionTitle(packageList, "No packages found", "Try another category or filter.")
             return
         }
 
-        addSectionTitle(packageList, section.title, "Sorted from lowest to highest price.")
         sectionPackages.forEach { mobilePackage ->
             packageList.addView(createPackageCard(mobilePackage))
         }
@@ -334,7 +323,7 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun createStoreCategoryChip(section: StoreSection, count: Int): View {
-        val selected = selectedStoreSection == section || (selectedStoreSection == null && section == StoreSection.ALL)
+        val selected = selectedStoreSection == section
         val primary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimary)
         val onPrimary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnPrimary)
         val onSurface = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurface)
@@ -351,7 +340,7 @@ class PackagesActivity : AppCompatActivity() {
             isClickable = true
             isFocusable = true
             setOnClickListener {
-                selectedStoreSection = if (section == StoreSection.ALL) null else section
+                selectedStoreSection = section
                 renderCatalog()
             }
         }
@@ -373,7 +362,7 @@ class PackagesActivity : AppCompatActivity() {
         })
 
         chip.addView(TextView(this).apply {
-            text = if (section == StoreSection.ALL) "All" else "$count"
+            text = "$count"
             gravity = Gravity.CENTER
             maxLines = 1
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelSmall)
@@ -387,6 +376,7 @@ class PackagesActivity : AppCompatActivity() {
     private fun sectionEmoji(section: StoreSection): String =
         when (section) {
             StoreSection.ORANGE_EUROPE -> "🇪🇺"
+            StoreSection.ORANGE_WORLD -> "🌐"
             StoreSection.ORANGE_BALKANS_ESIM -> "🌍"
             StoreSection.ORANGE_BALKANS_SIM -> "💳"
             StoreSection.TURKEY -> "🇹🇷"
@@ -403,7 +393,7 @@ class PackagesActivity : AppCompatActivity() {
             setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorPrimary))
             setPadding(0, dp(6), 0, dp(14))
             setOnClickListener {
-                selectedStoreSection = null
+                selectedStoreSection = StoreSection.ORANGE_EUROPE
                 renderCatalog()
             }
             parent.addView(this)
@@ -417,7 +407,7 @@ class PackagesActivity : AppCompatActivity() {
             setBackgroundResource(R.drawable.wallet_request_status_badge)
             backgroundTintList = ColorStateList.valueOf(getColor(R.color.r2w_card))
             setOnClickListener {
-                selectedStoreSection = if (section == StoreSection.ALL) null else section
+                selectedStoreSection = section
                 renderCatalog()
             }
         }
@@ -726,6 +716,22 @@ class PackagesActivity : AppCompatActivity() {
         return compact.contains("${days}days") || compact.contains("${days}day") || compact.contains("${days}d")
     }
 
+    private fun MobilePackage.isOrangeWorldPackage(): Boolean {
+        val text = searchableText()
+        val providerText = provider.orEmpty().lowercase()
+        val displayProviderText = providerLabel().lowercase()
+
+        return text.contains("orange world") ||
+            (
+                text.contains("world") &&
+                    (
+                        text.contains("orange") ||
+                            providerText.contains("orange") ||
+                            displayProviderText.contains("orange")
+                    )
+            )
+    }
+
     private fun MobilePackage.isEuropeBalkansPackage(): Boolean {
         val text = searchableText()
         val compact = text
@@ -814,7 +820,8 @@ class PackagesActivity : AppCompatActivity() {
                     !isEurope33Package()
 
             StoreSection.TURKEY ->
-                text.contains("turkey") || text.contains("turkiye") || text.contains("türkiye")
+                (text.contains("turkey") || text.contains("turkiye") || text.contains("türkiye")) &&
+                    !isOrangeWorldPackage()
 
             StoreSection.TGT ->
                 providerText.contains("tgt") || displayProviderText.contains("tgt")
