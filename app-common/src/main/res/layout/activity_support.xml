@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Support"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_text_primary"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -36,28 +36,30 @@
                 android:layout_marginTop="4dp"
                 android:text="Get help with eSIM orders, Orange recharge, Orange Check GB, wallet requests and OpenEUICC installation."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/r2w_border"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Priority B2B Support"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_text_primary"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -66,7 +68,7 @@
                         android:layout_marginTop="8dp"
                         android:text="For urgent dealer, reseller or activation issues, contact your Roam2World account manager."
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_text_secondary" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -76,7 +78,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Common Topics"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton
@@ -87,7 +89,11 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:text="Orders &amp; eSIM Activation"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius" 
+                android:backgroundTint="@color/r2w_premium_surface"
+                android:textColor="@color/r2w_premium_primary"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/support_tgt_recharge"
@@ -97,7 +103,11 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:text="Orange Recharge"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius" 
+                android:backgroundTint="@color/r2w_premium_surface"
+                android:textColor="@color/r2w_premium_primary"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/support_wallet"
@@ -107,7 +117,11 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:text="Wallet &amp; Balance"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius" 
+                android:backgroundTint="@color/r2w_premium_surface"
+                android:textColor="@color/r2w_premium_primary"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/support_openeuicc"
@@ -117,7 +131,11 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:text="OpenEUICC Install"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius" 
+                android:backgroundTint="@color/r2w_premium_surface"
+                android:textColor="@color/r2w_premium_primary"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
