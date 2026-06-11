@@ -166,7 +166,11 @@ class ReportsActivity : AppCompatActivity() {
                 "Dealer performance data unavailable"
             } else {
                 dealers.take(5).mapIndexed { index, dealer ->
-                    "${index + 1}. ${dealer.name}\nOrders: ${dealer.totalOrders} • Balance: ${dealer.currentBalance}"
+                    listOf(
+                        "${index + 1}. ${dealer.name}",
+                        "Orders: ${dealer.totalOrders}",
+                        "Balance: ${dealer.currentBalance}"
+                    ).joinToString("\n")
                 }.joinToString("\n\n")
             }
             status.text = "Live report data loaded • ${orders.size} orders • ${dealers.size} dealers"
