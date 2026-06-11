@@ -35,6 +35,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class MobileEsimsActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -256,10 +258,9 @@ class MobileEsimsActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.mobile_esim_subtitle).text = esim.iccid.orEmpty().ifBlank { "Pending ICCID" }
             item.requireViewById<TextView>(R.id.mobile_esim_title).text = esim.title()
             item.requireViewById<TextView>(R.id.mobile_esim_meta).text = listOfNotNull(
-                esim.provider?.takeIf { it.isNotBlank() },
-                esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: $it" },
-                esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" },
-                esim.status?.takeIf { it.isNotBlank() && it.lowercase() != displayStatus.raw.lowercase() }?.let { "Raw: $it" }
+                visibleProvider(esim.provider)?.takeIf { it.isNotBlank() },
+                esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: ${formatEsimDate(it)}" },
+                esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" }
             ).joinToString("  •  ")
             item.requireViewById<TextView>(R.id.mobile_esim_status).apply {
                 applyRoamStatusChip(displayStatus.label, displayStatus.raw)
@@ -276,6 +277,16 @@ class MobileEsimsActivity : AppCompatActivity() {
             }
             esims.addView(item)
         }
+    }
+
+
+    private fun visibleProvider(provider: String?): String? =
+        provider?.replace("TGT", "Orange", ignoreCase = true)
+            ?.replace("tgt", "Orange", ignoreCase = true)
+
+    private fun formatEsimDate(value: String): String {
+        val parsed = runCatching { OffsetDateTime.parse(value) }.getOrNull() ?: return value
+        return parsed.format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault()))
     }
 
     private fun realStatus(esim: MobileEsim): DisplayStatus {

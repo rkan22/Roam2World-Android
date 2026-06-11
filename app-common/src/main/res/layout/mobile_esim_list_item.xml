@@ -7,17 +7,17 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/r2w_card"
-    app:cardCornerRadius="22dp"
-    app:cardElevation="5dp"
-    app:strokeColor="@color/r2w_border"
+    app:cardBackgroundColor="@color/r2w_premium_surface"
+    app:cardCornerRadius="@dimen/r2w_card_radius"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/r2w_card_padding">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:text="ICCID"
                     android:textAppearance="?attr/textAppearanceLabelMedium"
-                    android:textColor="@color/r2w_text_secondary"
+                    android:textColor="@color/r2w_premium_muted"
                     android:textStyle="bold" />
 
                 <TextView
@@ -47,7 +47,7 @@
                     android:ellipsize="middle"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary" />
+                    android:textColor="@color/r2w_premium_text" />
             </LinearLayout>
 
             <TextView
@@ -55,7 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:background="@drawable/wallet_request_status_badge"
+                android:background="@drawable/r2w_chip_success"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
                 android:textAppearance="?attr/textAppearanceLabelSmall" />
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="14dp"
-            android:background="@color/r2w_border" />
+            android:background="@color/r2w_premium_border" />
 
         <TextView
             android:id="@+id/mobile_esim_title"
@@ -75,7 +75,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?attr/textAppearanceTitleMedium"
-            android:textColor="@color/r2w_text_primary"
+            android:textColor="@color/r2w_premium_text"
             android:textStyle="bold" />
 
         <TextView
@@ -86,7 +86,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="@color/r2w_text_secondary" />
+            android:textColor="@color/r2w_premium_muted" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -103,7 +103,10 @@
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
                 android:text="View Detail"
-                app:cornerRadius="14dp" />
+                app:cornerRadius="@dimen/r2w_button_radius"
+                app:strokeColor="@color/r2w_premium_primary"
+                app:strokeWidth="1dp"
+                android:textColor="@color/r2w_premium_primary" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_renew"
@@ -111,8 +114,12 @@
                 android:layout_height="46dp"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="Renew"
-                app:cornerRadius="14dp" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
