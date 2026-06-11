@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="r2w_screen_padding">20dp</dimen>
+    <dimen name="r2w_card_radius">18dp</dimen>
+    <dimen name="r2w_card_padding">18dp</dimen>
+    <dimen name="r2w_card_gap">16dp</dimen>
+    <dimen name="r2w_button_radius">14dp</dimen>
+    <dimen name="r2w_chip_radius">12dp</dimen>
+    <dimen name="r2w_icon_box">52dp</dimen>
+    <dimen name="r2w_icon_inner">28dp</dimen>
+    <dimen name="r2w_title_size">30sp</dimen>
+    <dimen name="r2w_section_title_size">20sp</dimen>
+    <dimen name="r2w_value_size">28sp</dimen>
+    <dimen name="r2w_body_size">15sp</dimen>
+    <dimen name="r2w_caption_size">13sp</dimen>
+</resources>
