@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Get help with eSIM orders, Orange SIM recharge, wallet requests and OpenEUICC installation."
+                android:text="Get help with eSIM orders, Orange recharge, Orange Check GB, wallet requests and OpenEUICC installation."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
 
@@ -86,7 +86,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:text="eSIM Orders &amp; Activation"
+                android:text="Orders &amp; eSIM Activation"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -96,7 +96,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:text="Orange SIM Recharge"
+                android:text="Orange Recharge"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -106,7 +106,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:text="Wallet &amp; Balance Requests"
+                android:text="Wallet &amp; Balance"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
@@ -116,7 +116,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:text="OpenEUICC Installation"
+                android:text="OpenEUICC Install"
                 app:cornerRadius="16dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
