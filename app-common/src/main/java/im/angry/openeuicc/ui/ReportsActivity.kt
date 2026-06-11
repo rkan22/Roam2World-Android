@@ -238,9 +238,7 @@ class ReportsActivity : AppCompatActivity() {
             .take(5)
             .joinToString("\n\n") { (provider, count) ->
                 val percent = (count * 100) / total
-                val filled = (percent / 10).coerceIn(1, 10)
-                val bar = "█".repeat(filled) + "░".repeat(10 - filled)
-                "${formatReportStatus(provider)}\n$bar  $percent%  •  $count orders"
+                "${formatReportStatus(provider)}\n$percent% of provider usage • $count orders"
             }
     }
 
