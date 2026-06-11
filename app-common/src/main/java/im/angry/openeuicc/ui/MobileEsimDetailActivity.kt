@@ -140,8 +140,12 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         val button = MaterialButton(this).apply {
             text = "Renew eSIM"
             visibility = View.GONE
-            cornerRadius = dp(28)
+            cornerRadius = dp(14)
             icon = getDrawable(R.drawable.ic_packages)
+            setTextColor(getColor(android.R.color.white))
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            background = getDrawable(R.drawable.r2w_premium_primary_button)
+            backgroundTintList = null
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(56)).apply {
                 topMargin = dp(20)
             }
@@ -193,6 +197,11 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         return refreshed
     }
 
+
+    private fun visibleProvider(provider: String?): String? =
+        provider?.replace("TGT", "Orange", ignoreCase = true)
+            ?.replace("tgt", "Orange", ignoreCase = true)
+
     private fun renderEsim(esim: MobileEsim?) {
         currentEsim = esim
         if (esim == null) {
@@ -204,16 +213,16 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         val displayStatus = realStatus(esim)
         requireViewById<TextView>(R.id.mobile_esim_detail_title).text = esim.title()
         setOptionalText(R.id.mobile_esim_detail_iccid, esim.iccid, R.string.mobile_esim_iccid_format)
-        requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(esim.provider)
+        requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(visibleProvider(esim.provider))
         setOptionalText(R.id.mobile_esim_detail_package, PackageNameCleaner.clean(esim.packageName), R.string.mobile_esim_package_format)
         requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(displayStatus.label, displayStatus.raw)
         setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
         setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)
         setOptionalText(R.id.mobile_esim_detail_matching_id, esim.matchingId, R.string.mobile_esim_matching_id_format)
-        setOptionalText(R.id.mobile_esim_detail_expires, esim.expiresAt, R.string.mobile_esim_expires_format)
+        setOptionalText(R.id.mobile_esim_detail_expires, esim.expiresAt?.let { formatProviderDate(it) }, R.string.mobile_esim_expires_format)
         setOptionalText(R.id.mobile_esim_detail_data_remaining, esim.dataRemaining, R.string.mobile_esim_data_remaining_format)
         setOptionalText(R.id.mobile_esim_detail_data_used, esim.dataUsed, R.string.mobile_esim_data_used_format)
-        setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt, R.string.mobile_esim_created_format)
+        setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt?.let { formatProviderDate(it) }, R.string.mobile_esim_created_format)
         setOptionalText(R.id.mobile_esim_detail_order, esim.orderNumber, R.string.mobile_esim_order_format)
         renderQr(esim)
         renderInstallAssistant(esim)
@@ -271,8 +280,8 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
             strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_border))
-            setCardBackgroundColor(getColor(R.color.r2w_card))
+            setStrokeColor(getColor(R.color.r2w_premium_border))
+            setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -286,13 +295,13 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             text = "Last Renewal"
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(getColor(R.color.r2w_text_primary))
+            setTextColor(getColor(R.color.r2w_premium_text))
         })
         body.addView(TextView(this).apply {
             text = details
             setPadding(0, dp(8), 0, 0)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            setTextColor(getColor(R.color.r2w_text_secondary))
+            setTextColor(getColor(R.color.r2w_premium_muted))
         })
         card.addView(body)
 

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -22,8 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="18dp"
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
+            android:paddingTop="22dp"
             android:paddingBottom="24dp">
 
             <TextView
@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dashboard_brand"
                 android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
+                android:textColor="@color/r2w_premium_primary" />
 
             <TextView
                 android:id="@+id/mobile_esim_detail_title"
@@ -40,7 +40,7 @@
                 android:layout_marginTop="2dp"
                 android:maxLines="2"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/r2w_premium_text" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/mobile_esim_detail_progress"
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorError"
+                android:textColor="@color/r2w_premium_danger"
                 android:visibility="gone" />
 
             <com.google.android.material.card.MaterialCardView
@@ -64,23 +64,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/mobile_esim_qr_title"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <ImageView
                         android:id="@+id/mobile_esim_qr_image"
@@ -88,7 +89,7 @@
                         android:layout_height="260dp"
                         android:layout_marginTop="12dp"
                         android:adjustViewBounds="true"
-                        android:background="@android:color/white"
+                        android:background="@drawable/r2w_premium_card"
                         android:contentDescription="@string/mobile_esim_qr_title"
                         android:padding="12dp"
                         android:scaleType="fitCenter"
@@ -101,7 +102,7 @@
                         android:layout_marginTop="12dp"
                         android:text="@string/mobile_esim_qr_unavailable"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textColor="@color/r2w_premium_muted"
                         android:visibility="gone" />
 
                     <com.google.android.material.button.MaterialButton
@@ -111,7 +112,10 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="16dp"
                         android:text="@string/mobile_esim_show_qr"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:strokeColor="@color/r2w_premium_primary"
+                        app:strokeWidth="1dp"
+                        android:textColor="@color/r2w_premium_primary"
                         app:icon="@drawable/ic_scan_black" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -121,23 +125,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Install Assistant"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/mobile_esim_install_status"
@@ -145,7 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/mobile_esim_install_steps"
@@ -153,7 +158,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -163,23 +168,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_iccid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/mobile_esim_copy_iccid"
@@ -188,7 +194,10 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="14dp"
                         android:text="@string/mobile_esim_copy_iccid"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:strokeColor="@color/r2w_premium_primary"
+                        app:strokeWidth="1dp"
+                        android:textColor="@color/r2w_premium_primary"
                         app:icon="@drawable/ic_save_as_black" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -198,23 +207,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_activation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/mobile_esim_copy_activation"
@@ -223,7 +233,10 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="14dp"
                         android:text="@string/mobile_esim_copy_activation"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:strokeColor="@color/r2w_premium_primary"
+                        app:strokeWidth="1dp"
+                        android:textColor="@color/r2w_premium_primary"
                         app:icon="@drawable/ic_save_as_black" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -232,23 +245,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_smdp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_matching_id"
@@ -256,7 +270,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/mobile_esim_copy_smdp"
@@ -265,7 +279,10 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="14dp"
                         android:text="@string/mobile_esim_copy_smdp"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:strokeColor="@color/r2w_premium_primary"
+                        app:strokeWidth="1dp"
+                        android:textColor="@color/r2w_premium_primary"
                         app:icon="@drawable/ic_save_as_black" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -274,23 +291,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/mobile_esim_profile"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -303,7 +321,7 @@
                             android:id="@+id/mobile_esim_detail_provider"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/wallet_request_status_badge"
+                            android:background="@drawable/r2w_chip_success"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
@@ -313,7 +331,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:background="@drawable/wallet_request_status_badge"
+                            android:background="@drawable/r2w_chip_success"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
@@ -325,7 +343,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_expires"
@@ -333,7 +351,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_data_remaining"
@@ -341,7 +359,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_data_used"
@@ -349,7 +367,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_created"
@@ -357,7 +375,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/mobile_esim_detail_order"
@@ -365,7 +383,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -374,8 +392,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="20dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/purchase_install_esim"
-                app:cornerRadius="28dp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius"
                 app:icon="@drawable/ic_task_sim_card_download" />
 
             <TextView
@@ -385,7 +407,7 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/mobile_esim_install_unavailable"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="@color/r2w_premium_muted"
                 android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
