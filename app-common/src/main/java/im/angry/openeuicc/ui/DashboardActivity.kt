@@ -45,6 +45,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var greeting: TextView
     private lateinit var account: TextView
     private lateinit var balance: TextView
+    private lateinit var todaySales: TextView
     private lateinit var activeEsims: TextView
     private lateinit var ordersSummary: TextView
     private lateinit var dealerSummaryCard: View
@@ -80,6 +81,7 @@ class DashboardActivity : AppCompatActivity() {
         setupInsets()
         setupBottomNavigation()
         setupQuickActions()
+        addTodaySalesKpiCard()
         addExpiredSoonKpiCard()
         renderPlaceholders()
         authApi.logMobileEndpointConfiguration()
@@ -177,12 +179,13 @@ class DashboardActivity : AppCompatActivity() {
         account.text = ""
         balance.text = "--"
         activeEsims.text = "--"
+        todaySales.text = "--"
         ordersSummary.text = "--"
         dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
         dealerSummaryCard.visibility = View.GONE
         manageDealers.visibility = View.GONE
         expiredSoonValue.text = "--"
-        expiredSoonSubtitle.text = "Loading expiring eSIMs"
+        expiredSoonSubtitle.text = "Loading expired eSIMs"
         renderOrders(emptyList())
     }
 
@@ -194,7 +197,6 @@ class DashboardActivity : AppCompatActivity() {
             renderSession(session)
 
             val dashboardResult = runCatching { authApi.dashboard(session) }
-            val esimsResult = runCatching { authApi.esims(session).esims }
             setLoading(false)
 
             dashboardResult
@@ -203,7 +205,6 @@ class DashboardActivity : AppCompatActivity() {
                     error.text = it.message ?: getString(R.string.dashboard_load_failed)
                     error.visibility = View.VISIBLE
                 }
-            esimsResult.onSuccess { renderExpiredSoon(it) }
         }
     }
 
@@ -230,8 +231,11 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun renderDashboard(data: MobileDashboardData) {
         balance.text = data.currentBalance
+        todaySales.text = data.todaySales
+        ordersSummary.text = data.monthlySales
         activeEsims.text = data.activeEsimCount
-        ordersSummary.text = data.recentOrders.size.toString()
+        expiredSoonValue.text = data.expiredEsimCount
+        expiredSoonSubtitle.text = "Expired eSIMs in your account"
         renderOrders(data.recentOrders)
     }
 
@@ -272,6 +276,45 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun addTodaySalesKpiCard() {
+        val parent = activeEsims.parent?.parent?.parent as? LinearLayout ?: return
+        val card = MaterialCardView(this).apply {
+            radius = dp(18).toFloat()
+            cardElevation = dp(3).toFloat()
+            strokeWidth = dp(1)
+            setStrokeColor(getColor(R.color.r2w_border))
+            setCardBackgroundColor(getColor(R.color.r2w_card))
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = dp(14)
+            }
+        }
+        val body = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+        }
+        body.addView(TextView(this).apply {
+            text = "Today's Sales"
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+        })
+        todaySales = TextView(this).apply {
+            text = "--"
+            setPadding(0, dp(6), 0, 0)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setTextColor(getColor(R.color.r2w_text_primary))
+        }
+        body.addView(todaySales)
+        body.addView(TextView(this).apply {
+            text = "Sales generated today"
+            setPadding(0, dp(4), 0, 0)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+        })
+        card.addView(body)
+        parent.addView(card)
+    }
+
     private fun addExpiredSoonKpiCard() {
         val parent = activeEsims.parent?.parent?.parent as? LinearLayout ?: return
         val card = MaterialCardView(this).apply {
@@ -292,7 +335,7 @@ class DashboardActivity : AppCompatActivity() {
             setPadding(dp(18), dp(16), dp(18), dp(16))
         }
         body.addView(TextView(this).apply {
-            text = "Expired Soon"
+            text = "Expired eSIMs"
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
             setTextColor(getColor(R.color.r2w_text_secondary))
         })

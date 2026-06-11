@@ -394,6 +394,20 @@ class Roam2WorldAuthApi(baseUrl: String) {
             dashboard.optString("balance"),
             dashboard.optString("credit")
         ) ?: "0"
+        val todaySales = firstNotBlank(
+            dashboard.optString("today_sales"),
+            dashboard.optString("todaySales"),
+            dashboard.optString("daily_sales"),
+            dashboard.optString("dailySales")
+        ) ?: "0"
+
+        val monthlySales = firstNotBlank(
+            dashboard.optString("monthly_sales"),
+            dashboard.optString("monthlySales"),
+            dashboard.optString("month_sales"),
+            dashboard.optString("monthSales")
+        ) ?: "0"
+
         val activeCount = firstNotBlank(
             dashboard.optString("active_esim_count"),
             dashboard.optString("active_eSIM_count"),
@@ -402,6 +416,15 @@ class Roam2WorldAuthApi(baseUrl: String) {
             dashboard.optString("active_esims"),
             dashboard.optString("activeEsims")
         ) ?: "0"
+
+        val expiredCount = firstNotBlank(
+            dashboard.optString("expired_esim_count"),
+            dashboard.optString("expiredEsimCount"),
+            dashboard.optString("expired_esims_count"),
+            dashboard.optString("expired_esims"),
+            dashboard.optString("expiredEsims")
+        ) ?: "0"
+
         val orders = firstArray(
             dashboard.optJSONArray("recent_orders"),
             dashboard.optJSONArray("recentOrders"),
@@ -412,7 +435,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
 
         return MobileDashboardData(
             currentBalance = balance,
+            todaySales = todaySales,
+            monthlySales = monthlySales,
             activeEsimCount = activeCount,
+            expiredEsimCount = expiredCount,
             recentOrders = parseOrders(orders)
         )
     }
