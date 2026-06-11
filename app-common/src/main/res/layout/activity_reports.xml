@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Reports"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_report_text"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -37,7 +37,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Revenue, sales, profit, provider usage and dealer performance"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_report_muted" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,9 +51,9 @@
                     android:layout_height="112dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -61,13 +61,13 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/r2w_card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Revenue"
-                            android:textColor="@color/r2w_report_muted" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:id="@+id/reports_revenue"
@@ -76,7 +76,7 @@
                             android:layout_marginTop="8dp"
                             android:text="--"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="@color/r2w_report_text"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
 
                         <TextView
@@ -84,7 +84,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Live wallet/orders"
-                            android:textColor="@color/r2w_report_success" />
+                            android:textColor="@color/r2w_premium_success" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -93,9 +93,9 @@
                     android:layout_height="112dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -103,13 +103,13 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/r2w_card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Sales"
-                            android:textColor="@color/r2w_report_muted" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:id="@+id/reports_sales"
@@ -118,7 +118,7 @@
                             android:layout_marginTop="8dp"
                             android:text="--"
                             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="@color/r2w_report_text"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
 
                         <TextView
@@ -126,7 +126,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Live orders"
-                            android:textColor="@color/r2w_report_success" />
+                            android:textColor="@color/r2w_premium_success" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -143,9 +143,9 @@
                     android:layout_height="104dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -153,13 +153,13 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/r2w_card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Profit est."
-                            android:textColor="@color/r2w_report_muted" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:id="@+id/reports_profit"
@@ -168,7 +168,7 @@
                             android:layout_marginTop="8dp"
                             android:text="--"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="@color/r2w_report_text"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -178,9 +178,9 @@
                     android:layout_height="104dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -188,13 +188,13 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/r2w_card_padding">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Active eSIMs"
-                            android:textColor="@color/r2w_report_muted" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:id="@+id/reports_active_esims"
@@ -203,7 +203,7 @@
                             android:layout_marginTop="8dp"
                             android:text="--"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="@color/r2w_report_text"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -213,23 +213,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="18dp"
-                app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Sales Overview"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_report_text"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -240,7 +241,7 @@
                         android:lineSpacingExtra="4dp"
                         android:text="No sales data yet"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_report_text" />
+                        android:textColor="@color/r2w_premium_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -248,23 +249,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Provider Usage Breakdown"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_report_text"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -275,7 +277,7 @@
                         android:lineSpacingExtra="5dp"
                         android:text="No provider usage yet"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_report_text" />
+                        android:textColor="@color/r2w_premium_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -283,23 +285,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Dealer Performance"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_report_text"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -310,7 +313,7 @@
                         android:lineSpacingExtra="5dp"
                         android:text="Dealer performance data unavailable"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_report_text" />
+                        android:textColor="@color/r2w_premium_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -318,23 +321,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="18dp"
-                app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Failed Orders"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_report_text"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -345,7 +349,7 @@
                         android:lineSpacingExtra="4dp"
                         android:text="No failed order data yet"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_report_danger" />
+                        android:textColor="@color/r2w_premium_danger" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -353,23 +357,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="18dp"
-                app:cardBackgroundColor="@color/r2w_report_card"
-                    app:strokeColor="@color/r2w_report_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Profit Overview"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_report_text"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -380,7 +385,7 @@
                         android:lineSpacingExtra="4dp"
                         android:text="Profit data unavailable"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_report_text" />
+                        android:textColor="@color/r2w_premium_text" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

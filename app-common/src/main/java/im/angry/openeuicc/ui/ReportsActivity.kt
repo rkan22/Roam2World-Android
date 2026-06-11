@@ -232,6 +232,13 @@ class ReportsActivity : AppCompatActivity() {
         ).joinToString("\n\n")
     }
 
+
+    private fun visibleProvider(provider: String?): String =
+        formatReportStatus(
+            provider?.replace("TGT", "Orange", ignoreCase = true)
+                ?.replace("tgt", "Orange", ignoreCase = true)
+        )
+
     private fun buildProviderUsage(orders: List<MobileOrder>): String {
         val providers = orders.groupingBy { it.provider ?: "Unknown" }.eachCount()
         if (providers.isEmpty()) return "No provider usage yet"
@@ -242,7 +249,7 @@ class ReportsActivity : AppCompatActivity() {
             .take(5)
             .joinToString("\n\n") { (provider, count) ->
                 val percent = (count * 100) / total
-                "${formatReportStatus(provider)}\n$percent% of provider usage • $count orders"
+                "${visibleProvider(provider)}\n$percent% of provider usage • $count orders"
             }
     }
 
