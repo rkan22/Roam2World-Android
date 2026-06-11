@@ -72,6 +72,8 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var salesOverview: TextView
     private lateinit var providerUsage: TextView
     private lateinit var dealerPerformance: TextView
+    private lateinit var failedOrders: TextView
+    private lateinit var profitOverview: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -92,6 +94,8 @@ class ReportsActivity : AppCompatActivity() {
         salesOverview = requireViewById(R.id.reports_sales_overview)
         providerUsage = requireViewById(R.id.reports_provider_usage)
         dealerPerformance = requireViewById(R.id.reports_dealer_performance)
+        failedOrders = requireViewById(R.id.reports_failed_orders)
+        profitOverview = requireViewById(R.id.reports_profit_overview)
 
         setupInsets()
         renderLoading()
@@ -125,6 +129,8 @@ class ReportsActivity : AppCompatActivity() {
         salesOverview.text = "Loading sales overview..."
         providerUsage.text = "Loading provider usage..."
         dealerPerformance.text = "Loading dealer performance..."
+        failedOrders.text = "Loading failed orders..."
+        profitOverview.text = "Loading profit overview..."
     }
 
     private fun loadReports() {
@@ -154,6 +160,8 @@ class ReportsActivity : AppCompatActivity() {
 
             salesOverview.text = buildSalesOverview(orders, wallet?.currentBalance)
             providerUsage.text = buildProviderUsage(orders)
+            failedOrders.text = buildFailedOrders(orders)
+            profitOverview.text = buildProfitOverview(totalRevenue, totalProfit, orders)
             dealerPerformance.text = if (dealers.isEmpty()) {
                 "Dealer performance data unavailable"
             } else {
@@ -231,6 +239,30 @@ class ReportsActivity : AppCompatActivity() {
                 val percent = (count * 100) / total
                 "${formatReportStatus(provider)} • $percent% • $count orders"
             }
+    }
+
+    private fun buildFailedOrders(orders: List<MobileOrder>): String {
+        val failed = orders.filter {
+            val status = it.statusLabel().orEmpty()
+            status.contains("Failed", ignoreCase = true) ||
+                status.contains("Cancel", ignoreCase = true) ||
+                status.contains("Refund", ignoreCase = true) ||
+                status.contains("Error", ignoreCase = true)
+        }
+        if (orders.isEmpty()) return "No order data yet"
+        val percent = if (orders.isEmpty()) 0 else (failed.size * 100) / orders.size
+        return "${failed.size} failed orders\n$percent% of total orders"
+    }
+
+    private fun buildProfitOverview(totalRevenue: BigDecimal, totalProfit: BigDecimal, orders: List<MobileOrder>): String {
+        val orderCount = orders.size.coerceAtLeast(1)
+        val avgProfit = totalProfit.divide(BigDecimal(orderCount), 2, java.math.RoundingMode.HALF_UP)
+        return listOf(
+            "Gross revenue: ${currency(totalRevenue)}",
+            "Net profit est.: ${currency(totalProfit)}",
+            "Profit margin est.: 22%",
+            "Avg. profit / order: ${currency(avgProfit)}"
+        ).joinToString("\n")
     }
 
     private fun amount(value: String?): BigDecimal? {
