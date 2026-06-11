@@ -91,6 +91,9 @@
     <string name="order_detail_renewal_code_format">Code: %s</string>
     <string name="order_detail_renewal_order_format">Renewal order: %s</string>
     <string name="order_detail_renewal_package_format">Package: %s</string>
+    <string name="order_detail_renewal_order_status_format">Order status: %s</string>
+    <string name="order_detail_renewal_profile_status_format">Profile status: %s</string>
+    <string name="order_detail_renewal_activated_end_format">Activated end: %s</string>
     <string name="order_detail_renewal_expiry_format">Renew expiry: %s</string>
     <string name="order_detail_renewal_latest_activation_format">Latest activation: %s</string>
     <string name="wallet_title">Wallet</string>

@@ -187,6 +187,9 @@ class MobileOrderDetailActivity : AppCompatActivity() {
             renewal.code?.let { getString(R.string.order_detail_renewal_code_format, it) },
             renewal.orderNo?.let { getString(R.string.order_detail_renewal_order_format, it) },
             renewal.productName?.let { getString(R.string.order_detail_renewal_package_format, it) },
+            renewal.orderStatus?.let { getString(R.string.order_detail_renewal_order_status_format, it) },
+            renewal.profileStatus?.let { getString(R.string.order_detail_renewal_profile_status_format, it) },
+            renewal.activatedEndTime?.let { getString(R.string.order_detail_renewal_activated_end_format, it) },
             renewal.renewExpirationTime?.let { getString(R.string.order_detail_renewal_expiry_format, it) },
             renewal.latestActivationTime?.let { getString(R.string.order_detail_renewal_latest_activation_format, it) }
         ).joinToString("\n")
