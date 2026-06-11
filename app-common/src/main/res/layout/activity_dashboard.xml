@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -26,7 +26,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="230dp"
+                android:layout_height="178dp"
                 android:layout_marginHorizontal="0dp"
                 app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="0dp"
@@ -36,23 +36,22 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/dashboard_hero_gradient"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="28dp"
+                    android:background="@color/r2w_premium_bg"
+                    android:paddingHorizontal="@dimen/r2w_screen_padding"
+                    android:paddingTop="22dp"
                     android:paddingBottom="28dp">
 
                     <ImageView
                         android:id="@+id/dashboard_brand_icon"
                         android:layout_width="46dp"
                         android:layout_height="46dp"
-                        android:background="@drawable/wallet_request_status_badge"
-                        android:backgroundTint="#33FFFFFF"
+                        android:background="@drawable/r2w_premium_icon_box"
                         android:contentDescription="@string/login_logo_content_description"
                         android:padding="9dp"
                         android:src="@drawable/ic_roam2world_logo"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@android:color/white" />
+                        app:tint="@color/r2w_premium_primary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -60,7 +59,7 @@
                         android:layout_marginStart="12dp"
                         android:text="Roam2World B2B"
                         android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="@id/dashboard_brand_icon"
                         app:layout_constraintEnd_toStartOf="@id/dashboard_profile_dot"
@@ -71,12 +70,11 @@
                         android:id="@+id/dashboard_profile_dot"
                         android:layout_width="46dp"
                         android:layout_height="46dp"
-                        android:background="@drawable/wallet_request_status_badge"
-                        android:backgroundTint="#EAF2FF"
+                        android:background="@drawable/r2w_premium_icon_box"
                         android:gravity="center"
                         android:text="R2W"
                         android:textAppearance="?attr/textAppearanceLabelSmall"
-                        android:textColor="@color/r2w_primary"
+                        android:textColor="@color/r2w_premium_primary"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -85,10 +83,10 @@
                         android:id="@+id/dashboard_greeting"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="42dp"
+                        android:layout_marginTop="30dp"
                         android:maxLines="2"
                         android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -102,7 +100,7 @@
                         android:ellipsize="end"
                         android:maxLines="2"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="#DDEBFF"
+                        android:textColor="@color/r2w_premium_muted"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/dashboard_greeting" />
@@ -129,33 +127,33 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_danger"
+                    android:textColor="@color/r2w_premium_danger"
                     android:visibility="gone" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="128dp"
-                    android:layout_marginTop="-34dp"
-                    app:cardBackgroundColor="@color/r2w_card"
-                    app:cardCornerRadius="24dp"
+                    android:layout_marginTop="10dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="22dp"
                     app:cardElevation="8dp"
-                    app:strokeColor="@color/r2w_border"
+                    app:strokeColor="@android:color/transparent"
                     app:strokeWidth="1dp">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="@drawable/r2w_wallet_gradient"
                         android:padding="20dp">
 
                         <TextView
                             android:id="@+id/dashboard_wallet_icon"
                             android:layout_width="70dp"
                             android:layout_height="70dp"
-                            android:background="@drawable/wallet_request_status_badge"
-                            android:backgroundTint="#EAF2FF"
+                            android:background="@drawable/r2w_premium_icon_box"
                             android:gravity="center"
                             android:text="▣"
-                            android:textColor="@color/r2w_primary"
+                            android:textColor="@color/r2w_premium_primary"
                             android:textSize="30sp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -169,7 +167,7 @@
                             android:layout_marginStart="18dp"
                             android:text="Wallet Balance"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_text_secondary"
+                            android:textColor="#DDEBFF"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@id/dashboard_wallet_icon"
                             app:layout_constraintTop_toTopOf="@id/dashboard_wallet_icon" />
@@ -183,7 +181,7 @@
                             android:ellipsize="end"
                             android:maxLines="1"
                             android:textAppearance="?attr/textAppearanceDisplaySmall"
-                            android:textColor="@color/r2w_primary"
+                            android:textColor="@android:color/white"
                             android:textStyle="bold"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@id/dashboard_wallet_icon"
@@ -200,13 +198,13 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="96dp"
+                        android:layout_height="118dp"
                         android:layout_marginEnd="7dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="@color/r2w_card"
-                        app:cardCornerRadius="18dp"
-                        app:cardElevation="3dp"
-                        app:strokeColor="@color/r2w_border"
+                        app:cardBackgroundColor="@color/r2w_premium_surface"
+                        app:cardCornerRadius="@dimen/r2w_card_radius"
+                        app:cardElevation="4dp"
+                        app:strokeColor="@color/r2w_premium_border"
                         app:strokeWidth="1dp">
 
                         <LinearLayout
@@ -221,7 +219,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Monthly Sales"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="@color/r2w_text_secondary" />
+                                android:textColor="@color/r2w_premium_muted" />
 
                             <TextView
                                 android:id="@+id/dashboard_orders_summary"
@@ -230,20 +228,20 @@
                                 android:layout_marginTop="8dp"
                                 android:maxLines="1"
                                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                                android:textColor="@color/r2w_text_primary"
+                                android:textColor="@color/r2w_premium_text"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="96dp"
+                        android:layout_height="118dp"
                         android:layout_marginStart="7dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="@color/r2w_card"
-                        app:cardCornerRadius="18dp"
-                        app:cardElevation="3dp"
-                        app:strokeColor="@color/r2w_border"
+                        app:cardBackgroundColor="@color/r2w_premium_surface"
+                        app:cardCornerRadius="@dimen/r2w_card_radius"
+                        app:cardElevation="4dp"
+                        app:strokeColor="@color/r2w_premium_border"
                         app:strokeWidth="1dp">
 
                         <LinearLayout
@@ -258,7 +256,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Active eSIMs"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="@color/r2w_text_secondary" />
+                                android:textColor="@color/r2w_premium_muted" />
 
                             <TextView
                                 android:id="@+id/dashboard_active_esims"
@@ -268,7 +266,7 @@
                                 android:ellipsize="end"
                                 android:maxLines="1"
                                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                                android:textColor="@color/r2w_text_primary"
+                                android:textColor="@color/r2w_premium_text"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -280,10 +278,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:visibility="gone"
-                    app:cardBackgroundColor="@color/r2w_card"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_border"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -297,7 +295,7 @@
                             android:layout_height="wrap_content"
                             android:text="Dealer Network"
                             android:textAppearance="?attr/textAppearanceLabelLarge"
-                            android:textColor="@color/r2w_text_secondary" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:id="@+id/dashboard_dealer_summary"
@@ -305,7 +303,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -316,7 +314,7 @@
                     android:layout_marginTop="28dp"
                     android:text="Quick Actions"
                     android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -341,12 +339,12 @@
                             android:gravity="center"
                             android:text="Buy eSIM"
                             android:textAlignment="center"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             app:cornerRadius="20dp"
                             app:icon="@drawable/ic_packages"
                             app:iconGravity="top"
                             app:iconPadding="6dp"
-                            app:strokeColor="@color/r2w_border" />
+                            app:strokeColor="@color/r2w_premium_border" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/dashboard_request_balance"
@@ -358,12 +356,12 @@
                             android:gravity="center"
                             android:text="Wallet Request"
                             android:textAlignment="center"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             app:cornerRadius="20dp"
                             app:icon="@drawable/ic_wallet"
                             app:iconGravity="top"
                             app:iconPadding="6dp"
-                            app:strokeColor="@color/r2w_border" />
+                            app:strokeColor="@color/r2w_premium_border" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -383,12 +381,12 @@
                             android:gravity="center"
                             android:text="eSIM History"
                             android:textAlignment="center"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             app:cornerRadius="20dp"
                             app:icon="@drawable/ic_checkmark_outline"
                             app:iconGravity="top"
                             app:iconPadding="6dp"
-                            app:strokeColor="@color/r2w_border" />
+                            app:strokeColor="@color/r2w_premium_border" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/dashboard_manage_dealers"
@@ -400,13 +398,13 @@
                             android:gravity="center"
                             android:text="Dealers"
                             android:textAlignment="center"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             android:visibility="gone"
                             app:cornerRadius="20dp"
                             app:icon="@drawable/ic_group"
                             app:iconGravity="top"
                             app:iconPadding="6dp"
-                            app:strokeColor="@color/r2w_border" />
+                            app:strokeColor="@color/r2w_premium_border" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -423,7 +421,7 @@
                         android:layout_weight="1"
                         android:text="Recent Purchases"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textColor="@color/r2w_text_primary"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -431,7 +429,7 @@
                         android:layout_height="wrap_content"
                         android:text="View All"
                         android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="@color/r2w_primary"
+                        android:textColor="@color/r2w_premium_primary"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -449,7 +447,7 @@
         android:id="@+id/dashboard_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_card"
+        android:background="@color/r2w_premium_surface"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

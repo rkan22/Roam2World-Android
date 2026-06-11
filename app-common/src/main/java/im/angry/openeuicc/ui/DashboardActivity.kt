@@ -231,11 +231,11 @@ class DashboardActivity : AppCompatActivity() {
         val isReseller = session.role?.lowercase() == "reseller"
         dealerSummaryCard.visibility = if (isReseller) View.VISIBLE else View.GONE
         manageDealers.visibility = if (isReseller) View.VISIBLE else View.GONE
-        greeting.text = session.displayName?.let { "Welcome, $it" } ?: getString(R.string.dashboard_greeting)
+        greeting.text = session.displayName?.let { "Welcome $it 👋" } ?: "Welcome Admin 👋"
         account.text = listOfNotNull(
             session.role?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
             session.email
-        ).joinToString(" - ")
+        ).joinToString("  •  ")
     }
 
     private fun renderDashboard(data: MobileDashboardData) {
@@ -268,7 +268,7 @@ class DashboardActivity : AppCompatActivity() {
         orders.removeAllViews()
         if (orderData.isEmpty()) {
             TextView(this).apply {
-                text = getString(R.string.dashboard_empty_orders)
+                text = "No recent purchases yet"
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
                 setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
                 orders.addView(this)
