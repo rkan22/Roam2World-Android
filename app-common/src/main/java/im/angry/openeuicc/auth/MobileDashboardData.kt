@@ -10,6 +10,8 @@ data class MobileDashboardData(
 )
 
 data class MobileDashboardOrder(
+    val id: String?,
+    val orderNumber: String?,
     val title: String,
     val subtitle: String,
     val amount: String?,

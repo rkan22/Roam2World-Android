@@ -468,8 +468,18 @@ class Roam2WorldAuthApi(baseUrl: String) {
             )
             val status = firstNotBlank(order.optString("status"), order.optString("state"))
             MobileDashboardOrder(
-                title = title,
-                subtitle = subtitle,
+                    id = firstNotBlank(
+                        order.optString("id"),
+                        order.optString("order_id"),
+                        order.optString("orderId")
+                    )?.takeIf { it.isNotBlank() },
+                    orderNumber = firstNotBlank(
+                        order.optString("order_number"),
+                        order.optString("orderNumber"),
+                        order.optString("number")
+                    )?.takeIf { it.isNotBlank() },
+                    title = title,
+                    subtitle = subtitle,
                 amount = amount,
                 status = status
             )
@@ -517,10 +527,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
 
     private fun parseMobileNotificationObject(json: JSONObject): MobileNotification =
         MobileNotification(
-            id = json.optString("id").takeIf { it.isNotBlank() },
-            title = json.optString("title").takeIf { it.isNotBlank() },
-            message = json.optString("message").takeIf { it.isNotBlank() },
-            type = json.optString("type").takeIf { it.isNotBlank() },
+            id = json.optString("id")?.takeIf { it.isNotBlank() },
+            title = json.optString("title")?.takeIf { it.isNotBlank() },
+            message = json.optString("message")?.takeIf { it.isNotBlank() },
+            type = json.optString("type")?.takeIf { it.isNotBlank() },
             isRead = json.optBoolean("is_read", false),
             readAt = json.optString("read_at").takeIf { it.isNotBlank() && it != "null" },
             createdAt = json.optString("created_at").takeIf { it.isNotBlank() && it != "null" },
