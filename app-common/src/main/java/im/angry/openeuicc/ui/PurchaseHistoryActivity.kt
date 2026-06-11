@@ -2,6 +2,8 @@ package im.angry.openeuicc.ui
 
 import java.time.OffsetDateTime
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -196,6 +198,12 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         return runCatching { OffsetDateTime.parse(value) }.getOrNull()
     }
 
+
+    private fun formatOrderDate(value: String): String {
+        val parsed = runCatching { OffsetDateTime.parse(value) }.getOrNull() ?: return value
+        return parsed.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
+    }
+
     private fun renderOrders(orderData: List<MobileOrder>) {
         orders.removeAllViews()
         empty.visibility = if (orderData.isEmpty()) View.VISIBLE else View.GONE
@@ -218,7 +226,7 @@ class PurchaseHistoryActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.history_package_name).text = PackageNameCleaner.clean(order.packageName)
             item.requireViewById<TextView>(R.id.history_created_date).apply {
                 text = listOfNotNull(
-                    order.createdAt,
+                    order.createdAt?.let { "Date: ${formatOrderDate(it)}" },
                     order.esim?.customerName()?.let { "Customer: $it" },
                     order.esim?.iccid?.let { "ICCID: $it" }
                 ).joinToString("\n")

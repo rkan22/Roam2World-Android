@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -27,8 +27,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="18dp"
+                android:paddingHorizontal="@dimen/r2w_screen_padding"
+                android:paddingTop="22dp"
                 android:paddingBottom="24dp">
 
                 <TextView
@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/dashboard_brand"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorPrimary" />
+                    android:textColor="@color/r2w_premium_primary" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -44,7 +44,7 @@
                     android:layout_marginTop="2dp"
                     android:text="Orders"
                     android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:textColor="@color/r2w_premium_text" />
 
                 <TextView
                     android:id="@+id/purchase_history_summary"
@@ -53,7 +53,7 @@
                     android:layout_marginTop="6dp"
                     android:text="Orders and purchase activity"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:textColor="@color/r2w_premium_muted" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/purchase_history_search_layout"
@@ -62,7 +62,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:hint="Search order, package, provider or ICCID"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
                     app:endIconMode="clear_text"
+                    app:hintTextColor="@color/r2w_premium_muted"
                     app:startIconDrawable="@drawable/ic_wallet">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -114,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorError"
+                    android:textColor="@color/r2w_premium_danger"
                     android:visibility="gone" />
 
                 <TextView
@@ -122,9 +129,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:background="@drawable/r2w_premium_card"
+                    android:padding="@dimen/r2w_card_padding"
                     android:text="No matching orders found."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="@color/r2w_premium_muted"
                     android:visibility="gone" />
 
                 <LinearLayout
