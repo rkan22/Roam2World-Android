@@ -31,8 +31,41 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class TransactionsActivity : AppCompatActivity() {
+
+    private fun formatTransactionDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(raw).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun formatTransactionStatus(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return "Unknown"
+        return raw
+            .replace("_", " ")
+            .replace("-", " ")
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase(Locale.ROOT).replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                }
+            }
+            .ifBlank { "Unknown" }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -156,7 +189,7 @@ class TransactionsActivity : AppCompatActivity() {
     private fun applyFilters() {
         val query = search.text?.toString()?.trim().orEmpty().lowercase()
         val filtered = allOrders.filter { selectedFilter.matches(it.status) }.filter { order ->
-            query.isBlank() || listOfNotNull(order.orderNumber, order.id, order.packageName, order.price, order.status, order.provider, order.createdAt, order.esim?.customerName(), order.esim?.customerPhone, order.esim?.iccid)
+            query.isBlank() || listOfNotNull(order.orderNumber, order.id, order.packageName, order.price, order.status, order.provider, order.createdAt, order.esimId, order.customerEmail, order.esim?.customerName(), order.esim?.customerPhone, order.esim?.customerEmail, order.esim?.iccid)
                 .joinToString(" ")
                 .lowercase()
                 .contains(query)
@@ -170,7 +203,7 @@ class TransactionsActivity : AppCompatActivity() {
         val pending = allOrders.count { TransactionFilter.PENDING.matches(it.status) }
         val completed = allOrders.count { TransactionFilter.COMPLETED.matches(it.status) }
         val failed = allOrders.count { TransactionFilter.FAILED.matches(it.status) }
-        summary.text = "${allOrders.size} orders • $pending pending • $completed completed • $failed failed"
+        summary.text = "${orders.size} shown • ${allOrders.size} total • $pending pending • $completed completed • $failed failed"
         orders.forEach { list.addView(createOrderCard(it)) }
     }
 
@@ -196,12 +229,12 @@ class TransactionsActivity : AppCompatActivity() {
                 order.esim?.iccid?.let { "ICCID: $it" },
                 order.provider?.let { "Provider: $it" },
                 order.price?.let { "Amount: $it" },
-                order.createdAt?.let { "Date: $it" }
+                order.createdAt?.let { "Date: ${formatTransactionDate(it)}" }
             ).joinToString("\n").ifBlank { "No extra order details" },
             false,
             com.google.android.material.R.style.TextAppearance_Material3_BodySmall
         ).apply { setPadding(0, dp(8), 0, 0) })
-        body.addView(label("Status: ${order.statusLabel().orEmpty().ifBlank { "Unknown" }}", false).apply { setPadding(0, dp(10), 0, 0) })
+        body.addView(label("Status: ${formatTransactionStatus(order.statusLabel().orEmpty().ifBlank { order.status.orEmpty() })}", false).apply { setPadding(0, dp(10), 0, 0) })
         body.addView(button("View Order Detail") {
             startActivity(MobileOrderDetailActivity.createIntent(this, order))
         }.apply {
