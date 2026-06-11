@@ -57,7 +57,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         setContentView(R.layout.activity_vodafone_renewal)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Vodafone Renewal"
+        supportActionBar?.title = "Vodafone Recharge"
 
         scroll = requireViewById(R.id.vodafone_renewal_scroll)
         searchIccidLayout = requireViewById(R.id.vodafone_search_iccid_layout)
@@ -122,7 +122,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         if (prefilled.isBlank()) return
         searchIccid.setText(prefilled)
         searchIccid.setSelection(searchIccid.text?.length ?: 0)
-        searchResult.text = "Searching Vodafone eSIM for ICCID: $prefilled"
+        searchResult.text = "Searching Vodafone eSIM: $prefilled"
         searchIccid.post { searchVodafoneEsim() }
     }
 
