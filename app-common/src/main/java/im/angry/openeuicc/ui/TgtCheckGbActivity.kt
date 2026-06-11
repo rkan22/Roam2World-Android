@@ -174,9 +174,13 @@ class TgtCheckGbActivity : AppCompatActivity() {
 
         val lines = mutableListOf<String>()
         lines += "Orange Check GB"
-        lines += "Status: ${raw.optString("message").ifBlank { "Success" }}"
+        lines += "Result: ${raw.optString("message").ifBlank { "Success" }}"
         response.optString("iccid").takeIf { it.isNotBlank() }?.let { lines += "ICCID: $it" }
-        response.optString("order_no").takeIf { it.isNotBlank() }?.let { lines += "Order No: $it" }
+        firstNotBlank(
+            response.optString("order_no"),
+            usage.optString("order_no"),
+            usage.optString("orderNo")
+        )?.let { lines += "Order No: $it" }
 
         if (totalMb != null) lines += "Total: ${formatGb(totalMb)}"
         if (usedMb != null) lines += "Used: ${formatGb(usedMb)}"
@@ -195,6 +199,10 @@ class TgtCheckGbActivity : AppCompatActivity() {
 
         result.text = lines.joinToString("\n")
     }
+
+
+    private fun firstNotBlank(vararg values: String?): String? =
+        values.firstOrNull { !it.isNullOrBlank() && it != "null" }
 
     private fun firstNumber(primary: JSONObject, secondary: JSONObject, vararg keys: String): Double? {
         for (key in keys) {

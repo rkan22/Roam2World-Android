@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Orange Check GB"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_text_primary"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -36,14 +36,22 @@
                 android:layout_marginTop="6dp"
                 android:text="Enter ICCID to check live total, used and remaining data."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tgt_check_gb_iccid_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:hint="ICCID">
+                android:hint="ICCID"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/tgt_check_gb_iccid"
@@ -57,19 +65,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="16dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="Check GB"
-                app:cornerRadius="16dp" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius" />
 
             <TextView
                 android:id="@+id/tgt_check_gb_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                android:background="@color/r2w_card"
-                android:padding="16dp"
+                android:background="@drawable/r2w_premium_card_soft"
+                android:lineSpacingExtra="4dp"
+                android:padding="@dimen/r2w_card_padding"
                 android:text="Result will appear here."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
