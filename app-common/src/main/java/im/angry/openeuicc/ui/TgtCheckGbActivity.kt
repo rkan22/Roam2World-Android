@@ -41,7 +41,7 @@ class TgtCheckGbActivity : AppCompatActivity() {
         setContentView(R.layout.activity_tgt_check_gb)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "TGT Check GB"
+        supportActionBar?.title = "Orange Check GB"
 
         scroll = requireViewById(R.id.tgt_check_gb_scroll)
         iccidLayout = requireViewById(R.id.tgt_check_gb_iccid_layout)
@@ -98,8 +98,8 @@ class TgtCheckGbActivity : AppCompatActivity() {
             response
                 .onSuccess { renderUsage(it) }
                 .onFailure {
-                    Toast.makeText(this@TgtCheckGbActivity, it.message ?: "TGT Check GB failed", Toast.LENGTH_LONG).show()
-                    result.text = it.message ?: "TGT Check GB failed"
+                    Toast.makeText(this@TgtCheckGbActivity, it.message ?: "Orange Check GB failed", Toast.LENGTH_LONG).show()
+                    result.text = it.message ?: "Orange Check GB failed"
                 }
         }
     }
@@ -129,7 +129,7 @@ class TgtCheckGbActivity : AppCompatActivity() {
 
         val json = JSONObject(responseText.ifBlank { "{}" })
         if (statusCode !in 200..299 || !json.optBoolean("success", false)) {
-            throw IllegalStateException(json.optString("error").ifBlank { "TGT usage check failed" })
+            throw IllegalStateException(json.optString("error").ifBlank { "Orange usage check failed" })
         }
         return json
     }
@@ -144,7 +144,7 @@ class TgtCheckGbActivity : AppCompatActivity() {
         val remainingMb = firstNumber(usage, rawData, "remaining_mb", "remainingMb", "dataResidual")
 
         val lines = mutableListOf<String>()
-        lines += "TGT Check GB"
+        lines += "Orange Check GB"
         lines += "Status: ${raw.optString("message").ifBlank { "Success" }}"
         response.optString("iccid").takeIf { it.isNotBlank() }?.let { lines += "ICCID: $it" }
         response.optString("order_no").takeIf { it.isNotBlank() }?.let { lines += "Order No: $it" }
