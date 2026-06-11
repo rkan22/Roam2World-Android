@@ -49,6 +49,7 @@ class DashboardActivity : AppCompatActivity() {
     private var monthlySalesKpi: TextView? = null
     private var activeEsimsKpi: TextView? = null
     private var expiredEsimsKpi: TextView? = null
+    private var expiringSoonKpi: TextView? = null
     private lateinit var activeEsims: TextView
     private lateinit var ordersSummary: TextView
     private lateinit var dealerSummaryCard: View
@@ -186,6 +187,7 @@ class DashboardActivity : AppCompatActivity() {
         monthlySalesKpi?.text = "--"
         activeEsimsKpi?.text = "--"
         expiredEsimsKpi?.text = "--"
+        expiringSoonKpi?.text = "--"
         ordersSummary.text = "--"
         dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
         dealerSummaryCard.visibility = View.GONE
@@ -241,6 +243,7 @@ class DashboardActivity : AppCompatActivity() {
         monthlySalesKpi?.text = data.monthlySales.ifBlank { "0.00" }
         activeEsimsKpi?.text = data.activeEsimCount.ifBlank { "0" }
         expiredEsimsKpi?.text = data.expiredEsimCount.ifBlank { "0" }
+        expiringSoonKpi?.text = "--"
         ordersSummary.text = data.monthlySales
         activeEsims.text = data.activeEsimCount
         expiredSoonValue.text = data.expiredEsimCount
@@ -318,6 +321,7 @@ class DashboardActivity : AppCompatActivity() {
         monthlySalesKpi = addInlineKpi(body, "Monthly Sales")
         activeEsimsKpi = addInlineKpi(body, "Active eSIMs")
         expiredEsimsKpi = addInlineKpi(body, "Expired eSIMs")
+        expiringSoonKpi = addInlineKpi(body, "Expiring in 7 Days")
         body.addView(TextView(this).apply {
             text = "Sales generated today"
             setPadding(0, dp(4), 0, 0)
@@ -375,24 +379,55 @@ class DashboardActivity : AppCompatActivity() {
 
 
     private fun addInlineKpi(parent: LinearLayout, title: String): TextView {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 22, 0, 8)
+            isClickable = true
+            isFocusable = true
+        }
+
         val label = TextView(this).apply {
             text = title
             textSize = 13f
             alpha = 0.72f
-            setPadding(0, 18, 0, 0)
+            isClickable = true
         }
 
         val value = TextView(this).apply {
             text = "--"
             textSize = 22f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
+            isClickable = true
         }
 
-        parent.addView(label)
-        parent.addView(value)
+        fun openEsims(filter: String) {
+            startActivity(
+                Intent(this, MobileEsimsActivity::class.java)
+                    .putExtra(MobileEsimFilters.FILTER_EXTRA_KEY, filter)
+            )
+        }
+
+        val clickListener = android.view.View.OnClickListener {
+            when (title) {
+                "Active eSIMs" -> openEsims("ACTIVE")
+                "Expired eSIMs" -> openEsims("EXPIRED")
+                "Expiring in 7 Days" -> openEsims(MobileEsimFilters.FILTER_EXPIRED_SOON)
+            }
+        }
+
+        if (title == "Active eSIMs" || title == "Expired eSIMs") {
+            row.setOnClickListener(clickListener)
+            label.setOnClickListener(clickListener)
+            value.setOnClickListener(clickListener)
+        }
+
+        row.addView(label)
+        row.addView(value)
+        parent.addView(row)
 
         return value
     }
+
 
     private fun addRenewalQuickActions() {
         val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return

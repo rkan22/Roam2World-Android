@@ -223,8 +223,13 @@ class MobileEsimsActivity : AppCompatActivity() {
         } else {
             allEsims
         }
-        val filtered = baseEsims
-            .filter { selectedFilter.matches(realStatus(it)) }
+        val statusFiltered = if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) {
+            baseEsims
+        } else {
+            baseEsims.filter { selectedFilter.matches(realStatus(it)) }
+        }
+
+        val filtered = statusFiltered
             .filter { esim ->
                 val displayStatus = realStatus(esim)
                 query.isBlank() || listOfNotNull(
