@@ -69,9 +69,9 @@ class PurchaseConfirmationActivity : AppCompatActivity() {
 
     private fun renderConfirmation() {
         requireViewById<TextView>(R.id.purchase_package_name).text =
-            "Package        ${intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: getString(R.string.packages_title)}"
+            "Package: ${PackageNameCleaner.clean(intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: getString(R.string.packages_title))}"
         setPlainText(R.id.purchase_order_number, intent.getStringExtra(EXTRA_ORDER_NUMBER), "Order No")
-        setPlainText(R.id.purchase_order_status, intent.getStringExtra(EXTRA_STATUS), "Activation")
+        setPlainText(R.id.purchase_order_status, cleanVisibleValue(intent.getStringExtra(EXTRA_STATUS)), "Activation")
         setPlainText(R.id.purchase_price, intent.getStringExtra(EXTRA_PRICE), "Price")
         setPlainText(R.id.purchase_balance_after, intent.getStringExtra(EXTRA_BALANCE_AFTER), "Balance After")
         setPlainText(R.id.purchase_iccid, intent.getStringExtra(EXTRA_ICCID), "ICCID")
@@ -87,9 +87,13 @@ class PurchaseConfirmationActivity : AppCompatActivity() {
         installUnavailable.visibility = if (canInstall) View.GONE else View.VISIBLE
     }
 
+    private fun cleanVisibleValue(value: String?): String? =
+        value?.replace("TGT", "Orange", ignoreCase = true)
+            ?.replace("tgt", "Orange", ignoreCase = true)
+
     private fun setPlainText(viewId: Int, value: String?, label: String) {
         requireViewById<TextView>(viewId).apply {
-            text = value?.let { "$label        $it" }.orEmpty()
+            text = value?.let { "$label: $it" }.orEmpty()
             visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
         }
     }
