@@ -11,7 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -153,13 +152,20 @@ class DealerDetailActivity : AppCompatActivity() {
         renderOrders(dealer.recentOrders)
     }
 
+
+    private fun visibleProvider(provider: String?): String =
+        provider.orEmpty()
+            .replace("TGT", "Orange", ignoreCase = true)
+            .replace("tgt", "Orange", ignoreCase = true)
+            .ifBlank { "Orange" }
+
     private fun renderOrders(orderData: List<MobileOrder>) {
         orders.removeAllViews()
         if (orderData.isEmpty()) {
             TextView(this).apply {
                 text = getString(R.string.dealer_recent_orders_empty)
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                setTextColor(getColor(R.color.r2w_premium_muted))
                 orders.addView(this)
             }
             return
@@ -172,7 +178,7 @@ class DealerDetailActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.history_package_name).text = PackageNameCleaner.clean(order.packageName)
             item.requireViewById<TextView>(R.id.history_created_date).text = order.createdAt.orEmpty()
             item.requireViewById<TextView>(R.id.history_price).text = order.price.orEmpty()
-            item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(order.provider)
+            item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(visibleProvider(order.provider))
             item.requireViewById<TextView>(R.id.history_status).applyRoamStatusChip(order.statusLabel(), order.status)
             orders.addView(item)
         }
