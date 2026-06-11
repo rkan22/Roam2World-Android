@@ -75,7 +75,6 @@ class MoreActivity : AppCompatActivity() {
     }
 
 
-
     private fun loadNotificationBadge() {
         lifecycleScope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -88,7 +87,7 @@ class MoreActivity : AppCompatActivity() {
             }
 
             notifications.text = if (unreadCount > 0) {
-                "Notifications\nInbox ($unreadCount)"
+                "Notifications\n$unreadCount unread"
             } else {
                 "Notifications\nInbox"
             }
