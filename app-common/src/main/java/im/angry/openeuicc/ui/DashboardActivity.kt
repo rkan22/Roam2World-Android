@@ -46,6 +46,9 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var account: TextView
     private lateinit var balance: TextView
     private lateinit var todaySales: TextView
+    private var monthlySalesKpi: TextView? = null
+    private var activeEsimsKpi: TextView? = null
+    private var expiredEsimsKpi: TextView? = null
     private lateinit var activeEsims: TextView
     private lateinit var ordersSummary: TextView
     private lateinit var dealerSummaryCard: View
@@ -180,6 +183,9 @@ class DashboardActivity : AppCompatActivity() {
         balance.text = "--"
         activeEsims.text = "--"
         todaySales.text = "--"
+        monthlySalesKpi?.text = "--"
+        activeEsimsKpi?.text = "--"
+        expiredEsimsKpi?.text = "--"
         ordersSummary.text = "--"
         dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
         dealerSummaryCard.visibility = View.GONE
@@ -231,7 +237,10 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun renderDashboard(data: MobileDashboardData) {
         balance.text = data.currentBalance
-        todaySales.text = data.todaySales
+        todaySales.text = data.todaySales.ifBlank { "0.00" }
+        monthlySalesKpi?.text = data.monthlySales.ifBlank { "0.00" }
+        activeEsimsKpi?.text = data.activeEsimCount.ifBlank { "0" }
+        expiredEsimsKpi?.text = data.expiredEsimCount.ifBlank { "0" }
         ordersSummary.text = data.monthlySales
         activeEsims.text = data.activeEsimCount
         expiredSoonValue.text = data.expiredEsimCount
@@ -305,6 +314,10 @@ class DashboardActivity : AppCompatActivity() {
             setTextColor(getColor(R.color.r2w_text_primary))
         }
         body.addView(todaySales)
+
+        monthlySalesKpi = addInlineKpi(body, "Monthly Sales")
+        activeEsimsKpi = addInlineKpi(body, "Active eSIMs")
+        expiredEsimsKpi = addInlineKpi(body, "Expired eSIMs")
         body.addView(TextView(this).apply {
             text = "Sales generated today"
             setPadding(0, dp(4), 0, 0)
@@ -356,6 +369,29 @@ class DashboardActivity : AppCompatActivity() {
         body.addView(expiredSoonSubtitle)
         card.addView(body)
         parent.addView(card)
+    }
+
+
+
+
+    private fun addInlineKpi(parent: LinearLayout, title: String): TextView {
+        val label = TextView(this).apply {
+            text = title
+            textSize = 13f
+            alpha = 0.72f
+            setPadding(0, 18, 0, 0)
+        }
+
+        val value = TextView(this).apply {
+            text = "--"
+            textSize = 22f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        }
+
+        parent.addView(label)
+        parent.addView(value)
+
+        return value
     }
 
     private fun addRenewalQuickActions() {
