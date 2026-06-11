@@ -3,8 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:padding="20dp">
+    android:background="@drawable/r2w_premium_card"
+    android:layout_marginHorizontal="@dimen/r2w_screen_padding"
+    android:layout_marginBottom="12dp"
+    android:padding="@dimen/r2w_card_padding">
 
     <ImageView
         android:id="@+id/download_method_icon"
@@ -13,7 +15,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?attr/colorAccent" />
+        app:tint="@color/r2w_premium_primary" />
 
     <TextView
         android:id="@+id/download_method_title"
@@ -23,7 +25,8 @@
         android:layout_marginEnd="20dp"
         android:ellipsize="marquee"
         android:maxLines="1"
-        android:textSize="15sp"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:textColor="@color/r2w_premium_text"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/download_method_chevron"
@@ -39,6 +42,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?attr/colorAccent" />
+        app:tint="@color/r2w_premium_primary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

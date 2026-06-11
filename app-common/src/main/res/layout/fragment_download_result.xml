@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceHeadlineMedium"
-        android:textColor="?attr/colorOnSurface" />
+        android:textColor="@color/r2w_premium_text" />
 
     <TextView
         android:id="@+id/download_result_message"
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:textAppearance="?attr/textAppearanceBodyLarge"
-        android:textColor="?attr/colorOnSurfaceVariant" />
+        android:textColor="@color/r2w_premium_muted" />
 
     <TextView
         android:id="@+id/download_result_suggestion"
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textColor="@color/r2w_premium_muted"
         android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
@@ -37,7 +37,11 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="28dp"
-        app:cornerRadius="28dp" />
+        android:background="@drawable/r2w_premium_primary_button"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
+        app:cornerRadius="@dimen/r2w_button_radius" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/download_result_diagnostics"
@@ -45,7 +49,11 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="10dp"
+        android:backgroundTint="@color/r2w_premium_surface"
         android:text="@string/download_wizard_view_diagnostics"
+        android:textColor="@color/r2w_premium_primary"
         android:visibility="gone"
-        app:cornerRadius="28dp" />
+        app:cornerRadius="@dimen/r2w_button_radius"
+        app:strokeColor="@color/r2w_premium_border"
+        app:strokeWidth="1dp" />
 </LinearLayout>

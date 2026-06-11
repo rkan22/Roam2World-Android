@@ -20,7 +20,8 @@
             android:layout_marginBottom="20dp"
             android:gravity="center_horizontal"
             android:text="@string/download_wizard_diagnostics"
-            android:textSize="20sp"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="@color/r2w_premium_text"
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +36,7 @@
             android:src="@drawable/ic_save_as_black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorAccent" />
+            app:tint="@color/r2w_premium_primary" />
 
         <TextView
             android:id="@+id/download_wizard_diagnostics_text"
@@ -45,7 +46,9 @@
             android:fontFamily="monospace"
             android:lineSpacingMultiplier="1.1"
             android:longClickable="true"
-            android:padding="10dp"
+            android:background="@drawable/r2w_premium_card_soft"
+            android:padding="@dimen/r2w_card_padding"
+            android:textColor="@color/r2w_premium_text"
             android:textIsSelectable="true"
             android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="parent"

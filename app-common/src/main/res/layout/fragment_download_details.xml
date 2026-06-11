@@ -19,7 +19,8 @@
             android:layout_marginBottom="20dp"
             android:gravity="center_horizontal"
             android:text="@string/download_wizard_details"
-            android:textSize="20sp"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="@color/r2w_premium_text"
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,7 +30,15 @@
             android:id="@+id/profile_download_server"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/profile_download_server">
+            android:hint="@string/profile_download_server"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="@color/r2w_premium_surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/r2w_premium_border"
+            app:hintTextColor="@color/r2w_premium_muted">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -44,7 +53,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/profile_download_code"
-            app:passwordToggleEnabled="true">
+            app:passwordToggleEnabled="true"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="@color/r2w_premium_surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/r2w_premium_border"
+            app:hintTextColor="@color/r2w_premium_muted">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -59,7 +76,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/profile_download_confirmation_code"
-            app:passwordToggleEnabled="true">
+            app:passwordToggleEnabled="true"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="@color/r2w_premium_surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/r2w_premium_border"
+            app:hintTextColor="@color/r2w_premium_muted">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
@@ -76,7 +101,15 @@
             android:layout_marginTop="15dp"
             android:layout_marginBottom="6dp"
             android:hint="@string/profile_download_imei"
-            app:passwordToggleEnabled="true">
+            app:passwordToggleEnabled="true"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            app:boxBackgroundColor="@color/r2w_premium_surface"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxStrokeColor="@color/r2w_premium_border"
+            app:hintTextColor="@color/r2w_premium_muted">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
