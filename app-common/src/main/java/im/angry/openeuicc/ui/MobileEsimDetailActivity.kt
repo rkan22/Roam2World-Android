@@ -36,9 +36,40 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.time.OffsetDateTime
 
 class MobileEsimDetailActivity : AppCompatActivity() {
+
+    private fun formatProviderDate(value: String): String {
+        if (value.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(value).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            value
+        }
+    }
+
+    private fun formatProviderStatus(value: String): String {
+        return when (value.uppercase(Locale.ROOT)) {
+            "INUSE" -> "In Use"
+            "ACTIVATED" -> "Activated"
+            "NOTACTIVE" -> "Not Activated"
+            "USED" -> "Used Up"
+            "EXPIRED" -> "Expired"
+            "ABANDON" -> "Abandoned"
+            "TERMINATION" -> "Terminated"
+            "ENABLED" -> "Enabled"
+            "DISABLED" -> "Disabled"
+            else -> value.ifBlank { "Unknown" }
+        }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -225,12 +256,12 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             renewal.orderNo?.let { "Order: $it" },
             renewal.productName?.let { "Package: $it" },
             renewal.productCode?.let { "Product code: $it" },
-            renewal.createdTime?.let { "Created: $it" },
-            renewal.activatedEndTime?.let { "Activated end: $it" },
-            renewal.renewExpirationTime?.let { "Renew expiry: $it" },
-            renewal.latestActivationTime?.let { "Latest activation: $it" },
-            renewal.orderStatus?.let { "Order status: $it" },
-            renewal.profileStatus?.let { "Profile status: $it" }
+            renewal.createdTime?.let { "Created: ${formatProviderDate(it)}" },
+            renewal.activatedEndTime?.let { "Activated end: ${formatProviderDate(it)}" },
+            renewal.renewExpirationTime?.let { "Renew expiry: ${formatProviderDate(it)}" },
+            renewal.latestActivationTime?.let { "Latest activation: ${formatProviderDate(it)}" },
+            renewal.orderStatus?.let { "Order status: ${formatProviderStatus(it)}" },
+            renewal.profileStatus?.let { "Profile status: ${formatProviderStatus(it)}" }
         ).joinToString("\n")
 
         if (details.isBlank()) return
