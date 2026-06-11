@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -27,8 +27,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="18dp"
+                android:paddingHorizontal="@dimen/r2w_screen_padding"
+                android:paddingTop="22dp"
                 android:paddingBottom="24dp">
 
                 <TextView
@@ -36,15 +36,15 @@
                     android:layout_height="wrap_content"
                     android:text="@string/dashboard_brand"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="?attr/colorPrimary" />
+                    android:textColor="@color/r2w_premium_primary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="@string/wallet_request_history_title"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                    android:textColor="?attr/colorOnSurface" />
+                    android:textAppearance="?attr/textAppearanceDisplaySmall"
+                    android:textColor="@color/r2w_premium_text" />
 
                 <TextView
                     android:id="@+id/wallet_request_history_error"
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorError"
+                    android:textColor="@color/r2w_premium_danger"
                     android:visibility="gone" />
 
                 <TextView
@@ -60,9 +60,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:background="@drawable/r2w_premium_card_soft"
+                    android:padding="@dimen/r2w_card_padding"
                     android:text="@string/wallet_request_history_empty"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textColor="@color/r2w_premium_muted"
                     android:visibility="gone" />
 
                 <LinearLayout

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
             android:paddingTop="20dp"
             android:paddingBottom="24dp">
 
@@ -39,7 +39,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="@string/wallet_request_amount">
+                android:hint="@string/wallet_request_amount"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/wallet_request_amount"
@@ -54,7 +61,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/wallet_request_currency">
+                android:hint="@string/wallet_request_currency"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/wallet_request_currency"
@@ -70,7 +84,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="@string/wallet_request_note">
+                android:hint="@string/wallet_request_note"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/wallet_request_note"
@@ -87,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorError"
+                android:textColor="@color/r2w_premium_danger"
                 android:visibility="gone" />
 
             <TextView
@@ -96,7 +117,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="@color/r2w_premium_primary"
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
@@ -104,7 +125,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                android:text="@string/wallet_request_submit" />
+                android:background="@drawable/r2w_premium_primary_button"
+                android:minHeight="56dp"
+                android:text="@string/wallet_request_submit"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/wallet_request_view_history"
@@ -112,7 +139,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/wallet_request_history" />
+                android:backgroundTint="@color/r2w_premium_surface"
+                android:minHeight="56dp"
+                android:text="@string/wallet_request_history"
+                android:textColor="@color/r2w_premium_primary"
+                app:cornerRadius="@dimen/r2w_button_radius"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

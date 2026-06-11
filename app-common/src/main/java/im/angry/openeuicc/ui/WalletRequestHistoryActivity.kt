@@ -24,6 +24,9 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class WalletRequestHistoryActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -98,6 +101,15 @@ class WalletRequestHistoryActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun formatWalletRequestDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return runCatching {
+            OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
+        }.getOrElse { raw }
+    }
+
     private fun renderRequests(requestData: List<MobileWalletRequest>) {
         requests.removeAllViews()
         empty.visibility = if (requestData.isEmpty()) View.VISIBLE else View.GONE
@@ -109,13 +121,13 @@ class WalletRequestHistoryActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.wallet_request_item_amount).text =
                 getString(R.string.wallet_request_amount_currency, request.amount, request.currency)
             item.requireViewById<TextView>(R.id.wallet_request_item_created).text =
-                request.createdAt.orEmpty()
+                formatWalletRequestDate(request.createdAt)
             item.requireViewById<TextView>(R.id.wallet_request_item_note).apply {
                 text = request.note.orEmpty()
                 visibility = if (request.note.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.wallet_request_item_reviewed).apply {
-                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, it) }.orEmpty()
+                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, formatWalletRequestDate(it)) }.orEmpty()
                 visibility = if (request.reviewedAt.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.wallet_request_item_status)
