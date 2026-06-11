@@ -4,14 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileOrder
+import im.angry.openeuicc.auth.MobileDealer
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
@@ -30,15 +33,31 @@ import java.util.Locale
 
 class ReportsActivity : AppCompatActivity() {
 
+    private fun parseReportInstant(value: String?): Instant? {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return null
+
+        val normalized = raw
+            .replace(" ", "T")
+            .replace(Regex("""(\.\d{3})\d+"""), "$1")
+            .let {
+                if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
+                    it
+                } else {
+                    "${it}Z"
+                }
+            }
+
+        return runCatching { Instant.parse(normalized) }.getOrNull()
+    }
+
     private fun formatReportDate(value: String?): String {
         val raw = value?.trim().orEmpty()
         if (raw.isBlank()) return ""
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-            Instant.parse(raw).atZone(ZoneId.systemDefault()).format(formatter)
-        } catch (_: Exception) {
-            raw
-        }
+        return parseReportInstant(raw)
+            ?.atZone(ZoneId.systemDefault())
+            ?.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
+            ?: raw
     }
 
     private fun formatReportStatus(value: String?): String {
@@ -74,6 +93,24 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var dealerPerformance: TextView
     private lateinit var failedOrders: TextView
     private lateinit var profitOverview: TextView
+    private lateinit var filterToday: MaterialButton
+    private lateinit var filterSevenDays: MaterialButton
+    private lateinit var filterThirtyDays: MaterialButton
+    private lateinit var filterAll: MaterialButton
+    private lateinit var exportCsv: MaterialButton
+
+    private var reportRange: ReportRange = ReportRange.THIRTY_DAYS
+    private var loadedOrders: List<MobileOrder> = emptyList()
+    private var loadedDealers: List<MobileDealer> = emptyList()
+    private var loadedWalletBalance: String? = null
+    private var loadedActiveEsims: String? = null
+
+    private enum class ReportRange {
+        TODAY,
+        SEVEN_DAYS,
+        THIRTY_DAYS,
+        ALL
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -96,8 +133,14 @@ class ReportsActivity : AppCompatActivity() {
         dealerPerformance = requireViewById(R.id.reports_dealer_performance)
         failedOrders = requireViewById(R.id.reports_failed_orders)
         profitOverview = requireViewById(R.id.reports_profit_overview)
+        filterToday = requireViewById(R.id.reports_filter_today)
+        filterSevenDays = requireViewById(R.id.reports_filter_7_days)
+        filterThirtyDays = requireViewById(R.id.reports_filter_30_days)
+        filterAll = requireViewById(R.id.reports_filter_all)
+        exportCsv = requireViewById(R.id.reports_export_csv)
 
         setupInsets()
+        setupFilters()
         renderLoading()
         loadReports()
     }
@@ -116,6 +159,37 @@ class ReportsActivity : AppCompatActivity() {
             ),
             consume = false
         )
+    }
+
+    private fun setupFilters() {
+        filterToday.setOnClickListener { applyReportRange(ReportRange.TODAY) }
+        filterSevenDays.setOnClickListener { applyReportRange(ReportRange.SEVEN_DAYS) }
+        filterThirtyDays.setOnClickListener { applyReportRange(ReportRange.THIRTY_DAYS) }
+        filterAll.setOnClickListener { applyReportRange(ReportRange.ALL) }
+        exportCsv.setOnClickListener { exportReportCsv() }
+        updateFilterButtons()
+    }
+
+    private fun applyReportRange(range: ReportRange) {
+        reportRange = range
+        updateFilterButtons()
+        renderReports()
+    }
+
+    private fun updateFilterButtons() {
+        val buttons = listOf(
+            filterToday to ReportRange.TODAY,
+            filterSevenDays to ReportRange.SEVEN_DAYS,
+            filterThirtyDays to ReportRange.THIRTY_DAYS,
+            filterAll to ReportRange.ALL
+        )
+
+        buttons.forEach { (button, range) ->
+            val selected = range == reportRange
+            button.isSelected = selected
+            button.alpha = if (selected) 1.0f else 0.72f
+            button.strokeWidth = if (selected) 2 else 1
+        }
     }
 
     private fun renderLoading() {
@@ -142,39 +216,117 @@ class ReportsActivity : AppCompatActivity() {
             val dealersRequest = async { runCatching { authApi.dealers(session) } }
 
             val dashboard = dashboardRequest.await().getOrNull()
-            val orders = ordersRequest.await().getOrNull()?.orders.orEmpty()
             val wallet = walletRequest.await().getOrNull()
-            val dealers = dealersRequest.await().getOrNull()?.dealers.orEmpty()
 
-            val totalRevenue = orders.mapNotNull { amount(it.price) }.fold(BigDecimal.ZERO, BigDecimal::add)
-            val totalProfit = totalRevenue.multiply(BigDecimal("0.22"))
-            val completedOrders = orders.count { it.statusLabel()?.contains("Completed", ignoreCase = true) == true }
-                .takeIf { it > 0 } ?: orders.size
+            loadedOrders = ordersRequest.await().getOrNull()?.orders.orEmpty()
+            loadedDealers = dealersRequest.await().getOrNull()?.dealers.orEmpty()
+            loadedWalletBalance = wallet?.currentBalance
+            loadedActiveEsims = dashboard?.activeEsimCount
 
-            revenue.text = currency(totalRevenue)
-            revenueDelta.text = "${orders.size} orders loaded"
-            sales.text = completedOrders.toString()
-            salesDelta.text = "${orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }} pending • ${orders.count { it.statusLabel()?.contains("Failed", ignoreCase = true) == true }} failed"
-            profit.text = currency(totalProfit)
-            activeEsims.text = dashboard?.activeEsimCount ?: "--"
-
-            salesOverview.text = buildSalesOverview(orders, wallet?.currentBalance)
-            providerUsage.text = buildProviderUsage(orders)
-            failedOrders.text = buildFailedOrders(orders)
-            profitOverview.text = buildProfitOverview(totalRevenue, totalProfit, orders)
-            dealerPerformance.text = if (dealers.isEmpty()) {
-                "Dealer performance data unavailable"
-            } else {
-                dealers.take(5).mapIndexed { index, dealer ->
-                    listOf(
-                        "${index + 1}. ${dealer.name}",
-                        "Orders: ${dealer.totalOrders}",
-                        "Balance: ${dealer.currentBalance}"
-                    ).joinToString("\n")
-                }.joinToString("\n\n")
-            }
-            status.text = "Live report data loaded • ${orders.size} orders • ${dealers.size} dealers"
+            renderReports()
         }
+    }
+
+    private fun renderReports() {
+        val orders = filteredOrders()
+        val totalRevenue = orders.mapNotNull { amount(it.price) }.fold(BigDecimal.ZERO, BigDecimal::add)
+        val totalProfit = totalRevenue.multiply(BigDecimal("0.22"))
+        val completedOrders = orders.count { it.statusLabel()?.contains("Completed", ignoreCase = true) == true }
+            .takeIf { it > 0 } ?: orders.size
+        val pendingOrders = orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }
+        val failedOrderCount = orders.count { it.statusLabel()?.contains("Failed", ignoreCase = true) == true }
+
+        revenue.text = currency(totalRevenue)
+        revenueDelta.text = "${orders.size} orders in ${rangeLabel()}"
+        sales.text = completedOrders.toString()
+        salesDelta.text = "$pendingOrders pending • $failedOrderCount failed"
+        profit.text = currency(totalProfit)
+        activeEsims.text = loadedActiveEsims ?: "--"
+
+        salesOverview.text = buildSalesOverview(orders, loadedWalletBalance)
+        providerUsage.text = buildProviderUsage(orders)
+        failedOrders.text = buildFailedOrders(orders)
+        profitOverview.text = buildProfitOverview(totalRevenue, totalProfit, orders)
+        dealerPerformance.text = buildDealerPerformance(loadedDealers)
+        status.text = if (orders.isEmpty()) {
+            getString(R.string.reports_empty_status, rangeLabel())
+        } else {
+            getString(R.string.reports_loaded_status, orders.size, loadedDealers.size, rangeLabel())
+        }
+    }
+
+    private fun filteredOrders(): List<MobileOrder> {
+        if (reportRange == ReportRange.ALL) return loadedOrders
+
+        val now = Instant.now()
+        val cutoff = when (reportRange) {
+            ReportRange.TODAY -> now.minusSeconds(24 * 60 * 60)
+            ReportRange.SEVEN_DAYS -> now.minusSeconds(7 * 24 * 60 * 60)
+            ReportRange.THIRTY_DAYS -> now.minusSeconds(30 * 24 * 60 * 60)
+            ReportRange.ALL -> Instant.EPOCH
+        }
+
+        return loadedOrders.filter { order ->
+            parseReportInstant(order.createdAt)?.isAfter(cutoff) == true
+        }
+    }
+
+    private fun rangeLabel(): String =
+        when (reportRange) {
+            ReportRange.TODAY -> getString(R.string.reports_filter_today)
+            ReportRange.SEVEN_DAYS -> getString(R.string.reports_filter_7_days)
+            ReportRange.THIRTY_DAYS -> getString(R.string.reports_filter_30_days)
+            ReportRange.ALL -> getString(R.string.reports_filter_all)
+        }
+
+    private fun buildDealerPerformance(dealers: List<MobileDealer>): String =
+        if (dealers.isEmpty()) {
+            getString(R.string.reports_empty_dealer_performance)
+        } else {
+            dealers.take(5).mapIndexed { index, dealer ->
+                listOf(
+                    "${index + 1}. ${dealer.name}",
+                    "Orders: ${dealer.totalOrders}",
+                    "Balance: ${dealer.currentBalance}"
+                ).joinToString("\n")
+            }.joinToString("\n\n")
+        }
+
+    private fun exportReportCsv() {
+        val orders = filteredOrders()
+        if (orders.isEmpty()) {
+            Toast.makeText(this, R.string.reports_export_empty, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val csv = buildString {
+            appendLine("Order,Package,Provider,Status,Amount,Created")
+            orders.forEach { order ->
+                appendLine(
+                    listOf(
+                        order.displayNumber(),
+                        PackageNameCleaner.clean(order.packageName),
+                        order.provider.orEmpty().replace("TGT", "Orange", ignoreCase = true),
+                        formatReportStatus(order.statusLabel()),
+                        order.price.orEmpty(),
+                        formatReportDate(order.createdAt)
+                    ).joinToString(",") { csvEscape(it) }
+                )
+            }
+        }
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/csv"
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.reports_export_subject, rangeLabel()))
+            putExtra(Intent.EXTRA_TEXT, csv)
+        }
+
+        startActivity(Intent.createChooser(intent, getString(R.string.reports_export_title)))
+    }
+
+    private fun csvEscape(value: String): String {
+        val escaped = value.replace("\"", "\"\"")
+        return "\"$escaped\""
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {

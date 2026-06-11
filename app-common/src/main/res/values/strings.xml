@@ -127,6 +127,21 @@
     <string name="order_detail_renewal_activated_end_format">Activated end: %s</string>
     <string name="order_detail_renewal_expiry_format">Renew expiry: %s</string>
     <string name="order_detail_renewal_latest_activation_format">Latest activation: %s</string>
+
+    <string name="reports_filter_today">Today</string>
+    <string name="reports_filter_7_days">7 days</string>
+    <string name="reports_filter_30_days">30 days</string>
+    <string name="reports_filter_all">All</string>
+    <string name="reports_export_csv">Export CSV</string>
+    <string name="reports_export_title">Export report</string>
+    <string name="reports_export_subject">Roam2World report - %s</string>
+    <string name="reports_export_empty">No report data to export for this period.</string>
+    <string name="reports_empty_status">No report data for %s yet.</string>
+    <string name="reports_loaded_status">Live report data loaded • %1$d orders • %2$d dealers • %3$s</string>
+    <string name="reports_empty_sales_overview">No sales in this period yet. New orders will appear here automatically.</string>
+    <string name="reports_empty_provider_usage">No provider usage in this period yet.</string>
+    <string name="reports_empty_failed_orders">No failed orders detected in this period.</string>
+    <string name="reports_empty_dealer_performance">Dealer performance data unavailable.</string>
     <string name="wallet_title">Wallet</string>
     <string name="wallet_current_balance">Current balance</string>
     <string name="wallet_recent_requests">Recent requests</string>
