@@ -53,8 +53,9 @@
     <string name="dealer_detail_stats_format">Orders: %1$s\nRevenue: %2$s\nAllocated: %3$s\nSpent: %4$s</string>
     <string name="dealer_allocate_balance">Allocate balance</string>
 
-    <string name="dealer_refund_card_title">Balance correction</string>
-    <string name="dealer_refund_card_subtitle">Use this only when money was allocated by mistake. The amount will be moved back from the dealer to your reseller wallet.</string>
+    <string name="dealer_refund_card_chip">Correction tool</string>
+    <string name="dealer_refund_card_title">Refund dealer balance</string>
+    <string name="dealer_refund_card_subtitle">Correct mistaken allocations by moving funds safely from this dealer back to your reseller wallet.</string>
     <string name="dealer_refund_balance">Refund money</string>
     <string name="dealer_refund_title">Refund money</string>
     <string name="dealer_refund_message">Return money from %s back to your reseller wallet.</string>
