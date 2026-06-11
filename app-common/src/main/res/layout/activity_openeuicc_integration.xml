@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="OpenEUICC Integration"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_text_primary"
+                android:text="OpenEUICC"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -35,16 +35,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Manage device eSIM profiles, slots and installation actions."
+                android:text="Manage eSIM profiles, device slots and installation actions."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/r2w_border"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -57,8 +59,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="OpenEUICC Status"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_text_primary"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -68,7 +70,7 @@
                         android:layout_marginTop="8dp"
                         android:text="Checking native OpenEUICC integration..."
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_text_secondary" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -84,8 +86,10 @@
                     android:layout_height="112dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:strokeColor="@color/r2w_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -99,7 +103,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Slot 1"
-                            android:textColor="@color/r2w_text_secondary" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -107,7 +111,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Available"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_success"
+                            android:textColor="@color/r2w_premium_success"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -117,8 +121,10 @@
                     android:layout_height="112dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
-                    app:strokeColor="@color/r2w_border"
+                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -132,7 +138,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Slot 2"
-                            android:textColor="@color/r2w_text_secondary" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -140,7 +146,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Ready"
                             android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_primary"
+                            android:textColor="@color/r2w_premium_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -152,7 +158,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Installed Profiles"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -168,7 +174,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Actions"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton
@@ -176,8 +182,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="Install New eSIM"
-                app:cornerRadius="16dp" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/openeuicc_refresh_profiles"
@@ -186,7 +196,10 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:text="Refresh Profiles"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius"
+                app:strokeColor="@color/r2w_premium_primary"
+                app:strokeWidth="1dp"
+                android:textColor="@color/r2w_premium_primary" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/openeuicc_open_native"
@@ -195,7 +208,10 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:text="Open Native OpenEUICC"
-                app:cornerRadius="16dp" />
+                app:cornerRadius="@dimen/r2w_button_radius"
+                app:strokeColor="@color/r2w_premium_primary"
+                app:strokeWidth="1dp"
+                android:textColor="@color/r2w_premium_primary" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

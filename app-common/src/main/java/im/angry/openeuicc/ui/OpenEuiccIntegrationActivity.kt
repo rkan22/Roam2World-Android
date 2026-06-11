@@ -75,9 +75,9 @@ class OpenEuiccIntegrationActivity : AppCompatActivity() {
     private fun renderStatus() {
         val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
         nativeStatus.text = if (target.isNullOrBlank()) {
-            "Native OpenEUICC target unavailable on this build. You can still view eSIMs inside Roam2World."
+            "OpenEUICC target unavailable on this build. You can still view eSIMs inside Roam2World."
         } else {
-            "Ready • Native OpenEUICC integration available"
+            "Ready • OpenEUICC integration available"
         }
     }
 
@@ -112,7 +112,7 @@ class OpenEuiccIntegrationActivity : AppCompatActivity() {
     private fun openNativeOpenEuicc() {
         val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
         if (target.isNullOrBlank()) {
-            Toast.makeText(this, "Native OpenEUICC target unavailable", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "OpenEUICC target unavailable", Toast.LENGTH_LONG).show()
             return
         }
         startActivity(Intent().setClassName(this, target))
