@@ -194,6 +194,57 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/dealer_detail_refund_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:strokeColor="@color/r2w_premium_danger"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/r2w_card_padding">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dealer_refund_card_title"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/dealer_refund_card_subtitle"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dealer_detail_refund"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/dealer_refund_balance"
+                        android:textStyle="bold"
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_danger"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:icon="@drawable/ic_wallet"
+                        app:iconTint="@color/r2w_premium_danger"
+                        app:strokeColor="@color/r2w_premium_danger"
+                        app:strokeWidth="1dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

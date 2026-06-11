@@ -197,6 +197,27 @@ class Roam2WorldAuthApi(baseUrl: String) {
         )
     }
 
+    suspend fun modifyDealerBalance(
+        session: AuthSession,
+        dealerId: String,
+        amount: String,
+        direction: String,
+        reason: String
+    ): MobileDealerAllocationResult = withContext(Dispatchers.IO) {
+        val body = JSONObject()
+            .put("amount", amount)
+            .put("direction", direction)
+            .put("reason", reason)
+
+        parseMobileDealerAllocation(
+            postJson(
+                ApiEndpoint("mobile dealer balance modification", "api/v1/mobile/dealers/$dealerId/modify-balance/"),
+                body,
+                session.authorizationHeader
+            )
+        )
+    }
+
     suspend fun suspendDealer(session: AuthSession, dealerId: String): MobileDealer = withContext(Dispatchers.IO) {
         parseMobileDealers(
             postJson(

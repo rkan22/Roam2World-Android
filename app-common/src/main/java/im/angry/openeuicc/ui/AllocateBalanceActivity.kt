@@ -120,6 +120,8 @@ class AllocateBalanceActivity : AppCompatActivity() {
                     )
                     success.visibility = View.VISIBLE
                     amountInput.text?.clear()
+                    setResult(RESULT_OK)
+                    finish()
                 }
                 .onFailure {
                     error.text = it.message ?: getString(R.string.dealer_allocate_failed)

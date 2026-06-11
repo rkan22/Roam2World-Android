@@ -7,10 +7,16 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.app.AlertDialog
+import android.text.InputType
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -40,12 +46,19 @@ class DealerDetailActivity : AppCompatActivity() {
     private lateinit var balance: TextView
     private lateinit var stats: TextView
     private lateinit var allocate: MaterialButton
+    private lateinit var refund: MaterialButton
     private lateinit var suspend: MaterialButton
     private lateinit var activate: MaterialButton
     private lateinit var orders: LinearLayout
 
     private val dealerId: String? by lazy { intent.getStringExtra(EXTRA_DEALER_ID) }
     private var currentDealer: MobileDealer? = null
+
+    private val allocateBalanceLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        loadDealer()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -66,12 +79,14 @@ class DealerDetailActivity : AppCompatActivity() {
         balance = requireViewById(R.id.dealer_detail_balance)
         stats = requireViewById(R.id.dealer_detail_stats)
         allocate = requireViewById(R.id.dealer_detail_allocate)
+        refund = requireViewById(R.id.dealer_detail_refund)
         suspend = requireViewById(R.id.dealer_detail_suspend)
         activate = requireViewById(R.id.dealer_detail_activate)
         orders = requireViewById(R.id.dealer_detail_orders)
 
         setupInsets()
         allocate.setOnClickListener { openAllocateBalance() }
+        refund.setOnClickListener { openRefundBalance() }
         suspend.setOnClickListener { updateDealerStatus(suspendDealer = true) }
         activate.setOnClickListener { updateDealerStatus(suspendDealer = false) }
         loadDealer()
@@ -187,11 +202,99 @@ class DealerDetailActivity : AppCompatActivity() {
     private fun openAllocateBalance() {
         val dealer = currentDealer ?: return
         val id = dealer.id ?: return
-        startActivity(
+        allocateBalanceLauncher.launch(
             Intent(this, AllocateBalanceActivity::class.java)
                 .putExtra(AllocateBalanceActivity.EXTRA_DEALER_ID, id)
                 .putExtra(AllocateBalanceActivity.EXTRA_DEALER_NAME, dealer.name)
         )
+    }
+
+    private fun openRefundBalance() {
+        val dealer = currentDealer ?: return
+        val id = dealer.id ?: return
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 16, 48, 0)
+        }
+
+        val amountInput = EditText(this).apply {
+            hint = getString(R.string.dealer_refund_amount)
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        }
+
+        val reasonInput = EditText(this).apply {
+            hint = getString(R.string.dealer_refund_reason)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            setText(getString(R.string.dealer_refund_default_reason))
+        }
+
+        container.addView(amountInput)
+        container.addView(reasonInput)
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dealer_refund_title)
+            .setMessage(getString(R.string.dealer_refund_message, dealer.name))
+            .setView(container)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.dealer_refund_submit, null)
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val amount = amountInput.text?.toString().orEmpty().trim().replace(",", ".")
+                val amountValue = amount.toDoubleOrNull()
+                if (amountValue == null || amountValue <= 0.0) {
+                    amountInput.error = getString(R.string.dealer_allocate_amount_required)
+                    return@setOnClickListener
+                }
+
+                val reason = reasonInput.text?.toString().orEmpty().trim()
+                    .ifBlank { getString(R.string.dealer_refund_default_reason) }
+
+                dialog.dismiss()
+                refundDealerBalance(id, amount, reason)
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun refundDealerBalance(dealerId: String, amount: String, reason: String) {
+        lifecycleScope.launch {
+            error.visibility = View.GONE
+            setLoading(true)
+            val session = activeSessionOrReturnToLogin()
+            if (session == null) {
+                setLoading(false)
+                return@launch
+            }
+
+            val result = runCatching {
+                authApi.modifyDealerBalance(
+                    session = session,
+                    dealerId = dealerId,
+                    amount = amount,
+                    direction = "refund_to_reseller",
+                    reason = reason
+                )
+            }
+
+            setLoading(false)
+            result
+                .onSuccess {
+                    renderDealer(it.dealer)
+                    Toast.makeText(
+                        this@DealerDetailActivity,
+                        getString(R.string.dealer_refund_success, it.amount, it.currency, it.dealer.currentBalance),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                .onFailure {
+                    error.text = it.message ?: getString(R.string.dealer_refund_failed)
+                    error.visibility = View.VISIBLE
+                }
+        }
     }
 
     private fun updateDealerStatus(suspendDealer: Boolean) {
@@ -221,6 +324,7 @@ class DealerDetailActivity : AppCompatActivity() {
     private fun setLoading(loading: Boolean) {
         progress.visibility = if (loading) View.VISIBLE else View.GONE
         allocate.isEnabled = !loading
+        refund.isEnabled = !loading
         suspend.isEnabled = !loading
         activate.isEnabled = !loading
     }
