@@ -132,10 +132,10 @@
     <string name="reports_filter_7_days">7 days</string>
     <string name="reports_filter_30_days">30 days</string>
     <string name="reports_filter_all">All</string>
-    <string name="reports_export_csv">Export CSV</string>
-    <string name="reports_export_title">Export report</string>
+    <string name="reports_export_csv">Export PDF</string>
+    <string name="reports_export_title">Export PDF report</string>
     <string name="reports_export_subject">Roam2World report - %s</string>
-    <string name="reports_export_empty">No report data to export for this period.</string>
+    <string name="reports_export_empty">No report data to export as PDF for this period.</string>
     <string name="reports_empty_status">No report data for %s yet.</string>
     <string name="reports_loaded_status">Live report data loaded • %1$d orders • %2$d dealers • %3$s</string>
     <string name="reports_empty_sales_overview">No sales in this period yet. New orders will appear here automatically.</string>

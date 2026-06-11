@@ -1,12 +1,17 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
@@ -26,6 +31,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -166,7 +172,7 @@ class ReportsActivity : AppCompatActivity() {
         filterSevenDays.setOnClickListener { applyReportRange(ReportRange.SEVEN_DAYS) }
         filterThirtyDays.setOnClickListener { applyReportRange(ReportRange.THIRTY_DAYS) }
         filterAll.setOnClickListener { applyReportRange(ReportRange.ALL) }
-        exportCsv.setOnClickListener { exportReportCsv() }
+        exportCsv.setOnClickListener { exportReportPdf() }
         updateFilterButtons()
     }
 
@@ -292,33 +298,209 @@ class ReportsActivity : AppCompatActivity() {
             }.joinToString("\n\n")
         }
 
-    private fun exportReportCsv() {
+    private fun exportReportPdf() {
         val orders = filteredOrders()
         if (orders.isEmpty()) {
             Toast.makeText(this, R.string.reports_export_empty, Toast.LENGTH_LONG).show()
             return
         }
 
-        val csv = buildString {
-            appendLine("Order,Package,Provider,Status,Amount,Created")
-            orders.forEach { order ->
-                appendLine(
-                    listOf(
-                        order.displayNumber(),
-                        PackageNameCleaner.clean(order.packageName),
-                        order.provider.orEmpty().replace("TGT", "Orange", ignoreCase = true),
-                        formatReportStatus(order.statusLabel()),
-                        order.price.orEmpty(),
-                        formatReportDate(order.createdAt)
-                    ).joinToString(",") { csvEscape(it) }
-                )
+        val safeRange = rangeLabel().lowercase(Locale.ROOT).replace(" ", "-")
+        val outputDir = File(cacheDir, "reports").apply { mkdirs() }
+        val outputFile = File(outputDir, "roam2world-report-$safeRange.pdf")
+
+        val document = PdfDocument()
+        try {
+            val pageWidth = 842
+            val pageHeight = 595
+            val margin = 28f
+            val lineHeight = 20f
+            var pageNumber = 1
+            var y = 42f
+
+            val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(24, 38, 58)
+                textSize = 18f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
+            val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(95, 107, 124)
+                textSize = 10f
+            }
+            val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.WHITE
+                textSize = 8.5f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(32, 45, 64)
+                textSize = 8.5f
+            }
+            val mutedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(95, 107, 124)
+                textSize = 8.5f
+            }
+            val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(224, 230, 238)
+                strokeWidth = 1f
+            }
+            val headerBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(37, 99, 235)
+                style = Paint.Style.FILL
+            }
+
+            fun shorten(value: String, paint: Paint, maxWidth: Float): String {
+                if (paint.measureText(value) <= maxWidth) return value
+                var result = value
+                while (result.length > 4 && paint.measureText("$result...") > maxWidth) {
+                    result = result.dropLast(1)
+                }
+                return "$result..."
+            }
+
+            val totalRevenue = orders.mapNotNull { amount(it.price) }.fold(BigDecimal.ZERO, BigDecimal::add)
+            val totalProfit = totalRevenue.multiply(BigDecimal("0.22"))
+            val totalSales = orders.count { it.statusLabel()?.contains("Completed", ignoreCase = true) == true }
+                .takeIf { it > 0 } ?: orders.size
+            val totalActiveEsims = loadedActiveEsims ?: "--"
+
+            val summaryLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(95, 107, 124)
+                textSize = 8.5f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            val summaryValuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(24, 38, 58)
+                textSize = 14f
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            val summaryCardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(246, 249, 253)
+                style = Paint.Style.FILL
+            }
+            val summaryStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.rgb(224, 230, 238)
+                style = Paint.Style.STROKE
+                strokeWidth = 1f
+            }
+
+            fun drawSummaryCards(canvas: android.graphics.Canvas) {
+                val labels = listOf("Total Revenue", "Total Sales", "Total Profit", "Active eSIMs")
+                val values = listOf(currency(totalRevenue), totalSales.toString(), currency(totalProfit), totalActiveEsims)
+                val cardWidth = 188f
+                val cardHeight = 48f
+                var x = margin
+
+                labels.forEachIndexed { index, label ->
+                    canvas.drawRoundRect(x, y, x + cardWidth, y + cardHeight, 12f, 12f, summaryCardPaint)
+                    canvas.drawRoundRect(x, y, x + cardWidth, y + cardHeight, 12f, 12f, summaryStrokePaint)
+                    canvas.drawText(label, x + 12f, y + 17f, summaryLabelPaint)
+                    canvas.drawText(shorten(values[index], summaryValuePaint, cardWidth - 24f), x + 12f, y + 38f, summaryValuePaint)
+                    x += cardWidth + 10f
+                }
+
+                y += cardHeight + 24f
+            }
+
+            fun drawTableHeader(canvas: android.graphics.Canvas) {
+                canvas.drawRect(margin, y - 13f, pageWidth - margin, y + 7f, headerBgPaint)
+
+                val headers = listOf("Order", "Date", "Customer", "Package", "Provider", "Status", "Amount", "eSIM")
+                val widths = listOf(70f, 92f, 105f, 150f, 78f, 75f, 65f, 110f)
+                var x = margin + 6f
+                headers.forEachIndexed { index, header ->
+                    canvas.drawText(header, x, y, headerPaint)
+                    x += widths[index]
+                }
+
+                y += 16f
+            }
+
+            fun startPage(): PdfDocument.Page {
+                val page = document.startPage(
+                    PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+                )
+                val canvas = page.canvas
+
+                canvas.drawText("Roam2World Report", margin, y, titlePaint)
+                canvas.drawText(
+                    "Period: ${rangeLabel()}   •   Orders: ${orders.size}   •   Generated: ${formatReportDate(Instant.now().toString())}",
+                    margin,
+                    y + 18f,
+                    subtitlePaint
+                )
+
+                y += 42f
+
+                if (pageNumber == 1) {
+                    drawSummaryCards(canvas)
+                }
+
+                drawTableHeader(canvas)
+                return page
+            }
+
+            fun finishPage(page: PdfDocument.Page) {
+                page.canvas.drawText("Page $pageNumber", pageWidth - margin - 45f, pageHeight - 18f, subtitlePaint)
+                document.finishPage(page)
+                pageNumber += 1
+                y = 42f
+            }
+
+            var page = startPage()
+            val widths = listOf(70f, 92f, 105f, 150f, 78f, 75f, 65f, 110f)
+
+            orders.forEachIndexed { index, order ->
+                if (y > pageHeight - 42f) {
+                    finishPage(page)
+                    page = startPage()
+                }
+
+                val rowPaint = if (index % 2 == 0) textPaint else mutedPaint
+                val canvas = page.canvas
+
+                canvas.drawLine(margin, y + 5f, pageWidth - margin, y + 5f, linePaint)
+
+                val values = listOf(
+                    order.displayNumber(),
+                    formatReportDate(order.createdAt),
+                    order.customerName().orEmpty().ifBlank { "-" },
+                    PackageNameCleaner.clean(order.packageName),
+                    order.provider.orEmpty().replace("TGT", "Orange", ignoreCase = true).ifBlank { "-" },
+                    formatReportStatus(order.statusLabel()),
+                    order.price.orEmpty().ifBlank { "-" },
+                    order.esimId.orEmpty().ifBlank { "-" }
+                )
+
+                var x = margin + 6f
+                values.forEachIndexed { valueIndex, value ->
+                    canvas.drawText(shorten(value, rowPaint, widths[valueIndex] - 8f), x, y, rowPaint)
+                    x += widths[valueIndex]
+                }
+
+                y += lineHeight
+            }
+
+            finishPage(page)
+
+            outputFile.outputStream().use { out ->
+                document.writeTo(out)
+            }
+        } finally {
+            document.close()
         }
 
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            outputFile
+        )
+
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/csv"
+            type = "application/pdf"
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.reports_export_subject, rangeLabel()))
-            putExtra(Intent.EXTRA_TEXT, csv)
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
         startActivity(Intent.createChooser(intent, getString(R.string.reports_export_title)))
