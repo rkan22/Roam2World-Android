@@ -22,11 +22,40 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.math.roundToInt
 
 class TgtCheckGbActivity : AppCompatActivity() {
+
+    private fun formatTgtDate(value: String): String {
+        if (value.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(value).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            value
+        }
+    }
+
+    private fun formatTgtStatus(value: String): String {
+        return when (value.uppercase(Locale.ROOT)) {
+            "INUSE" -> "In Use"
+            "ACTIVATED" -> "Activated"
+            "NOTACTIVE" -> "Not Activated"
+            "USED" -> "Used Up"
+            "EXPIRED" -> "Expired"
+            "ABANDON" -> "Abandoned"
+            "TERMINATION" -> "Terminated"
+            else -> value.ifBlank { "Unknown" }
+        }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
 
     private lateinit var scroll: View
@@ -153,9 +182,15 @@ class TgtCheckGbActivity : AppCompatActivity() {
         if (usedMb != null) lines += "Used: ${formatGb(usedMb)}"
         if (remainingMb != null) lines += "Remaining: ${formatGb(remainingMb)}"
 
-        usage.optString("status").takeIf { it.isNotBlank() }?.let { lines += "Status: $it" }
-        usage.optString("start_date").takeIf { it.isNotBlank() }?.let { lines += "Start Date: $it" }
-        usage.optString("end_date").takeIf { it.isNotBlank() }?.let { lines += "End Date: $it" }
+        usage.optString("status").takeIf { it.isNotBlank() }?.let {
+            val prettyStatus = formatTgtStatus(it)
+            lines += "Status: $prettyStatus"
+            if (it.equals("EXPIRED", ignoreCase = true)) {
+                lines += "This eSIM package has expired."
+            }
+        }
+        usage.optString("start_date").takeIf { it.isNotBlank() }?.let { lines += "Start Date: ${formatTgtDate(it)}" }
+        usage.optString("end_date").takeIf { it.isNotBlank() }?.let { lines += "End Date: ${formatTgtDate(it)}" }
         rawData.optString("qtaconsumption").takeIf { it.isNotBlank() }?.let { lines += "Consumption: $it" }
 
         result.text = lines.joinToString("\n")
