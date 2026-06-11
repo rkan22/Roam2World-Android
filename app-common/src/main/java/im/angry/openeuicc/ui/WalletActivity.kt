@@ -242,7 +242,7 @@ class WalletActivity : AppCompatActivity() {
             TextView(this).apply {
                 text = errorText
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorError))
+                setTextColor(getColor(R.color.r2w_premium_danger))
                 requests.addView(this)
             }
             return
@@ -251,7 +251,7 @@ class WalletActivity : AppCompatActivity() {
             TextView(this).apply {
                 text = getString(R.string.wallet_request_history_empty)
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                setTextColor(getColor(R.color.r2w_premium_muted))
                 requests.addView(this)
             }
             return
@@ -314,7 +314,7 @@ class WalletActivity : AppCompatActivity() {
             TextView(this).apply {
                 text = getString(R.string.wallet_empty_transactions)
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
+                setTextColor(getColor(R.color.r2w_premium_muted))
                 transactions.addView(this)
             }
             return
