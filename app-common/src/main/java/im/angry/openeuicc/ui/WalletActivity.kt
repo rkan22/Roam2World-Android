@@ -30,8 +30,31 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class WalletActivity : AppCompatActivity() {
+
+    private fun formatWalletDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(raw).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun formatWalletText(value: String?): String {
+        val raw = value.orEmpty()
+        val isoPattern = Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z""")
+        return isoPattern.replace(raw) { matchResult -> formatWalletDate(matchResult.value) }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -242,7 +265,7 @@ class WalletActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.wallet_request_item_status)
                 .applyRoamStatusChip(request.statusLabel(), request.status)
             item.requireViewById<TextView>(R.id.wallet_request_item_created).apply {
-                text = request.createdAt.orEmpty()
+                text = formatWalletDate(request.createdAt)
                 visibility = if (request.createdAt.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.wallet_request_item_note).apply {
@@ -250,7 +273,7 @@ class WalletActivity : AppCompatActivity() {
                 visibility = if (request.note.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.wallet_request_item_reviewed).apply {
-                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, it) }.orEmpty()
+                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, formatWalletDate(it)) }.orEmpty()
                 visibility = if (request.reviewedAt.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             requests.addView(item)
@@ -259,7 +282,11 @@ class WalletActivity : AppCompatActivity() {
 
     private fun renderQuickStats(transactionData: List<MobileTransaction>) {
         val totalTransactions = transactionData.size
-        val lastActivity = transactionData.firstOrNull()?.title?.takeIf { it.isNotBlank() } ?: "No activity yet"
+        val last = transactionData.firstOrNull()
+        val lastActivity = listOfNotNull(
+            last?.title?.takeIf { it.isNotBlank() },
+            last?.subtitle?.takeIf { it.isNotBlank() }?.let { formatWalletText(it) }
+        ).joinToString(" • ").ifBlank { "No activity yet" }
         val completedCount = transactionData.count {
             it.status.orEmpty().lowercase().contains("complete") ||
                 it.status.orEmpty().lowercase().contains("success") ||
@@ -296,8 +323,8 @@ class WalletActivity : AppCompatActivity() {
         val inflater = LayoutInflater.from(this)
         transactionData.forEach { transaction ->
             val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
-            item.requireViewById<TextView>(R.id.transaction_title).text = transaction.title
-            item.requireViewById<TextView>(R.id.transaction_subtitle).text = transaction.subtitle
+            item.requireViewById<TextView>(R.id.transaction_title).text = formatWalletText(transaction.title)
+            item.requireViewById<TextView>(R.id.transaction_subtitle).text = formatWalletText(transaction.subtitle)
             item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
             item.requireViewById<TextView>(R.id.transaction_status).apply {
                 applyRoamStatusChip(transaction.status, transaction.status)
