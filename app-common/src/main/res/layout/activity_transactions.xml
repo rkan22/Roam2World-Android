@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -25,14 +25,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/r2w_screen_padding">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Transactions"
                     android:textAppearance="?attr/textAppearanceDisplaySmall"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <TextView
@@ -42,7 +42,7 @@
                     android:layout_marginTop="6dp"
                     android:text="Orders and purchase activity"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary" />
+                    android:textColor="@color/r2w_premium_muted" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/transactions_search_layout"
@@ -51,7 +51,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
                     android:hint="Search order, package, provider or status"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
                     app:endIconMode="clear_text"
+                    app:hintTextColor="@color/r2w_premium_muted"
                     app:startIconDrawable="@drawable/ic_wallet">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -103,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_danger"
+                    android:textColor="@color/r2w_premium_danger"
                     android:visibility="gone" />
 
                 <TextView
@@ -111,11 +118,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="18dp"
-                    android:background="@color/r2w_card"
-                    android:padding="18dp"
+                    android:background="@drawable/r2w_premium_card_soft"
+                    android:padding="@dimen/r2w_card_padding"
                     android:text="No matching transactions found."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary"
+                    android:textColor="@color/r2w_premium_muted"
                     android:visibility="gone" />
 
                 <LinearLayout
@@ -132,7 +139,7 @@
         android:id="@+id/transactions_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_card"
+        android:background="@color/r2w_premium_surface"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

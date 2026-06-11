@@ -1,6 +1,7 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -85,7 +86,7 @@ class TransactionsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transactions)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = "Orders"
+        supportActionBar?.title = "Transactions"
 
         refresh = requireViewById(R.id.transactions_refresh)
         bottomNav = requireViewById(R.id.transactions_bottom_nav)
@@ -207,13 +208,20 @@ class TransactionsActivity : AppCompatActivity() {
         orders.forEach { list.addView(createOrderCard(it)) }
     }
 
+
+    private fun visibleProvider(provider: String?): String =
+        provider.orEmpty()
+            .replace("TGT", "Orange", ignoreCase = true)
+            .replace("tgt", "Orange", ignoreCase = true)
+            .ifBlank { "Unknown" }
+
     private fun createOrderCard(order: MobileOrder): View {
         val card = MaterialCardView(this).apply {
-            radius = dp(22).toFloat()
-            cardElevation = dp(5).toFloat()
+            radius = dp(18).toFloat()
+            cardElevation = dp(4).toFloat()
             strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_border))
-            setCardBackgroundColor(getColor(R.color.r2w_card))
+            setStrokeColor(getColor(R.color.r2w_premium_border))
+            setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = dp(14) }
         }
         val body = LinearLayout(this).apply {
@@ -227,7 +235,7 @@ class TransactionsActivity : AppCompatActivity() {
                 order.esim?.customerName()?.let { "Customer: $it" },
                 order.esim?.customerPhone?.let { "Phone: $it" },
                 order.esim?.iccid?.let { "ICCID: $it" },
-                order.provider?.let { "Provider: $it" },
+                order.provider?.let { "Provider: ${visibleProvider(it)}" },
                 order.price?.let { "Amount: $it" },
                 order.createdAt?.let { "Date: ${formatTransactionDate(it)}" }
             ).joinToString("\n").ifBlank { "No extra order details" },
@@ -248,7 +256,7 @@ class TransactionsActivity : AppCompatActivity() {
         TextView(this).apply {
             text = textValue
             setTextAppearance(appearance)
-            setTextColor(getColor(if (bold) R.color.r2w_text_primary else R.color.r2w_text_secondary))
+            setTextColor(getColor(if (bold) R.color.r2w_premium_text else R.color.r2w_premium_muted))
             if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
 
@@ -257,6 +265,10 @@ class TransactionsActivity : AppCompatActivity() {
             text = textValue
             gravity = Gravity.CENTER
             cornerRadius = dp(14)
+            setTextColor(getColor(R.color.r2w_premium_primary))
+            strokeColor = ColorStateList.valueOf(getColor(R.color.r2w_premium_border))
+            strokeWidth = dp(1)
+            backgroundTintList = ColorStateList.valueOf(getColor(R.color.r2w_premium_surface))
             setOnClickListener { action() }
         }
 
