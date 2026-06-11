@@ -488,11 +488,11 @@ class DashboardActivity : AppCompatActivity() {
                 topMargin = dp(12)
             }
         }
-        row.addView(createQuickActionButton("TGT\nRecharge") {
-            startActivity(Intent(this, TgtSimRechargeActivity::class.java))
+        row.addView(createQuickActionButton("Store") {
+            openPackagesActivity()
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
-        row.addView(createQuickActionButton("Vodafone\nRenewal") {
-            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
+        row.addView(createQuickActionButton("My eSIMs") {
+            openEsimActivity()
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
         quickActions.addView(row)
     }
