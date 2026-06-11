@@ -3,4 +3,7 @@
     <cache-path
         name="reports"
         path="reports/" />
+    <cache-path
+        name="qr"
+        path="qr/" />
 </paths>

@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import com.google.android.material.button.MaterialButton
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
@@ -24,6 +25,8 @@ import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
 import im.angry.openeuicc.util.setupRootViewSystemBarInsets
+import java.io.File
+import java.net.URLEncoder
 
 class MobileEsimQrActivity : AppCompatActivity() {
     private lateinit var activationCode: String
@@ -72,21 +75,11 @@ class MobileEsimQrActivity : AppCompatActivity() {
         }
 
         requireViewById<MaterialButton>(R.id.mobile_esim_qr_share).setOnClickListener {
-            val shareText = buildString {
-                appendLine(requireViewById<TextView>(R.id.mobile_esim_qr_title).text.toString())
-                appendLine()
-                appendLine(getString(R.string.mobile_esim_share_qr_payload_label))
-                appendLine(payload)
-            }
-
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.mobile_esim_qr_title))
-                putExtra(Intent.EXTRA_TEXT, shareText)
-            }
-
-            startActivity(Intent.createChooser(intent, getString(R.string.mobile_esim_share_qr)))
+            val planName = requireViewById<TextView>(R.id.mobile_esim_qr_title).text.toString()
+                .ifBlank { getString(R.string.mobile_esim_qr_title) }
+            shareQrInstallTemplate(planName, payload)
         }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
@@ -98,6 +91,104 @@ class MobileEsimQrActivity : AppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
+
+    private fun shareQrInstallTemplate(planName: String, payload: String) {
+        if (payload.isBlank()) return
+
+        val iphoneLink = buildIphoneInstallLink(payload)
+        val androidLink = buildAndroidInstallLink(payload)
+        val bitmap = createQrBitmap(payload, QR_SIZE) ?: return
+
+        val outputDir = File(cacheDir, "qr").apply { mkdirs() }
+        val outputFile = File(outputDir, "esim-install-${System.currentTimeMillis()}.png")
+        outputFile.outputStream().use { out ->
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+        }
+
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            outputFile
+        )
+
+        val plainBody = buildInstallPlainText(planName, iphoneLink, androidLink)
+        val htmlBody = buildInstallHtml(planName, iphoneLink, androidLink)
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_SUBJECT, "eSIM Installation - $planName")
+            putExtra(Intent.EXTRA_TEXT, plainBody)
+            putExtra(Intent.EXTRA_HTML_TEXT, htmlBody)
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        startActivity(Intent.createChooser(intent, getString(R.string.mobile_esim_share_qr)))
+    }
+
+    private fun buildInstallPlainText(planName: String, iphoneLink: String, androidLink: String): String =
+        buildString {
+            appendLine(planName)
+            appendLine()
+            appendLine("QR code is attached.")
+            appendLine()
+            appendLine("iPhone Quick Install:")
+            appendLine(iphoneLink)
+            appendLine()
+            appendLine("Android Quick Install:")
+            appendLine(androidLink)
+        }
+
+    private fun buildInstallHtml(planName: String, iphoneLink: String, androidLink: String): String {
+        val safePlanName = htmlEscape(planName)
+        val safeIphoneLink = htmlEscape(iphoneLink)
+        val safeAndroidLink = htmlEscape(androidLink)
+
+        return """
+            <html>
+              <body style="font-family: Arial, sans-serif; color: #18263A; line-height: 1.45;">
+                <h2 style="margin: 0 0 12px 0;">$safePlanName</h2>
+                <p style="margin: 0 0 18px 0;">QR code is attached.</p>
+
+                <p style="margin: 0 0 14px 0;">
+                  <a href="$safeIphoneLink"
+                     style="display:inline-block;background:#2563EB;color:#FFFFFF;text-decoration:none;
+                            padding:12px 18px;border-radius:10px;font-weight:bold;">
+                    iPhone Quick Install
+                  </a>
+                </p>
+
+                <p style="margin: 0 0 18px 0;">
+                  <a href="$safeAndroidLink"
+                     style="display:inline-block;background:#0F172A;color:#FFFFFF;text-decoration:none;
+                            padding:12px 18px;border-radius:10px;font-weight:bold;">
+                    Android Quick Install
+                  </a>
+                </p>
+
+                <p style="font-size:12px;color:#5F6B7C;margin-top:20px;">
+                  If the buttons do not open, copy and paste the links below:<br/>
+                  iPhone: $safeIphoneLink<br/>
+                  Android: $safeAndroidLink
+                </p>
+              </body>
+            </html>
+        """.trimIndent()
+    }
+
+    private fun htmlEscape(value: String): String =
+        value
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;")
+
+    private fun buildIphoneInstallLink(payload: String): String =
+        "https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${URLEncoder.encode(payload, "UTF-8")}"
+
+    private fun buildAndroidInstallLink(payload: String): String =
+        payload.replaceFirst("LPA:", "lpa:", ignoreCase = true)
 
     private fun copyToClipboard(label: String, value: String, toastResId: Int) {
         if (value.isBlank()) return
