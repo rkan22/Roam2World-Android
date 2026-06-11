@@ -39,8 +39,39 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class CustomersActivity : AppCompatActivity() {
+
+    private fun formatCustomerDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            OffsetDateTime.parse(raw).format(formatter)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun formatCustomerStatus(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return "Unknown"
+        return raw
+            .replace("_", " ")
+            .replace("-", " ")
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase(Locale.ROOT).replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                }
+            }
+            .ifBlank { "Unknown" }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -253,7 +284,7 @@ class CustomersActivity : AppCompatActivity() {
     private fun renderCustomers(customers: List<CustomerSummary>) {
         list.removeAllViews()
         empty.visibility = if (customers.isEmpty()) View.VISIBLE else View.GONE
-        summary.text = "${customers.size} customers • ${customers.sumOf { it.totalEsims }} eSIM records"
+        summary.text = "${customers.size} customers • ${customers.sumOf { it.totalEsims }} eSIM records • ${customers.sumOf { it.activeEsims }} active"
         customers.forEach { customer -> list.addView(createCustomerCard(customer)) }
     }
 
@@ -279,10 +310,13 @@ class CustomersActivity : AppCompatActivity() {
         body.addView(label(
             listOfNotNull(
                 latest.packageName?.let { "Last package: ${PackageNameCleaner.clean(it)}" },
+                latest.orderNumber?.let { "Order: $it" },
+                latest.status?.let { "Status: ${formatCustomerStatus(it)}" },
                 latest.dataRemaining?.let { "Remaining: $it" },
                 latest.iccid?.let { "ICCID: $it" },
-                latest.expiresAt?.let { "Expires: $it" },
-                latest.provider?.let { "Provider: $it" }
+                latest.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
+                latest.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
+                latest.provider?.let { "Provider: ${formatCustomerStatus(it)}" }
             ).joinToString("\n").ifBlank { "No eSIM details available" },
             false,
             com.google.android.material.R.style.TextAppearance_Material3_BodySmall
@@ -321,12 +355,14 @@ class CustomersActivity : AppCompatActivity() {
             body.addView(label(PackageNameCleaner.clean(record.packageName), true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium))
             body.addView(label(
                 listOfNotNull(
+                    record.orderNumber?.let { "Order: $it" },
                     record.iccid?.let { "ICCID: $it" },
                     record.dataRemaining?.let { "Remaining: $it" },
                     record.dataUsed?.let { "Used: $it" },
-                    record.expiresAt?.let { "Expires: $it" },
-                    record.status?.let { "Status: $it" },
-                    record.provider?.let { "Provider: $it" }
+                    record.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
+                    record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
+                    record.status?.let { "Status: ${formatCustomerStatus(it)}" },
+                    record.provider?.let { "Provider: ${formatCustomerStatus(it)}" }
                 ).joinToString("\n"),
                 false,
                 com.google.android.material.R.style.TextAppearance_Material3_BodySmall
@@ -441,7 +477,7 @@ class CustomersActivity : AppCompatActivity() {
         fun customerKey(): String = firstNotBlankStatic(customerPhone, customerEmail, customerName(), iccid, id) ?: "unknown"
 
         fun searchText(): String = listOfNotNull(
-            customerName(), customerPhone, customerEmail, iccid, packageName, provider, dataRemaining, orderNumber
+            customerName(), customerPhone, customerEmail, iccid, packageName, provider, dataRemaining, dataUsed, orderNumber, orderId, status, createdAt, expiresAt
         ).joinToString(" ")
 
         fun toMobileEsim(): MobileEsim = MobileEsim(
