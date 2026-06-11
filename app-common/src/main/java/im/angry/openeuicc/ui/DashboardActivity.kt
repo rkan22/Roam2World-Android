@@ -504,7 +504,7 @@ class DashboardActivity : AppCompatActivity() {
                 topMargin = dp(12)
             }
         }
-        row2.addView(createQuickActionButton("TGT Recharge") {
+        row2.addView(createQuickActionButton("Orange Recharge") {
             startActivity(Intent(this, TgtSimRechargeActivity::class.java))
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
         row2.addView(createQuickActionButton("Vodafone Recharge") {

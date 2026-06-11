@@ -1,5 +1,7 @@
 package im.angry.openeuicc.ui
 
+import java.time.OffsetDateTime
+import java.time.LocalDate
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -42,6 +44,7 @@ class PurchaseHistoryActivity : AppCompatActivity() {
 
     private var allOrders: List<MobileOrder> = emptyList()
     private var filter: OrderFilter = OrderFilter.ALL
+    private var dateFilter: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -61,6 +64,7 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         search = requireViewById(R.id.purchase_history_search)
 
         setupInsets()
+        dateFilter = intent.getStringExtra("order_date_filter")
         setupFilters()
         refresh.setOnRefreshListener { loadOrders() }
         renderOrders(emptyList())
@@ -153,6 +157,7 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         val q = search.text?.toString()?.trim().orEmpty().lowercase()
         val filtered = allOrders
             .filter { filter.matches(it.status) }
+            .filter { matchesDateFilter(it) }
             .filter { order ->
                 q.isBlank() || listOfNotNull(
                     order.id,
@@ -168,6 +173,27 @@ class PurchaseHistoryActivity : AppCompatActivity() {
                 ).joinToString(" ").lowercase().contains(q)
             }
         renderOrders(filtered)
+    }
+
+
+    private fun matchesDateFilter(order: MobileOrder): Boolean {
+        val filterValue = dateFilter?.uppercase() ?: return true
+        val created = parseOrderDate(order.createdAt) ?: return false
+        val today = LocalDate.now()
+
+        return when (filterValue) {
+            "TODAY" -> created.toLocalDate() == today
+            "MONTH" -> {
+                val d = created.toLocalDate()
+                d.year == today.year && d.month == today.month
+            }
+            else -> true
+        }
+    }
+
+    private fun parseOrderDate(value: String?): OffsetDateTime? {
+        if (value.isNullOrBlank()) return null
+        return runCatching { OffsetDateTime.parse(value) }.getOrNull()
     }
 
     private fun renderOrders(orderData: List<MobileOrder>) {

@@ -44,7 +44,7 @@ private enum class StoreSection(val title: String) {
     ORANGE_BALKANS_ESIM("Orange Balkans eSIM"),
     ORANGE_BALKANS_SIM("Orange Balkans SIM"),
     TURKEY("Türkiye"),
-    TGT("TGT"),
+    Orange("Orange"),
     VODAFONE("Vodafone"),
     ALL("All Packages")
 }
@@ -415,7 +415,7 @@ class PackagesActivity : AppCompatActivity() {
             StoreSection.ORANGE_BALKANS_ESIM -> "🌍"
             StoreSection.ORANGE_BALKANS_SIM -> "💳"
             StoreSection.TURKEY -> "🇹🇷"
-            StoreSection.TGT -> "📶"
+            StoreSection.Orange -> "📶"
             StoreSection.VODAFONE -> "📱"
             StoreSection.ALL -> "🛒"
         }
@@ -992,7 +992,7 @@ class PackagesActivity : AppCompatActivity() {
                 (text.contains("turkey") || text.contains("turkiye") || text.contains("türkiye")) &&
                     !isOrangeWorldPackage()
 
-            StoreSection.TGT ->
+            StoreSection.Orange ->
                 providerText.contains("tgt") || displayProviderText.contains("tgt")
 
             StoreSection.VODAFONE ->

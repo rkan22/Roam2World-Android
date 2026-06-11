@@ -97,8 +97,8 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun permissionsForRole(role: String): String = when (role.lowercase()) {
         "admin" -> "All modules • Dealer management • Reports • Wallet • eSIM Store"
-        "reseller" -> "Dealer management • Wallet • Reports • eSIM Store • TGT Recharge"
-        "dealer" -> "eSIM Store • Wallet • Orders • TGT Recharge"
+        "reseller" -> "Dealer management • Wallet • Reports • eSIM Store • Orange Recharge"
+        "dealer" -> "eSIM Store • Wallet • Orders • Orange Recharge"
         else -> "eSIM Store • Wallet • Reports • OpenEUICC"
     }
 

@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TGT Recharge"
+                android:text="Orange Recharge"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="@color/r2w_text_primary"
                 android:textStyle="bold" />
@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Manage physical SIM recharge and TGT eSIM renewal"
+                android:text="Manage physical SIM recharge and Orange eSIM renewal"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
 
@@ -50,7 +50,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="TGT SIM" />
+                    android:text="Orange SIM" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/tgt_mode_esim_renewal"
@@ -230,7 +230,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="TGT eSIM Renewal"
+                    android:text="Orange eSIM Renewal"
                     android:textAppearance="?attr/textAppearanceTitleLarge"
                     android:textColor="@color/r2w_text_primary"
                     android:textStyle="bold" />
@@ -262,7 +262,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="14dp"
-                    android:text="Find TGT eSIM"
+                    android:text="Find Orange eSIM"
                     app:cornerRadius="16dp" />
 
                 <TextView
@@ -272,7 +272,7 @@
                     android:layout_marginTop="16dp"
                     android:background="@color/r2w_card"
                     android:padding="16dp"
-                    android:text="Enter ICCID to search TGT eSIMs."
+                    android:text="Enter ICCID to search Orange eSIMs."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="@color/r2w_text_secondary" />
 

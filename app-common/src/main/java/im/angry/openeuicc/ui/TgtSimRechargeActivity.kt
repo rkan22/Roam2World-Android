@@ -190,7 +190,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         renderMode(isEsimRenewal = true)
         esimSearchIccid.setText(prefilled)
         esimSearchIccid.setSelection(esimSearchIccid.text?.length ?: 0)
-        esimSearchResult.text = "Searching TGT eSIM for ICCID: $prefilled"
+        esimSearchResult.text = "Searching Orange eSIM for ICCID: $prefilled"
         esimSearchIccid.post { searchTgtEsimForRenewal() }
     }
 
@@ -228,7 +228,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onSuccess { esim ->
                     selectedRenewalEsim = esim
                     if (esim == null) {
-                        esimSearchResult.text = "No TGT eSIM found for ICCID: $query"
+                        esimSearchResult.text = "No Orange eSIM found for ICCID: $query"
                         esimRenewButton.isEnabled = false
                     } else {
                         renderFoundTgtEsim(esim)
@@ -238,14 +238,14 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onFailure { error ->
                     selectedRenewalEsim = null
                     esimRenewButton.isEnabled = false
-                    esimSearchResult.text = error.message ?: "TGT eSIM search failed"
+                    esimSearchResult.text = error.message ?: "Orange eSIM search failed"
                 }
         }
     }
 
     private fun renderFoundTgtEsim(esim: MobileEsim) {
         esimSearchResult.text = listOf(
-            "TGT eSIM found",
+            "Orange eSIM found",
             "ICCID: ${esim.iccid.orEmpty()}",
             "Current plan: ${PackageNameCleaner.clean(esim.packageName)}",
             "Selected renewal: ${selectedRenewalDataGb}GB",
@@ -283,7 +283,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onFailure { error ->
                     Toast.makeText(
                         this@TgtSimRechargeActivity,
-                        error.message ?: "TGT eSIM renewal request failed",
+                        error.message ?: "Orange eSIM renewal request failed",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -317,7 +317,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onFailure { error ->
                     Toast.makeText(
                         this@TgtSimRechargeActivity,
-                        error.message ?: "TGT recharge request failed",
+                        error.message ?: "Orange recharge request failed",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -338,8 +338,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             requestUrl = requestUrl,
             authorizationHeader = session.authorizationHeader,
             body = body,
-            fallbackMessage = "TGT recharge request submitted",
-            fallbackError = "TGT recharge request failed"
+            fallbackMessage = "Orange recharge request submitted",
+            fallbackError = "Orange recharge request failed"
         )
     }
 
@@ -361,8 +361,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             requestUrl = requestUrl,
             authorizationHeader = session.authorizationHeader,
             body = body,
-            fallbackMessage = "TGT eSIM renewal submitted",
-            fallbackError = "TGT eSIM renewal request failed"
+            fallbackMessage = "Orange eSIM renewal submitted",
+            fallbackError = "Orange eSIM renewal request failed"
         )
     }
 
@@ -414,7 +414,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
     private fun setEsimSearching(searching: Boolean) {
         esimSearchButton.isEnabled = !searching
-        esimSearchButton.text = if (searching) "Searching..." else "Find TGT eSIM"
+        esimSearchButton.text = if (searching) "Searching..." else "Find Orange eSIM"
         if (searching) {
             selectedRenewalEsim = null
             esimRenewButton.isEnabled = false
@@ -468,7 +468,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         var valid = true
 
         if (selectedRenewalEsim == null) {
-            esimSearchIccidLayout.error = "Find a TGT eSIM first"
+            esimSearchIccidLayout.error = "Find a Orange eSIM first"
             valid = false
         }
 

@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Get help with eSIM orders, TGT SIM recharge, wallet requests and OpenEUICC installation."
+                android:text="Get help with eSIM orders, Orange SIM recharge, wallet requests and OpenEUICC installation."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_text_secondary" />
 
@@ -96,7 +96,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:text="TGT SIM Recharge"
+                android:text="Orange SIM Recharge"
                 app:cornerRadius="16dp" />
 
             <com.google.android.material.button.MaterialButton
