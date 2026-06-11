@@ -25,6 +25,9 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class MobileNotificationsActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -115,11 +118,14 @@ class MobileNotificationsActivity : AppCompatActivity() {
                 text = notification.message.orEmpty()
                 visibility = if (text.isNullOrBlank()) View.GONE else View.VISIBLE
             }
-            item.requireViewById<TextView>(R.id.mobile_notification_status).text =
-                if (notification.isRead) "Read" else "New"
+            item.requireViewById<TextView>(R.id.mobile_notification_status).apply {
+                text = if (notification.isRead) "Read" else "New"
+                setTextColor(getColor(if (notification.isRead) R.color.r2w_premium_muted else R.color.r2w_premium_success))
+                setBackgroundResource(if (notification.isRead) R.drawable.r2w_chip_neutral else R.drawable.r2w_chip_success)
+            }
             item.requireViewById<TextView>(R.id.mobile_notification_meta).text = listOfNotNull(
                 notification.type?.replace("_", " ")?.uppercase(),
-                notification.createdAt,
+                formatNotificationDate(notification.createdAt),
                 notification.relatedOrderId?.let { "Order #$it" },
                 notification.relatedEsimId?.let { "eSIM #$it" }
             ).joinToString(" • ")
@@ -132,6 +138,15 @@ class MobileNotificationsActivity : AppCompatActivity() {
         }
     }
 
+
+
+    private fun formatNotificationDate(value: String?): String? {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return null
+        return runCatching {
+            OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
+        }.getOrElse { raw }
+    }
 
     private fun openNotification(notification: MobileNotification) {
         lifecycleScope.launch {

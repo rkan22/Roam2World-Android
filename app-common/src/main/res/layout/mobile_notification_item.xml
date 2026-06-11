@@ -3,21 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="@dimen/r2w_card_gap"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="?attr/colorSurfaceVariant"
-    app:cardCornerRadius="12dp"
-    app:strokeColor="?attr/colorOutlineVariant"
+    app:cardBackgroundColor="@color/r2w_premium_surface"
+    app:cardCornerRadius="@dimen/r2w_card_radius"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="14dp">
+        android:padding="@dimen/r2w_card_padding">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,34 +32,41 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="?attr/colorOnSurface" />
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/r2w_premium_text"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/mobile_notification_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:background="@drawable/wallet_request_status_badge"
                 android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
-                android:textAppearance="?attr/textAppearanceLabelSmall" />
+                android:paddingVertical="5dp"
+                android:textAppearance="?attr/textAppearanceLabelMedium"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/mobile_notification_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="@color/r2w_premium_muted" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/r2w_premium_border" />
 
         <TextView
             android:id="@+id/mobile_notification_meta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="@color/r2w_premium_muted" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
