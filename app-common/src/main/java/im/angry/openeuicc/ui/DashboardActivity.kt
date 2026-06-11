@@ -21,6 +21,7 @@ import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileDashboardData
 import im.angry.openeuicc.auth.MobileDashboardOrder
+import im.angry.openeuicc.auth.MobileOrder
 import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
@@ -285,6 +286,23 @@ class DashboardActivity : AppCompatActivity() {
                 visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.order_status).applyRoamStatusChip(order.status, order.status)
+            item.setOnClickListener {
+                startActivity(
+                    MobileOrderDetailActivity.createIntent(
+                        this,
+                        MobileOrder(
+                            id = order.id,
+                            orderNumber = order.orderNumber,
+                            packageName = order.title,
+                            price = order.amount,
+                            status = order.status,
+                            createdAt = order.subtitle,
+                            provider = null,
+                            esimId = null
+                        )
+                    )
+                )
+            }
             orders.addView(item)
         }
     }
