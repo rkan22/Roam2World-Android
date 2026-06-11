@@ -18,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -213,48 +215,42 @@ class DealerDetailActivity : AppCompatActivity() {
         val dealer = currentDealer ?: return
         val id = dealer.id ?: return
 
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 16, 48, 0)
-        }
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_refund_money, null, false)
+        val amountLayout = view.requireViewById<TextInputLayout>(R.id.refund_amount_layout)
+        val amountInput = view.requireViewById<TextInputEditText>(R.id.refund_amount_input)
+        val reasonInput = view.requireViewById<TextInputEditText>(R.id.refund_reason_input)
+        val message = view.requireViewById<TextView>(R.id.refund_dialog_message)
+        val cancel = view.requireViewById<MaterialButton>(R.id.refund_cancel)
+        val submit = view.requireViewById<MaterialButton>(R.id.refund_submit)
 
-        val amountInput = EditText(this).apply {
-            hint = getString(R.string.dealer_refund_amount)
-            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-        }
-
-        val reasonInput = EditText(this).apply {
-            hint = getString(R.string.dealer_refund_reason)
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            setText(getString(R.string.dealer_refund_default_reason))
-        }
-
-        container.addView(amountInput)
-        container.addView(reasonInput)
+        message.text = getString(R.string.dealer_refund_message, dealer.name)
+        reasonInput.setText(getString(R.string.dealer_refund_default_reason))
 
         val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dealer_refund_title)
-            .setMessage(getString(R.string.dealer_refund_message, dealer.name))
-            .setView(container)
-            .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.dealer_refund_submit, null)
+            .setView(view)
             .create()
 
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val amount = amountInput.text?.toString().orEmpty().trim().replace(",", ".")
-                val amountValue = amount.toDoubleOrNull()
-                if (amountValue == null || amountValue <= 0.0) {
-                    amountInput.error = getString(R.string.dealer_allocate_amount_required)
-                    return@setOnClickListener
-                }
+        cancel.setOnClickListener {
+            dialog.dismiss()
+        }
 
-                val reason = reasonInput.text?.toString().orEmpty().trim()
-                    .ifBlank { getString(R.string.dealer_refund_default_reason) }
-
-                dialog.dismiss()
-                refundDealerBalance(id, amount, reason)
+        submit.setOnClickListener {
+            val amount = amountInput.text?.toString().orEmpty().trim().replace(",", ".")
+            val amountValue = amount.toDoubleOrNull()
+            if (amountValue == null || amountValue <= 0.0) {
+                amountLayout.error = getString(R.string.dealer_allocate_amount_required)
+                return@setOnClickListener
             }
+
+            val reason = reasonInput.text?.toString().orEmpty().trim()
+                .ifBlank { getString(R.string.dealer_refund_default_reason) }
+
+            dialog.dismiss()
+            refundDealerBalance(id, amount, reason)
+        }
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         }
 
         dialog.show()
