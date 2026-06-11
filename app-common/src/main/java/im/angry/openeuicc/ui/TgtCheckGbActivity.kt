@@ -153,7 +153,9 @@ class TgtCheckGbActivity : AppCompatActivity() {
         if (usedMb != null) lines += "Used: ${formatGb(usedMb)}"
         if (remainingMb != null) lines += "Remaining: ${formatGb(remainingMb)}"
 
-        usage.optString("status").takeIf { it.isNotBlank() }?.let { lines += "Line Status: $it" }
+        usage.optString("status").takeIf { it.isNotBlank() }?.let { lines += "Status: $it" }
+        usage.optString("start_date").takeIf { it.isNotBlank() }?.let { lines += "Start Date: $it" }
+        usage.optString("end_date").takeIf { it.isNotBlank() }?.let { lines += "End Date: $it" }
         rawData.optString("qtaconsumption").takeIf { it.isNotBlank() }?.let { lines += "Consumption: $it" }
 
         result.text = lines.joinToString("\n")
