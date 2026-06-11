@@ -55,6 +55,13 @@ class CustomersActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun visibleProvider(provider: String?): String =
+        formatCustomerStatus(
+            provider?.replace("TGT", "Orange", ignoreCase = true)
+                ?.replace("tgt", "Orange", ignoreCase = true)
+        )
+
     private fun formatCustomerStatus(value: String?): String {
         val raw = value?.trim().orEmpty()
         if (raw.isBlank()) return "Unknown"
@@ -291,11 +298,11 @@ class CustomersActivity : AppCompatActivity() {
     private fun createCustomerCard(customer: CustomerSummary): View {
         val latest = customer.latestEsim
         val card = MaterialCardView(this).apply {
-            radius = dp(22).toFloat()
-            cardElevation = dp(5).toFloat()
+            radius = dp(18).toFloat()
+            cardElevation = dp(4).toFloat()
             strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_border))
-            setCardBackgroundColor(getColor(R.color.r2w_card))
+            setStrokeColor(getColor(R.color.r2w_premium_border))
+            setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 bottomMargin = dp(14)
             }
@@ -316,7 +323,7 @@ class CustomersActivity : AppCompatActivity() {
                 latest.iccid?.let { "ICCID: $it" },
                 latest.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
                 latest.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
-                latest.provider?.let { "Provider: ${formatCustomerStatus(it)}" }
+                latest.provider?.let { "Provider: ${visibleProvider(it)}" }
             ).joinToString("\n").ifBlank { "No eSIM details available" },
             false,
             com.google.android.material.R.style.TextAppearance_Material3_BodySmall
@@ -344,8 +351,8 @@ class CustomersActivity : AppCompatActivity() {
             val card = MaterialCardView(this).apply {
                 radius = dp(16).toFloat()
                 strokeWidth = dp(1)
-                setStrokeColor(getColor(R.color.r2w_border))
-                setCardBackgroundColor(getColor(R.color.r2w_card))
+                setStrokeColor(getColor(R.color.r2w_premium_border))
+                setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(12) }
             }
             val body = LinearLayout(this).apply {
@@ -362,7 +369,7 @@ class CustomersActivity : AppCompatActivity() {
                     record.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
                     record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
                     record.status?.let { "Status: ${formatCustomerStatus(it)}" },
-                    record.provider?.let { "Provider: ${formatCustomerStatus(it)}" }
+                    record.provider?.let { "Provider: ${visibleProvider(it)}" }
                 ).joinToString("\n"),
                 false,
                 com.google.android.material.R.style.TextAppearance_Material3_BodySmall
@@ -392,7 +399,7 @@ class CustomersActivity : AppCompatActivity() {
         TextView(this).apply {
             text = textValue
             setTextAppearance(appearance)
-            setTextColor(getColor(if (bold) R.color.r2w_text_primary else R.color.r2w_text_secondary))
+            setTextColor(getColor(if (bold) R.color.r2w_premium_text else R.color.r2w_premium_muted))
             if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
         }
 
@@ -401,6 +408,11 @@ class CustomersActivity : AppCompatActivity() {
             text = textValue
             gravity = Gravity.CENTER
             cornerRadius = dp(14)
+            setTextColor(getColor(R.color.r2w_premium_primary))
+            strokeColor = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_border))
+            strokeWidth = dp(1)
+            backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_surface))
+            iconTint = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_primary))
             setOnClickListener { action() }
         }
 
