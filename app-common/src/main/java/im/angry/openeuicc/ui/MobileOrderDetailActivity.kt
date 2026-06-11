@@ -138,6 +138,11 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         return refreshed
     }
 
+
+    private fun visibleProvider(provider: String?): String? =
+        provider?.replace("TGT", "Orange", ignoreCase = true)
+            ?.replace("tgt", "Orange", ignoreCase = true)
+
     private fun renderOrder(order: MobileOrder?) {
         currentOrder = order
         if (order == null) {
@@ -150,9 +155,9 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         setOptionalText(R.id.order_detail_number, order.displayNumber(), R.string.order_detail_number_format)
         setOptionalText(R.id.order_detail_package, PackageNameCleaner.clean(order.packageName), R.string.order_detail_package_format)
         setOptionalText(R.id.order_detail_price, order.price, R.string.order_detail_price_format)
-        requireViewById<TextView>(R.id.order_detail_provider).applyRoamProviderChip(order.provider)
+        requireViewById<TextView>(R.id.order_detail_provider).applyRoamProviderChip(visibleProvider(order.provider))
         requireViewById<TextView>(R.id.order_detail_status).applyRoamStatusChip(order.statusLabel(), order.status)
-        setOptionalText(R.id.order_detail_created, order.createdAt, R.string.order_detail_created_format)
+        setOptionalText(R.id.order_detail_created, order.createdAt?.let { formatOrderDate(it) }, R.string.order_detail_created_format)
         setOptionalText(R.id.order_detail_esim_id, order.esimId, R.string.order_detail_esim_id_format)
         renderTimeline(order)
         renderCustomerInfo(order)

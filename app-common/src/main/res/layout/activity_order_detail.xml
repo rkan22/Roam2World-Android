@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -22,8 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="18dp"
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
+            android:paddingTop="22dp"
             android:paddingBottom="24dp">
 
             <TextView
@@ -31,15 +31,15 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dashboard_brand"
                 android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="?attr/colorPrimary" />
+                android:textColor="@color/r2w_premium_primary" />
 
             <TextView
                 android:id="@+id/order_detail_heading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="?attr/colorOnSurface" />
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/order_detail_progress"
@@ -55,30 +55,31 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorError"
+                android:textColor="@color/r2w_premium_danger"
                 android:visibility="gone" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/order_detail_summary"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -91,7 +92,7 @@
                             android:id="@+id/order_detail_provider"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/wallet_request_status_badge"
+                            android:background="@drawable/r2w_chip_neutral"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
@@ -101,7 +102,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:background="@drawable/wallet_request_status_badge"
+                            android:background="@drawable/r2w_chip_neutral"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
@@ -113,7 +114,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
                         android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/order_detail_price"
@@ -121,7 +122,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/order_detail_number"
@@ -129,7 +130,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_detail_created"
@@ -137,7 +138,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_detail_esim_id"
@@ -145,7 +146,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -155,23 +156,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Order Timeline"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/order_timeline_created"
@@ -179,7 +181,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_timeline_payment"
@@ -187,7 +189,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_timeline_provider"
@@ -195,7 +197,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_timeline_esim"
@@ -203,7 +205,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_timeline_qr"
@@ -211,7 +213,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -222,23 +224,24 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/order_detail_customer_info"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/order_detail_customer_name"
@@ -246,7 +249,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_detail_customer_phone"
@@ -254,7 +257,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_detail_customer_email"
@@ -262,7 +265,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/order_detail_iccid"
@@ -270,7 +273,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -281,23 +284,24 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="?attr/colorSurfaceVariant"
-                app:cardCornerRadius="8dp"
-                app:strokeColor="?attr/colorOutlineVariant"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:cardElevation="4dp"
+                app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="@dimen/r2w_card_padding">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/order_detail_last_renewal"
                         android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="@color/r2w_premium_text" />
 
                     <TextView
                         android:id="@+id/order_detail_renewal_details"
@@ -305,7 +309,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
+                        android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -316,9 +320,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="22dp"
+                android:backgroundTint="@color/r2w_premium_surface"
                 android:text="@string/order_detail_copy_iccid"
+                android:textColor="@color/r2w_premium_primary"
                 android:visibility="gone"
-                app:cornerRadius="28dp"
+                app:cornerRadius="@dimen/r2w_button_radius"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp"
                 app:icon="@drawable/ic_task_sim_card_download" />
 
             <com.google.android.material.button.MaterialButton
@@ -326,8 +334,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="22dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/order_detail_view_esim"
-                app:cornerRadius="28dp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius"
                 app:icon="@drawable/ic_task_sim_card_download" />
 
             <TextView
@@ -337,7 +349,7 @@
                 android:layout_marginTop="14dp"
                 android:text="@string/order_detail_esim_unavailable"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textColor="@color/r2w_premium_muted"
                 android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
