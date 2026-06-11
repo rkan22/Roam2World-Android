@@ -7,10 +7,10 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/r2w_card"
-    app:cardCornerRadius="24dp"
-    app:cardElevation="6dp"
-    app:strokeColor="@color/r2w_border"
+    app:cardBackgroundColor="@color/r2w_premium_surface"
+    app:cardCornerRadius="@dimen/r2w_card_radius"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -29,12 +29,11 @@
                 android:id="@+id/package_visibility"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
-                android:background="@drawable/wallet_request_status_badge"
-                android:backgroundTint="#EAF2FF"
+                android:background="@drawable/r2w_premium_icon_box"
                 android:gravity="center"
                 android:text="🌐"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_primary"
+                android:textColor="@color/r2w_premium_primary"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -51,7 +50,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="@color/r2w_primary"
+                    android:textColor="@color/r2w_premium_primary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -62,7 +61,7 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="@color/r2w_text_secondary" />
+                    android:textColor="@color/r2w_premium_muted" />
 
                 <TextView
                     android:id="@+id/package_badge"
@@ -74,7 +73,7 @@
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="5dp"
                     android:textAppearance="?attr/textAppearanceLabelSmall"
-                    android:textColor="@color/r2w_primary"
+                    android:textColor="@color/r2w_premium_primary"
                     android:textStyle="bold"
                     android:visibility="gone" />
             </LinearLayout>
@@ -88,14 +87,14 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
-            android:textColor="@color/r2w_text_primary"
+            android:textColor="@color/r2w_premium_text"
             android:textStyle="bold" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="16dp"
-            android:background="@color/r2w_border" />
+            android:background="@color/r2w_premium_border" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -112,15 +111,15 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:background="@drawable/dashboard_hero_gradient"
+                android:layout_height="46dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:gravity="center"
-                android:minWidth="128dp"
+                android:minWidth="112dp"
                 android:paddingHorizontal="20dp"
                 android:text="Buy Now"
                 android:textAppearance="?attr/textAppearanceLabelLarge"

@@ -257,7 +257,7 @@ class PackagesActivity : AppCompatActivity() {
             if (query.isBlank() && filtersAreDefault()) {
                 lastEmptyReason ?: LIVE_CATALOG_EMPTY_MESSAGE
             } else {
-                "No packages match your filters."
+                "No packages match your search or filters."
             }
         } else {
             ""

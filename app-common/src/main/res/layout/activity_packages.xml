@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -31,7 +31,7 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="220dp"
+                    android:layout_height="188dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
@@ -40,19 +40,19 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/dashboard_hero_gradient"
+                        android:background="@color/r2w_premium_bg"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
-                        android:paddingHorizontal="24dp"
+                        android:paddingHorizontal="@dimen/r2w_screen_padding"
                         android:paddingTop="24dp"
-                        android:paddingBottom="44dp">
+                        android:paddingBottom="28dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Store"
                             android:textAppearance="?attr/textAppearanceDisplaySmall"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
 
                         <TextView
@@ -61,7 +61,7 @@
                             android:layout_marginTop="8dp"
                             android:text="Find the best eSIM plan for your customer. Search, filter and compare live B2B pricing."
                             android:textAppearance="?attr/textAppearanceBodyLarge"
-                            android:textColor="#EAF2FF" />
+                            android:textColor="@color/r2w_premium_muted" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -73,12 +73,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#26FFFFFF"
+                                android:backgroundTint="#EAF2FF"
                                 android:paddingHorizontal="13dp"
                                 android:paddingVertical="8dp"
                                 android:text="Live API"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="@android:color/white"
+                                android:textColor="@color/r2w_premium_primary"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -86,12 +86,12 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#26FFFFFF"
+                                android:backgroundTint="#EAF2FF"
                                 android:paddingHorizontal="13dp"
                                 android:paddingVertical="8dp"
                                 android:text="Filtered"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="@android:color/white"
+                                android:textColor="@color/r2w_premium_primary"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -99,12 +99,12 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#26FFFFFF"
+                                android:backgroundTint="#EAF2FF"
                                 android:paddingHorizontal="13dp"
                                 android:paddingVertical="8dp"
                                 android:text="B2B Price"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
-                                android:textColor="@android:color/white"
+                                android:textColor="@color/r2w_premium_primary"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -119,11 +119,11 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="-38dp"
-                        app:cardBackgroundColor="@color/r2w_card"
+                        android:layout_marginTop="4dp"
+                        app:cardBackgroundColor="@color/r2w_premium_surface"
                         app:cardCornerRadius="24dp"
                         app:cardElevation="9dp"
-                        app:strokeColor="@color/r2w_border"
+                        app:strokeColor="@color/r2w_premium_border"
                         app:strokeWidth="1dp">
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -131,18 +131,18 @@
                             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Search country, package, provider or ICCID-ready plan"
+                            android:hint="Search country, package or provider"
                             android:paddingHorizontal="14dp"
                             android:paddingTop="8dp"
                             android:paddingBottom="8dp"
-                            app:boxBackgroundColor="@color/r2w_card"
+                            app:boxBackgroundColor="@color/r2w_premium_surface"
                             app:boxCornerRadiusBottomEnd="20dp"
                             app:boxCornerRadiusBottomStart="20dp"
                             app:boxCornerRadiusTopEnd="20dp"
                             app:boxCornerRadiusTopStart="20dp"
                             app:endIconMode="clear_text"
                             app:startIconDrawable="@drawable/ic_packages"
-                            app:strokeColor="@color/r2w_border">
+                            app:strokeColor="@color/r2w_premium_border">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/packages_search"
@@ -160,7 +160,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_danger"
+                        android:textColor="@color/r2w_premium_danger"
                         android:visibility="gone" />
 
                     <LinearLayout
@@ -175,9 +175,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Recommended Plans"
+                            android:text="Featured Packages"
                             android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="@color/r2w_text_primary"
+                            android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
 
                         <TextView
@@ -189,7 +189,7 @@
                             android:paddingVertical="7dp"
                             android:text="Best Match"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="@color/r2w_primary"
+                            android:textColor="@color/r2w_premium_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -205,9 +205,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="28dp"
-                        android:text="All Store Packages"
+                        android:text="All Packages"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
-                        android:textColor="@color/r2w_text_primary"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -215,11 +215,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:background="@color/r2w_card"
+                        android:background="@drawable/r2w_premium_card"
                         android:padding="18dp"
                         android:text="No matching packages found. Try clearing filters or searching another country."
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_text_secondary"
+                        android:textColor="@color/r2w_premium_muted"
                         android:visibility="gone" />
 
                     <LinearLayout
@@ -237,7 +237,7 @@
         android:id="@+id/packages_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_card"
+        android:background="@color/r2w_premium_surface"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
