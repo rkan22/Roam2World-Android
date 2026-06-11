@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -19,14 +19,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Orange Recharge"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -35,7 +35,7 @@
                 android:layout_marginTop="4dp"
                 android:text="Manage physical SIM recharge and Orange eSIM renewal"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/tgt_mode_tabs"
@@ -70,11 +70,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:background="@color/r2w_card"
-                    android:padding="16dp"
+                    android:background="@drawable/r2w_premium_card_soft"
+                    android:padding="@dimen/r2w_card_padding"
                     android:text="Selected package: 10GB / 30 Days"
                     android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textColor="@color/r2w_primary"
+                    android:textColor="@color/r2w_premium_primary"
                     android:textStyle="bold" />
 
                 <TextView
@@ -83,7 +83,7 @@
                     android:layout_marginTop="24dp"
                     android:text="30 Days Packages"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <HorizontalScrollView
@@ -132,7 +132,7 @@
                     android:layout_marginTop="20dp"
                     android:text="60 Days Packages"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <HorizontalScrollView
@@ -164,7 +164,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:hint="@string/r2w_enter_iccid">
+                    android:hint="@string/r2w_enter_iccid"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_iccid"
@@ -179,7 +187,7 @@
                     android:layout_marginTop="24dp"
                     android:text="@string/r2w_customer_information"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -187,7 +195,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Customer name">
+                    android:hint="Customer name"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_customer_name"
@@ -201,7 +217,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Phone number">
+                    android:hint="Phone number"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_customer_phone"
@@ -214,9 +238,13 @@
                     android:id="@+id/tgt_activate"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:background="@drawable/r2w_premium_primary_button"
                     android:layout_marginTop="24dp"
                     android:text="@string/r2w_activate"
-                    app:cornerRadius="16dp" />
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="@dimen/r2w_button_radius" />
             </LinearLayout>
 
             <LinearLayout
@@ -232,7 +260,7 @@
                     android:layout_marginTop="20dp"
                     android:text="Orange eSIM Renewal"
                     android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <TextView
@@ -241,14 +269,22 @@
                     android:layout_marginTop="6dp"
                     android:text="Search by ICCID, select package, then submit renewal."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary" />
+                    android:textColor="@color/r2w_premium_muted" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tgt_esim_search_iccid_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:hint="Search ICCID">
+                    android:hint="Search ICCID"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_search_iccid"
@@ -261,20 +297,24 @@
                     android:id="@+id/tgt_esim_search_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:background="@drawable/r2w_premium_primary_button"
                     android:layout_marginTop="14dp"
                     android:text="Find Orange eSIM"
-                    app:cornerRadius="16dp" />
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="@dimen/r2w_button_radius" />
 
                 <TextView
                     android:id="@+id/tgt_esim_search_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:background="@color/r2w_card"
-                    android:padding="16dp"
+                    android:background="@drawable/r2w_premium_card_soft"
+                    android:padding="@dimen/r2w_card_padding"
                     android:text="Enter ICCID to search Orange eSIMs."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_text_secondary" />
+                    android:textColor="@color/r2w_premium_muted" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -282,7 +322,7 @@
                     android:layout_marginTop="20dp"
                     android:text="Renewal Package"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <HorizontalScrollView
@@ -331,7 +371,7 @@
                     android:layout_marginTop="20dp"
                     android:text="Customer Information"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_text_primary"
+                    android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -339,7 +379,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Customer name">
+                    android:hint="Customer name"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_customer_name"
@@ -353,7 +401,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Phone number">
+                    android:hint="Phone number"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_customer_phone"
@@ -367,7 +423,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="Email optional">
+                    android:hint="Email optional"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:hintTextColor="@color/r2w_premium_muted">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_customer_email"
@@ -380,10 +444,14 @@
                     android:id="@+id/tgt_esim_renew_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:background="@drawable/r2w_premium_primary_button"
                     android:layout_marginTop="16dp"
                     android:enabled="false"
                     android:text="Continue Renewal"
-                    app:cornerRadius="16dp" />
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="@dimen/r2w_button_radius" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

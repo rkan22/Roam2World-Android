@@ -190,7 +190,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         renderMode(isEsimRenewal = true)
         esimSearchIccid.setText(prefilled)
         esimSearchIccid.setSelection(esimSearchIccid.text?.length ?: 0)
-        esimSearchResult.text = "Searching Orange eSIM for ICCID: $prefilled"
+        esimSearchResult.text = "Searching Orange eSIM: $prefilled"
         esimSearchIccid.post { searchTgtEsimForRenewal() }
     }
 
@@ -468,7 +468,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         var valid = true
 
         if (selectedRenewalEsim == null) {
-            esimSearchIccidLayout.error = "Find a Orange eSIM first"
+            esimSearchIccidLayout.error = "Find an Orange eSIM first"
             valid = false
         }
 
