@@ -232,12 +232,15 @@ class ReportsActivity : AppCompatActivity() {
         val providers = orders.groupingBy { it.provider ?: "Unknown" }.eachCount()
         if (providers.isEmpty()) return "No provider usage yet"
         val total = providers.values.sum().coerceAtLeast(1)
+
         return providers.entries
             .sortedByDescending { it.value }
             .take(5)
-            .joinToString("\n") { (provider, count) ->
+            .joinToString("\n\n") { (provider, count) ->
                 val percent = (count * 100) / total
-                "${formatReportStatus(provider)} • $percent% • $count orders"
+                val filled = (percent / 10).coerceIn(1, 10)
+                val bar = "█".repeat(filled) + "░".repeat(10 - filled)
+                "${formatReportStatus(provider)}\n$bar  $percent%  •  $count orders"
             }
     }
 

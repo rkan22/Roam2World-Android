@@ -266,7 +266,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="5dp"
                         android:text="No provider usage yet"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@color/r2w_text_primary" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
