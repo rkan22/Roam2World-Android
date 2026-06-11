@@ -4,7 +4,7 @@
     android:id="@+id/login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
+    android:background="@color/r2w_premium_bg"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,7 +32,7 @@
                 android:contentDescription="@string/login_logo_content_description"
                 android:padding="12dp"
                 android:src="@drawable/ic_roam2world_logo"
-                app:tint="?attr/colorPrimary" />
+                app:tint="@color/r2w_premium_primary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -41,7 +41,7 @@
                 android:gravity="center"
                 android:text="@string/login_title"
                 android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                android:textColor="?attr/colorOnSurface" />
+                android:textColor="@color/r2w_premium_text" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -50,7 +50,7 @@
                 android:gravity="center"
                 android:text="@string/login_subtitle"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/email_layout"
@@ -58,7 +58,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:hint="@string/login_email">
+                android:hint="@string/login_email"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email_input"
@@ -76,7 +83,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="@string/login_password"
-                app:endIconMode="password_toggle">
+                app:endIconMode="password_toggle"
+                app:boxBackgroundColor="@color/r2w_premium_surface"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeColor="@color/r2w_premium_border"
+                app:hintTextColor="@color/r2w_premium_muted">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password_input"
@@ -92,8 +106,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
+                android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/login_action"
-                app:cornerRadius="28dp" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="@dimen/r2w_button_radius" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/login_progress"
@@ -111,7 +129,7 @@
                 android:gravity="center"
                 android:minHeight="24dp"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorError"
+                android:textColor="@color/r2w_premium_danger"
                 android:visibility="invisible" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
