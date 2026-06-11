@@ -93,15 +93,15 @@ class PurchaseReviewActivity : AppCompatActivity() {
         val balance = decimalAmount(intent.getStringExtra(EXTRA_CURRENT_BALANCE))
         val after = balance?.subtract(total)?.setScale(2, RoundingMode.HALF_UP)
 
-        requireViewById<TextView>(R.id.review_customer).text = "Customer     ${customerName()}"
-        requireViewById<TextView>(R.id.review_phone).text = "Phone        ${intent.getStringExtra(EXTRA_CUSTOMER_PHONE).orEmpty()}"
-        requireViewById<TextView>(R.id.review_package).text = "Package      ${intent.getStringExtra(EXTRA_NAME).orEmpty()}"
-        requireViewById<TextView>(R.id.review_provider).text = "Provider     ${displayProvider()}"
-        requireViewById<TextView>(R.id.review_package_price).text = "Package Price     ${money(price)}"
-        requireViewById<TextView>(R.id.review_tax).text = "Tax               ${money(tax)}"
-        requireViewById<TextView>(R.id.review_total).text = "Total        ${money(total)}"
-        requireViewById<TextView>(R.id.review_current_balance).text = "Current Balance        ${intent.getStringExtra(EXTRA_CURRENT_BALANCE) ?: "--"}"
-        requireViewById<TextView>(R.id.review_balance_after).text = "Balance After Purchase ${after?.let { money(it) } ?: "--"}"
+        requireViewById<TextView>(R.id.review_customer).text = "Customer: ${customerName()}"
+        requireViewById<TextView>(R.id.review_phone).text = "Phone: ${intent.getStringExtra(EXTRA_CUSTOMER_PHONE).orEmpty()}"
+        requireViewById<TextView>(R.id.review_package).text = "Package: ${PackageNameCleaner.clean(intent.getStringExtra(EXTRA_NAME))}"
+        requireViewById<TextView>(R.id.review_provider).text = "Provider: ${displayProvider()}"
+        requireViewById<TextView>(R.id.review_package_price).text = "Package Price: ${money(price)}"
+        requireViewById<TextView>(R.id.review_tax).text = "Tax: ${money(tax)}"
+        requireViewById<TextView>(R.id.review_total).text = "Total: ${money(total)}"
+        requireViewById<TextView>(R.id.review_current_balance).text = "Current Balance: ${intent.getStringExtra(EXTRA_CURRENT_BALANCE) ?: "--"}"
+        requireViewById<TextView>(R.id.review_balance_after).text = "Balance After Purchase: ${after?.let { money(it) } ?: "--"}"
         renderSimIccidRequirement()
     }
 
@@ -228,7 +228,14 @@ class PurchaseReviewActivity : AppCompatActivity() {
         intent.getStringExtra(EXTRA_CUSTOMER_LAST_NAME)
     ).filter { it.isNotBlank() }.joinToString(" ").ifBlank { "Customer" }
 
-    private fun displayProvider(): String = intent.getStringExtra(EXTRA_PROVIDER)?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } ?: "Roam2World"
+    private fun displayProvider(): String {
+        val provider = intent.getStringExtra(EXTRA_PROVIDER).orEmpty()
+        return when {
+            provider.contains("tgt", ignoreCase = true) -> "Orange"
+            provider.isNotBlank() -> provider.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            else -> "Roam2World"
+        }
+    }
 
     private fun isDemoPackage(): Boolean = intent.getStringExtra(EXTRA_ID)?.startsWith("demo-") == true
 
