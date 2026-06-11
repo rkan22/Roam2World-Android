@@ -108,5 +108,10 @@
             <activity
             android:name="im.angry.openeuicc.ui.TgtCheckGbActivity"
             android:exported="false" />
-</application>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.AddDealerActivity"
+            android:exported="false" />
+
+    </application>
 </manifest>

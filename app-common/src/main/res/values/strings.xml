@@ -63,6 +63,24 @@
     <string name="dealer_allocate_amount_required">Enter an amount greater than 0.</string>
     <string name="dealer_allocate_failed">Could not allocate dealer balance.</string>
     <string name="dealer_allocate_success">Allocated %1$s %2$s. Dealer balance is now %3$s.</string>
+
+    <string name="dealer_add">Add dealer</string>
+    <string name="dealer_add_title">Add dealer</string>
+    <string name="dealer_add_subtitle">Create a new dealer account under your reseller workspace.</string>
+    <string name="dealer_add_first_name">First name</string>
+    <string name="dealer_add_last_name">Last name</string>
+    <string name="dealer_add_email">Email</string>
+    <string name="dealer_add_phone">Phone</string>
+    <string name="dealer_add_country_code">Country code</string>
+    <string name="dealer_add_password">Temporary password</string>
+    <string name="dealer_add_initial_balance">Initial balance</string>
+    <string name="dealer_add_submit">Create dealer</string>
+    <string name="dealer_add_created">Dealer created successfully.</string>
+    <string name="dealer_add_failed">Could not create dealer.</string>
+    <string name="dealer_add_name_required">Enter first name and last name.</string>
+    <string name="dealer_add_email_required">Enter a valid email.</string>
+    <string name="dealer_add_password_required">Enter a temporary password.</string>
+
     <string name="purchase_history_title">Purchase history</string>
     <string name="purchase_history_empty">No purchases yet.</string>
     <string name="purchase_history_load_failed">Could not load purchase history.</string>

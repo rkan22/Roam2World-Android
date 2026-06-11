@@ -78,6 +78,19 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/my_dealers_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/r2w_premium_primary_button"
+                    android:text="@string/dealer_add"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="@dimen/r2w_button_radius" />
+
                 <TextView
                     android:id="@+id/my_dealers_error"
                     android:layout_width="match_parent"

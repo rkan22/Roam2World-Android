@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -52,6 +53,9 @@ class MyDealersActivity : AppCompatActivity() {
         error = requireViewById(R.id.my_dealers_error)
 
         setupInsets()
+        requireViewById<MaterialButton>(R.id.my_dealers_add).setOnClickListener {
+            startActivity(Intent(this, AddDealerActivity::class.java))
+        }
         refresh.setOnRefreshListener { loadDealers() }
         renderDealers(emptyList())
         loadDealers()

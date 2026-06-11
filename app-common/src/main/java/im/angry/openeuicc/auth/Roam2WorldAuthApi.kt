@@ -130,6 +130,46 @@ class Roam2WorldAuthApi(baseUrl: String) {
         ).optInt("updated", 0)
     }
 
+
+    suspend fun createDealer(
+        session: AuthSession,
+        firstName: String,
+        lastName: String,
+        email: String,
+        phoneNumber: String,
+        countryCode: String,
+        password: String,
+        initialBalance: String
+    ): MobileDealer = withContext(Dispatchers.IO) {
+        val fullName = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
+        val body = JSONObject().apply {
+            put("role", "dealer")
+            put("first_name", firstName)
+            put("last_name", lastName)
+            put("name", fullName)
+            put("email", email)
+            put("password", password)
+            put("password_confirm", password)
+            put("currency", "USD")
+            if (phoneNumber.isNotBlank()) {
+                put("phone_number", phoneNumber)
+                put("phone", phoneNumber)
+            }
+            if (countryCode.isNotBlank()) {
+                put("country_code", countryCode.uppercase())
+            }
+            if (initialBalance.isNotBlank()) {
+                put("initial_balance", initialBalance)
+                put("balance", initialBalance)
+                put("current_balance", initialBalance)
+            }
+        }
+
+        parseMobileDealers(
+            postJson(MOBILE_DEALERS_ENDPOINT, body, session.authorizationHeader)
+        ).dealers.firstOrNull() ?: throw AuthApiException("Created dealer was unavailable")
+    }
+
     suspend fun dealers(session: AuthSession): MobileDealerList = withContext(Dispatchers.IO) {
         parseMobileDealers(getJson(MOBILE_DEALERS_ENDPOINT, session.authorizationHeader))
     }
