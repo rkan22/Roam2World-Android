@@ -481,6 +481,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun addRenewalQuickActions() {
         val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return
+
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setBaselineAligned(false)
@@ -488,11 +489,11 @@ class DashboardActivity : AppCompatActivity() {
                 topMargin = dp(12)
             }
         }
-        row.addView(createQuickActionButton("Store") {
-            openPackagesActivity()
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
         row.addView(createQuickActionButton("My eSIMs") {
             openEsimActivity()
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        row.addView(createQuickActionButton("Notifications") {
+            startActivity(Intent(this, MobileNotificationsActivity::class.java))
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
         quickActions.addView(row)
 
@@ -503,13 +504,28 @@ class DashboardActivity : AppCompatActivity() {
                 topMargin = dp(12)
             }
         }
-        row2.addView(createQuickActionButton("Orders") {
-            openPurchaseHistoryActivity()
+        row2.addView(createQuickActionButton("TGT Recharge") {
+            startActivity(Intent(this, TgtSimRechargeActivity::class.java))
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
-        row2.addView(createQuickActionButton("Wallet") {
-            openWalletActivity()
+        row2.addView(createQuickActionButton("Vodafone Recharge") {
+            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
         quickActions.addView(row2)
+
+        val row3 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBaselineAligned(false)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = dp(12)
+            }
+        }
+        row3.addView(createQuickActionButton("Orange Check GB") {
+            startActivity(Intent(this, TgtCheckGbActivity::class.java))
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        row3.addView(createQuickActionButton("More") {
+            openMoreActivity()
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        quickActions.addView(row3)
     }
 
     private fun createQuickActionButton(label: String, action: () -> Unit): MaterialButton =
