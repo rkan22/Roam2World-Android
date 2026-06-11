@@ -22,4 +22,11 @@
     <color name="roam_on_surface_variant">#526071</color>
     <color name="roam_outline">#697587</color>
     <color name="roam_outline_variant">#DDE5F0</color>
+
+    <color name="r2w_report_card">#FFFFFF</color>
+    <color name="r2w_report_text">#0F172A</color>
+    <color name="r2w_report_muted">#64748B</color>
+    <color name="r2w_report_border">#E2E8F0</color>
+    <color name="r2w_report_success">#16A34A</color>
+    <color name="r2w_report_danger">#EF4444</color>
 </resources>
