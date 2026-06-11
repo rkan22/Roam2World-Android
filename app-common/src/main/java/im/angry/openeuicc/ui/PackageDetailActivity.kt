@@ -102,10 +102,9 @@ class PackageDetailActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
             ?: "0"
         requireViewById<TextView>(R.id.package_detail_visibility).text =
-            getString(
-                R.string.package_detail_visibility_format,
-                intent.getStringExtra(EXTRA_VISIBILITY) ?: ""
-            )
+            intent.getStringExtra(EXTRA_VISIBILITY)?.takeIf { it.isNotBlank() }?.let {
+                getString(R.string.package_detail_visibility_format, it)
+            } ?: "Instant digital delivery"
 
         setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
         setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
