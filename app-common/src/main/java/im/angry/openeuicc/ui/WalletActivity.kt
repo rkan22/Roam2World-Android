@@ -40,9 +40,21 @@ class WalletActivity : AppCompatActivity() {
     private fun formatWalletDate(value: String?): String {
         val raw = value?.trim().orEmpty()
         if (raw.isBlank()) return ""
+
+        val normalized = raw
+            .replace(" ", "T")
+            .replace(Regex("""(\.\d{3})\d+"""), "$1")
+            .let {
+                if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
+                    it
+                } else {
+                    "${it}Z"
+                }
+            }
+
         return try {
             val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-            Instant.parse(raw).atZone(ZoneId.systemDefault()).format(formatter)
+            Instant.parse(normalized).atZone(ZoneId.systemDefault()).format(formatter)
         } catch (_: Exception) {
             raw
         }
@@ -50,7 +62,7 @@ class WalletActivity : AppCompatActivity() {
 
     private fun formatWalletText(value: String?): String {
         val raw = value.orEmpty()
-        val isoPattern = Regex("""\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z""")
+        val isoPattern = Regex("""\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?""")
         return isoPattern.replace(raw) { matchResult -> formatWalletDate(matchResult.value) }
     }
 
