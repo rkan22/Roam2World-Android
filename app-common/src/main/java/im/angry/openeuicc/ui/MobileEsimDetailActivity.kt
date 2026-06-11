@@ -81,6 +81,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     private lateinit var copyActivationButton: MaterialButton
     private lateinit var copySmdpButton: MaterialButton
     private lateinit var showQrButton: MaterialButton
+    private lateinit var shareQrButton: MaterialButton
     private lateinit var renewButton: MaterialButton
     private lateinit var installButton: MaterialButton
     private lateinit var installUnavailable: TextView
@@ -105,6 +106,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         copyActivationButton = requireViewById(R.id.mobile_esim_copy_activation)
         copySmdpButton = requireViewById(R.id.mobile_esim_copy_smdp)
         showQrButton = requireViewById(R.id.mobile_esim_show_qr)
+        shareQrButton = requireViewById(R.id.mobile_esim_share_qr)
         installButton = requireViewById(R.id.mobile_esim_install_button)
         installUnavailable = requireViewById(R.id.mobile_esim_install_unavailable)
         renewButton = createRenewButton()
@@ -354,8 +356,14 @@ class MobileEsimDetailActivity : AppCompatActivity() {
 
         val qrPayload = esim.qrPayload()
         showQrButton.visibility = if (qrPayload.isNullOrBlank()) View.GONE else View.VISIBLE
+        shareQrButton.visibility = showQrButton.visibility
+
         showQrButton.setOnClickListener {
             startActivity(MobileEsimQrActivity.createIntent(this, esim))
+        }
+
+        shareQrButton.setOnClickListener {
+            shareQrPayload(esim)
         }
 
         renewButton.visibility = if (canRenew(esim)) View.VISIBLE else View.GONE
@@ -367,6 +375,31 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         installButton.setOnClickListener {
             launchInstallFlow(esim, installCode)
         }
+    }
+
+    private fun shareQrPayload(esim: MobileEsim) {
+        val payload = esim.qrPayload().orEmpty()
+        if (payload.isBlank()) return
+
+        val title = esim.iccid
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "eSIM $it" }
+            ?: getString(R.string.mobile_esim_qr_title)
+
+        val shareText = buildString {
+            appendLine(title)
+            appendLine()
+            appendLine(getString(R.string.mobile_esim_share_qr_payload_label))
+            appendLine(payload)
+        }
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, title)
+            putExtra(Intent.EXTRA_TEXT, shareText)
+        }
+
+        startActivity(Intent.createChooser(intent, getString(R.string.mobile_esim_share_qr)))
     }
 
     private fun launchInstallFlow(esim: MobileEsim, installCode: String?) {

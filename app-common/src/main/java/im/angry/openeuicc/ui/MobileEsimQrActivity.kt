@@ -70,6 +70,23 @@ class MobileEsimQrActivity : AppCompatActivity() {
                 R.string.mobile_esim_smdp_copied
             )
         }
+
+        requireViewById<MaterialButton>(R.id.mobile_esim_qr_share).setOnClickListener {
+            val shareText = buildString {
+                appendLine(requireViewById<TextView>(R.id.mobile_esim_qr_title).text.toString())
+                appendLine()
+                appendLine(getString(R.string.mobile_esim_share_qr_payload_label))
+                appendLine(payload)
+            }
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.mobile_esim_qr_title))
+                putExtra(Intent.EXTRA_TEXT, shareText)
+            }
+
+            startActivity(Intent.createChooser(intent, getString(R.string.mobile_esim_share_qr)))
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
