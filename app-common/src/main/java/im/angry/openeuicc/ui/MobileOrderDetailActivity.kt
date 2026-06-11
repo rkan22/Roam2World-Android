@@ -27,8 +27,24 @@ import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class MobileOrderDetailActivity : AppCompatActivity() {
+
+    private fun formatOrderDate(value: String): String {
+        if (value.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(value).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            value
+        }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -189,9 +205,9 @@ class MobileOrderDetailActivity : AppCompatActivity() {
             renewal.productName?.let { getString(R.string.order_detail_renewal_package_format, it) },
             renewal.orderStatus?.let { getString(R.string.order_detail_renewal_order_status_format, it) },
             renewal.profileStatus?.let { getString(R.string.order_detail_renewal_profile_status_format, it) },
-            renewal.activatedEndTime?.let { getString(R.string.order_detail_renewal_activated_end_format, it) },
-            renewal.renewExpirationTime?.let { getString(R.string.order_detail_renewal_expiry_format, it) },
-            renewal.latestActivationTime?.let { getString(R.string.order_detail_renewal_latest_activation_format, it) }
+            renewal.activatedEndTime?.let { getString(R.string.order_detail_renewal_activated_end_format, formatOrderDate(it)) },
+            renewal.renewExpirationTime?.let { getString(R.string.order_detail_renewal_expiry_format, formatOrderDate(it)) },
+            renewal.latestActivationTime?.let { getString(R.string.order_detail_renewal_latest_activation_format, formatOrderDate(it)) }
         ).joinToString("\n")
 
         requireViewById<View>(R.id.order_detail_renewal_card).visibility =
