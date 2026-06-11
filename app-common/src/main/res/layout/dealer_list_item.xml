@@ -7,9 +7,10 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="?attr/colorSurfaceVariant"
-    app:cardCornerRadius="8dp"
-    app:strokeColor="?attr/colorOutlineVariant"
+    app:cardBackgroundColor="@color/r2w_premium_surface"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="@dimen/r2w_card_radius"
+    app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,7 +27,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceTitleSmall"
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="@color/r2w_premium_text"
             app:layout_constraintEnd_toStartOf="@id/dealer_item_status"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -51,7 +52,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textColor="@color/r2w_premium_muted"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/dealer_item_name" />
@@ -64,7 +65,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textColor="@color/r2w_premium_muted"
             app:layout_constraintEnd_toStartOf="@id/dealer_item_revenue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/dealer_item_balance" />
@@ -75,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textColor="@color/r2w_premium_muted"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/dealer_item_orders" />
     </androidx.constraintlayout.widget.ConstraintLayout>
