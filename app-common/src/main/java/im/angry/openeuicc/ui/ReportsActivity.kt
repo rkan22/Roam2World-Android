@@ -23,8 +23,41 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class ReportsActivity : AppCompatActivity() {
+
+    private fun formatReportDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(raw).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun formatReportStatus(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return "Unknown"
+        return raw
+            .replace("_", " ")
+            .replace("-", " ")
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase(Locale.ROOT).replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                }
+            }
+            .ifBlank { "Unknown" }
+    }
+
+
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
@@ -113,9 +146,9 @@ class ReportsActivity : AppCompatActivity() {
                 .takeIf { it > 0 } ?: orders.size
 
             revenue.text = currency(totalRevenue)
-            revenueDelta.text = "${orders.size} total orders"
+            revenueDelta.text = "${orders.size} orders loaded"
             sales.text = completedOrders.toString()
-            salesDelta.text = "${orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }} pending"
+            salesDelta.text = "${orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }} pending • ${orders.count { it.statusLabel()?.contains("Failed", ignoreCase = true) == true }} failed"
             profit.text = currency(totalProfit)
             activeEsims.text = dashboard?.activeEsimCount ?: "--"
 
@@ -125,10 +158,10 @@ class ReportsActivity : AppCompatActivity() {
                 "Dealer performance data unavailable"
             } else {
                 dealers.take(5).mapIndexed { index, dealer ->
-                    "${index + 1}. ${dealer.name} • ${dealer.totalOrders} orders • ${dealer.currentBalance} balance"
-                }.joinToString("\n")
+                    "${index + 1}. ${dealer.name}\nOrders: ${dealer.totalOrders} • Balance: ${dealer.currentBalance}"
+                }.joinToString("\n\n")
             }
-            status.text = "Live report data loaded from mobile API"
+            status.text = "Live report data loaded • ${orders.size} orders • ${dealers.size} dealers"
         }
     }
 
@@ -161,11 +194,28 @@ class ReportsActivity : AppCompatActivity() {
     }
 
     private fun buildSalesOverview(orders: List<MobileOrder>, currentBalance: String?): String {
-        val latest = orders.take(5).joinToString("\n") { order ->
-            "${order.displayNumber()} • ${PackageNameCleaner.clean(order.packageName)} • ${order.price ?: "--"}"
+        val completed = orders.count { it.statusLabel()?.contains("Completed", ignoreCase = true) == true }
+        val pending = orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }
+        val failed = orders.count {
+            val status = it.statusLabel().orEmpty()
+            status.contains("Failed", ignoreCase = true) ||
+                status.contains("Cancel", ignoreCase = true) ||
+                status.contains("Refund", ignoreCase = true)
         }
+
+        val latest = orders.take(5).joinToString("\n\n") { order ->
+            listOfNotNull(
+                order.displayNumber(),
+                PackageNameCleaner.clean(order.packageName),
+                order.price?.let { "Amount: $it" },
+                order.statusLabel()?.let { "Status: ${formatReportStatus(it)}" },
+                order.createdAt?.let { "Date: ${formatReportDate(it)}" }
+            ).joinToString("\n")
+        }
+
         return listOfNotNull(
             currentBalance?.let { "Current balance: $it" },
+            "Orders: ${orders.size} total • $completed completed • $pending pending • $failed failed",
             latest.ifBlank { "No order data yet" }
         ).joinToString("\n\n")
     }
@@ -179,7 +229,7 @@ class ReportsActivity : AppCompatActivity() {
             .take(5)
             .joinToString("\n") { (provider, count) ->
                 val percent = (count * 100) / total
-                "$provider • $percent% • $count orders"
+                "${formatReportStatus(provider)} • $percent% • $count orders"
             }
     }
 
