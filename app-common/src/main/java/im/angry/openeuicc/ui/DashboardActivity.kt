@@ -495,6 +495,21 @@ class DashboardActivity : AppCompatActivity() {
             openEsimActivity()
         }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
         quickActions.addView(row)
+
+        val row2 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBaselineAligned(false)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = dp(12)
+            }
+        }
+        row2.addView(createQuickActionButton("Orders") {
+            openPurchaseHistoryActivity()
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        row2.addView(createQuickActionButton("Wallet") {
+            openWalletActivity()
+        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        quickActions.addView(row2)
     }
 
     private fun createQuickActionButton(label: String, action: () -> Unit): MaterialButton =
