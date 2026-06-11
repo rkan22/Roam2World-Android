@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">OpenEUICC</string>
+    <string name="app_name" translatable="false">Roam2World B2B</string>
     <string name="no_euicc_priv">No eSIM found on this device.\nOn some devices, you may need to enable dual SIM first in the menu of this app.</string>
     <string name="channel_type_telephony_manager">TelephonyManager (Privileged)</string>
 
