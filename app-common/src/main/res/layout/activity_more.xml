@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_background">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -20,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="@dimen/r2w_screen_padding">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="More"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_text_primary"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <TextView
@@ -36,14 +36,14 @@
                 android:layout_marginTop="4dp"
                 android:text="Roam2World B2B telecom control center"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_text_secondary" />
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="22dp"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
                 app:cardElevation="5dp"
                 app:strokeWidth="0dp">
 
@@ -58,7 +58,7 @@
                     <TextView
                         android:layout_width="58dp"
                         android:layout_height="58dp"
-                        android:background="@drawable/wallet_request_status_badge"
+                        android:background="@drawable/r2w_premium_icon_box"
                         android:backgroundTint="#33FFFFFF"
                         android:gravity="center"
                         android:text="R2W"
@@ -97,7 +97,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Business Operations"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -122,10 +122,15 @@
                         android:gravity="center"
                         android:text="Customers\nCRM"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_person"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/more_esim_history"
@@ -137,10 +142,15 @@
                         android:gravity="center"
                         android:text="Orders\nHistory"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_checkmark_outline"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -160,10 +170,15 @@
                         android:gravity="center"
                         android:text="OpenEUICC\nInstall"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_task_sim_card_download"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/more_tgt_recharge"
@@ -175,10 +190,15 @@
                         android:gravity="center"
                         android:text="Orange\nRecharge"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_packages"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -198,10 +218,15 @@
                         android:gravity="center"
                         android:text="Vodafone\nRecharge"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_packages"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/more_orders"
@@ -213,10 +238,15 @@
                         android:gravity="center"
                         android:text="Order\nStatus"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_wallet"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -236,10 +266,15 @@
                         android:gravity="center"
                         android:text="Reports\nDashboard"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_bar_chart"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/more_support"
@@ -251,10 +286,15 @@
                         android:gravity="center"
                         android:text="Support\nHelp"
                         android:textAlignment="center"
-                        app:cornerRadius="18dp"
+                        app:cornerRadius="@dimen/r2w_card_radius"
                         app:icon="@drawable/ic_support"
                         app:iconGravity="top"
-                        app:iconPadding="6dp" />
+                        app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -267,10 +307,15 @@
                 android:gravity="center"
                 android:text="Notifications\nInbox"
                 android:textAlignment="center"
-                app:cornerRadius="18dp"
+                app:cornerRadius="@dimen/r2w_card_radius"
                 app:icon="@drawable/ic_support"
                 app:iconGravity="top"
-                app:iconPadding="6dp" />
+                app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/more_tgt_check_gb"
@@ -281,10 +326,15 @@
                 android:gravity="center"
                 android:text="Orange\nCheck GB"
                 android:textAlignment="center"
-                app:cornerRadius="18dp"
+                app:cornerRadius="@dimen/r2w_card_radius"
                 app:icon="@drawable/ic_packages"
                 app:iconGravity="top"
-                app:iconPadding="6dp" />
+                app:iconPadding="6dp" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -292,7 +342,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Account"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_text_primary"
+                android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -311,9 +361,14 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="Profile"
-                    app:cornerRadius="18dp"
+                    app:cornerRadius="@dimen/r2w_card_radius"
                     app:icon="@drawable/ic_person"
-                    app:iconGravity="top" />
+                    app:iconGravity="top" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/more_settings"
@@ -324,9 +379,14 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="Settings"
-                    app:cornerRadius="18dp"
+                    app:cornerRadius="@dimen/r2w_card_radius"
                     app:icon="@drawable/ic_settings"
-                    app:iconGravity="top" />
+                    app:iconGravity="top" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_text"
+                        app:iconTint="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -336,11 +396,14 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="18dp"
                 android:gravity="center_vertical"
+                android:backgroundTint="@color/r2w_premium_surface"
                 android:text="@string/logout"
-                android:textColor="@color/r2w_danger"
-                app:cornerRadius="16dp"
+                android:textColor="@color/r2w_premium_danger"
+                app:strokeColor="@color/r2w_premium_danger"
+                app:strokeWidth="1dp"
+                app:cornerRadius="@dimen/r2w_button_radius"
                 app:icon="@drawable/ic_logout"
-                app:iconTint="@color/r2w_danger" />
+                app:iconTint="@color/r2w_premium_danger" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -348,7 +411,7 @@
         android:id="@+id/more_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_card"
+        android:background="@color/r2w_premium_surface"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
