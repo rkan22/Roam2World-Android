@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="14dp"
+    android:layout_marginBottom="12dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     app:cardBackgroundColor="@color/r2w_premium_surface"
-    app:cardCornerRadius="@dimen/r2w_card_radius"
-    app:cardElevation="4dp"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="3dp"
     app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
@@ -97,29 +97,42 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_view_detail"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
+                android:layout_height="48dp"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:background="@drawable/r2w_esim_secondary_button"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:minWidth="0dp"
                 android:text="View Detail"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:strokeColor="@color/r2w_premium_primary"
-                app:strokeWidth="1dp"
-                android:textColor="@color/r2w_premium_primary" />
+                android:textAllCaps="false"
+                android:textColor="@color/r2w_premium_primary"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@null"
+                app:strokeWidth="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_renew"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
+                android:layout_height="48dp"
                 android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/r2w_premium_primary_button"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:minWidth="0dp"
                 android:text="Renew"
+                android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 app:backgroundTint="@null"
-                app:cornerRadius="@dimen/r2w_button_radius" />
+                app:cornerRadius="16dp"
+                app:icon="@null" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

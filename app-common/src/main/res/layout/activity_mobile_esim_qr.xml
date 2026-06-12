@@ -8,11 +8,11 @@
 
     <ImageButton
         android:id="@+id/mobile_esim_qr_close"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/mobile_esim_qr_close"
-        android:padding="12dp"
+        android:padding="14dp"
         android:src="@drawable/ic_x_black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -47,8 +47,8 @@
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="18dp"
-            android:paddingBottom="28dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="32dp">
 
             <ImageView
                 android:id="@+id/mobile_esim_qr_full_image"
@@ -57,9 +57,9 @@
                 android:adjustViewBounds="true"
                 android:background="@drawable/r2w_premium_card"
                 android:contentDescription="@string/mobile_esim_qr_title"
-                android:elevation="4dp"
+                android:elevation="3dp"
                 android:maxHeight="460dp"
-                android:padding="18dp"
+                android:padding="20dp"
                 android:scaleType="fitCenter" />
 
             <TextView
@@ -84,42 +84,52 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_qr_copy_activation"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="22dp"
+                android:background="@drawable/r2w_esim_secondary_button"
+                android:gravity="center"
                 android:text="@string/mobile_esim_copy_activation"
-                app:cornerRadius="@dimen/r2w_button_radius" 
-                android:backgroundTint="@color/r2w_premium_surface"
+                android:textAllCaps="false"
                 android:textColor="@color/r2w_premium_primary"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp"/>
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@null"
+                app:strokeWidth="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_qr_copy_smdp"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="10dp"
+                android:background="@drawable/r2w_esim_secondary_button"
+                android:gravity="center"
                 android:text="@string/mobile_esim_copy_smdp"
-                app:cornerRadius="@dimen/r2w_button_radius" 
-                android:backgroundTint="@color/r2w_premium_surface"
+                android:textAllCaps="false"
                 android:textColor="@color/r2w_premium_primary"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp"/>
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@null"
+                app:strokeWidth="0dp" />
 
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mobile_esim_qr_share"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="10dp"
+                android:background="@drawable/r2w_esim_secondary_button"
+                android:gravity="center"
                 android:text="@string/mobile_esim_share_qr"
+                android:textAllCaps="false"
                 android:textColor="@color/r2w_premium_primary"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:strokeColor="@color/r2w_premium_primary"
-                app:strokeWidth="1dp"/>
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@null"
+                app:strokeWidth="0dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
