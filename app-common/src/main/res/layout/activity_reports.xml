@@ -20,13 +20,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/r2w_screen_padding">
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
+            android:paddingTop="20dp"
+            android:paddingBottom="30dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Reports"
-                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge"
                 android:textColor="@color/r2w_premium_text"
                 android:textStyle="bold" />
 
@@ -42,7 +44,7 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:overScrollMode="never"
                 android:scrollbars="none">
 
@@ -53,59 +55,68 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_today"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:background="@drawable/r2w_reports_filter_button"
+                                                android:layout_width="wrap_content"
+                        android:layout_height="42dp"
                         android:text="@string/reports_filter_today"
                         android:textColor="@color/r2w_premium_primary"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
                         app:cornerRadius="18dp"
-                        app:strokeColor="@color/r2w_premium_primary"
-                        app:strokeWidth="1dp" />
+                        app:strokeColor="#BFD4FF"
+                        app:strokeWidth="0dp" app:backgroundTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_7_days"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:background="@drawable/r2w_reports_filter_button"
+                                                android:layout_width="wrap_content"
+                        android:layout_height="42dp"
                         android:layout_marginStart="8dp"
                         android:text="@string/reports_filter_7_days"
                         android:textColor="@color/r2w_premium_primary"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
                         app:cornerRadius="18dp"
-                        app:strokeColor="@color/r2w_premium_primary"
-                        app:strokeWidth="1dp" />
+                        app:strokeColor="#BFD4FF"
+                        app:strokeWidth="0dp" app:backgroundTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_30_days"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:background="@drawable/r2w_reports_filter_button"
+                                                android:layout_width="wrap_content"
+                        android:layout_height="42dp"
                         android:layout_marginStart="8dp"
                         android:text="@string/reports_filter_30_days"
                         android:textColor="@color/r2w_premium_primary"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
                         app:cornerRadius="18dp"
-                        app:strokeColor="@color/r2w_premium_primary"
-                        app:strokeWidth="1dp" />
+                        app:strokeColor="#BFD4FF"
+                        app:strokeWidth="0dp" app:backgroundTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_all"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:background="@drawable/r2w_reports_filter_button"
+                                                android:layout_width="wrap_content"
+                        android:layout_height="42dp"
                         android:layout_marginStart="8dp"
                         android:text="@string/reports_filter_all"
                         android:textColor="@color/r2w_premium_primary"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
                         app:cornerRadius="18dp"
-                        app:strokeColor="@color/r2w_premium_primary"
-                        app:strokeWidth="1dp" />
+                        app:strokeColor="#BFD4FF"
+                        app:strokeWidth="0dp" app:backgroundTint="@null" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_export_csv"
                         android:layout_width="wrap_content"
-                        android:layout_height="44dp"
+                        android:layout_height="42dp"
                         android:layout_marginStart="12dp"
                         android:background="@drawable/r2w_premium_primary_button"
                         android:text="@string/reports_export_csv"
                         android:textColor="@android:color/white"
+                        android:textAllCaps="false"
                         android:textStyle="bold"
                         app:backgroundTint="@null"
                         app:cornerRadius="18dp" />
@@ -121,12 +132,12 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="112dp"
+                    android:layout_height="116dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardCornerRadius="22dp"
                     app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:strokeColor="@color/r2w_premium_border"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -163,12 +174,12 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="112dp"
+                    android:layout_height="116dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardCornerRadius="22dp"
                     app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:strokeColor="@color/r2w_premium_border"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -213,12 +224,12 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="104dp"
+                    android:layout_height="108dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardCornerRadius="22dp"
                     app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:strokeColor="@color/r2w_premium_border"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -248,12 +259,12 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="104dp"
+                    android:layout_height="108dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="@dimen/r2w_card_radius"
+                    app:cardCornerRadius="22dp"
                     app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:strokeColor="@color/r2w_premium_border"
+                    app:strokeColor="@color/r2w_premium_border"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -285,11 +296,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="22dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
+                app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -321,11 +332,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="22dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
+                app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -357,11 +368,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="22dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
+                app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -393,11 +404,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="22dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
+                app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -429,11 +440,11 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
+                android:layout_marginTop="14dp"
+                app:cardCornerRadius="22dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
+                app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
