@@ -30,147 +30,137 @@
                 android:paddingHorizontal="@dimen/r2w_screen_padding"
                 android:paddingTop="22dp"
                 android:paddingBottom="28dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_brand"
-                    android:textAppearance="?attr/textAppearanceLabelLarge"
-                    android:textColor="@color/r2w_premium_primary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/wallet_title"
-                    android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                    android:textColor="@color/r2w_premium_text"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="190dp"
-                    android:layout_marginTop="20dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="26dp"
-                    app:cardElevation="8dp"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/r2w_wallet_balance_modern"
-                        android:orientation="vertical"
-                        android:padding="22dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <LinearLayout
-                                android:layout_width="46dp"
-                                android:layout_height="46dp"
-                                android:background="@drawable/r2w_wallet_soft_blue"
-                                android:gravity="center">
-
-                                <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:src="@drawable/ic_wallet"
-                                    app:tint="@color/r2w_premium_primary" />
-                            </LinearLayout>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
-                                android:layout_weight="1"
-                                android:text="@string/wallet_current_balance"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
-                                android:textColor="@android:color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/wallet_balance"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="22dp"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            android:textAppearance="?attr/textAppearanceDisplaySmall"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Available for package purchases and dealer allocations"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="#DCEBFF" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/wallet_request_balance"
+                    <TextView
                         android:layout_width="0dp"
-                        android:layout_height="54dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@drawable/r2w_premium_primary_button"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:insetBottom="0dp"
-                        android:insetLeft="0dp"
-                        android:insetRight="0dp"
-                        android:insetTop="0dp"
-                        android:maxLines="1"
-                        android:minHeight="0dp"
-                        android:minWidth="0dp"
-                        android:text="@string/wallet_request_balance"
-                        android:textAllCaps="false"
-                        android:textColor="@android:color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="@null"
-                        app:cornerRadius="16dp"
-                        app:icon="@null" />
+                        android:text="@string/wallet_title"
+                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/wallet_request_history"
-                        android:layout_width="0dp"
-                        android:layout_height="54dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/r2w_wallet_secondary_button"
-                        android:ellipsize="end"
-                        android:gravity="center"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/r2w_wallet_header_history_bg"
+                        android:contentDescription="@string/wallet_request_history"
                         android:insetBottom="0dp"
                         android:insetLeft="0dp"
                         android:insetRight="0dp"
                         android:insetTop="0dp"
-                        android:maxLines="1"
-                        android:minHeight="0dp"
                         android:minWidth="0dp"
-                        android:text="@string/wallet_request_history"
-                        android:textAllCaps="false"
-                        android:textColor="@color/r2w_premium_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
+                        android:minHeight="0dp"
+                        android:text=""
                         app:backgroundTint="@null"
-                        app:cornerRadius="16dp"
-                        app:icon="@null"
-                        app:strokeWidth="0dp" />
+                        app:cornerRadius="26dp"
+                        app:icon="@drawable/ic_wallet_history_clock"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="26dp"
+                        app:iconTint="@color/r2w_text_primary" />
                 </LinearLayout>
+
+
+                
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="210dp"
+                    android:layout_marginTop="18dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="8dp"
+                    app:strokeWidth="0dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/r2w_wallet_balance_modern"
+                        android:clipToPadding="false"
+                        android:padding="22dp">
+
+                        <ImageView
+                            android:layout_width="170dp"
+                            android:layout_height="170dp"
+                            android:layout_gravity="end|center_vertical"
+                            android:alpha="0.75"
+                            android:contentDescription="@null"
+                            android:src="@drawable/r2w_wallet_big_mark" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="28dp"
+                                    android:layout_height="28dp"
+                                    android:contentDescription="@null"
+                                    android:src="@drawable/ic_wallet"
+                                    app:tint="@android:color/white" />
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="14dp"
+                                    android:layout_weight="1"
+                                    android:text="@string/wallet_current_balance"
+                                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                                    android:textColor="@android:color/white"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/wallet_balance"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="22dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                                android:textColor="@android:color/white"
+                                android:textStyle="bold" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/wallet_request_balance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="48dp"
+                                android:layout_marginTop="18dp"
+                                android:background="@drawable/r2w_wallet_secondary_button"
+                                android:insetBottom="0dp"
+                                android:insetLeft="0dp"
+                                android:insetRight="0dp"
+                                android:insetTop="0dp"
+                                android:minHeight="0dp"
+                                android:minWidth="0dp"
+                                android:paddingHorizontal="18dp"
+                                android:text="@string/wallet_request_balance"
+                                android:textAllCaps="false"
+                                android:textColor="@color/r2w_premium_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                app:backgroundTint="@null"
+                                app:cornerRadius="14dp"
+                                app:icon="@drawable/request_balance"
+                                app:iconGravity="textStart"
+                                app:iconPadding="8dp"
+                                app:iconSize="22dp"
+                                app:iconTint="@color/r2w_premium_primary" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/wallet_low_balance_card"
@@ -209,6 +199,7 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/wallet_quick_stats_card"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -252,17 +243,9 @@
                     android:textColor="@color/r2w_premium_danger"
                     android:visibility="gone" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
-                    android:text="@string/wallet_recent_requests"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_premium_text"
-                    android:textStyle="bold" />
-
                 <LinearLayout
                     android:id="@+id/wallet_requests"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
@@ -272,7 +255,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="28dp"
-                    android:text="@string/wallet_recent_transactions"
+                    android:text="Transaction List"
                     android:textAppearance="?attr/textAppearanceTitleMedium"
                     android:textColor="@color/r2w_premium_text"
                     android:textStyle="bold" />

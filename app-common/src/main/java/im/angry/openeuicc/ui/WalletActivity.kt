@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -326,7 +328,7 @@ class WalletActivity : AppCompatActivity() {
             TextView(this).apply {
                 text = getString(R.string.wallet_empty_transactions)
                 setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(getColor(R.color.r2w_premium_muted))
+                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
                 transactions.addView(this)
             }
             return
@@ -335,12 +337,82 @@ class WalletActivity : AppCompatActivity() {
         val inflater = LayoutInflater.from(this)
         transactionData.forEach { transaction ->
             val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
-            item.requireViewById<TextView>(R.id.transaction_title).text = formatWalletText(transaction.title)
-            item.requireViewById<TextView>(R.id.transaction_subtitle).text = formatWalletText(transaction.subtitle)
-            item.requireViewById<TextView>(R.id.transaction_amount).text = transaction.amount
-            item.requireViewById<TextView>(R.id.transaction_status).apply {
-                applyRoamStatusChip(transaction.status, transaction.status)
+
+            val amountRaw = transaction.amount.trim()
+            val titleRaw = transaction.title.trim()
+            val statusRaw = transaction.status.orEmpty().trim()
+            val combined = "$amountRaw $titleRaw $statusRaw".lowercase(Locale.ENGLISH)
+
+            val isDebit =
+                amountRaw.startsWith("-") ||
+                    combined.contains("debit") ||
+                    combined.contains("purchase") ||
+                    combined.contains("charge") ||
+                    combined.contains("deduct") ||
+                    combined.contains("vendor")
+
+            val statusKey = statusRaw.lowercase(Locale.ENGLISH)
+            val isFailed = statusKey.contains("fail") || statusKey.contains("cancel") || statusKey.contains("reject")
+            val isPending = statusKey.contains("pending") || statusKey.contains("review") || statusKey.contains("processing")
+
+            val typeLabel = if (isDebit) "Debit" else "Credit"
+            val amountDisplay = when {
+                amountRaw.isBlank() -> ""
+                amountRaw.startsWith("+") || amountRaw.startsWith("-") -> amountRaw
+                isDebit -> "- $amountRaw"
+                else -> "+ $amountRaw"
             }
+
+            item.requireViewById<FrameLayout>(R.id.transaction_icon_bg).setBackgroundResource(
+                if (isDebit) R.drawable.wallet_debit_icon_bg else R.drawable.wallet_credit_icon_bg
+            )
+
+            item.requireViewById<ImageView>(R.id.transaction_icon).setImageResource(
+                if (isDebit) R.drawable.ic_wallet_arrow_up else R.drawable.ic_wallet_arrow_down
+            )
+
+            item.requireViewById<TextView>(R.id.transaction_title).text = typeLabel
+            item.requireViewById<TextView>(R.id.transaction_subtitle).text = formatWalletText(transaction.subtitle)
+
+            item.requireViewById<TextView>(R.id.transaction_description).apply {
+                text = formatWalletText(transaction.title).ifBlank { typeLabel }
+                visibility = if (text.isNullOrBlank()) View.GONE else View.VISIBLE
+            }
+
+            item.requireViewById<TextView>(R.id.transaction_amount).apply {
+                text = amountDisplay
+                setTextColor(
+                    android.graphics.Color.parseColor(
+                        if (isDebit) "#D73535" else "#0F9F5A"
+                    )
+                )
+            }
+
+            item.requireViewById<TextView>(R.id.transaction_status).apply {
+                val cleanStatus = statusRaw
+                    .replace("_", " ")
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                    .ifBlank { if (isFailed) "Failed" else "Completed" }
+
+                text = cleanStatus
+                setTextColor(
+                    android.graphics.Color.parseColor(
+                        when {
+                            isFailed -> "#D73535"
+                            isPending -> "#F97316"
+                            else -> "#0F9F5A"
+                        }
+                    )
+                )
+                setBackgroundResource(
+                    when {
+                        isFailed -> R.drawable.wallet_status_failed_bg
+                        isPending -> R.drawable.wallet_status_pending_bg
+                        else -> R.drawable.wallet_status_completed_bg
+                    }
+                )
+            }
+
             transactions.addView(item)
         }
     }
