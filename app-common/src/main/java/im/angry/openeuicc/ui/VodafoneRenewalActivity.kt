@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
@@ -47,6 +46,7 @@ class VodafoneRenewalActivity : AppCompatActivity() {
     private lateinit var searchButton: MaterialButton
     private lateinit var renewButton: MaterialButton
     private lateinit var searchResult: TextView
+    private lateinit var selectedPackage: TextView
 
     private var selectedDataGb = "200"
     private var selectedEsim: MobileEsim? = null
@@ -71,9 +71,11 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         searchButton = requireViewById(R.id.vodafone_search_button)
         renewButton = requireViewById(R.id.vodafone_renew_button)
         searchResult = requireViewById(R.id.vodafone_search_result)
+        selectedPackage = requireViewById(R.id.vodafone_selected_package)
 
         setupInsets()
         setupPackageSelection()
+        renderSelectedPackage()
         setupActions()
         applyPrefilledIccid()
     }
@@ -99,21 +101,46 @@ class VodafoneRenewalActivity : AppCompatActivity() {
             R.id.vodafone_package_200gb to "200",
             R.id.vodafone_package_400gb to "400",
             R.id.vodafone_package_500gb to "500"
-        ).forEach { (chipId, dataGb) ->
-            requireViewById<Chip>(chipId).setOnClickListener {
+        ).forEach { (viewId, dataGb) ->
+            requireViewById<View>(viewId).setOnClickListener {
                 selectedDataGb = dataGb
-                selectedEsim?.let { renderFoundEsim(it) }
+                renderSelectedPackage()
             }
         }
     }
 
+
+
+
+private fun renderSelectedPackage() {
+        selectedPackage.text = "Vodafone eSIM Renewal\n${selectedDataGb}GB"
+
+        listOf(
+            R.id.vodafone_package_200gb to "200",
+            R.id.vodafone_package_400gb to "400",
+            R.id.vodafone_package_500gb to "500"
+        ).forEach { (viewId, dataGb) ->
+            val selected = dataGb == selectedDataGb
+            val view = requireViewById<TextView>(viewId)
+            view.setBackgroundResource(if (selected) R.drawable.r2w_vodafone_card_selected else R.drawable.r2w_vodafone_card_unselected)
+            view.setTextColor(getColor(if (selected) android.R.color.holo_red_dark else R.color.r2w_premium_text))
+            view.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
+        }
+    }
+
+
     private fun setupActions() {
-        searchButton.setOnClickListener { searchVodafoneEsim() }
+        searchButton.visibility = View.GONE
+        searchResult.visibility = View.GONE
+        renewButton.isEnabled = true
+
         renewButton.setOnClickListener {
             if (!validateForm()) return@setOnClickListener
             submitRenewal()
         }
     }
+
+
 
     private fun applyPrefilledIccid() {
         val prefilled = intent.getStringExtra(EXTRA_RENEW_ICCID)
@@ -122,9 +149,9 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         if (prefilled.isBlank()) return
         searchIccid.setText(prefilled)
         searchIccid.setSelection(searchIccid.text?.length ?: 0)
-        searchResult.text = "Searching Vodafone eSIM: $prefilled"
-        searchIccid.post { searchVodafoneEsim() }
     }
+
+
 
     private fun searchVodafoneEsim() {
         clearErrors()
@@ -189,11 +216,26 @@ class VodafoneRenewalActivity : AppCompatActivity() {
     }
 
     private fun submitRenewal() {
-        val esim = selectedEsim ?: return
+        val query = searchIccid.text?.toString()?.trim().orEmpty()
+
         lifecycleScope.launch {
             val session = activeSessionOrReturnToLogin() ?: return@launch
             setRenewing(true)
             val result = runCatching {
+                val esim = withContext(Dispatchers.IO) {
+                    authApi.esims(session).esims.firstOrNull { esim ->
+                        isVodafoneEsim(esim) &&
+                            (
+                                esim.iccid?.equals(query, ignoreCase = true) == true ||
+                                    esim.iccid?.contains(query, ignoreCase = true) == true
+                            )
+                    }
+                } ?: throw IllegalStateException("No Vodafone eSIM found for ICCID: $query")
+
+                if (isExpired(esim)) {
+                    throw IllegalStateException("Expired Vodafone eSIMs cannot be renewed")
+                }
+
                 withContext(Dispatchers.IO) { postVodafoneRenewal(session, esim) }
             }
             setRenewing(false)
@@ -201,9 +243,8 @@ class VodafoneRenewalActivity : AppCompatActivity() {
             result
                 .onSuccess { message ->
                     Toast.makeText(this@VodafoneRenewalActivity, message, Toast.LENGTH_LONG).show()
+                    searchResult.visibility = View.VISIBLE
                     searchResult.text = message
-                    selectedEsim = null
-                    renewButton.isEnabled = false
                 }
                 .onFailure { error ->
                     Toast.makeText(
@@ -211,9 +252,13 @@ class VodafoneRenewalActivity : AppCompatActivity() {
                         error.message ?: "Vodafone renewal request failed",
                         Toast.LENGTH_LONG
                     ).show()
+                    searchResult.visibility = View.VISIBLE
+                    searchResult.text = error.message ?: "Vodafone renewal request failed"
                 }
         }
     }
+
+
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
         val savedSession = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return redirectToLogin()
@@ -255,6 +300,8 @@ class VodafoneRenewalActivity : AppCompatActivity() {
             fallbackError = "Vodafone renewal request failed"
         )
     }
+
+
 
     private fun postJsonRequest(
         requestUrl: String,
@@ -301,8 +348,8 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         clearErrors()
         var valid = true
 
-        if (selectedEsim == null) {
-            searchIccidLayout.error = "Find a Vodafone eSIM first"
+        if ((searchIccid.text?.toString()?.trim()?.length ?: 0) < 6) {
+            searchIccidLayout.error = "Enter Vodafone eSIM ICCID"
             valid = false
         }
         if (customerName.text?.toString()?.trim().isNullOrBlank()) {
@@ -321,6 +368,8 @@ class VodafoneRenewalActivity : AppCompatActivity() {
         return valid
     }
 
+
+
     private fun clearErrors() {
         searchIccidLayout.error = null
         customerNameLayout.error = null
@@ -338,9 +387,11 @@ class VodafoneRenewalActivity : AppCompatActivity() {
     }
 
     private fun setRenewing(renewing: Boolean) {
-        renewButton.isEnabled = !renewing && selectedEsim != null
+        renewButton.isEnabled = !renewing
         renewButton.text = if (renewing) "Submitting..." else "Continue Renewal"
     }
+
+
 
     private fun isVodafoneEsim(esim: MobileEsim): Boolean {
         val provider = esim.provider.orEmpty().lowercase()

@@ -23,267 +23,318 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="18dp"
-            android:paddingBottom="30dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="28dp">
 
-            <com.google.android.material.card.MaterialCardView
+            <ImageView
+                android:layout_width="76dp"
+                android:layout_height="76dp"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/package_detail_provider_logo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/orange_logo" />
+
+            <TextView
+                android:id="@+id/package_detail_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="8dp"
-                app:strokeWidth="0dp">
+                android:layout_marginTop="22dp"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/package_detail_visibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/r2w_premium_muted" />
+
+            <TextView
+                android:id="@+id/package_detail_country"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/r2w_package_card_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="22dp">
+
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/r2w_package_icon_circle"
+                    android:gravity="center" android:padding="18dp"
+                        android:src="@drawable/ic_package_data"
+                        android:scaleType="centerInside"
+                        />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/r2w_wallet_gradient"
-                    android:orientation="vertical"
-                    android:padding="24dp">
+                    android:layout_marginStart="22dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/package_detail_country"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/r2w_premium_card_soft"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="7dp"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/package_detail_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:lineSpacingExtra="2dp"
-                        android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                        android:textColor="@android:color/white"
+                        android:text="@string/package_detail_data_label"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <TextView
+                        android:id="@+id/package_detail_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="?attr/textAppearanceDisplaySmall"
+                        android:textColor="@color/r2w_premium_text"
                         android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/r2w_package_card_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="22dp">
+
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/r2w_package_icon_circle"
+                    android:gravity="center" android:padding="18dp"
+                        android:src="@drawable/ic_package_calendar"
+                        android:scaleType="centerInside"
+                        />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="22dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/package_detail_validity_label"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <TextView
+                        android:id="@+id/package_detail_validity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textAppearance="?attr/textAppearanceDisplaySmall"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/r2w_package_card_bg"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="22dp">
+
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/r2w_package_icon_circle"
+                    android:gravity="center" android:padding="18dp"
+                        android:src="@drawable/ic_package_price"
+                        android:scaleType="centerInside"
+                        />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="22dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/package_detail_price_label"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_muted" />
 
                     <TextView
                         android:id="@+id/package_detail_price"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="6dp"
                         android:textAppearance="?attr/textAppearanceDisplaySmall"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/r2w_premium_primary"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/package_detail_visibility"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@android:color/white" />
-
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="12dp"
+                android:background="@drawable/r2w_package_card_bg"
+                android:orientation="vertical"
+                android:padding="22dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/package_detail_coverage_flag"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        android:background="@drawable/r2w_package_icon_circle"
+                        android:gravity="center" android:padding="18dp"
+                        android:src="@drawable/ic_package_globe"
+                        android:scaleType="centerInside"
+                        />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/package_detail_coverage_label"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="@color/r2w_premium_muted" />
+
+                        <TextView
+                            android:id="@+id/package_detail_coverage"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                            android:textColor="@color/r2w_premium_text"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/package_detail_network"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:gravity="center"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/package_detail_data_label"
-                            android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/package_detail_data"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_premium_text"
-                            android:textStyle="bold" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_us" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_gb" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_fr" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_de" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_es" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_it" />
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <Space
-                    android:layout_width="12dp"
-                    android:layout_height="1dp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_nl" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_ch" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_se" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_pt" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_be" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_at" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_dk" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_no" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_pl" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_fi" />
+                        <ImageView android:layout_width="42dp" android:layout_height="30dp" android:layout_margin="5dp" android:background="@drawable/r2w_flag_tile_bg" android:padding="1dp" android:scaleType="centerCrop" android:src="@drawable/flag_tr" />
 
                         <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/package_detail_validity_label"
+                            android:layout_width="42dp"
+                            android:layout_height="30dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/r2w_flag_tile_bg"
+                            android:gravity="center"
+                            android:text="+130"
                             android:textAppearance="?attr/textAppearanceLabelMedium"
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/package_detail_validity"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@color/r2w_premium_text"
+                            android:textColor="@color/r2w_premium_primary"
                             android:textStyle="bold" />
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
             </LinearLayout>
 
             <TextView
+                android:id="@+id/package_detail_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/package_detail_overview"
-                android:textAppearance="?attr/textAppearanceTitleLarge"
-                android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+                android:layout_marginTop="18dp"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/r2w_premium_muted" />
 
-            <com.google.android.material.card.MaterialCardView
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="4dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:id="@+id/package_detail_network"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/package_detail_coverage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:lineSpacingExtra="4dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@color/r2w_premium_border" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/package_detail_included_title"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:lineSpacingExtra="5dp"
-                        android:text="@string/package_detail_included_body"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/package_detail_description_title"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/package_detail_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:lineSpacingExtra="4dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:layout_height="44dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/r2w_package_soft_strip"
+                android:gravity="center"
+                android:text="@string/package_detail_safe_checkout"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/package_purchase_button"
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="18dp"
                 android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/package_purchase_action"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 app:backgroundTint="@null"
                 app:cornerRadius="@dimen/r2w_button_radius" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="@string/package_detail_safe_checkout"
-                android:textAppearance="?attr/textAppearanceBodySmall"
-                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/package_purchase_progress"

@@ -109,29 +109,52 @@ class PackageDetailActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.package_detail_country).text = displayPackageName
         requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
             ?: "0"
+        setCoverageFlag(countryCode, country, coverage)
         requireViewById<TextView>(R.id.package_detail_visibility).text =
-            intent.getStringExtra(EXTRA_VISIBILITY)?.takeIf { it.isNotBlank() }?.let {
-                getString(R.string.package_detail_visibility_format, it)
-            } ?: "Instant digital delivery"
+            "Stay connected with fast and reliable data."
 
         setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
         setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
-        setOptionalText(
-            R.id.package_detail_network,
-            cleanProviderName?.takeIf { !it.equals("Reseller", ignoreCase = true) && !it.equals("Dealer", ignoreCase = true) },
-            R.string.package_detail_network_format
-        )
-        setOptionalText(
-            R.id.package_detail_coverage,
-            flaggedCoverageDisplay(coverage)?.takeIf {
-                !it.equals("Multi Country", ignoreCase = true) &&
-                    !it.equals("Multi-country", ignoreCase = true) &&
-                    !it.equals("Global", ignoreCase = true) &&
-                    !it.equals("World", ignoreCase = true)
-            },
-            R.string.package_detail_coverage_format
-        )
-        setOptionalText(R.id.package_detail_description, intent.getStringExtra(EXTRA_DESCRIPTION), R.string.package_detail_description_format)
+        requireViewById<TextView>(R.id.package_detail_network).visibility = View.GONE
+        requireViewById<TextView>(R.id.package_detail_coverage).text = "150+ Countries"
+        requireViewById<TextView>(R.id.package_detail_description).text =
+            "Stay connected across ${displayPackageName.removePrefix("Orange ").substringBeforeLast(" ")} with fast and reliable data."
+    }
+
+    private fun setCoverageFlag(countryCode: String?, country: String?, coverage: String?) {
+        val imageView = requireViewById<android.widget.ImageView>(R.id.package_detail_coverage_flag)
+
+        val code = countryCode
+            ?.trim()
+            ?.lowercase()
+            ?.takeIf { it.length == 2 && it.all { char -> char in 'a'..'z' } }
+
+        val flagResId = code?.let {
+            resources.getIdentifier("flag_$it", "drawable", packageName)
+        } ?: 0
+
+        if (flagResId != 0) {
+            imageView.setImageResource(flagResId)
+            return
+        }
+
+        val text = listOfNotNull(country, coverage)
+            .joinToString(" ")
+            .lowercase()
+
+        val fallbackRes = when {
+            text.contains("turkey") || text.contains("türkiye") ->
+                resources.getIdentifier("flag_tr", "drawable", packageName)
+            text.contains("europe") || text.contains("europa") ->
+                resources.getIdentifier("flag_eu", "drawable", packageName)
+            else -> 0
+        }
+
+        if (fallbackRes != 0) {
+            imageView.setImageResource(fallbackRes)
+        } else {
+            imageView.setImageResource(R.drawable.ic_package_globe)
+        }
     }
 
     private fun marketingDetailPackageName(
@@ -364,9 +387,9 @@ class PackageDetailActivity : AppCompatActivity() {
     private fun flaggedCountryDisplay(country: String?, countryCode: String?, coverage: String?): String {
         val cleanCountry = country?.takeIf { it.isNotBlank() } ?: "Global"
         if (cleanCountry.equals("Multi-country", ignoreCase = true)) {
-            return flaggedCoverageDisplay(coverage)?.let { "🌍 Multi-country\n$it" } ?: "🌍 Multi-country"
+            return flaggedCoverageDisplay(coverage)?.let { "Multi-country\n$it" } ?: "Multi-country"
         }
-        val flag = countryCode?.let { codeToFlag(it) } ?: countryNameToFlag(cleanCountry) ?: "🌍"
+        val flag = countryCode?.let { codeToFlag(it) } ?: countryNameToFlag(cleanCountry) ?: ""
         val code = countryCode?.takeIf { it.isNotBlank() }?.uppercase()?.let { " - $it" }.orEmpty()
         return "$flag $cleanCountry$code"
     }
@@ -380,7 +403,7 @@ class PackageDetailActivity : AppCompatActivity() {
             .orEmpty()
         if (items.isEmpty()) return null
         return items.joinToString(", ") { name ->
-            val flag = countryNameToFlag(name) ?: codeToFlagOrNull(name) ?: "🌍"
+            val flag = countryNameToFlag(name) ?: codeToFlagOrNull(name) ?: ""
             "$flag $name"
         }
     }
@@ -392,7 +415,7 @@ class PackageDetailActivity : AppCompatActivity() {
 
     private fun codeToFlag(code: String): String {
         val normalized = code.trim().uppercase()
-        if (normalized.length != 2 || normalized.any { it !in 'A'..'Z' }) return "🌍"
+        if (normalized.length != 2 || normalized.any { it !in 'A'..'Z' }) return ""
         val first = Character.codePointAt(normalized, 0) - 'A'.code + 0x1F1E6
         val second = Character.codePointAt(normalized, 1) - 'A'.code + 0x1F1E6
         return String(Character.toChars(first)) + String(Character.toChars(second))

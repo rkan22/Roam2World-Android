@@ -11,6 +11,7 @@
         android:id="@+id/vodafone_renewal_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,189 +25,237 @@
             android:paddingTop="20dp"
             android:paddingBottom="30dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Vodafone eSIM Renewal"
-                android:textAppearance="?attr/textAppearanceHeadlineLarge"
-                android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold"
-                android:textAllCaps="false" />
+            <ImageView
+                android:layout_width="76dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="10dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="Vodafone"
+                android:scaleType="fitCenter"
+                android:src="@drawable/vodafone_logo" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Search by ICCID. Renewal is available only before the eSIM expires."
+                android:text="Vodafone Recharge"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge"
+                android:textColor="@color/r2w_premium_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Renew Vodafone eSIM packages with ICCID"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_premium_muted" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/vodafone_search_iccid_layout"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:hint="Search ICCID"
+                android:layout_marginTop="26dp"
+                android:text="1. Vodafone eSIM ICCID"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="@color/r2w_premium_text"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/vodafone_search_iccid_layout"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Vodafone eSIM ICCID"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
                 app:boxCornerRadiusTopEnd="18dp"
                 app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
-                app:hintTextColor="@color/r2w_premium_muted">
+                app:hintTextColor="@color/r2w_premium_muted"
+                app:startIconDrawable="@drawable/ic_task_sim_card_download">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/vodafone_search_iccid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/vodafone_search_button"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:background="@drawable/r2w_premium_primary_button"
-                android:layout_marginTop="14dp"
-                android:text="Find Vodafone eSIM"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textAllCaps="false"
-                app:backgroundTint="@null"
-                app:cornerRadius="16dp" />
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:text="Find Vodafone eSIM" />
 
             <TextView
                 android:id="@+id/vodafone_search_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/r2w_recharge_info_card"
-                android:padding="@dimen/r2w_card_padding"
-                android:text="Enter ICCID to search Vodafone eSIMs."
+                android:background="@drawable/r2w_vodafone_selected_card"
+                android:padding="16dp"
+                android:text="Enter ICCID, choose package, then continue."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_premium_muted" />
+                android:textColor="@color/r2w_premium_muted"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Renewal Package"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:layout_marginTop="28dp"
+                android:text="2. Choose eSIM Data"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold"
-                android:textAllCaps="false" />
+                android:textStyle="bold" />
 
-            <HorizontalScrollView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:scrollbars="none">
+                android:layout_marginTop="12dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/vodafone_package_group"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/vodafone_package_200gb"
+                    android:layout_width="0dp"
+                    android:layout_height="82dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_vodafone_card_selected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="200GB"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    android:textColor="#E60000"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/vodafone_package_400gb"
+                    android:layout_width="0dp"
+                    android:layout_height="82dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_vodafone_card_unselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="400GB"
+                    android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                    android:textColor="@color/r2w_premium_text" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/vodafone_package_500gb"
+                android:layout_width="match_parent"
+                android:layout_height="82dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/r2w_vodafone_card_unselected"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="500GB"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                android:textColor="@color/r2w_premium_text" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/r2w_vodafone_selected_card"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="58dp"
+                    android:layout_height="58dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="Vodafone"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/vodafone_logo" />
+
+                <TextView
+                    android:id="@+id/vodafone_selected_package"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/vodafone_package_200gb"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="200GB / 30D"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="#BFD4FF"
-                    app:chipStrokeWidth="1dp" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/vodafone_package_400gb"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="400GB / 30D"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="#BFD4FF"
-                    app:chipStrokeWidth="1dp" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/vodafone_package_500gb"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="500GB / 30D"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="#BFD4FF"
-                    app:chipStrokeWidth="1dp" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="Vodafone eSIM Renewal\n200GB"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Customer Information"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:layout_marginTop="28dp"
+                android:text="3. Customer Information"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold"
-                android:textAllCaps="false" />
+                android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/vodafone_customer_name_layout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:hint="Customer name"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
                 app:boxCornerRadiusTopEnd="18dp"
                 app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
-                app:hintTextColor="@color/r2w_premium_muted">
+                app:hintTextColor="@color/r2w_premium_muted"
+                app:startIconDrawable="@drawable/ic_person">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/vodafone_customer_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/vodafone_customer_phone_layout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Phone number"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
                 app:boxCornerRadiusTopEnd="18dp"
                 app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
-                app:hintTextColor="@color/r2w_premium_muted">
+                app:hintTextColor="@color/r2w_premium_muted"
+                app:startIconDrawable="@drawable/ic_phone">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/vodafone_customer_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="phone" />
+                    android:inputType="phone"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/vodafone_customer_email_layout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="Email optional"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
                 app:boxCornerRadiusBottomEnd="18dp"
                 app:boxCornerRadiusBottomStart="18dp"
@@ -219,20 +268,21 @@
                     android:id="@+id/vodafone_customer_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/vodafone_renew_button"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:background="@drawable/r2w_premium_primary_button"
-                android:layout_marginTop="20dp"
-                android:enabled="false"
+                android:layout_height="56dp"
+                android:layout_marginTop="22dp"
+                android:background="@drawable/r2w_vodafone_primary_button"
+                android:enabled="true"
                 android:text="Continue Renewal"
+                android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
-                android:textAllCaps="false"
                 app:backgroundTint="@null"
                 app:cornerRadius="16dp" />
         </LinearLayout>

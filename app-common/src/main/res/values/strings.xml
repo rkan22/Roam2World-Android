@@ -174,6 +174,7 @@
     <string name="packages_load_failed">Could not load packages.</string>
     <string name="packages_global_country">Global</string>
     <string name="package_detail_title">Package details</string>
+    <string name="package_detail_provider_logo">Orange logo</string>
     <string name="package_detail_overview">Overview</string>
     <string name="package_detail_visibility_format">Visible to: %s</string>
     <string name="package_detail_data_format">Data: %s</string>
@@ -184,10 +185,13 @@
     <string name="package_detail_data_label">Data</string>
     <string name="package_detail_validity_label">Validity</string>
     <string name="package_detail_included_title">What’s included</string>
-    <string name="package_detail_included_body">✓ Instant eSIM delivery\n✓ QR code installation\n✓ iPhone and Android support\n✓ Works without a physical SIM</string>
+    <string name="package_detail_included_body">Instant eSIM delivery\nQR code installation\niPhone and Android support\nWorks without a physical SIM</string>
     <string name="package_detail_description_title">Plan description</string>
     <string name="package_detail_safe_checkout">Secure wallet purchase • Instant delivery</string>
-    <string name="package_purchase_action">Buy with wallet</string>
+    <string name="package_detail_price_label">Price</string>
+    <string name="package_detail_coverage_label">Coverage</string>
+    <string name="package_detail_flag_grid">150+ supported countries</string>
+    <string name="package_purchase_action">Purchase Package</string>
     <string name="package_purchase_wallet_failed">Could not check wallet balance.</string>
     <string name="package_purchase_price_unavailable">Package price is unavailable.</string>
     <string name="package_purchase_insufficient_balance">Insufficient wallet balance.</string>

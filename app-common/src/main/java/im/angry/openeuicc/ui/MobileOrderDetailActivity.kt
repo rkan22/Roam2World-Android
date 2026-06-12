@@ -182,7 +182,7 @@ class MobileOrderDetailActivity : AppCompatActivity() {
     }
 
     private fun setTimelineText(viewId: Int, done: Boolean, label: String) {
-        requireViewById<TextView>(viewId).text = "${if (done) "✓" else "•"} $label"
+        requireViewById<TextView>(viewId).text = label
     }
 
     private fun renderCustomerInfo(order: MobileOrder) {

@@ -31,18 +31,33 @@
         <item name="android:statusBarColor">?attr/colorSurfaceVariant</item>
         <item name="android:colorBackground">?attr/colorSurface</item>
         <item name="dialogCornerRadius">28dp</item>
+            <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="android:fontFamily">@font/r2w_google_sans</item>
+        <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
     <style name="ToolbarTheme" parent="Widget.Material3.Toolbar">
         <item name="android:background">?attr/colorSurface</item>
         <item name="titleTextColor">?attr/colorOnSurface</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
+            <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="android:fontFamily">@font/r2w_google_sans</item>
+        <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
     <style name="AlertDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
         <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
         <item name="dialogCornerRadius">28dp</item>
+            <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="android:fontFamily">@font/r2w_google_sans</item>
+        <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
     <style name="NegativeButtonStyle" parent="Widget.Material3.Button.TextButton.Dialog">
@@ -60,6 +75,11 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+            <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+
+        <item name="android:fontFamily">@font/r2w_google_sans</item>
+        <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
 </resources>

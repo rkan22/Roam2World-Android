@@ -360,18 +360,16 @@ class PackagesActivity : AppCompatActivity() {
     private fun createStoreCategoryChip(section: StoreSection, count: Int): View {
         val selected = selectedStoreSection == section
         val primary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorPrimary)
-        val onPrimary = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnPrimary)
-        val onSurface = MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurface)
-        val surface = getColor(R.color.r2w_card)
 
         val chip = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            minimumWidth = dp(106)
-            minimumHeight = dp(92)
-            setPadding(dp(12), dp(10), dp(12), dp(10))
-            setBackgroundResource(R.drawable.wallet_request_status_badge)
-            backgroundTintList = ColorStateList.valueOf(if (selected) primary else surface)
+            minimumWidth = dp(128)
+            minimumHeight = dp(116)
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            setBackgroundResource(
+                if (selected) R.drawable.r2w_store_category_selected_bg else R.drawable.r2w_store_category_bg
+            )
             isClickable = true
             isFocusable = true
             setOnClickListener {
@@ -380,44 +378,62 @@ class PackagesActivity : AppCompatActivity() {
             }
         }
 
-        chip.addView(TextView(this).apply {
-            text = sectionEmoji(section)
-            textSize = 24f
-            gravity = Gravity.CENTER
-            setPadding(0, 0, 0, dp(6))
+        chip.addView(android.widget.ImageView(this).apply {
+            setImageResource(sectionLogoRes(section))
+            adjustViewBounds = true
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            layoutParams = LinearLayout.LayoutParams(dp(48), dp(48)).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(10)
+            }
         })
 
         chip.addView(TextView(this).apply {
-            text = section.title
+            text = sectionDisplayTitle(section)
             gravity = Gravity.CENTER
             maxLines = 2
+            includeFontPadding = false
+            setLineSpacing(0f, 0.95f)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
             setTypeface(typeface, Typeface.BOLD)
-            setTextColor(if (selected) onPrimary else onSurface)
-        })
-
-        chip.addView(TextView(this).apply {
-            text = "$count"
-            gravity = Gravity.CENTER
-            maxLines = 1
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelSmall)
-            setTextColor(if (selected) onPrimary else MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant))
-            setPadding(0, dp(3), 0, 0)
+            setTextColor(android.graphics.Color.BLACK)
         })
 
         return chip
     }
 
-    private fun sectionEmoji(section: StoreSection): String =
+
+
+
+
+
+
+
+
+
+
+    private fun sectionDisplayTitle(section: StoreSection): String =
         when (section) {
-            StoreSection.ORANGE_EUROPE -> "🇪🇺"
-            StoreSection.ORANGE_WORLD -> "🌐"
-            StoreSection.ORANGE_BALKANS_ESIM -> "🌍"
-            StoreSection.ORANGE_BALKANS_SIM -> "💳"
-            StoreSection.TURKEY -> "🇹🇷"
-            StoreSection.Orange -> "📶"
-            StoreSection.VODAFONE -> "📱"
-            StoreSection.ALL -> "🛒"
+            StoreSection.TURKEY -> "Turkey"
+            StoreSection.ORANGE_EUROPE -> "Orange Europe"
+            StoreSection.ORANGE_BALKANS_ESIM,
+            StoreSection.ORANGE_BALKANS_SIM -> "Orange Balkans"
+            StoreSection.ORANGE_WORLD,
+            StoreSection.Orange -> "Orange World"
+            StoreSection.VODAFONE -> "Vodafone Europe"
+            StoreSection.ALL -> "All Packages"
+        }
+
+    private fun sectionLogoRes(section: StoreSection): Int =
+        when (section) {
+            StoreSection.ORANGE_EUROPE,
+            StoreSection.ORANGE_WORLD,
+            StoreSection.ORANGE_BALKANS_ESIM,
+            StoreSection.ORANGE_BALKANS_SIM,
+            StoreSection.Orange -> R.drawable.orange_logo
+            StoreSection.VODAFONE -> R.drawable.ic_vodafone_logo
+            StoreSection.TURKEY -> R.drawable.ic_roam2world_logo
+            StoreSection.ALL -> R.drawable.ic_package_globe
         }
 
     private fun addStoreSectionHeader(parent: LinearLayout, section: StoreSection) {
@@ -436,44 +452,50 @@ class PackagesActivity : AppCompatActivity() {
     }
 
     private fun createStoreCategoryCard(section: StoreSection, count: Int): View {
+        val selected = selectedStoreSection == section
+
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(16), dp(14), dp(16), dp(14))
-            setBackgroundResource(R.drawable.wallet_request_status_badge)
-            backgroundTintList = ColorStateList.valueOf(getColor(R.color.r2w_card))
+            gravity = Gravity.CENTER
+            minimumWidth = dp(128)
+            minimumHeight = dp(116)
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            setBackgroundResource(
+                if (selected) R.drawable.r2w_store_category_selected_bg else R.drawable.r2w_store_category_bg
+            )
+            isClickable = true
+            isFocusable = true
             setOnClickListener {
                 selectedStoreSection = section
                 renderCatalog()
             }
         }
 
-        card.addView(TextView(this).apply {
-            text = section.title
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-            setTypeface(typeface, Typeface.BOLD)
-            setTextColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface))
-        })
-
-        card.addView(TextView(this).apply {
-            text = if (section == StoreSection.ALL) {
-                "Browse every package, lowest price first"
-            } else {
-                "$count packages - lowest price first"
+        card.addView(android.widget.ImageView(this).apply {
+            setImageResource(sectionLogoRes(section))
+            adjustViewBounds = true
+            scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            layoutParams = LinearLayout.LayoutParams(dp(48), dp(48)).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(10)
             }
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            setTextColor(MaterialColors.getColor(window.decorView, com.google.android.material.R.attr.colorOnSurfaceVariant))
-            setPadding(0, dp(4), 0, 0)
         })
 
-        card.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            setMargins(0, 0, 0, dp(10))
-        }
+        card.addView(TextView(this).apply {
+            text = sectionDisplayTitle(section)
+            gravity = Gravity.CENTER
+            maxLines = 2
+            includeFontPadding = false
+            setLineSpacing(0f, 0.95f)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(android.graphics.Color.BLACK)
+        })
 
         return card
     }
+
+
 
     private fun addPackageSection(
         parent: LinearLayout,
@@ -585,7 +607,52 @@ class PackagesActivity : AppCompatActivity() {
             )
         }
 
-    private fun MobilePackage.dataSortValue(): Double =
+    private fun setPackageCardFlag(imageView: android.widget.ImageView, mobilePackage: MobilePackage) {
+    val code = mobilePackage.countryCode
+        ?.trim()
+        ?.lowercase()
+        ?.takeIf { it.length == 2 && it.all { char -> char in 'a'..'z' } }
+
+    val flagResId = code?.let {
+        imageView.resources.getIdentifier("flag_$it", "drawable", imageView.context.packageName)
+    } ?: 0
+
+    if (flagResId != 0) {
+        imageView.setImageResource(flagResId)
+        imageView.setPadding(3, 3, 3, 3)
+        imageView.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+        return
+    }
+
+    val text = listOfNotNull(
+        mobilePackage.name,
+        mobilePackage.country,
+        mobilePackage.coverage,
+        mobilePackage.provider
+    ).joinToString(" ").lowercase()
+
+    val fallbackName = when {
+        text.contains("turkey") || text.contains("türkiye") -> "flag_tr"
+        text.contains("europe") || text.contains("europa") || text.contains(" eu ") -> "flag_eu"
+        else -> null
+    }
+
+    val fallbackResId = fallbackName?.let {
+        imageView.resources.getIdentifier(it, "drawable", imageView.context.packageName)
+    } ?: 0
+
+    if (fallbackResId != 0) {
+        imageView.setImageResource(fallbackResId)
+        imageView.setPadding(3, 3, 3, 3)
+        imageView.scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+    } else {
+        imageView.setImageResource(R.drawable.ic_package_globe)
+        imageView.setPadding(12, 12, 12, 12)
+        imageView.scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+    }
+}
+
+private fun MobilePackage.dataSortValue(): Double =
         dataFilterLabel()
             ?.let { dataFilterSortValue(it) }
             ?: 0.0
@@ -710,6 +777,18 @@ class PackagesActivity : AppCompatActivity() {
             .show()
     }
 
+
+    private fun providerFilterLogoRes(label: String): Int {
+        val normalized = label.trim().lowercase()
+        return when {
+            normalized.contains("orange") -> R.drawable.orange_logo
+            normalized.contains("vodafone") -> R.drawable.ic_vodafone_logo
+            normalized.contains("roam2world") || normalized.contains("turkey") -> R.drawable.ic_roam2world_logo
+            normalized.contains("all") -> R.drawable.ic_package_globe
+            else -> R.drawable.ic_package_globe
+        }
+    }
+
     private fun filterButtonParams(start: Int = 0, end: Int = 0): LinearLayout.LayoutParams =
         LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
             setMargins(dp(start), 0, dp(end), 0)
@@ -737,40 +816,38 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun createPackageCard(mobilePackage: MobilePackage, badge: String? = null): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
-        item.requireViewById<TextView>(R.id.package_country).text = mobilePackage.cleanCardSummary()
-        item.requireViewById<TextView>(R.id.package_country).text = mobilePackage.cleanCardSummary()
-        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.marketingPackageName()
-        item.requireViewById<TextView>(R.id.package_specs).apply {
-            text = mobilePackage.cleanCardSpecs()
-            visibility = if (text.isBlank()) View.GONE else View.VISIBLE
-        }
-        item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
-        item.requireViewById<TextView>(R.id.package_badge).visibility = View.GONE
-        item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.cardFlagEmoji()
-        item.setOnClickListener {
+        val openDetail = android.view.View.OnClickListener {
             startActivity(PackageDetailActivity.createIntent(this, mobilePackage, userRole))
         }
+
+        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.cleanPackageTitle()
+        item.requireViewById<TextView>(R.id.package_specs).text = mobilePackage.cardValidityOnly()
+        item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
+
+        item.requireViewById<android.widget.ImageView>(R.id.package_icon).apply {
+            setImageResource(R.drawable.ic_package_globe)
+            setPadding(dp(2), dp(2), dp(2), dp(2))
+            scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+        }
+
+        item.requireViewById<com.google.android.material.button.MaterialButton>(R.id.package_buy_button)
+            .setOnClickListener(openDetail)
+
+        item.setOnClickListener(openDetail)
         return item
     }
 
-    private fun MobilePackage.cardFlagEmoji(): String {
-        val code = countryCode?.trim()?.uppercase()
-        if (!code.isNullOrBlank() && code.length == 2 && code.all { it in 'A'..'Z' }) {
-            return code.map { Character.toChars(0x1F1E6 + (it.code - 'A'.code)).concatToString() }
-                .joinToString("")
-        }
 
-        val text = listOfNotNull(name, country, coverage, provider)
-            .joinToString(" ")
-            .lowercase()
 
-        return when {
-            text.contains("turkey") || text.contains("türkiye") -> "🇹🇷"
-            text.contains("europe") || text.contains("europa") || text.contains(" eu ") -> "🇪🇺"
-            text.contains("balkan") -> "🌍"
-            text.contains("global") || text.contains("world") || text.contains("multi") -> "🌐"
-            else -> "🌐"
-        }
+    private fun MobilePackage.cardValidityOnly(): String {
+        val parts = specs()
+            .split("•", "·", "|")
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+
+        return parts.firstOrNull { it.contains("day", ignoreCase = true) || it.contains("days", ignoreCase = true) }
+            ?: parts.lastOrNull()
+            ?: ""
     }
 
     private fun MobilePackage.marketingPackageName(): String {

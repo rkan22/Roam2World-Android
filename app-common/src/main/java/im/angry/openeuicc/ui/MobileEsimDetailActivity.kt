@@ -243,16 +243,16 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         val installReady = qrReady || manualReady || !esim.installCode().isNullOrBlank()
 
         val status = when {
-            qrReady -> "✓ QR Ready"
-            manualReady -> "✓ Manual Install Ready"
-            installReady -> "✓ Install Info Ready"
+            qrReady -> "QR Ready"
+            manualReady -> "Manual Install Ready"
+            installReady -> "Install Info Ready"
             else -> "• Waiting for Install Info"
         }
 
         val steps = listOf(
-            "${if (qrReady) "✓" else "•"} 1. Scan QR code or open QR view",
-            "${if (manualReady) "✓" else "•"} 2. Use SMDP + Matching ID for manual install",
-            "${if (installReady) "✓" else "•"} 3. Tap Install eSIM / OpenEUICC",
+            "1. Scan QR code or open QR view",
+            "2. Use SMDP + Matching ID for manual install",
+            "3. Tap Install eSIM / OpenEUICC",
             "• 4. Enable mobile data and data roaming after install"
         ).joinToString("\n")
 

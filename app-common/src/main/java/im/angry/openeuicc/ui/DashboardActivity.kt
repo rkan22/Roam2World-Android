@@ -66,6 +66,22 @@ class DashboardActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
+
+        findViewById<MaterialButton>(R.id.dashboard_request_balance)?.setOnClickListener {
+            openWalletActivity()
+        }
+
+        findViewById<android.widget.ImageButton>(R.id.dashboard_wallet_eye_button)?.setOnClickListener {
+            val amountView = findViewById<TextView>(R.id.dashboard_wallet_balance)
+            val currentlyHidden = amountView.text?.toString()?.contains("•") == true
+            if (currentlyHidden) {
+                amountView.text = amountView.tag as? CharSequence ?: "0.00"
+            } else {
+                amountView.tag = amountView.text
+                amountView.text = "••••••"
+            }
+        }
+
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.title = getString(R.string.dashboard_title)
 
@@ -74,7 +90,7 @@ class DashboardActivity : AppCompatActivity() {
         progress = requireViewById(R.id.dashboard_progress)
         greeting = requireViewById(R.id.dashboard_greeting)
         account = requireViewById(R.id.dashboard_account)
-        balance = requireViewById(R.id.dashboard_balance)
+        balance = requireViewById(R.id.dashboard_wallet_balance)
         activeEsims = requireViewById(R.id.dashboard_active_esims)
         ordersSummary = requireViewById(R.id.dashboard_orders_summary)
         dealerSummaryCard = requireViewById(R.id.dashboard_dealer_summary_card)
@@ -495,72 +511,82 @@ class DashboardActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
     private fun addRenewalQuickActions() {
         val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return
 
-        val row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setBaselineAligned(false)
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = dp(12)
-            }
-        }
-        row.addView(createQuickActionButton("My eSIMs") {
-            openEsimActivity()
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
-        row.addView(createQuickActionButton("Notifications") {
-            startActivity(Intent(this, MobileNotificationsActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
-        quickActions.addView(row)
+        // Eski Buy eSIM / Wallet Request dahil tüm eski quick action içeriklerini kaldır.
+        quickActions.removeAllViews()
 
-        val row2 = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setBaselineAligned(false)
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = dp(12)
-            }
-        }
-        row2.addView(createQuickActionButton("Orange Recharge") {
-            startActivity(Intent(this, TgtSimRechargeActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
-        row2.addView(createQuickActionButton("Vodafone Recharge") {
-            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
-        quickActions.addView(row2)
+        val actions = listOf(
+            "Orders" to { startActivity(Intent(this, PurchaseHistoryActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+            "Wallet" to { startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+            "Dealers" to { startActivity(Intent(this, MyDealersActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
 
-        val row3 = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setBaselineAligned(false)
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = dp(12)
+            "Orange Recharge" to { startActivity(Intent(this, TgtSimRechargeActivity::class.java)) },
+            "Vodafone" to { startActivity(Intent(this, VodafoneRenewalActivity::class.java)) },
+            "Orange Check GB" to { startActivity(Intent(this, TgtCheckGbActivity::class.java)) }
+        )
+
+        actions.chunked(3).forEachIndexed { rowIndex, rowActions ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setBaselineAligned(false)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = if (rowIndex == 0) dp(12) else dp(10)
+                }
             }
+
+            rowActions.forEachIndexed { columnIndex, item ->
+                val params = LinearLayout.LayoutParams(0, dp(96), 1f).apply {
+                    leftMargin = if (columnIndex == 0) 0 else dp(5)
+                    rightMargin = if (columnIndex == 2) 0 else dp(5)
+                }
+
+                row.addView(createQuickActionButton(item.first) { item.second.invoke() }, params)
+            }
+
+            quickActions.addView(row)
         }
-        row3.addView(createQuickActionButton("Orange Check GB") {
-            startActivity(Intent(this, TgtCheckGbActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
-        row3.addView(createQuickActionButton("More") {
-            openMoreActivity()
-        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
-        quickActions.addView(row3)
     }
+
 
     private fun createQuickActionButton(label: String, action: () -> Unit): MaterialButton =
         MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
             text = label
             gravity = android.view.Gravity.CENTER
             textAlignment = View.TEXT_ALIGNMENT_CENTER
+            isAllCaps = false
+            maxLines = 2
+            setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
             setTextColor(getColor(R.color.r2w_text_primary))
-            cornerRadius = dp(20)
-            icon = getDrawable(R.drawable.ic_packages)
+            cornerRadius = dp(18)
+            minHeight = 0
+            minimumHeight = 0
+            insetTop = 0
+            insetBottom = 0
+            setPadding(dp(4), dp(8), dp(4), dp(8))
+
+            icon = getDrawable(
+                when (label) {
+                    "Orders" -> R.drawable.ic_quick_orders
+                    "Wallet" -> R.drawable.ic_quick_wallet
+                    "Dealers" -> R.drawable.ic_quick_dealers
+                    "Orange Recharge" -> R.drawable.orange_logo
+                    "Vodafone" -> R.drawable.vodafone_logo
+                    "Orange Check GB" -> R.drawable.ic_quick_check_gb
+                    else -> R.drawable.ic_packages
+                }
+            )
             iconGravity = MaterialButton.ICON_GRAVITY_TOP
-            iconPadding = dp(6)
+            iconPadding = dp(4)
+            iconSize = if (label == "Orange Recharge" || label == "Vodafone") dp(28) else dp(22)
             strokeColor = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_border))
             setOnClickListener { action() }
         }
+
 
     private fun setLoading(loading: Boolean) {
         progress.visibility = if (loading) View.VISIBLE else View.GONE
