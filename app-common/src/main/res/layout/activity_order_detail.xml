@@ -23,8 +23,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="22dp"
-            android:paddingBottom="24dp">
+            android:paddingTop="20dp"
+            android:paddingBottom="30dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -38,14 +38,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge"
                 android:textColor="@color/r2w_premium_text" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/order_detail_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:indeterminate="true"
                 android:visibility="gone" />
 
@@ -63,8 +63,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
@@ -92,9 +92,9 @@
                             android:id="@+id/order_detail_provider"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/r2w_chip_neutral"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
+                            android:background="@drawable/r2w_order_status_chip"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="5dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
 
                         <TextView
@@ -102,9 +102,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:background="@drawable/r2w_chip_neutral"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
+                            android:background="@drawable/r2w_order_status_chip"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="5dp"
                             android:textAppearance="?attr/textAppearanceLabelSmall" />
                     </LinearLayout>
 
@@ -155,10 +155,10 @@
                 android:id="@+id/order_detail_timeline_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
@@ -222,11 +222,11 @@
                 android:id="@+id/order_detail_customer_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
@@ -282,11 +282,11 @@
                 android:id="@+id/order_detail_renewal_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:visibility="gone"
                 app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="@dimen/r2w_card_radius"
-                app:cardElevation="4dp"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="3dp"
                 app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
@@ -316,30 +316,33 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/order_detail_copy_iccid"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:background="@drawable/r2w_esim_secondary_button"
+                                android:layout_width="match_parent"
+                android:layout_height="54dp"
                 android:layout_marginTop="22dp"
-                android:backgroundTint="@color/r2w_premium_surface"
+                app:backgroundTint="@null"
                 android:text="@string/order_detail_copy_iccid"
                 android:textColor="@color/r2w_premium_primary"
+                android:textAllCaps="false"
+                android:textStyle="bold"
                 android:visibility="gone"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp"
+                app:cornerRadius="16dp"
+                app:strokeColor="#BFD4FF"
+                app:strokeWidth="0dp"
                 app:icon="@drawable/ic_task_sim_card_download" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/order_detail_view_esim"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:layout_marginTop="22dp"
                 android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/order_detail_view_esim"
                 android:textColor="@android:color/white"
+                android:textAllCaps="false"
                 android:textStyle="bold"
                 app:backgroundTint="@null"
-                app:cornerRadius="@dimen/r2w_button_radius"
+                app:cornerRadius="16dp"
                 app:icon="@drawable/ic_task_sim_card_download" />
 
             <TextView
