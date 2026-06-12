@@ -129,6 +129,17 @@
                         app:cornerRadius="@dimen/r2w_button_radius"
                         app:strokeColor="@color/r2w_premium_primary"
                         app:strokeWidth="1dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mobile_esim_send_customer"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/mobile_esim_send_customer"
+                        android:textColor="@android:color/white"
+                        app:cornerRadius="@dimen/r2w_button_radius" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

@@ -85,6 +85,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
     private lateinit var copySmdpButton: MaterialButton
     private lateinit var showQrButton: MaterialButton
     private lateinit var shareQrButton: MaterialButton
+    private lateinit var sendCustomerButton: MaterialButton
     private lateinit var renewButton: MaterialButton
     private lateinit var installButton: MaterialButton
     private lateinit var installUnavailable: TextView
@@ -110,6 +111,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         copySmdpButton = requireViewById(R.id.mobile_esim_copy_smdp)
         showQrButton = requireViewById(R.id.mobile_esim_show_qr)
         shareQrButton = requireViewById(R.id.mobile_esim_share_qr)
+        sendCustomerButton = requireViewById(R.id.mobile_esim_send_customer)
         installButton = requireViewById(R.id.mobile_esim_install_button)
         installUnavailable = requireViewById(R.id.mobile_esim_install_unavailable)
         renewButton = createRenewButton()
@@ -360,6 +362,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         val qrPayload = esim.qrPayload()
         showQrButton.visibility = if (qrPayload.isNullOrBlank()) View.GONE else View.VISIBLE
         shareQrButton.visibility = showQrButton.visibility
+        sendCustomerButton.visibility = showQrButton.visibility
 
         showQrButton.setOnClickListener {
             startActivity(MobileEsimQrActivity.createIntent(this, esim))
@@ -367,6 +370,10 @@ class MobileEsimDetailActivity : AppCompatActivity() {
 
         shareQrButton.setOnClickListener {
             shareQrPayload(esim)
+        }
+
+        sendCustomerButton.setOnClickListener {
+            shareQrPayload(esim, esim.customerEmail?.takeIf { email -> email.isNotBlank() })
         }
 
         renewButton.visibility = if (canRenew(esim)) View.VISIBLE else View.GONE
@@ -380,7 +387,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun shareQrPayload(esim: MobileEsim) {
+    private fun shareQrPayload(esim: MobileEsim, recipientEmail: String? = null) {
         val payload = esim.qrPayload().orEmpty()
         if (payload.isBlank()) return
 
@@ -410,6 +417,7 @@ class MobileEsimDetailActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, plainBody)
             putExtra(Intent.EXTRA_HTML_TEXT, htmlBody)
             putExtra(Intent.EXTRA_STREAM, uri)
+            recipientEmail?.let { putExtra(Intent.EXTRA_EMAIL, arrayOf(it)) }
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
