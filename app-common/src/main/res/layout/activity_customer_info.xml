@@ -69,19 +69,32 @@
                     android:minHeight="150dp"
                     android:padding="@dimen/r2w_card_padding">
 
-                    <TextView
+                    <LinearLayout
                         android:id="@+id/customer_package_art"
                         android:layout_width="88dp"
                         android:layout_height="112dp"
                         android:background="@drawable/r2w_wallet_gradient"
                         android:gravity="center"
-                        android:text="eSIM"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"
+                        android:orientation="vertical"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:src="@drawable/ic_package_globe"
+                            app:tint="@android:color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="eSIM"
+                            android:textAppearance="?attr/textAppearanceLabelLarge"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/customer_selected_label"
@@ -250,15 +263,15 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/customer_continue_button"
                 android:layout_width="match_parent"
-                android:layout_height="58dp"
+                android:layout_height="56dp"
                 android:layout_marginTop="22dp"
-                android:text="Continue  →"
+                android:text="Continue"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:background="@drawable/r2w_premium_primary_button"
                 app:backgroundTint="@null"
-                app:cornerRadius="@dimen/r2w_button_radius" />
+                app:cornerRadius="16dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
