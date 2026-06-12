@@ -1,5 +1,7 @@
 package im.angry.openeuicc.ui
 
+import android.content.res.ColorStateList
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +9,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -385,6 +389,20 @@ class DashboardActivity : AppCompatActivity() {
         val isRow = parent.orientation == LinearLayout.HORIZONTAL
         val childCountBeforeAdd = parent.childCount
 
+        val iconRes = when {
+            title.contains("Today", ignoreCase = true) -> R.drawable.ic_kpi_sales
+            title.contains("Monthly", ignoreCase = true) -> R.drawable.ic_kpi_calendar
+            title.contains("Active", ignoreCase = true) -> R.drawable.ic_kpi_esim
+            title.contains("Expired", ignoreCase = true) || title.contains("Expiring", ignoreCase = true) -> R.drawable.ic_kpi_expiring
+            else -> R.drawable.ic_kpi_sales
+        }
+
+        val iconBg = when {
+            title.contains("Active", ignoreCase = true) -> R.drawable.r2w_kpi_green_circle
+            title.contains("Expired", ignoreCase = true) || title.contains("Expiring", ignoreCase = true) -> R.drawable.r2w_kpi_orange_circle
+            else -> R.drawable.r2w_kpi_blue_circle
+        }
+
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
@@ -405,14 +423,14 @@ class DashboardActivity : AppCompatActivity() {
             layoutParams = if (fullWidth || !isRow) {
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    dp(126)
+                    dp(118)
                 ).apply {
                     topMargin = dp(12)
                 }
             } else {
                 LinearLayout.LayoutParams(
                     0,
-                    dp(126),
+                    dp(118),
                     1f
                 ).apply {
                     if (childCountBeforeAdd == 0) {
@@ -424,10 +442,36 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        val iconBox = FrameLayout(this).apply {
+            background = getDrawable(iconBg)
+            layoutParams = LinearLayout.LayoutParams(dp(42), dp(42))
+        }
+
+        iconBox.addView(ImageView(this).apply {
+            setImageResource(iconRes)
+            layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), android.view.Gravity.CENTER)
+        })
+
         val body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(dp(18), dp(14), dp(18), dp(14))
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                1f
+            ).apply {
+                leftMargin = dp(10)
+            }
         }
 
         body.addView(TextView(this).apply {
@@ -443,7 +487,7 @@ class DashboardActivity : AppCompatActivity() {
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
             setPadding(0, dp(6), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineMedium)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             setTextColor(getColor(R.color.r2w_text_primary))
         }
@@ -459,7 +503,9 @@ class DashboardActivity : AppCompatActivity() {
             setTextColor(getColor(R.color.r2w_text_secondary))
         })
 
-        card.addView(body)
+        row.addView(iconBox)
+        row.addView(body)
+        card.addView(row)
         parent.addView(card)
 
         return value
@@ -468,6 +514,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun addExpiredSoonKpiCard() {
         val parent = requireViewById<LinearLayout>(R.id.dashboard_dynamic_kpis)
+
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
@@ -477,36 +524,77 @@ class DashboardActivity : AppCompatActivity() {
             isClickable = true
             isFocusable = true
             setOnClickListener { openExpiredSoonEsims() }
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = dp(16)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(118)
+            ).apply {
+                topMargin = dp(12)
             }
         }
+
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(10), dp(10), dp(10))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+
+        val iconBox = FrameLayout(this).apply {
+            background = getDrawable(R.drawable.r2w_kpi_orange_circle)
+            layoutParams = LinearLayout.LayoutParams(dp(42), dp(42))
+        }
+
+        iconBox.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_kpi_expiring)
+            layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), android.view.Gravity.CENTER)
+        })
+
         val body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(dp(18), dp(14), dp(18), dp(14))
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                1f
+            ).apply {
+                leftMargin = dp(10)
+            }
         }
+
         body.addView(TextView(this).apply {
             text = "Expired eSIMs"
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
             setTextColor(getColor(R.color.r2w_text_secondary))
+            maxLines = 1
         })
+
         expiredSoonValue = TextView(this).apply {
             text = "--"
             setPadding(0, dp(6), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineMedium)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             setTextColor(getColor(R.color.r2w_text_primary))
+            maxLines = 1
         }
+
         body.addView(expiredSoonValue)
+
         expiredSoonSubtitle = TextView(this).apply {
             text = "Loading expiring eSIMs"
             setPadding(0, dp(4), 0, 0)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
             setTextColor(getColor(R.color.r2w_text_secondary))
+            maxLines = 1
         }
+
         body.addView(expiredSoonSubtitle)
-        card.addView(body)
+
+        row.addView(iconBox)
+        row.addView(body)
+        card.addView(row)
         parent.addView(card)
     }
 
@@ -583,7 +671,8 @@ class DashboardActivity : AppCompatActivity() {
             iconGravity = MaterialButton.ICON_GRAVITY_TOP
             iconPadding = dp(4)
             iconSize = if (label == "Orange Recharge" || label == "Vodafone") dp(28) else dp(22)
-            strokeColor = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_border))
+            iconTint = ColorStateList.valueOf(getColor(R.color.r2w_text_primary))
+            strokeColor = ColorStateList.valueOf(getColor(R.color.r2w_border))
             setOnClickListener { action() }
         }
 
