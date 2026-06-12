@@ -737,27 +737,101 @@ class PackagesActivity : AppCompatActivity() {
 
     private fun createPackageCard(mobilePackage: MobilePackage, badge: String? = null): View {
         val item = LayoutInflater.from(this).inflate(R.layout.package_list_item, packageList, false)
-        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.cleanPackageTitle()
-        item.requireViewById<TextView>(R.id.package_country).text = listOfNotNull(
-            mobilePackage.providerLabel().takeIf { it.isNotBlank() },
-            mobilePackage.country.takeIf { it.isNotBlank() },
-            mobilePackage.countryCode?.takeIf { it.isNotBlank() }
-        ).joinToString(" · ")
+        item.requireViewById<TextView>(R.id.package_country).text = mobilePackage.cleanCardSummary()
+        item.requireViewById<TextView>(R.id.package_country).text = mobilePackage.cleanCardSummary()
+        item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.marketingPackageName()
         item.requireViewById<TextView>(R.id.package_specs).apply {
-            text = mobilePackage.specs()
+            text = mobilePackage.cleanCardSpecs()
             visibility = if (text.isBlank()) View.GONE else View.VISIBLE
         }
         item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
-        item.requireViewById<TextView>(R.id.package_badge).apply {
-            text = badge.orEmpty()
-            visibility = if (badge.isNullOrBlank()) View.GONE else View.VISIBLE
-        }
-        item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.visibilityLabel()
+        item.requireViewById<TextView>(R.id.package_badge).visibility = View.GONE
+        item.requireViewById<TextView>(R.id.package_visibility).text = mobilePackage.cardFlagEmoji()
         item.setOnClickListener {
             startActivity(PackageDetailActivity.createIntent(this, mobilePackage, userRole))
         }
         return item
     }
+
+    private fun MobilePackage.cardFlagEmoji(): String {
+        val code = countryCode?.trim()?.uppercase()
+        if (!code.isNullOrBlank() && code.length == 2 && code.all { it in 'A'..'Z' }) {
+            return code.map { Character.toChars(0x1F1E6 + (it.code - 'A'.code)).concatToString() }
+                .joinToString("")
+        }
+
+        val text = listOfNotNull(name, country, coverage, provider)
+            .joinToString(" ")
+            .lowercase()
+
+        return when {
+            text.contains("turkey") || text.contains("türkiye") -> "🇹🇷"
+            text.contains("europe") || text.contains("europa") || text.contains(" eu ") -> "🇪🇺"
+            text.contains("balkan") -> "🌍"
+            text.contains("global") || text.contains("world") || text.contains("multi") -> "🌐"
+            else -> "🌐"
+        }
+    }
+
+    private fun MobilePackage.marketingPackageName(): String {
+        val providerName = "Orange"
+
+        val allText = listOfNotNull(
+            name,
+            country,
+            countryCode,
+            coverage,
+            provider,
+            providerLabel()
+        )
+            .joinToString(" ")
+            .lowercase()
+
+        val regionName = when {
+            allText.contains("balkan") -> "Balkans"
+            allText.contains("europe") || allText.contains("eu ") || allText.contains("europa") -> "Europe"
+            allText.contains("turkey") || allText.contains(" türkiye") || countryCode.equals("TR", ignoreCase = true) -> "Turkey"
+            else -> "World"
+        }
+
+        val dataLabel = cleanDataLabel()
+            .takeIf { it.isNotBlank() }
+            ?: dataAmount.orEmpty().trim().takeIf { it.isNotBlank() }
+
+        return listOfNotNull(providerName, regionName, dataLabel)
+            .joinToString(" ")
+            .trim()
+            .ifBlank { "Orange World" }
+    }
+
+    private fun MobilePackage.cleanCardSummary(): String =
+        listOf(
+            cleanDataLabel(),
+            cleanValidityLabel()
+        )
+            .filter { it.isNotBlank() }
+            .joinToString(" • ")
+            .ifBlank { "Instant eSIM delivery" }
+
+    private fun MobilePackage.cleanCardSpecs(): String =
+        listOf(
+            cleanProviderTitle().takeIf {
+                it.isNotBlank() &&
+                    !it.equals("Reseller", ignoreCase = true) &&
+                    !it.equals("Dealer", ignoreCase = true)
+            },
+            cleanCoverageLabel().takeIf {
+                it.isNotBlank() &&
+                    !it.equals("Multi Country", ignoreCase = true) &&
+                    !it.equals("Multi-country", ignoreCase = true) &&
+                    !it.equals("Global", ignoreCase = true) &&
+                    !it.equals("World", ignoreCase = true)
+            }
+        )
+            .filterNotNull()
+            .distinct()
+            .joinToString(" • ")
+
 
     private fun MobilePackage.matchesSelectedFilters(): Boolean =
         matchesRegion(selectedRegion) && matchesProvider(selectedProvider) && matchesData(selectedData) && matchesValidity(selectedValidity)

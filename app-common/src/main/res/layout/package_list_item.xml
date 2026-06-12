@@ -29,10 +29,10 @@
                 android:id="@+id/package_visibility"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
-                android:background="@drawable/r2w_premium_icon_box"
+                android:background="@drawable/r2w_flag_circle_bg"
                 android:gravity="center"
                 android:text="🌐"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
                 android:textColor="@color/r2w_premium_primary"
                 android:textStyle="bold" />
 

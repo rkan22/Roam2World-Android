@@ -24,13 +24,13 @@
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/r2w_screen_padding"
             android:paddingTop="18dp"
-            android:paddingBottom="28dp">
+            android:paddingBottom="30dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="22dp"
+                app:cardCornerRadius="28dp"
                 app:cardElevation="8dp"
                 app:strokeWidth="0dp">
 
@@ -39,40 +39,127 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/r2w_wallet_gradient"
                     android:orientation="vertical"
-                    android:padding="22dp">
+                    android:padding="24dp">
+
+                    <TextView
+                        android:id="@+id/package_detail_country"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/r2w_premium_card_soft"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="7dp"
+                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/package_detail_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:lineSpacingExtra="2dp"
                         android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                        android:textColor="@android:color/white" />
-
-                    <TextView
-                        android:id="@+id/package_detail_country"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/package_detail_price"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
+                        android:layout_marginTop="20dp"
                         android:textAppearance="?attr/textAppearanceDisplaySmall"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/package_detail_visibility"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceLabelLarge"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@android:color/white" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/package_detail_data_label"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="@color/r2w_premium_muted" />
+
+                        <TextView
+                            android:id="@+id/package_detail_data"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="@color/r2w_premium_text"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="1dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/r2w_premium_surface"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="@color/r2w_premium_border"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/package_detail_validity_label"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
+                            android:textColor="@color/r2w_premium_muted" />
+
+                        <TextView
+                            android:id="@+id/package_detail_validity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
+                            android:textColor="@color/r2w_premium_text"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -100,36 +187,43 @@
                     android:padding="@dimen/r2w_card_padding">
 
                     <TextView
-                        android:id="@+id/package_detail_data"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/package_detail_validity"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
                         android:id="@+id/package_detail_network"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
+                        android:textAppearance="?attr/textAppearanceBodyLarge"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/package_detail_coverage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="12dp"
                         android:lineSpacingExtra="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/r2w_premium_border" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/package_detail_included_title"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:lineSpacingExtra="5dp"
+                        android:text="@string/package_detail_included_body"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@color/r2w_premium_muted" />
                 </LinearLayout>
@@ -145,20 +239,35 @@
                 app:strokeColor="@color/r2w_premium_border"
                 app:strokeWidth="1dp">
 
-                <TextView
-                    android:id="@+id/package_detail_description"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/r2w_card_padding"
-                    android:lineSpacingExtra="4dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_premium_muted" />
+                    android:orientation="vertical"
+                    android:padding="@dimen/r2w_card_padding">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/package_detail_description_title"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/package_detail_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:lineSpacingExtra="4dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/package_purchase_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="58dp"
                 android:layout_marginTop="24dp"
                 android:background="@drawable/r2w_premium_primary_button"
                 android:text="@string/package_purchase_action"
@@ -166,6 +275,15 @@
                 android:textStyle="bold"
                 app:backgroundTint="@null"
                 app:cornerRadius="@dimen/r2w_button_radius" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="@string/package_detail_safe_checkout"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="@color/r2w_premium_muted" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/package_purchase_progress"

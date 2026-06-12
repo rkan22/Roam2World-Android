@@ -181,6 +181,12 @@
     <string name="package_detail_network_format">Network: %s</string>
     <string name="package_detail_coverage_format">Coverage: %s</string>
     <string name="package_detail_description_format">%s</string>
+    <string name="package_detail_data_label">Data</string>
+    <string name="package_detail_validity_label">Validity</string>
+    <string name="package_detail_included_title">What’s included</string>
+    <string name="package_detail_included_body">✓ Instant eSIM delivery\n✓ QR code installation\n✓ iPhone and Android support\n✓ Works without a physical SIM</string>
+    <string name="package_detail_description_title">Plan description</string>
+    <string name="package_detail_safe_checkout">Secure wallet purchase • Instant delivery</string>
     <string name="package_purchase_action">Buy with wallet</string>
     <string name="package_purchase_wallet_failed">Could not check wallet balance.</string>
     <string name="package_purchase_price_unavailable">Package price is unavailable.</string>

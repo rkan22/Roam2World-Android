@@ -96,9 +96,17 @@ class PackageDetailActivity : AppCompatActivity() {
             cleanProviderName
         )
 
-        requireViewById<TextView>(R.id.package_detail_name).text =
-            cleanPackageName.ifBlank { getString(R.string.package_detail_title) }
-        requireViewById<TextView>(R.id.package_detail_country).text = flaggedCountryDisplay(country, countryCode, coverage)
+        val displayPackageName = marketingDetailPackageName(
+            providerName = cleanProviderName,
+            data = intent.getStringExtra(EXTRA_DATA),
+            country = country,
+            countryCode = countryCode,
+            coverage = coverage,
+            rawPackageName = rawPackageName
+        )
+
+        requireViewById<TextView>(R.id.package_detail_name).text = displayPackageName
+        requireViewById<TextView>(R.id.package_detail_country).text = displayPackageName
         requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
             ?: "0"
         requireViewById<TextView>(R.id.package_detail_visibility).text =
@@ -108,9 +116,57 @@ class PackageDetailActivity : AppCompatActivity() {
 
         setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
         setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
-        setOptionalText(R.id.package_detail_network, intent.getStringExtra(EXTRA_NETWORK), R.string.package_detail_network_format)
-        setOptionalText(R.id.package_detail_coverage, flaggedCoverageDisplay(coverage), R.string.package_detail_coverage_format)
+        setOptionalText(
+            R.id.package_detail_network,
+            cleanProviderName?.takeIf { !it.equals("Reseller", ignoreCase = true) && !it.equals("Dealer", ignoreCase = true) },
+            R.string.package_detail_network_format
+        )
+        setOptionalText(
+            R.id.package_detail_coverage,
+            flaggedCoverageDisplay(coverage)?.takeIf {
+                !it.equals("Multi Country", ignoreCase = true) &&
+                    !it.equals("Multi-country", ignoreCase = true) &&
+                    !it.equals("Global", ignoreCase = true) &&
+                    !it.equals("World", ignoreCase = true)
+            },
+            R.string.package_detail_coverage_format
+        )
         setOptionalText(R.id.package_detail_description, intent.getStringExtra(EXTRA_DESCRIPTION), R.string.package_detail_description_format)
+    }
+
+    private fun marketingDetailPackageName(
+        providerName: String?,
+        data: String?,
+        country: String?,
+        countryCode: String?,
+        coverage: String?,
+        rawPackageName: String
+    ): String {
+        val provider = "Orange"
+
+        val allText = listOfNotNull(
+            rawPackageName,
+            providerName,
+            country,
+            countryCode,
+            coverage
+        )
+            .joinToString(" ")
+            .lowercase()
+
+        val region = when {
+            allText.contains("balkan") -> "Balkans"
+            allText.contains("europe") || allText.contains("eu ") || allText.contains("europa") -> "Europe"
+            allText.contains("turkey") || allText.contains("türkiye") || countryCode.equals("TR", ignoreCase = true) -> "Turkey"
+            else -> "World"
+        }
+
+        val dataLabel = data?.trim()?.takeIf { it.isNotBlank() }
+
+        return listOfNotNull(provider, region, dataLabel)
+            .joinToString(" ")
+            .trim()
+            .ifBlank { "Orange World" }
     }
 
     private fun purchasePackage() {
