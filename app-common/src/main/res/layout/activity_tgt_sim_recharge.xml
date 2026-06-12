@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Manage physical SIM recharge and Orange eSIM renewal"
+                android:text="Manage physical SIM recharge and Orange eSim renewal"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 android:textColor="@color/r2w_premium_muted" />
 
@@ -61,30 +61,32 @@
                 <TextView
                     android:id="@+id/tgt_mode_sim"
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
+                    android:layout_height="44dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
                     android:background="@drawable/r2w_orange_small_toggle_selected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:text="Orange SIM"
+                    android:text="Orange SimCard"
                     android:textColor="@color/r2w_premium_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tgt_mode_esim_renewal"
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
+                    android:layout_height="44dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:background="@drawable/r2w_orange_small_toggle_unselected"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
-                    android:text="eSIM Renewal"
+                    android:text="Orange eSim"
                     android:textColor="@color/r2w_premium_primary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -431,198 +433,319 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Orange eSIM Renewal"
+                    android:layout_marginTop="26dp"
+                    android:text="1. Orange eSim ICCID"
                     android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textColor="@color/r2w_orange_chip_text"
-                    android:textStyle="bold"
-                android:textAllCaps="false" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Search by ICCID, select package, then submit renewal."
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_premium_muted" />
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tgt_esim_search_iccid_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:hint="Search ICCID"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_marginTop="12dp"
+                    android:hint="Orange eSim ICCID"
                     app:boxBackgroundColor="@color/r2w_premium_surface"
                     app:boxCornerRadiusBottomEnd="18dp"
                     app:boxCornerRadiusBottomStart="18dp"
                     app:boxCornerRadiusTopEnd="18dp"
                     app:boxCornerRadiusTopStart="18dp"
                     app:boxStrokeColor="@color/r2w_premium_border"
-                    app:hintTextColor="@color/r2w_premium_muted">
+                    app:hintTextColor="@color/r2w_premium_muted"
+                    app:startIconDrawable="@drawable/ic_task_sim_card_download">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_search_iccid"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/tgt_esim_search_button"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
-                    android:background="@drawable/r2w_premium_primary_button"
+                    android:layout_height="56dp"
                     android:layout_marginTop="14dp"
-                    android:text="Find Orange eSIM"
+                    android:background="@drawable/r2w_premium_primary_button"
+                    android:text="Find Orange eSim"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
-                android:textAllCaps="false"
                     app:backgroundTint="@null"
-                    app:cornerRadius="16dp" />
+                    app:cornerRadius="16dp" android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tgt_esim_search_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/r2w_recharge_info_card"
-                    android:padding="@dimen/r2w_card_padding"
-                    android:text="Enter ICCID to search Orange eSIMs."
+                    android:background="@drawable/r2w_orange_selected_card"
+                    android:padding="16dp"
+                    android:text="Enter ICCID to search Orange eSims."
                     android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="@color/r2w_premium_muted" />
+                    android:textColor="@color/r2w_premium_muted" android:visibility="gone" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Renewal Package"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_orange_chip_text"
-                    android:textStyle="bold"
-                android:textAllCaps="false" />
+                    android:layout_marginTop="28dp"
+                    android:text="2. Choose Renewal Product"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
 
-                <HorizontalScrollView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:scrollbars="none">
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/tgt_esim_renewal_package_group"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:selectionRequired="true"
-                        app:singleSelection="true">
+                    <LinearLayout
+                        android:id="@+id/tgt_esim_product_30d"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_selected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/tgt_esim_renewal_10gb"
-                            android:layout_width="wrap_content"
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/orange_logo" />
+
+                        <TextView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="10GB"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="@color/r2w_orange_chip_stroke"
-                    app:chipStrokeWidth="1dp" />
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:text="Orange eSim\n30 Days"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="@color/r2w_premium_text"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/tgt_esim_renewal_20gb"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="20GB"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="@color/r2w_orange_chip_stroke"
-                    app:chipStrokeWidth="1dp" />
+                    <LinearLayout
+                        android:id="@+id/tgt_esim_product_60d"
+                        android:layout_width="0dp"
+                        android:layout_height="86dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/tgt_esim_renewal_30gb"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="30GB"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="@color/r2w_orange_chip_stroke"
-                    app:chipStrokeWidth="1dp" />
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/orange_logo" />
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/tgt_esim_renewal_50gb"
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="50GB"
-                    android:textColor="@color/r2w_premium_primary"
-                    app:chipBackgroundColor="#F8FAFF"
-                    app:chipCornerRadius="16dp"
-                    app:chipStrokeColor="@color/r2w_orange_chip_stroke"
-                    app:chipStrokeWidth="1dp" />
-                    </com.google.android.material.chip.ChipGroup>
-                </HorizontalScrollView>
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:text="Orange eSim\n60 Days"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="@color/r2w_premium_muted"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="Customer Information"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="@color/r2w_orange_chip_text"
-                    android:textStyle="bold"
-                android:textAllCaps="false" />
+                    android:layout_marginTop="28dp"
+                    android:text="3. Choose Renewal Data"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_10gb"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_selected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="10GB"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/r2w_premium_primary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_20gb"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="20GB"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/r2w_premium_text" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_30gb"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="30GB"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/r2w_premium_text" />
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_50gb"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="50GB"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/r2w_premium_text" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_20gb_60d"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="20GB / 60D"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_premium_text" />
+
+                    <TextView
+                        android:id="@+id/tgt_esim_renewal_60gb_60d"
+                        android:layout_width="0dp"
+                        android:layout_height="74dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_orange_card_unselected"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="60GB / 60D"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_premium_text" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    android:text="4. Customer Information"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tgt_esim_customer_name_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
                     android:hint="Customer name"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     app:boxBackgroundColor="@color/r2w_premium_surface"
                     app:boxCornerRadiusBottomEnd="18dp"
                     app:boxCornerRadiusBottomStart="18dp"
                     app:boxCornerRadiusTopEnd="18dp"
                     app:boxCornerRadiusTopStart="18dp"
                     app:boxStrokeColor="@color/r2w_premium_border"
-                    app:hintTextColor="@color/r2w_premium_muted">
+                    app:hintTextColor="@color/r2w_premium_muted"
+                    app:startIconDrawable="@drawable/ic_person">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_customer_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPersonName" />
+                        android:inputType="textPersonName"
+                        android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tgt_esim_customer_phone_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Phone number"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     app:boxBackgroundColor="@color/r2w_premium_surface"
                     app:boxCornerRadiusBottomEnd="18dp"
                     app:boxCornerRadiusBottomStart="18dp"
                     app:boxCornerRadiusTopEnd="18dp"
                     app:boxCornerRadiusTopStart="18dp"
                     app:boxStrokeColor="@color/r2w_premium_border"
-                    app:hintTextColor="@color/r2w_premium_muted">
+                    app:hintTextColor="@color/r2w_premium_muted"
+                    app:startIconDrawable="@drawable/ic_phone">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/tgt_esim_customer_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="phone" />
+                        android:inputType="phone"
+                        android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tgt_esim_customer_email_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:hint="Email optional"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     app:boxBackgroundColor="@color/r2w_premium_surface"
                     app:boxCornerRadiusBottomEnd="18dp"
                     app:boxCornerRadiusBottomStart="18dp"
@@ -635,20 +758,50 @@
                         android:id="@+id/tgt_esim_customer_email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress" />
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/r2w_orange_selected_card"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="Orange"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/orange_logo" />
+
+                    <TextView
+                        android:id="@+id/tgt_esim_selected_package"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Orange eSim\n10GB"
+                        android:textAppearance="?attr/textAppearanceTitleSmall"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/tgt_esim_renew_button"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="22dp"
                     android:background="@drawable/r2w_premium_primary_button"
-                    android:layout_marginTop="16dp"
-                    android:enabled="false"
+                    android:enabled="true"
                     android:text="Continue Renewal"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textStyle="bold"
-                android:textAllCaps="false"
                     app:backgroundTint="@null"
                     app:cornerRadius="16dp" />
             </LinearLayout>

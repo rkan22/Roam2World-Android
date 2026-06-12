@@ -56,10 +56,12 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private lateinit var esimSearchButton: MaterialButton
     private lateinit var esimRenewButton: MaterialButton
     private lateinit var esimSearchResult: TextView
+    private lateinit var esimSelectedPackage: TextView
     private lateinit var activate: MaterialButton
 
     private var selectedPackageName = "10GB / 30 Days"
     private var selectedRenewalDataGb = "10"
+    private var selectedRenewalPackageName = "10GB / 30 Days"
     private var selectedRenewalEsim: MobileEsim? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,12 +93,14 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         esimSearchButton = requireViewById(R.id.tgt_esim_search_button)
         esimRenewButton = requireViewById(R.id.tgt_esim_renew_button)
         esimSearchResult = requireViewById(R.id.tgt_esim_search_result)
+        esimSelectedPackage = requireViewById(R.id.tgt_esim_selected_package)
         activate = requireViewById(R.id.tgt_activate)
 
         setupInsets()
         setupModeTabs()
         setupPackageSelection()
         setupRenewalPackageSelection()
+        renderRenewalPackageSelection()
         setupActivation()
         setupEsimRenewal()
         renderSelectedPackage()
@@ -173,17 +177,66 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
 
     private fun setupRenewalPackageSelection() {
+        requireViewById<View>(R.id.tgt_esim_product_30d).setOnClickListener {
+            selectedRenewalPackageName = "10GB / 30 Days"
+            selectedRenewalDataGb = "10"
+            renderRenewalPackageSelection()
+        }
+        requireViewById<View>(R.id.tgt_esim_product_60d).setOnClickListener {
+            selectedRenewalPackageName = "20GB / 60 Days"
+            selectedRenewalDataGb = "20"
+            renderRenewalPackageSelection()
+        }
+
         listOf(
-            R.id.tgt_esim_renewal_10gb to "10",
-            R.id.tgt_esim_renewal_20gb to "20",
-            R.id.tgt_esim_renewal_30gb to "30",
-            R.id.tgt_esim_renewal_50gb to "50"
-        ).forEach { (chipId, dataGb) ->
-            requireViewById<Chip>(chipId).setOnClickListener {
-                selectedRenewalDataGb = dataGb
+            R.id.tgt_esim_renewal_10gb to ("10GB / 30 Days" to "10"),
+            R.id.tgt_esim_renewal_20gb to ("20GB / 30 Days" to "20"),
+            R.id.tgt_esim_renewal_30gb to ("30GB / 30 Days" to "30"),
+            R.id.tgt_esim_renewal_50gb to ("50GB / 30 Days" to "50"),
+            R.id.tgt_esim_renewal_20gb_60d to ("20GB / 60 Days" to "20"),
+            R.id.tgt_esim_renewal_60gb_60d to ("60GB / 60 Days" to "60")
+        ).forEach { (viewId, packageInfo) ->
+            requireViewById<View>(viewId).setOnClickListener {
+                selectedRenewalPackageName = packageInfo.first
+                selectedRenewalDataGb = packageInfo.second
+                renderRenewalPackageSelection()
             }
         }
     }
+
+
+
+
+
+
+    private fun renderRenewalPackageSelection() {
+        esimSelectedPackage.text = "Orange eSim\n$selectedRenewalPackageName"
+
+        val is60Days = selectedRenewalPackageName.contains("60 Days")
+        requireViewById<View>(R.id.tgt_esim_product_30d).setBackgroundResource(
+            if (!is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
+        )
+        requireViewById<View>(R.id.tgt_esim_product_60d).setBackgroundResource(
+            if (is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
+        )
+
+        listOf(
+            R.id.tgt_esim_renewal_10gb to "10GB / 30 Days",
+            R.id.tgt_esim_renewal_20gb to "20GB / 30 Days",
+            R.id.tgt_esim_renewal_30gb to "30GB / 30 Days",
+            R.id.tgt_esim_renewal_50gb to "50GB / 30 Days",
+            R.id.tgt_esim_renewal_20gb_60d to "20GB / 60 Days",
+            R.id.tgt_esim_renewal_60gb_60d to "60GB / 60 Days"
+        ).forEach { (viewId, packageName) ->
+            val selected = packageName == selectedRenewalPackageName
+            val view = requireViewById<TextView>(viewId)
+            view.setBackgroundResource(if (selected) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected)
+            view.setTextColor(getColor(if (selected) R.color.r2w_premium_primary else R.color.r2w_premium_text))
+            view.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
+        }
+    }
+
+
 
     private fun setupActivation() {
         activate.setOnClickListener {
@@ -193,14 +246,17 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     }
 
     private fun setupEsimRenewal() {
-        esimSearchButton.setOnClickListener {
-            searchTgtEsimForRenewal()
-        }
+        esimSearchButton.visibility = View.GONE
+        esimSearchResult.visibility = View.GONE
+        esimRenewButton.isEnabled = true
+
         esimRenewButton.setOnClickListener {
             if (!validateEsimRenewalForm()) return@setOnClickListener
             submitEsimRenewalRequest()
         }
     }
+
+
 
     private fun applyPrefilledIccid() {
         val prefilled = intent.getStringExtra(EXTRA_RENEW_ICCID)
@@ -210,9 +266,9 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         renderMode(isEsimRenewal = true)
         esimSearchIccid.setText(prefilled)
         esimSearchIccid.setSelection(esimSearchIccid.text?.length ?: 0)
-        esimSearchResult.text = "Searching Orange eSIM: $prefilled"
-        esimSearchIccid.post { searchTgtEsimForRenewal() }
     }
+
+
 
     private fun searchTgtEsimForRenewal() {
         clearEsimRenewalErrors()
@@ -248,7 +304,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onSuccess { esim ->
                     selectedRenewalEsim = esim
                     if (esim == null) {
-                        esimSearchResult.text = "No Orange eSIM found for ICCID: $query"
+                        esimSearchResult.text = "No Orange eSim found for ICCID: $query"
                         esimRenewButton.isEnabled = false
                     } else {
                         renderFoundTgtEsim(esim)
@@ -258,14 +314,14 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 .onFailure { error ->
                     selectedRenewalEsim = null
                     esimRenewButton.isEnabled = false
-                    esimSearchResult.text = error.message ?: "Orange eSIM search failed"
+                    esimSearchResult.text = error.message ?: "Orange eSim search failed"
                 }
         }
     }
 
     private fun renderFoundTgtEsim(esim: MobileEsim) {
         esimSearchResult.text = listOf(
-            "Orange eSIM found",
+            "Orange eSim found",
             "ICCID: ${esim.iccid.orEmpty()}",
             "Current plan: ${PackageNameCleaner.clean(esim.packageName)}",
             "Selected renewal: ${selectedRenewalDataGb}GB",
@@ -274,7 +330,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     }
 
     private fun submitEsimRenewalRequest() {
-        val esim = selectedRenewalEsim ?: return
+        val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
+
         lifecycleScope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
             if (session == null) {
@@ -289,6 +346,13 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
             setEsimRenewing(true)
             val result = runCatching {
+                val esim = withContext(Dispatchers.IO) {
+                    authApi.esims(session).esims.firstOrNull { esim ->
+                        esim.iccid?.equals(query, ignoreCase = true) == true ||
+                            esim.iccid?.contains(query, ignoreCase = true) == true
+                    }
+                } ?: throw IllegalStateException("No Orange eSim found for ICCID: $query")
+
                 withContext(Dispatchers.IO) { postTgtEsimRenewal(session, esim) }
             }
             setEsimRenewing(false)
@@ -296,19 +360,22 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             result
                 .onSuccess { message ->
                     Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    esimSearchResult.visibility = View.VISIBLE
                     esimSearchResult.text = message
-                    selectedRenewalEsim = null
-                    esimRenewButton.isEnabled = false
                 }
                 .onFailure { error ->
                     Toast.makeText(
                         this@TgtSimRechargeActivity,
-                        error.message ?: "Orange eSIM renewal request failed",
+                        error.message ?: "Orange eSim renewal request failed",
                         Toast.LENGTH_LONG
                     ).show()
+                    esimSearchResult.visibility = View.VISIBLE
+                    esimSearchResult.text = error.message ?: "Orange eSim renewal request failed"
                 }
         }
     }
+
+
 
     private fun submitRechargeRequest() {
         lifecycleScope.launch {
@@ -381,8 +448,8 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             requestUrl = requestUrl,
             authorizationHeader = session.authorizationHeader,
             body = body,
-            fallbackMessage = "Orange eSIM renewal submitted",
-            fallbackError = "Orange eSIM renewal request failed"
+            fallbackMessage = "Orange eSim renewal submitted",
+            fallbackError = "Orange eSim renewal request failed"
         )
     }
 
@@ -434,7 +501,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
     private fun setEsimSearching(searching: Boolean) {
         esimSearchButton.isEnabled = !searching
-        esimSearchButton.text = if (searching) "Searching..." else "Find Orange eSIM"
+        esimSearchButton.text = if (searching) "Searching..." else "Find Orange eSim"
         if (searching) {
             selectedRenewalEsim = null
             esimRenewButton.isEnabled = false
@@ -512,29 +579,26 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         clearEsimRenewalErrors()
         var valid = true
 
-        if (selectedRenewalEsim == null) {
-            esimSearchIccidLayout.error = "Find an Orange eSIM first"
+        val iccidValue = esimSearchIccid.text?.toString()?.trim().orEmpty()
+        if (iccidValue.length < 6) {
+            esimSearchIccidLayout.error = "Enter Orange eSim ICCID"
             valid = false
         }
 
-        if (esimCustomerName.text?.toString()?.trim().isNullOrBlank()) {
+        if (esimCustomerName.text?.toString()?.trim().isNullOrEmpty()) {
             esimCustomerNameLayout.error = "Customer name is required"
             valid = false
         }
 
-        if ((esimCustomerPhone.text?.toString()?.trim()?.length ?: 0) < 6) {
-            esimCustomerPhoneLayout.error = "Enter a valid phone number"
-            valid = false
-        }
-
-        val email = esimCustomerEmail.text?.toString()?.trim().orEmpty()
-        if (email.isNotBlank() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            esimCustomerEmailLayout.error = "Enter a valid email"
+        if (esimCustomerPhone.text?.toString()?.trim().isNullOrEmpty()) {
+            esimCustomerPhoneLayout.error = "Phone number is required"
             valid = false
         }
 
         return valid
     }
+
+
 
     private fun clearErrors() {
         iccidLayout.error = null
