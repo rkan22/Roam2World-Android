@@ -68,7 +68,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_tgt_sim_recharge)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.r2w_tgt_recharge)
+        supportActionBar?.title = "Orange Recharge"
 
         scroll = requireNestedScrollView()
         simRechargeSection = requireViewById(R.id.tgt_sim_recharge_section)
@@ -121,22 +121,40 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     }
 
     private fun setupModeTabs() {
-        requireViewById<Chip>(R.id.tgt_mode_sim).setOnClickListener {
+        requireViewById<View>(R.id.tgt_mode_sim).setOnClickListener {
             renderMode(isEsimRenewal = false)
         }
-        requireViewById<Chip>(R.id.tgt_mode_esim_renewal).setOnClickListener {
+        requireViewById<View>(R.id.tgt_mode_esim_renewal).setOnClickListener {
             renderMode(isEsimRenewal = true)
         }
     }
 
+
+
     private fun renderMode(isEsimRenewal: Boolean) {
         simRechargeSection.visibility = if (isEsimRenewal) View.GONE else View.VISIBLE
         esimRenewalSection.visibility = if (isEsimRenewal) View.VISIBLE else View.GONE
-        requireViewById<Chip>(R.id.tgt_mode_sim).isChecked = !isEsimRenewal
-        requireViewById<Chip>(R.id.tgt_mode_esim_renewal).isChecked = isEsimRenewal
+
+        requireViewById<View>(R.id.tgt_mode_sim).setBackgroundResource(
+            if (!isEsimRenewal) R.drawable.r2w_orange_small_toggle_selected else R.drawable.r2w_orange_small_toggle_unselected
+        )
+        requireViewById<View>(R.id.tgt_mode_esim_renewal).setBackgroundResource(
+            if (isEsimRenewal) R.drawable.r2w_orange_small_toggle_selected else R.drawable.r2w_orange_small_toggle_unselected
+        )
     }
 
+
+
     private fun setupPackageSelection() {
+        requireViewById<View>(R.id.tgt_product_30d).setOnClickListener {
+            selectedPackageName = "10GB / 30 Days"
+            renderSelectedPackage()
+        }
+        requireViewById<View>(R.id.tgt_product_60d).setOnClickListener {
+            selectedPackageName = "20GB / 60 Days"
+            renderSelectedPackage()
+        }
+
         listOf(
             R.id.tgt_package_10gb_30d to "10GB / 30 Days",
             R.id.tgt_package_20gb_30d to "20GB / 30 Days",
@@ -144,13 +162,15 @@ class TgtSimRechargeActivity : AppCompatActivity() {
             R.id.tgt_package_50gb_30d to "50GB / 30 Days",
             R.id.tgt_package_20gb_60d to "20GB / 60 Days",
             R.id.tgt_package_60gb_60d to "60GB / 60 Days"
-        ).forEach { (chipId, packageName) ->
-            requireViewById<Chip>(chipId).setOnClickListener {
+        ).forEach { (viewId, packageName) ->
+            requireViewById<View>(viewId).setOnClickListener {
                 selectedPackageName = packageName
                 renderSelectedPackage()
             }
         }
     }
+
+
 
     private fun setupRenewalPackageSelection() {
         listOf(
@@ -427,8 +447,33 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     }
 
     private fun renderSelectedPackage() {
-        selectedPackage.text = "Selected package: $selectedPackageName"
+        selectedPackage.text = "Orange Balkans SIM\n$selectedPackageName"
+
+        val is60Days = selectedPackageName.contains("60 Days")
+        requireViewById<View>(R.id.tgt_product_30d).setBackgroundResource(
+            if (!is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
+        )
+        requireViewById<View>(R.id.tgt_product_60d).setBackgroundResource(
+            if (is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
+        )
+
+        listOf(
+            R.id.tgt_package_10gb_30d to "10GB / 30 Days",
+            R.id.tgt_package_20gb_30d to "20GB / 30 Days",
+            R.id.tgt_package_30gb_30d to "30GB / 30 Days",
+            R.id.tgt_package_50gb_30d to "50GB / 30 Days",
+            R.id.tgt_package_20gb_60d to "20GB / 60 Days",
+            R.id.tgt_package_60gb_60d to "60GB / 60 Days"
+        ).forEach { (viewId, packageName) ->
+            val selected = packageName == selectedPackageName
+            val view = requireViewById<TextView>(viewId)
+            view.setBackgroundResource(if (selected) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected)
+            view.setTextColor(getColor(if (selected) R.color.r2w_premium_primary else R.color.r2w_premium_text))
+            view.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
+        }
     }
+
+
 
     private fun tgtRechargeUrl(): String =
         "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/recharge/"

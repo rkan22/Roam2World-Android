@@ -20,15 +20,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/r2w_screen_padding">
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
+            android:paddingTop="20dp"
+            android:paddingBottom="30dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Vodafone eSIM Renewal"
-                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textAppearance="?attr/textAppearanceHeadlineLarge"
                 android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAllCaps="false" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -46,10 +49,10 @@
                 android:hint="Search ICCID"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusBottomEnd="18dp"
+                app:boxCornerRadiusBottomStart="18dp"
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
                 app:hintTextColor="@color/r2w_premium_muted">
 
@@ -63,21 +66,22 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/vodafone_search_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:background="@drawable/r2w_premium_primary_button"
                 android:layout_marginTop="14dp"
                 android:text="Find Vodafone eSIM"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
+                android:textAllCaps="false"
                 app:backgroundTint="@null"
-                app:cornerRadius="@dimen/r2w_button_radius" />
+                app:cornerRadius="16dp" />
 
             <TextView
                 android:id="@+id/vodafone_search_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/r2w_vodafone_accent_card"
+                android:background="@drawable/r2w_recharge_info_card"
                 android:padding="@dimen/r2w_card_padding"
                 android:text="Enter ICCID to search Vodafone eSIMs."
                 android:textAppearance="?attr/textAppearanceBodyMedium"
@@ -90,7 +94,8 @@
                 android:text="Renewal Package"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAllCaps="false" />
 
             <HorizontalScrollView
                 android:layout_width="match_parent"
@@ -110,19 +115,34 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:text="200GB / 30D" />
+                        android:text="200GB / 30D"
+                    android:textColor="@color/r2w_premium_primary"
+                    app:chipBackgroundColor="#F8FAFF"
+                    app:chipCornerRadius="16dp"
+                    app:chipStrokeColor="#BFD4FF"
+                    app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/vodafone_package_400gb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="400GB / 30D" />
+                        android:text="400GB / 30D"
+                    android:textColor="@color/r2w_premium_primary"
+                    app:chipBackgroundColor="#F8FAFF"
+                    app:chipCornerRadius="16dp"
+                    app:chipStrokeColor="#BFD4FF"
+                    app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/vodafone_package_500gb"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="500GB / 30D" />
+                        android:text="500GB / 30D"
+                    android:textColor="@color/r2w_premium_primary"
+                    app:chipBackgroundColor="#F8FAFF"
+                    app:chipCornerRadius="16dp"
+                    app:chipStrokeColor="#BFD4FF"
+                    app:chipStrokeWidth="1dp" />
                 </com.google.android.material.chip.ChipGroup>
             </HorizontalScrollView>
 
@@ -133,7 +153,8 @@
                 android:text="Customer Information"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textAllCaps="false" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/vodafone_customer_name_layout"
@@ -143,10 +164,10 @@
                 android:hint="Customer name"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusBottomEnd="18dp"
+                app:boxCornerRadiusBottomStart="18dp"
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
                 app:hintTextColor="@color/r2w_premium_muted">
 
@@ -165,10 +186,10 @@
                 android:hint="Phone number"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusBottomEnd="18dp"
+                app:boxCornerRadiusBottomStart="18dp"
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
                 app:hintTextColor="@color/r2w_premium_muted">
 
@@ -187,10 +208,10 @@
                 android:hint="Email optional"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 app:boxBackgroundColor="@color/r2w_premium_surface"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusBottomEnd="18dp"
+                app:boxCornerRadiusBottomStart="18dp"
+                app:boxCornerRadiusTopEnd="18dp"
+                app:boxCornerRadiusTopStart="18dp"
                 app:boxStrokeColor="@color/r2w_premium_border"
                 app:hintTextColor="@color/r2w_premium_muted">
 
@@ -204,15 +225,16 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/vodafone_renew_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="54dp"
                 android:background="@drawable/r2w_premium_primary_button"
                 android:layout_marginTop="20dp"
                 android:enabled="false"
                 android:text="Continue Renewal"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
+                android:textAllCaps="false"
                 app:backgroundTint="@null"
-                app:cornerRadius="@dimen/r2w_button_radius" />
+                app:cornerRadius="16dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
