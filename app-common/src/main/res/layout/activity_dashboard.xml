@@ -26,7 +26,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="178dp"
+                android:layout_height="188dp"
                 android:layout_marginHorizontal="0dp"
                 app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="0dp"
@@ -132,7 +132,8 @@
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="128dp"
+                    android:layout_height="132dp"
+                    android:layout_gravity="center_horizontal"
                     android:layout_marginTop="10dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="22dp"
@@ -146,16 +147,15 @@
                         android:background="@drawable/r2w_wallet_gradient"
                         android:padding="20dp">
 
-                        <TextView
+                        <ImageView
                             android:id="@+id/dashboard_wallet_icon"
                             android:layout_width="70dp"
                             android:layout_height="70dp"
                             android:background="@drawable/r2w_premium_icon_box"
-                            android:gravity="center"
-                            android:text="▣"
-                            android:textColor="@color/r2w_premium_primary"
-                            android:textSize="30sp"
-                            android:textStyle="bold"
+                            android:contentDescription="@string/wallet_title"
+                            android:padding="20dp"
+                            android:src="@drawable/ic_wallet"
+                            app:tint="@color/r2w_premium_primary"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
@@ -190,16 +190,27 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
+                    android:id="@+id/dashboard_dynamic_kpis"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:layout_marginTop="16dp"
                     android:baselineAligned="false"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginEnd="7dp"
+                        android:layout_height="126dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         app:cardBackgroundColor="@color/r2w_premium_surface"
                         app:cardCornerRadius="@dimen/r2w_card_radius"
@@ -212,7 +223,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:orientation="vertical"
-                            android:padding="16dp">
+                            android:padding="18dp">
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -235,8 +246,8 @@
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="118dp"
-                        android:layout_marginStart="7dp"
+                        android:layout_height="126dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         app:cardBackgroundColor="@color/r2w_premium_surface"
                         app:cardCornerRadius="@dimen/r2w_card_radius"
@@ -249,7 +260,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:orientation="vertical"
-                            android:padding="16dp">
+                            android:padding="18dp">
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -275,6 +286,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/dashboard_dealer_summary_card"
                     android:layout_width="match_parent"
+                    android:layout_gravity="center_horizontal"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
                     android:visibility="gone"
@@ -334,7 +346,7 @@
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="82dp"
-                            android:layout_marginEnd="7dp"
+                            android:layout_marginEnd="6dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Buy eSIM"
@@ -351,7 +363,7 @@
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="82dp"
-                            android:layout_marginStart="7dp"
+                            android:layout_marginStart="6dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Wallet Request"
@@ -376,7 +388,7 @@
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="82dp"
-                            android:layout_marginEnd="7dp"
+                            android:layout_marginEnd="6dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="eSIM History"
@@ -393,7 +405,7 @@
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="82dp"
-                            android:layout_marginStart="7dp"
+                            android:layout_marginStart="6dp"
                             android:layout_weight="1"
                             android:gravity="center"
                             android:text="Dealers"

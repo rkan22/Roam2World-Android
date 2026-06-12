@@ -229,9 +229,9 @@ class DashboardActivity : AppCompatActivity() {
         currentRole = session.role
         invalidateOptionsMenu()
         val isReseller = session.role?.lowercase() == "reseller"
-        dealerSummaryCard.visibility = if (isReseller) View.VISIBLE else View.GONE
-        manageDealers.visibility = if (isReseller) View.VISIBLE else View.GONE
-        greeting.text = session.displayName?.let { "Welcome $it 👋" } ?: "Welcome Admin 👋"
+        dealerSummaryCard.visibility = View.GONE
+        manageDealers.visibility = View.GONE
+        greeting.text = session.displayName?.let { "Welcome $it" } ?: "Welcome Admin"
         account.text = listOfNotNull(
             session.role?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
             session.email
@@ -309,7 +309,9 @@ class DashboardActivity : AppCompatActivity() {
 
 
     private fun addTodaySalesKpiCard() {
-        val parent = activeEsims.parent?.parent?.parent as? LinearLayout ?: return
+        val parent = requireViewById<LinearLayout>(R.id.dashboard_dynamic_kpis)
+
+        parent.removeAllViews()
 
         val section = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -317,7 +319,7 @@ class DashboardActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = dp(14)
+                topMargin = dp(16)
             }
         }
 
@@ -339,12 +341,15 @@ class DashboardActivity : AppCompatActivity() {
             fullWidth = true
         )
 
-        parent.addView(section)
+        val insertIndex = parent.indexOfChild(activeEsims.parent?.parent as? android.view.View) + 1
+        parent.addView(section, insertIndex.coerceAtLeast(0))
     }
 
     private fun createKpiRow(): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
+            isBaselineAligned = false
+            gravity = android.view.Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -361,6 +366,9 @@ class DashboardActivity : AppCompatActivity() {
         esimFilter: String? = null,
         fullWidth: Boolean = false
     ): TextView {
+        val isRow = parent.orientation == LinearLayout.HORIZONTAL
+        val childCountBeforeAdd = parent.childCount
+
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
@@ -377,38 +385,47 @@ class DashboardActivity : AppCompatActivity() {
                     )
                 }
             }
-            layoutParams = if (fullWidth) {
+
+            layoutParams = if (fullWidth || !isRow) {
                 LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    dp(126)
                 ).apply {
                     topMargin = dp(12)
                 }
             } else {
                 LinearLayout.LayoutParams(
                     0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    dp(126),
                     1f
                 ).apply {
-                    marginEnd = dp(6)
-                    marginStart = dp(6)
+                    if (childCountBeforeAdd == 0) {
+                        marginEnd = dp(6)
+                    } else {
+                        marginStart = dp(6)
+                    }
                 }
             }
         }
 
         val body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(16), dp(18), dp(16))
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(18), dp(14), dp(18), dp(14))
         }
 
         body.addView(TextView(this).apply {
             text = title
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
             setTextColor(getColor(R.color.r2w_text_secondary))
         })
 
         val value = TextView(this).apply {
             text = "--"
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
             setPadding(0, dp(6), 0, 0)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineMedium)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -419,6 +436,8 @@ class DashboardActivity : AppCompatActivity() {
 
         body.addView(TextView(this).apply {
             text = subtitle
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
             setPadding(0, dp(4), 0, 0)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
             setTextColor(getColor(R.color.r2w_text_secondary))
@@ -432,7 +451,7 @@ class DashboardActivity : AppCompatActivity() {
 
 
     private fun addExpiredSoonKpiCard() {
-        val parent = activeEsims.parent?.parent?.parent as? LinearLayout ?: return
+        val parent = requireViewById<LinearLayout>(R.id.dashboard_dynamic_kpis)
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
@@ -443,12 +462,13 @@ class DashboardActivity : AppCompatActivity() {
             isFocusable = true
             setOnClickListener { openExpiredSoonEsims() }
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                topMargin = dp(14)
+                topMargin = dp(16)
             }
         }
         val body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(16), dp(18), dp(16))
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(18), dp(14), dp(18), dp(14))
         }
         body.addView(TextView(this).apply {
             text = "Expired eSIMs"
@@ -491,10 +511,10 @@ class DashboardActivity : AppCompatActivity() {
         }
         row.addView(createQuickActionButton("My eSIMs") {
             openEsimActivity()
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
         row.addView(createQuickActionButton("Notifications") {
             startActivity(Intent(this, MobileNotificationsActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
         quickActions.addView(row)
 
         val row2 = LinearLayout(this).apply {
@@ -506,10 +526,10 @@ class DashboardActivity : AppCompatActivity() {
         }
         row2.addView(createQuickActionButton("Orange Recharge") {
             startActivity(Intent(this, TgtSimRechargeActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
         row2.addView(createQuickActionButton("Vodafone Recharge") {
             startActivity(Intent(this, VodafoneRenewalActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
         quickActions.addView(row2)
 
         val row3 = LinearLayout(this).apply {
@@ -521,10 +541,10 @@ class DashboardActivity : AppCompatActivity() {
         }
         row3.addView(createQuickActionButton("Orange Check GB") {
             startActivity(Intent(this, TgtCheckGbActivity::class.java))
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { rightMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { rightMargin = dp(6) })
         row3.addView(createQuickActionButton("More") {
             openMoreActivity()
-        }, LinearLayout.LayoutParams(0, dp(82), 1f).apply { leftMargin = dp(7) })
+        }, LinearLayout.LayoutParams(0, dp(126), 1f).apply { leftMargin = dp(6) })
         quickActions.addView(row3)
     }
 
