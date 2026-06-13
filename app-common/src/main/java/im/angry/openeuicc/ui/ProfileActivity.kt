@@ -83,11 +83,18 @@ class ProfileActivity : AppCompatActivity() {
         val emailValue = session?.email?.takeIf { it.isNotBlank() } ?: "user@company.com"
         val roleValue = session?.role?.takeIf { it.isNotBlank() } ?: "B2B User"
 
+        val prettyRole = roleValue.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+
         avatar.text = initials(displayName)
         name.text = displayName
         email.text = emailValue
-        role.text = "Role: ${roleValue.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }}"
+        role.text = "Premium $prettyRole"
         permissions.text = permissionsForRole(roleValue)
+
+        findViewById<TextView>(R.id.profile_full_name_value)?.text = displayName
+        findViewById<TextView>(R.id.profile_email_value)?.text = emailValue
+        findViewById<TextView>(R.id.profile_phone_value)?.text = "Not provided"
+        findViewById<TextView>(R.id.profile_account_type)?.text = "Roam2World B2B"
     }
 
     private fun initials(value: String): String {

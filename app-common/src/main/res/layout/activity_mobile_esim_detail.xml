@@ -22,31 +22,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="22dp"
+            android:paddingHorizontal="18dp"
+            android:paddingTop="18dp"
             android:paddingBottom="24dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/dashboard_brand"
-                android:textAppearance="?attr/textAppearanceLabelLarge"
-                android:textColor="@color/r2w_premium_primary" />
-
-            <TextView
-                android:id="@+id/mobile_esim_detail_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:maxLines="2"
-                android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                android:textColor="@color/r2w_premium_text" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/mobile_esim_detail_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:indeterminate="true"
                 android:visibility="gone" />
 
@@ -59,39 +42,392 @@
                 android:textColor="@color/r2w_premium_danger"
                 android:visibility="gone" />
 
+            <TextView
+                android:id="@+id/mobile_esim_detail_title"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/mobile_esim_iccid_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:padding="16dp">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/mobile_esim_qr_title"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_esim_summary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="eSIM Summary"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Provider:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_provider"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Package:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_package"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:ellipsize="end"
+                            android:gravity="end"
+                            android:maxLines="1"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Data:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_data_remaining"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/mobile_esim_detail_data_used"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/mobile_esim_detail_created"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/mobile_esim_detail_order"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:visibility="gone" />
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Validity:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_validity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="30 Days"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Status:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:background="@drawable/r2w_esim_status_active"
+                            android:gravity="center"
+                            android:minWidth="86dp"
+                            android:paddingHorizontal="14dp"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Expiry:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_expires"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_esim_info" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="Activation Information"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:id="@+id/mobile_esim_iccid_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="ICCID:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_iccid"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.5"
+                            android:ellipsize="middle"
+                            android:gravity="end"
+                            android:maxLines="1"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mobile_esim_copy_iccid"
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@android:color/transparent"
+                            android:insetBottom="0dp"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:insetTop="0dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:text=""
+                            app:backgroundTint="@null"
+                            app:icon="@drawable/ic_esim_copy"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="26dp"
+                            app:iconTint="#2F63D9" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:id="@+id/mobile_esim_activation_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Activation Code:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_activation"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.5"
+                            android:ellipsize="middle"
+                            android:gravity="end"
+                            android:maxLines="1"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mobile_esim_copy_activation"
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@android:color/transparent"
+                            android:insetBottom="0dp"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:insetTop="0dp"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:text=""
+                            app:backgroundTint="@null"
+                            app:icon="@drawable/ic_esim_copy"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="26dp"
+                            app:iconTint="#2F63D9" />
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+
+                    <LinearLayout
+                        android:id="@+id/mobile_esim_smdp_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Matching ID:"
+                            android:textColor="@color/r2w_text_secondary"
+                            android:textSize="16sp" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_smdp"
+                            android:layout_width="1dp"
+                            android:layout_height="1dp"
+                            android:visibility="gone" />
+                        <TextView
+                            android:id="@+id/mobile_esim_detail_matching_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="16sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/mobile_esim_copy_smdp"
+                            android:layout_width="1dp"
+                            android:layout_height="1dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
 
                     <ImageView
                         android:id="@+id/mobile_esim_qr_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="260dp"
-                        android:layout_marginTop="12dp"
+                        android:layout_width="220dp"
+                        android:layout_height="220dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="14dp"
                         android:adjustViewBounds="true"
-                        android:background="@drawable/r2w_premium_card"
+                        android:background="#FFFFFF"
                         android:contentDescription="@string/mobile_esim_qr_title"
-                        android:padding="12dp"
+                        android:padding="8dp"
                         android:scaleType="fitCenter"
                         android:visibility="gone" />
 
@@ -100,47 +436,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:gravity="center"
                         android:text="@string/mobile_esim_qr_unavailable"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="@color/r2w_premium_muted"
                         android:visibility="gone" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_show_qr"
-                        android:background="@drawable/r2w_esim_secondary_button"
-                                                android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/mobile_esim_show_qr"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp"
-                        android:textColor="@color/r2w_premium_primary"
-                        app:icon="@drawable/ic_scan_black" app:backgroundTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_share_qr"
-                        android:background="@drawable/r2w_esim_secondary_button"
-                                                android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/mobile_esim_share_qr"
-                        android:textColor="@color/r2w_premium_primary"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp" app:backgroundTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_send_customer"
-                        android:background="@drawable/r2w_premium_primary_button"
-                        style="@style/Widget.Material3.Button"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="10dp"
-                        android:text="@string/mobile_esim_send_customer"
-                        android:textColor="@android:color/white"
-                        app:cornerRadius="16dp" app:backgroundTint="@null" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -148,291 +448,143 @@
                 android:id="@+id/mobile_esim_install_assistant_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Install Assistant"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_install_status"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_install_steps"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/mobile_esim_activation_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_iccid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_copy_iccid"
-                        android:background="@drawable/r2w_esim_secondary_button"
-                                                android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/mobile_esim_copy_iccid"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp"
-                        android:textColor="@color/r2w_premium_primary"
-                        app:icon="@drawable/ic_save_as_black" app:backgroundTint="@null" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/mobile_esim_smdp_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_activation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_copy_activation"
-                        android:background="@drawable/r2w_esim_secondary_button"
-                                                android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/mobile_esim_copy_activation"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp"
-                        android:textColor="@color/r2w_premium_primary"
-                        app:icon="@drawable/ic_save_as_black" app:backgroundTint="@null" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_smdp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_matching_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/mobile_esim_copy_smdp"
-                        android:background="@drawable/r2w_esim_secondary_button"
-                                                android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/mobile_esim_copy_smdp"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp"
-                        android:textColor="@color/r2w_premium_primary"
-                        app:icon="@drawable/ic_save_as_black" app:backgroundTint="@null" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/mobile_esim_profile"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text" />
+                    android:padding="16dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/mobile_esim_detail_provider"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/r2w_chip_success"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:textAppearance="?attr/textAppearanceLabelSmall" />
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_esim_tools" />
 
                         <TextView
-                            android:id="@+id/mobile_esim_detail_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/r2w_chip_success"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:textAppearance="?attr/textAppearanceLabelSmall" />
+                            android:layout_marginStart="12dp"
+                            android:text="Installation Actions"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/mobile_esim_detail_package"
+                        android:id="@+id/mobile_esim_install_status"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/mobile_esim_install_steps"
+                        android:layout_width="1dp"
+                        android:layout_height="1dp"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mobile_esim_install_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/r2w_premium_primary_button"
+                        android:text="Install via OpenEUICC"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_esim_download"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconSize="26dp"
+                        app:iconTint="@android:color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mobile_esim_show_qr"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/r2w_esim_outline_button"
+                        android:text="View QR Code"
+                        android:textAllCaps="false"
+                        android:textColor="#2F63D9"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_esim_eye"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconSize="26dp"
+                        app:iconTint="#2F63D9"
+                        app:strokeWidth="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mobile_esim_share_qr"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/r2w_esim_outline_button"
+                        android:text="@string/mobile_esim_share_qr"
+                        android:textAllCaps="false"
+                        android:textColor="#2F63D9"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_esim_copy"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconSize="26dp"
+                        app:iconTint="#2F63D9"
+                        app:strokeWidth="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mobile_esim_send_customer"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/r2w_esim_outline_button"
+                        android:text="@string/mobile_esim_send_customer"
+                        android:textAllCaps="false"
+                        android:textColor="#2F63D9"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_esim_copy"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconSize="26dp"
+                        app:iconTint="#2F63D9"
+                        app:strokeWidth="0dp" />
+
+                    <TextView
+                        android:id="@+id/mobile_esim_install_unavailable"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_text" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_expires"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:gravity="center"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_data_remaining"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_data_used"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_created"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
-
-                    <TextView
-                        android:id="@+id/mobile_esim_detail_order"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_muted" />
+                        android:textColor="@color/r2w_premium_muted"
+                        android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/mobile_esim_install_button"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/r2w_premium_primary_button"
-                android:text="@string/purchase_install_esim"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                app:backgroundTint="@null"
-                app:cornerRadius="16dp"
-                app:icon="@drawable/ic_task_sim_card_download" />
-
-            <TextView
-                android:id="@+id/mobile_esim_install_unavailable"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/mobile_esim_install_unavailable"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_premium_muted"
-                android:visibility="gone" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

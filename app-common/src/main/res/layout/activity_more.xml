@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_premium_bg">
+    android:background="#FFFFFF">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -11,6 +11,7 @@
         android:id="@+id/more_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/more_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,412 +21,486 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="20dp"
-            android:paddingBottom="30dp">
+            android:paddingTop="22dp"
+            android:paddingBottom="24dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="22dp"
                 android:text="More"
-                android:textAppearance="?attr/textAppearanceHeadlineLarge"
-                android:textColor="@color/r2w_premium_text"
+                android:textColor="@color/r2w_text_primary"
+                android:textSize="34sp"
                 android:textStyle="bold" />
 
-            <TextView
+            <Space
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Roam2World B2B telecom control center"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_premium_muted" />
+                android:layout_height="28dp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/dashboard_hero_gradient"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="58dp"
-                        android:layout_height="58dp"
-                        android:background="@drawable/r2w_premium_icon_box"
-                        android:backgroundTint="#33FFFFFF"
-                        android:gravity="center"
-                        android:text="R2W"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Roam2World B2B"
-                            android:textAppearance="?attr/textAppearanceTitleMedium"
-                            android:textColor="@android:color/white"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Admin / Reseller / Dealer workspace"
-                            android:textAppearance="?attr/textAppearanceBodyMedium"
-                            android:textColor="#DDEBFF" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Business Operations"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+            <Space
+                android:id="@+id/more_esim_history"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
 
             <LinearLayout
+                android:id="@+id/more_profile"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_customers"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Customers\nCRM"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_person"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_esim_history"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Orders\nHistory"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_checkmark_outline"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_openeuicc"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="OpenEUICC\nInstall"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_task_sim_card_download"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_tgt_recharge"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Orange\nRecharge"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_packages"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_vodafone_renewal"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Vodafone\nRecharge"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_packages"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_orders"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Order\nStatus"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_wallet"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_reports"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Reports\nDashboard"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_bar_chart"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/more_support"
-                android:background="@drawable/r2w_more_menu_button"
-                                                android:layout_width="0dp"
-                        android:layout_height="86dp"
-                        android:layout_marginStart="6dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Support\nHelp"
-                        android:textAlignment="center"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_support"
-                        app:iconGravity="top"
-                        app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/more_notifications"
-                android:background="@drawable/r2w_more_menu_wide_button"
-                                android:layout_width="match_parent"
-                android:layout_height="74dp"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="Notifications\nInbox"
-                android:textAlignment="center"
-                app:cornerRadius="22dp"
-                app:icon="@drawable/ic_support"
-                app:iconGravity="top"
-                app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/more_tgt_check_gb"
-                android:background="@drawable/r2w_more_menu_wide_button"
-                                android:layout_width="match_parent"
-                android:layout_height="74dp"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="Orange\nCheck GB"
-                android:textAlignment="center"
-                app:cornerRadius="22dp"
-                app:icon="@drawable/ic_packages"
-                app:iconGravity="top"
-                app:iconPadding="6dp" 
-                        app:backgroundTint="@null"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="#E3EBF7"
-                        app:strokeWidth="0dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Account"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_profile"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Profile"
-                    app:cornerRadius="@dimen/r2w_card_radius"
-                    app:icon="@drawable/ic_person"
-                    app:iconGravity="top" 
-                        android:backgroundTint="@color/r2w_premium_surface"
-                        android:textColor="@color/r2w_premium_text"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="@color/r2w_premium_border"
-                        app:strokeWidth="1dp"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/more_settings"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="74dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Settings"
-                    app:cornerRadius="@dimen/r2w_card_radius"
-                    app:icon="@drawable/ic_settings"
-                    app:iconGravity="top" 
-                        android:backgroundTint="@color/r2w_premium_surface"
-                        android:textColor="@color/r2w_premium_text"
-                        app:iconTint="@color/r2w_premium_primary"
-                        app:strokeColor="@color/r2w_premium_border"
-                        app:strokeWidth="1dp"/>
-            </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/more_logout"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="18dp"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
-                android:backgroundTint="@color/r2w_premium_surface"
-                android:text="@string/logout"
-                android:textColor="@color/r2w_premium_danger"
-                app:strokeColor="@color/r2w_premium_danger"
-                app:strokeWidth="1dp"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:icon="@drawable/ic_logout"
-                app:iconTint="@color/r2w_premium_danger" />
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_person"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Profile"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_customers"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_person"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Customer CRM"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_openeuicc"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_task_sim_card_download"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="OpenEUICC"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_tgt_recharge"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/orange_logo" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Orange SIM Recharge"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_vodafone_renewal"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/vodafone_logo" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Vodafone Recharge"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_orders"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_wallet"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Orders"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_reports"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_bar_chart"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Reports"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_support"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_support"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Support"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_notifications"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_support"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                android:id="@+id/more_notifications_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Notifications"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_tgt_check_gb"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_packages"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Orange Check GB"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_settings"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_settings"
+                app:tint="@color/r2w_premium_primary" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Settings"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_chevron"
+                    app:tint="@color/r2w_text_primary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/more_logout"
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:background="@drawable/r2w_more_row_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_more_logout"
+                    app:tint="#D20A0A" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_weight="1"
+                    android:text="Logout"
+                    android:textColor="#D20A0A"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -433,7 +508,7 @@
         android:id="@+id/more_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_premium_surface"
+        android:background="#FFFFFF"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

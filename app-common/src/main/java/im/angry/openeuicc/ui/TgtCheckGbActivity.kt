@@ -80,6 +80,11 @@ class TgtCheckGbActivity : AppCompatActivity() {
 
         setupInsets()
         checkButton.setOnClickListener { checkGb() }
+        findViewById<MaterialButton>(R.id.tgt_usage_topup).setOnClickListener {
+            startActivity(Intent(this, TgtSimRechargeActivity::class.java).apply {
+                putExtra("renew.iccid", iccidInput.text?.toString()?.trim().orEmpty())
+            })
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -172,32 +177,69 @@ class TgtCheckGbActivity : AppCompatActivity() {
         val usedMb = firstNumber(usage, rawData, "used_mb", "usedMb", "dataUsage")
         val remainingMb = firstNumber(usage, rawData, "remaining_mb", "remainingMb", "dataResidual")
 
-        val lines = mutableListOf<String>()
-        lines += "Orange Check GB"
-        lines += "Result: ${raw.optString("message").ifBlank { "Success" }}"
-        response.optString("iccid").takeIf { it.isNotBlank() }?.let { lines += "ICCID: $it" }
-        firstNotBlank(
-            response.optString("order_no"),
-            usage.optString("order_no"),
-            usage.optString("orderNo")
-        )?.let { lines += "Order No: $it" }
+        val totalText = totalMb?.let { formatGb(it) } ?: "-- GB"
+        val usedText = usedMb?.let { formatGb(it) } ?: "-- GB"
+        val remainingText = remainingMb?.let { formatGb(it) } ?: "-- GB"
 
-        if (totalMb != null) lines += "Total: ${formatGb(totalMb)}"
-        if (usedMb != null) lines += "Used: ${formatGb(usedMb)}"
-        if (remainingMb != null) lines += "Remaining: ${formatGb(remainingMb)}"
+        val percent = if (totalMb != null && usedMb != null && totalMb > 0) {
+            ((usedMb / totalMb) * 100).roundToInt().coerceIn(0, 100)
+        } else {
+            0
+        }
 
-        usage.optString("status").takeIf { it.isNotBlank() }?.let {
-            val prettyStatus = formatTgtStatus(it)
-            lines += "Status: $prettyStatus"
-            if (it.equals("EXPIRED", ignoreCase = true)) {
-                lines += "This eSIM package has expired."
+        val statusRaw = usage.optString("status").ifBlank { raw.optString("status") }
+        val statusText = formatTgtStatus(statusRaw.ifBlank { "ACTIVE" })
+
+        val startDate = firstNotBlank(
+            usage.optString("start_date"),
+            usage.optString("startDate"),
+            rawData.optString("startTime"),
+            rawData.optString("activated_time")
+        )?.let { formatTgtDate(it) } ?: "—"
+
+        val endDate = firstNotBlank(
+            usage.optString("end_date"),
+            usage.optString("endDate"),
+            rawData.optString("endTime"),
+            rawData.optString("expiredTime")
+        )?.let { formatTgtDate(it) } ?: "—"
+
+        val packageName = firstNotBlank(
+            usage.optString("package_name"),
+            usage.optString("packageName"),
+            rawData.optString("productName"),
+            rawData.optString("packageName")
+        ) ?: "Orange Package"
+
+        val iccid = response.optString("iccid").ifBlank { iccidInput.text?.toString()?.trim().orEmpty() }
+
+        findViewById<com.google.android.material.progressindicator.LinearProgressIndicator>(R.id.tgt_usage_progress).progress = percent
+        findViewById<TextView>(R.id.tgt_usage_remaining).text = remainingText
+        findViewById<TextView>(R.id.tgt_usage_total).text = "of $totalText"
+        findViewById<TextView>(R.id.tgt_usage_percent).text = "$percent% Used"
+        findViewById<TextView>(R.id.tgt_usage_package).text = packageName
+        findViewById<TextView>(R.id.tgt_usage_iccid).text = iccid.ifBlank { "ICCID unavailable" }
+        findViewById<TextView>(R.id.tgt_usage_allowance).text = totalText
+        findViewById<TextView>(R.id.tgt_usage_activated).text = startDate
+        findViewById<TextView>(R.id.tgt_usage_expires).text = endDate
+        findViewById<TextView>(R.id.tgt_usage_status).apply {
+            text = statusText
+            if (statusText.contains("expired", ignoreCase = true)) {
+                setBackgroundResource(R.drawable.r2w_customer_expired_badge)
+                setTextColor(android.graphics.Color.parseColor("#DC2626"))
+            } else {
+                setBackgroundResource(R.drawable.r2w_customer_active_badge)
+                setTextColor(android.graphics.Color.parseColor("#168653"))
             }
         }
-        usage.optString("start_date").takeIf { it.isNotBlank() }?.let { lines += "Start Date: ${formatTgtDate(it)}" }
-        usage.optString("end_date").takeIf { it.isNotBlank() }?.let { lines += "End Date: ${formatTgtDate(it)}" }
-        rawData.optString("qtaconsumption").takeIf { it.isNotBlank() }?.let { lines += "Consumption: $it" }
 
-        result.text = lines.joinToString("\n")
+        result.visibility = View.GONE
+        result.text = listOf(
+            "Total: $totalText",
+            "Used: $usedText",
+            "Remaining: $remainingText",
+            "Status: $statusText"
+        ).joinToString("\n")
     }
 
 

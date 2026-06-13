@@ -3,6 +3,7 @@ package im.angry.openeuicc.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
@@ -25,19 +26,20 @@ class MoreActivity : AppCompatActivity() {
     private val api by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
     private lateinit var scroll: View
     private lateinit var bottomNav: BottomNavigationView
-    private lateinit var profile: MaterialButton
-    private lateinit var customers: MaterialButton
-    private lateinit var esimHistory: MaterialButton
-    private lateinit var openEuicc: MaterialButton
-    private lateinit var tgtRecharge: MaterialButton
-    private lateinit var tgtCheckGb: MaterialButton
-    private lateinit var vodafoneRenewal: MaterialButton
-    private lateinit var orders: MaterialButton
-    private lateinit var notifications: MaterialButton
-    private lateinit var reports: MaterialButton
-    private lateinit var support: MaterialButton
-    private lateinit var settings: MaterialButton
-    private lateinit var logoutButton: MaterialButton
+    private lateinit var profile: View
+    private lateinit var customers: View
+    private lateinit var esimHistory: View
+    private lateinit var openEuicc: View
+    private lateinit var tgtRecharge: View
+    private lateinit var tgtCheckGb: View
+    private lateinit var vodafoneRenewal: View
+    private lateinit var orders: View
+    private lateinit var notifications: View
+    private lateinit var reports: View
+    private lateinit var support: View
+    private lateinit var settings: View
+    private lateinit var logoutButton: View
+    private lateinit var notificationsText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -57,6 +59,7 @@ class MoreActivity : AppCompatActivity() {
         vodafoneRenewal = requireViewById(R.id.more_vodafone_renewal)
         orders = requireViewById(R.id.more_orders)
         notifications = requireViewById(R.id.more_notifications)
+        notificationsText = requireViewById(R.id.more_notifications_text)
         reports = requireViewById(R.id.more_reports)
         support = requireViewById(R.id.more_support)
         settings = requireViewById(R.id.more_settings)
@@ -86,10 +89,10 @@ class MoreActivity : AppCompatActivity() {
                 0
             }
 
-            notifications.text = if (unreadCount > 0) {
-                "Notifications\n$unreadCount unread"
+            notificationsText.text = if (unreadCount > 0) {
+                "Notifications ($unreadCount)"
             } else {
-                "Notifications\nInbox"
+                "Notifications"
             }
         }
     }
@@ -195,7 +198,7 @@ class MoreActivity : AppCompatActivity() {
 
     private fun showAllBusinessItems() {
         customers.visibility = View.VISIBLE
-        esimHistory.visibility = View.VISIBLE
+        esimHistory.visibility = View.GONE
         openEuicc.visibility = View.VISIBLE
         tgtRecharge.visibility = View.VISIBLE
         tgtCheckGb.visibility = View.VISIBLE

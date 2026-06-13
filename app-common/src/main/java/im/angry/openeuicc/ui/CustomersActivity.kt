@@ -8,6 +8,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -288,56 +290,173 @@ class CustomersActivity : AppCompatActivity() {
             }
             .sortedBy { it.name.lowercase() }
 
+
+    private fun initialsForCustomer(name: String): String =
+        name.split(" ")
+            .filter { it.isNotBlank() }
+            .take(2)
+            .map { it.first().uppercaseChar() }
+            .joinToString("")
+            .ifBlank { "CU" }
+
+    private fun statusLabel(record: CustomerEsimRecord): String =
+        when {
+            isExpired(record) -> "Expired"
+            record.status?.contains("pending", ignoreCase = true) == true -> "Pending"
+            else -> "Active"
+        }
+
+    private fun statusBadgeBg(label: String): Int =
+        when (label.lowercase(Locale.ENGLISH)) {
+            "expired" -> R.drawable.r2w_customer_expired_badge
+            "pending", "expiring" -> R.drawable.r2w_customer_expiring_badge
+            else -> R.drawable.r2w_customer_active_badge
+        }
+
+    private fun statusTextColor(label: String): Int =
+        when (label.lowercase(Locale.ENGLISH)) {
+            "expired" -> android.graphics.Color.parseColor("#DC2626")
+            "pending", "expiring" -> android.graphics.Color.parseColor("#F59E0B")
+            else -> android.graphics.Color.parseColor("#168653")
+        }
+
+
     private fun renderCustomers(customers: List<CustomerSummary>) {
         list.removeAllViews()
         empty.visibility = if (customers.isEmpty()) View.VISIBLE else View.GONE
-        summary.text = "${customers.size} customers • ${customers.sumOf { it.totalEsims }} eSIM records • ${customers.sumOf { it.activeEsims }} active"
+
+        val totalCustomers = allCustomers.size
+        val totalActive = allCustomers.sumOf { it.activeEsims }
+
+        findViewById<TextView>(R.id.customers_total_count)?.text = totalCustomers.toString()
+        findViewById<TextView>(R.id.customers_active_count)?.text = totalActive.toString()
+
+        summary.text = "Showing ${customers.size} customers"
         customers.forEach { customer -> list.addView(createCustomerCard(customer)) }
     }
 
     private fun createCustomerCard(customer: CustomerSummary): View {
         val latest = customer.latestEsim
+        val status = statusLabel(latest)
+
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
-            cardElevation = dp(4).toFloat()
+            cardElevation = dp(3).toFloat()
             strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_premium_border))
-            setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                bottomMargin = dp(14)
+            setStrokeColor(android.graphics.Color.parseColor("#E2E8F0"))
+            setCardBackgroundColor(android.graphics.Color.WHITE)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = dp(12)
             }
+            setOnClickListener { showCustomerDetails(customer) }
+            isClickable = true
+            isFocusable = true
         }
-        val body = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(16), dp(18), dp(16))
-        }
-        body.addView(label(customer.name, true, com.google.android.material.R.style.TextAppearance_Material3_TitleLarge))
-        body.addView(label(listOfNotNull(customer.phone, customer.email).filter { it.isNotBlank() }.joinToString(" • ").ifBlank { "No contact info" }, false))
-        body.addView(label("${customer.totalEsims} eSIMs • ${customer.activeEsims} active • ${customer.expiredEsims} expired", false).apply { setPadding(0, dp(12), 0, 0) })
-        body.addView(label(
-            listOfNotNull(
-                latest.packageName?.let { "Last package: ${PackageNameCleaner.clean(it)}" },
-                latest.orderNumber?.let { "Order: $it" },
-                latest.status?.let { "Status: ${formatCustomerStatus(it)}" },
-                latest.dataRemaining?.let { "Remaining: $it" },
-                latest.iccid?.let { "ICCID: $it" },
-                latest.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
-                latest.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
-                latest.provider?.let { "Provider: ${visibleProvider(it)}" }
-            ).joinToString("\n").ifBlank { "No eSIM details available" },
-            false,
-            com.google.android.material.R.style.TextAppearance_Material3_BodySmall
-        ).apply { setPadding(0, dp(10), 0, 0) })
 
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBaselineAligned(false)
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(14) }
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(14), dp(14), dp(14))
         }
-        row.addView(button("View Details") { showCustomerDetails(customer) }, LinearLayout.LayoutParams(0, dp(48), 1f).apply { rightMargin = dp(6) })
-        row.addView(button("Last eSIM") { openEsimDetail(latest) }, LinearLayout.LayoutParams(0, dp(48), 1f).apply { leftMargin = dp(6) })
-        body.addView(row)
-        card.addView(body)
+
+        val avatarWrap = FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(70), dp(70))
+        }
+
+        avatarWrap.addView(TextView(this).apply {
+            text = initialsForCustomer(customer.name)
+            gravity = Gravity.CENTER
+            background = getDrawable(R.drawable.r2w_customer_avatar_bg)
+            setTextColor(getColor(R.color.r2w_premium_primary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            layoutParams = FrameLayout.LayoutParams(dp(64), dp(64), Gravity.CENTER)
+        })
+
+        val info = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                leftMargin = dp(14)
+            }
+        }
+
+        info.addView(TextView(this).apply {
+            text = customer.name
+            setTextColor(getColor(R.color.r2w_text_primary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+        })
+
+        info.addView(TextView(this).apply {
+            text = listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact info"
+            setPadding(0, dp(4), 0, 0)
+            setTextColor(getColor(R.color.r2w_text_secondary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+        })
+
+        info.addView(TextView(this).apply {
+            text = PackageNameCleaner.clean(latest.packageName).orEmpty().ifBlank { "Package unavailable" }
+            setPadding(0, dp(6), 0, 0)
+            setTextColor(getColor(R.color.r2w_premium_primary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            maxLines = 1
+            ellipsize = android.text.TextUtils.TruncateAt.END
+        })
+
+        val right = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        right.addView(TextView(this).apply {
+            text = "●  $status"
+            gravity = Gravity.CENTER
+            minWidth = dp(92)
+            minHeight = dp(32)
+            setPadding(dp(10), 0, dp(10), 0)
+            setTextColor(statusTextColor(status))
+            background = getDrawable(statusBadgeBg(status))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        })
+
+        right.addView(TextView(this).apply {
+            text = "Last Transaction"
+            setPadding(0, dp(8), 0, 0)
+            gravity = Gravity.END
+            setTextColor(getColor(R.color.r2w_text_secondary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+        })
+
+        right.addView(TextView(this).apply {
+            text = latest.createdAt?.let { formatCustomerDate(it) }?.takeIf { it.isNotBlank() } ?: "—"
+            gravity = Gravity.END
+            setTextColor(getColor(R.color.r2w_text_primary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+            maxLines = 1
+        })
+
+        row.addView(avatarWrap)
+        row.addView(info)
+        row.addView(right)
+        row.addView(ImageView(this).apply {
+            setImageResource(R.drawable.ic_more_chevron)
+            setColorFilter(getColor(R.color.r2w_text_secondary))
+            layoutParams = LinearLayout.LayoutParams(dp(24), dp(24)).apply {
+                leftMargin = dp(8)
+            }
+        })
+
+        card.addView(row)
         return card
     }
 

@@ -209,6 +209,71 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         provider?.replace("TGT", "Orange", ignoreCase = true)
             ?.replace("tgt", "Orange", ignoreCase = true)
 
+
+    private fun esimStatusBackground(status: String): Int {
+        val value = status.lowercase(Locale.ENGLISH)
+        return when {
+            value.contains("active") ||
+                value.contains("activated") ||
+                value.contains("in use") ||
+                value.contains("enabled") -> R.drawable.r2w_esim_status_green
+
+            value.contains("ready") ||
+                value.contains("qr") ||
+                value.contains("install") ||
+                value.contains("not activated") ||
+                value.contains("notactive") -> R.drawable.r2w_esim_status_blue
+
+            value.contains("expired") ||
+                value.contains("fail") ||
+                value.contains("used") ||
+                value.contains("terminated") ||
+                value.contains("termination") ||
+                value.contains("abandon") -> R.drawable.r2w_esim_status_red
+
+            value.contains("pending") ||
+                value.contains("waiting") ||
+                value.contains("processing") -> R.drawable.r2w_esim_status_orange
+
+            else -> R.drawable.r2w_esim_status_gray
+        }
+    }
+
+    private fun cleanEsimValue(value: String?): String =
+        value.orEmpty()
+            .replace(Regex("""^(Data Remaining|Data Used|Expiry|Expires|Package|Status|Provider|ICCID):\s*""", RegexOption.IGNORE_CASE), "")
+            .trim()
+
+    private fun extractDataFromPackage(packageName: String?): String {
+        val raw = packageName.orEmpty()
+        val match = Regex("""(?i)\b(\d+(?:[.,]\d+)?)\s*(GB|MB)\b""").find(raw)
+        return match?.let { "${it.groupValues[1].replace(",", ".")}${it.groupValues[2].uppercase(Locale.ENGLISH)}" }.orEmpty()
+    }
+
+    private fun extractValidityFromPackage(packageName: String?): String {
+        val raw = packageName.orEmpty()
+        val match = Regex("""(?i)\b(\d+)\s*(day|days|gün|gun)\b""").find(raw)
+        return match?.let { "${it.groupValues[1]} Days" }.orEmpty()
+    }
+
+    private fun displayEsimData(esim: MobileEsim): String =
+        cleanEsimValue(esim.dataRemaining)
+            .ifBlank { cleanEsimValue(esim.dataUsed) }
+            .ifBlank { extractDataFromPackage(esim.packageName) }
+            .ifBlank { "—" }
+
+    private fun displayEsimValidity(esim: MobileEsim): String =
+        extractValidityFromPackage(esim.packageName)
+            .ifBlank { "—" }
+
+    private fun displayEsimExpiry(esim: MobileEsim): String =
+        esim.expiresAt?.let { formatProviderDate(it) }.orEmpty()
+            .ifBlank { esim.lastRenewal?.renewExpirationTime?.let { formatProviderDate(it) }.orEmpty() }
+            .ifBlank { esim.lastRenewal?.activatedEndTime?.let { formatProviderDate(it) }.orEmpty() }
+            .ifBlank { esim.lastRenewal?.latestActivationTime?.let { formatProviderDate(it) }.orEmpty() }
+            .ifBlank { "—" }
+
+
     private fun renderEsim(esim: MobileEsim?) {
         currentEsim = esim
         if (esim == null) {
@@ -218,19 +283,30 @@ class MobileEsimDetailActivity : AppCompatActivity() {
         }
 
         val displayStatus = realStatus(esim)
+        val providerText = visibleProvider(esim.provider).orEmpty().ifBlank { "Orange" }
+        val packageText = PackageNameCleaner.clean(esim.packageName).orEmpty().ifBlank { esim.title() }
+        val statusText = displayStatus.label.ifBlank { displayStatus.raw }.ifBlank { "Unknown" }
+
         requireViewById<TextView>(R.id.mobile_esim_detail_title).text = esim.title()
-        setOptionalText(R.id.mobile_esim_detail_iccid, esim.iccid, R.string.mobile_esim_iccid_format)
-        requireViewById<TextView>(R.id.mobile_esim_detail_provider).applyRoamProviderChip(visibleProvider(esim.provider))
-        setOptionalText(R.id.mobile_esim_detail_package, PackageNameCleaner.clean(esim.packageName), R.string.mobile_esim_package_format)
-        requireViewById<TextView>(R.id.mobile_esim_detail_status).applyRoamStatusChip(displayStatus.label, displayStatus.raw)
-        setOptionalText(R.id.mobile_esim_detail_activation, esim.activationCode, R.string.mobile_esim_activation_format)
-        setOptionalText(R.id.mobile_esim_detail_smdp, esim.smdpAddress, R.string.mobile_esim_smdp_format)
-        setOptionalText(R.id.mobile_esim_detail_matching_id, esim.matchingId, R.string.mobile_esim_matching_id_format)
-        setOptionalText(R.id.mobile_esim_detail_expires, esim.expiresAt?.let { formatProviderDate(it) }, R.string.mobile_esim_expires_format)
-        setOptionalText(R.id.mobile_esim_detail_data_remaining, esim.dataRemaining, R.string.mobile_esim_data_remaining_format)
-        setOptionalText(R.id.mobile_esim_detail_data_used, esim.dataUsed, R.string.mobile_esim_data_used_format)
-        setOptionalText(R.id.mobile_esim_detail_created, esim.createdAt?.let { formatProviderDate(it) }, R.string.mobile_esim_created_format)
-        setOptionalText(R.id.mobile_esim_detail_order, esim.orderNumber, R.string.mobile_esim_order_format)
+        requireViewById<TextView>(R.id.mobile_esim_detail_iccid).text = esim.iccid.orEmpty()
+        requireViewById<TextView>(R.id.mobile_esim_detail_provider).text = providerText
+        requireViewById<TextView>(R.id.mobile_esim_detail_package).text = packageText
+
+        requireViewById<TextView>(R.id.mobile_esim_detail_status).apply {
+            text = statusText
+            setBackgroundResource(esimStatusBackground(statusText))
+            setTextColor(getColor(android.R.color.white))
+        }
+
+        requireViewById<TextView>(R.id.mobile_esim_detail_activation).text = esim.activationCode.orEmpty()
+        requireViewById<TextView>(R.id.mobile_esim_detail_smdp).text = esim.smdpAddress.orEmpty()
+        requireViewById<TextView>(R.id.mobile_esim_detail_matching_id).text = esim.matchingId.orEmpty()
+        requireViewById<TextView>(R.id.mobile_esim_detail_expires).text = displayEsimExpiry(esim)
+        requireViewById<TextView>(R.id.mobile_esim_detail_data_remaining).text = displayEsimData(esim)
+        requireViewById<TextView>(R.id.mobile_esim_detail_validity).text = displayEsimValidity(esim)
+        requireViewById<TextView>(R.id.mobile_esim_detail_data_used).text = cleanEsimValue(esim.dataUsed)
+        requireViewById<TextView>(R.id.mobile_esim_detail_created).text = esim.createdAt?.let { formatProviderDate(it) }.orEmpty()
+        requireViewById<TextView>(R.id.mobile_esim_detail_order).text = esim.orderNumber.orEmpty()
         renderQr(esim)
         renderInstallAssistant(esim)
         renderLastRenewal(esim)
