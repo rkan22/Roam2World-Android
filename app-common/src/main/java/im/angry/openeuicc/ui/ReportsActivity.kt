@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -104,6 +105,7 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var filterThirtyDays: MaterialButton
     private lateinit var filterAll: MaterialButton
     private lateinit var exportCsv: MaterialButton
+    private lateinit var bottomNav: BottomNavigationView
 
     private var reportRange: ReportRange = ReportRange.THIRTY_DAYS
     private var loadedOrders: List<MobileOrder> = emptyList()
@@ -144,9 +146,11 @@ class ReportsActivity : AppCompatActivity() {
         filterThirtyDays = requireViewById(R.id.reports_filter_30_days)
         filterAll = requireViewById(R.id.reports_filter_all)
         exportCsv = requireViewById(R.id.reports_export_csv)
+        bottomNav = requireViewById(R.id.reports_bottom_nav)
 
         setupInsets()
         setupFilters()
+        setupBottomNavigation()
         renderLoading()
         loadReports()
     }
@@ -165,6 +169,35 @@ class ReportsActivity : AppCompatActivity() {
             ),
             consume = false
         )
+    }
+
+    private fun setupBottomNavigation() {
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_packages -> {
+                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_wallet -> {
+                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_esims -> {
+                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_more -> {
+                    startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                else -> false
+            }
+        }
+        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
     }
 
     private fun setupFilters() {
@@ -193,8 +226,14 @@ class ReportsActivity : AppCompatActivity() {
         buttons.forEach { (button, range) ->
             val selected = range == reportRange
             button.isSelected = selected
-            button.alpha = if (selected) 1.0f else 0.72f
-            button.strokeWidth = if (selected) 2 else 1
+            button.alpha = 1.0f
+            button.strokeWidth = 0
+            button.setTextColor(
+                getColor(if (selected) android.R.color.white else R.color.r2w_text_primary)
+            )
+            button.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                getColor(if (selected) R.color.r2w_premium_primary else android.R.color.white)
+            )
         }
     }
 
@@ -243,11 +282,11 @@ class ReportsActivity : AppCompatActivity() {
         val failedOrderCount = orders.count { it.statusLabel()?.contains("Failed", ignoreCase = true) == true }
 
         revenue.text = currency(totalRevenue)
-        revenueDelta.text = "${orders.size} orders in ${rangeLabel()}"
+        revenueDelta.text = "↑ Live • ${orders.size} orders"
         sales.text = completedOrders.toString()
-        salesDelta.text = "$pendingOrders pending • $failedOrderCount failed"
+        salesDelta.text = "↑ $pendingOrders pending • $failedOrderCount failed"
         profit.text = currency(totalProfit)
-        activeEsims.text = loadedActiveEsims ?: "--"
+        activeEsims.text = "Active eSIMs\n${loadedActiveEsims ?: "--"}\nLive dashboard"
 
         salesOverview.text = buildSalesOverview(orders, loadedWalletBalance)
         providerUsage.text = buildProviderUsage(orders)

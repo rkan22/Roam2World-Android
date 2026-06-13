@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_premium_bg">
+    android:background="#F8FAFC">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -11,7 +11,8 @@
         android:id="@+id/reports_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/reports_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
@@ -20,337 +21,232 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="@dimen/r2w_screen_padding"
-            android:paddingTop="20dp"
-            android:paddingBottom="30dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Reports"
-                android:textAppearance="?attr/textAppearanceHeadlineLarge"
-                android:textColor="@color/r2w_premium_text"
-                android:textStyle="bold" />
+            android:paddingBottom="24dp">
 
             <TextView
                 android:id="@+id/reports_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Revenue, sales, profit, provider usage and dealer performance"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="@color/r2w_premium_muted" />
-
-            <HorizontalScrollView
+                android:layout_marginHorizontal="18dp"
+                android:layout_marginTop="12dp"
+                android:text="Loading live reports..."
+                android:textColor="@color/r2w_text_secondary"
+                android:textSize="13sp" />
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="18dp"
                 android:layout_marginTop="14dp"
-                android:overScrollMode="never"
-                android:scrollbars="none">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_today"
-                        android:background="@drawable/r2w_reports_filter_button"
-                                                android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:text="@string/reports_filter_today"
-                        android:textColor="@color/r2w_premium_primary"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_reports_filter_white"
+                        android:text="Günlük"
                         android:textAllCaps="false"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="13sp"
                         android:textStyle="bold"
-                        app:cornerRadius="18dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp" app:backgroundTint="@null" />
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:strokeWidth="0dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_7_days"
-                        android:background="@drawable/r2w_reports_filter_button"
-                                                android:layout_width="wrap_content"
-                        android:layout_height="42dp"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
                         android:layout_marginStart="8dp"
-                        android:text="@string/reports_filter_7_days"
-                        android:textColor="@color/r2w_premium_primary"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_reports_filter_white"
+                        android:text="Haftalık"
                         android:textAllCaps="false"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="13sp"
                         android:textStyle="bold"
-                        app:cornerRadius="18dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp" app:backgroundTint="@null" />
+                        app:backgroundTint="@null"
+                        app:cornerRadius="12dp"
+                        app:strokeWidth="0dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/reports_filter_30_days"
-                        android:background="@drawable/r2w_reports_filter_button"
-                                                android:layout_width="wrap_content"
-                        android:layout_height="42dp"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
                         android:layout_marginStart="8dp"
-                        android:text="@string/reports_filter_30_days"
-                        android:textColor="@color/r2w_premium_primary"
+                        android:layout_weight="1"
+                        android:background="@drawable/r2w_reports_filter_white"
+                        android:text="Aylık"
                         android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:cornerRadius="18dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp" app:backgroundTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/reports_filter_all"
-                        android:background="@drawable/r2w_reports_filter_button"
-                                                android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/reports_filter_all"
-                        android:textColor="@color/r2w_premium_primary"
-                        android:textAllCaps="false"
-                        android:textStyle="bold"
-                        app:cornerRadius="18dp"
-                        app:strokeColor="#BFD4FF"
-                        app:strokeWidth="0dp" app:backgroundTint="@null" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/reports_export_csv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="42dp"
-                        android:layout_marginStart="12dp"
-                        android:background="@drawable/r2w_premium_primary_button"
-                        android:text="@string/reports_export_csv"
-                        android:textColor="@android:color/white"
-                        android:textAllCaps="false"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="13sp"
                         android:textStyle="bold"
                         app:backgroundTint="@null"
-                        app:cornerRadius="18dp" />
+                        app:cornerRadius="12dp"
+                        app:strokeWidth="0dp" />
                 </LinearLayout>
-            </HorizontalScrollView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reports_filter_all"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="116dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    app:cardCornerRadius="22dp"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="@dimen/r2w_card_padding">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Revenue"
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/reports_revenue"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="--"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="@color/r2w_premium_text"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/reports_revenue_delta"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Live wallet/orders"
-                            android:textColor="@color/r2w_premium_success" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="116dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    app:cardCornerRadius="22dp"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="@dimen/r2w_card_padding">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Sales"
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/reports_sales"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="--"
-                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                            android:textColor="@color/r2w_premium_text"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/reports_sales_delta"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Live orders"
-                            android:textColor="@color/r2w_premium_success" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reports_export_csv"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/r2w_premium_primary_button"
+                    android:text="Export PDF"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_reports_filter"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconSize="20dp"
+                    app:iconTint="@android:color/white" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:baselineAligned="false"
+                android:layout_marginHorizontal="18dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="108dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    app:cardCornerRadius="22dp"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="@dimen/r2w_card_padding">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Profit est."
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/reports_profit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="--"
-                            android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="@color/r2w_premium_text"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="108dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    app:cardCornerRadius="22dp"
-                    app:cardBackgroundColor="@color/r2w_premium_surface"
-                    app:strokeColor="@color/r2w_premium_border"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical"
-                        android:padding="@dimen/r2w_card_padding">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Active eSIMs"
-                            android:textColor="@color/r2w_premium_muted" />
-
-                        <TextView
-                            android:id="@+id/reports_active_esims"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="--"
-                            android:textAppearance="?attr/textAppearanceTitleLarge"
-                            android:textColor="@color/r2w_premium_text"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="22dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="245dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_reports_card_white"
                     android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Sales Overview"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
+                        android:text="Revenue  ⓘ"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reports_revenue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="--"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="23sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reports_revenue_delta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Live orders"
+                        android:textColor="#16A34A"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/reports_sales_overview"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="0dp"
                         android:layout_marginTop="14dp"
+                        android:layout_weight="1"
+                        android:gravity="bottom"
                         android:lineSpacingExtra="4dp"
-                        android:text="No sales data yet"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_text" />
+                        android:text="Loading chart..."
+                        android:textColor="#0B63E5"
+                        android:textSize="12sp" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="22dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="245dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_reports_card_white"
                     android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Provider Usage Breakdown"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
+                        android:text="Sales  ⓘ"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reports_sales"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="--"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="23sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reports_sales_delta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Live orders"
+                        android:textColor="#16A34A"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/reports_active_esims"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_weight="1"
+                        android:gravity="bottom"
+                        android:text="Active eSIMs: --"
+                        android:textColor="#0B63E5"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="18dp"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_reports_card_white"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Provider Usage Breakdown  ⓘ"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -360,119 +256,129 @@
                         android:layout_marginTop="12dp"
                         android:lineSpacingExtra="5dp"
                         android:text="No provider usage yet"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_text" />
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="13sp" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardCornerRadius="22dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/r2w_reports_card_white"
                     android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dealer Performance"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
+                        android:text="Failed Orders  ⓘ"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/reports_dealer_performance"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:lineSpacingExtra="5dp"
-                        android:text="Dealer performance data unavailable"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_text" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:layout_marginTop="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-            <com.google.android.material.card.MaterialCardView
+                        <ImageView
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            android:background="@drawable/r2w_customer_expired_badge"
+                            android:contentDescription="@null"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_reports_failed" />
+
+                        <TextView
+                            android:id="@+id/reports_failed_orders"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:lineSpacingExtra="4dp"
+                            android:text="0"
+                            android:textColor="@color/r2w_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="18dp"
                 android:layout_marginTop="14dp"
-                app:cardCornerRadius="22dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
+                android:background="@drawable/r2w_reports_card_white"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:text="Dealer Performance  ⓘ"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Failed Orders"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/reports_dealer_performance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:lineSpacingExtra="5dp"
+                    android:text="Dealer performance data unavailable"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/reports_failed_orders"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:lineSpacingExtra="4dp"
-                        android:text="No failed order data yet"
-                        android:textAppearance="?attr/textAppearanceBodyLarge"
-                        android:textColor="@color/r2w_premium_danger" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/reports_profit"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
 
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="18dp"
                 android:layout_marginTop="14dp"
-                app:cardCornerRadius="22dp"
-                app:cardBackgroundColor="@color/r2w_premium_surface"
-                app:cardElevation="3dp"
-                    app:strokeColor="@color/r2w_premium_border"
-                app:strokeWidth="1dp">
+                android:background="@drawable/r2w_reports_card_white"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/r2w_card_padding">
+                    android:text="Profit Overview  ⓘ"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Profit Overview"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/r2w_premium_text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/reports_profit_overview"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:lineSpacingExtra="4dp"
-                        android:text="Profit data unavailable"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                        android:textColor="@color/r2w_premium_text" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
+                <TextView
+                    android:id="@+id/reports_profit_overview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:lineSpacingExtra="5dp"
+                    android:text="Profit overview unavailable"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/reports_bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/activity_dashboard_bottom" />
 </androidx.constraintlayout.widget.ConstraintLayout>
