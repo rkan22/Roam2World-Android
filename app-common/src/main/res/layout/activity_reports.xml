@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="@color/r2w_premium_bg">
 
     <include layout="@layout/toolbar_activity" />
 
@@ -171,7 +171,7 @@
                         android:gravity="bottom"
                         android:lineSpacingExtra="4dp"
                         android:text="Loading chart..."
-                        android:textColor="#0B63E5"
+                        android:textColor="@color/r2w_premium_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
 
@@ -220,7 +220,7 @@
                         android:layout_weight="1"
                         android:gravity="bottom"
                         android:text="Active eSIMs: --"
-                        android:textColor="#0B63E5"
+                        android:textColor="@color/r2w_premium_primary"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -375,7 +375,7 @@
         android:id="@+id/reports_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/r2w_premium_bg"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

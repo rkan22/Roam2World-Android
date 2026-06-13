@@ -211,7 +211,7 @@ class MoreActivity : AppCompatActivity() {
         tgtCheckGb.visibility = View.VISIBLE
         vodafoneRenewal.visibility = View.VISIBLE
         orders.visibility = View.VISIBLE
-        notifications.visibility = View.VISIBLE
+        notifications.visibility = View.GONE
         reports.visibility = View.VISIBLE
         support.visibility = View.VISIBLE
     }
