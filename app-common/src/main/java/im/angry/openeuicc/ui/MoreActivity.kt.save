@@ -1,9 +1,16 @@
+
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+./gradlew :app-unpriv:assembleDebug && \
+~/Library/Android/sdk/platform-tools/adb install -r "$(pwd)/app-unpriv/build/outputs/apk/debug/app-unpriv-debug.apk" && \
+~/Library/Android/sdk/platform-tools/adb shell am force-stop im.angry.easyeuicc
+nano app-common/src/main/java/im/angry/openeuicc/ui/MoreActivity.kt
 package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -217,28 +224,15 @@ class MoreActivity : AppCompatActivity() {
     }
 
     private fun showSupportOptions() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_support_options, null, false)
-        val dialog = AlertDialog.Builder(this)
-            .setView(view)
-            .create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        view.findViewById<MaterialButton>(R.id.support_whatsapp).setOnClickListener {
-            dialog.dismiss()
-            openSupportWhatsApp()
-        }
-
-        view.findViewById<MaterialButton>(R.id.support_email).setOnClickListener {
-            dialog.dismiss()
-            openSupportEmail()
-        }
-
-        view.findViewById<TextView>(R.id.support_cancel).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
+        AlertDialog.Builder(this)
+            .setTitle("Support")
+            .setItems(arrayOf("WhatsApp ile yaz", "Mail gönder")) { _, which ->
+                when (which) {
+                    0 -> openSupportWhatsApp()
+                    1 -> openSupportEmail()
+                }
+            }
+            .show()
     }
 
     private fun openSupportWhatsApp() {
