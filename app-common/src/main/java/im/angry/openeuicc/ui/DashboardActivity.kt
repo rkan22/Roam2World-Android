@@ -13,7 +13,12 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -33,8 +38,11 @@ import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.util.activityToolbarInsetHandler
 import im.angry.openeuicc.util.mainViewPaddingInsetHandler
+import im.angry.openeuicc.ui.compose.screens.DashboardScreen
+import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.OffsetDateTime
@@ -65,50 +73,34 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var expiredSoonValue: TextView
     private lateinit var expiredSoonSubtitle: TextView
     private var currentRole: String? = null
+    private val dashboardDataFlow = MutableStateFlow<MobileDashboardData?>(null)
+    private var displayName by mutableStateOf("Admin")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
-
-        findViewById<MaterialButton>(R.id.dashboard_request_balance)?.setOnClickListener {
-            openWalletActivity()
-        }
-
-        findViewById<android.widget.ImageButton>(R.id.dashboard_wallet_eye_button)?.setOnClickListener {
-            val amountView = findViewById<TextView>(R.id.dashboard_wallet_balance)
-            val currentlyHidden = amountView.text?.toString()?.contains("•") == true
-            if (currentlyHidden) {
-                amountView.text = amountView.tag as? CharSequence ?: "0.00"
-            } else {
-                amountView.tag = amountView.text
-                amountView.text = "••••••"
+        
+        setContent {
+            val data by dashboardDataFlow.collectAsState()
+            R2WTheme {
+                DashboardScreen(
+                    userName = displayName,
+                    data = data,
+                    onWalletClick = { openWalletActivity() },
+                    onActionClick = { action ->
+                        when (action) {
+                            "orders" -> openPurchaseHistoryActivity()
+                            "wallet" -> openWalletActivity()
+                            "orange" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
+                            "vodafone" -> startActivity(Intent(this, VodafoneRenewalActivity::class.java))
+                            "crm" -> openMyDealersActivity()
+                            "reports" -> startActivity(Intent(this, ReportsActivity::class.java))
+                        }
+                    }
+                )
             }
         }
 
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.dashboard_title)
-
-        scroll = requireViewById(R.id.dashboard_scroll)
-        bottomNav = requireViewById(R.id.dashboard_bottom_nav)
-        progress = requireViewById(R.id.dashboard_progress)
-        greeting = requireViewById(R.id.dashboard_greeting)
-        account = requireViewById(R.id.dashboard_account)
-        balance = requireViewById(R.id.dashboard_wallet_balance)
-        activeEsims = requireViewById(R.id.dashboard_active_esims)
-        ordersSummary = requireViewById(R.id.dashboard_orders_summary)
-        dealerSummaryCard = requireViewById(R.id.dashboard_dealer_summary_card)
-        dealerSummary = requireViewById(R.id.dashboard_dealer_summary)
-        manageDealers = requireViewById(R.id.dashboard_manage_dealers)
-        error = requireViewById(R.id.dashboard_error)
-        orders = requireViewById(R.id.dashboard_orders)
-
-        setupInsets()
-        setupBottomNavigation()
-        setupQuickActions()
-        addTodaySalesKpiCard()
-        addExpiredSoonKpiCard()
-        renderPlaceholders()
         authApi.logMobileEndpointConfiguration()
         loadDashboard()
     }
@@ -247,29 +239,11 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun renderSession(session: AuthSession) {
         currentRole = session.role
-        invalidateOptionsMenu()
-        val isReseller = session.role?.lowercase() == "reseller"
-        dealerSummaryCard.visibility = View.GONE
-        manageDealers.visibility = View.GONE
-        greeting.text = session.displayName?.let { "Welcome $it" } ?: "Welcome Admin"
-        account.text = listOfNotNull(
-            session.role?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-            session.email
-        ).joinToString("  •  ")
+        displayName = session.displayName ?: "Admin"
     }
 
     private fun renderDashboard(data: MobileDashboardData) {
-        balance.text = r2wMoney(data.currentBalance)
-        todaySales.text = r2wMoney((data.todaySales.ifBlank { "0.00" }).toString())
-        monthlySalesKpi?.text = r2wMoney((data.monthlySales.ifBlank { "0.00" }).toString())
-        activeEsimsKpi?.text = data.activeEsimCount.ifBlank { "0" }
-        expiredEsimsKpi?.text = data.expiredEsimCount.ifBlank { "0" }
-        expiringSoonKpi?.text = "--"
-        ordersSummary.text = data.monthlySales
-        activeEsims.text = data.activeEsimCount
-        expiredSoonValue.text = data.expiredEsimCount
-        expiredSoonSubtitle.text = "Expired eSIMs in your account"
-        renderOrders(data.recentOrders)
+        dashboardDataFlow.value = data
     }
 
     private fun renderExpiredSoon(esimData: List<MobileEsim>) {
