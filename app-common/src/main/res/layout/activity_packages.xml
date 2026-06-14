@@ -3,9 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_premium_bg">
+    android:background="@drawable/r2w_store_screen_bg">
 
-    <include layout="@layout/toolbar_activity" />
+    <include
+        layout="@layout/toolbar_activity"
+        android:visibility="gone" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/packages_refresh"
@@ -14,7 +16,7 @@
         app:layout_constraintBottom_toTopOf="@id/packages_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/packages_scroll"
@@ -27,11 +29,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="28dp">
+                android:paddingBottom="92dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="188dp"
+                    android:layout_height="154dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="0dp"
                     app:cardElevation="0dp"
@@ -40,18 +42,18 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/r2w_premium_bg"
+                        android:background="@drawable/r2w_store_screen_bg"
                         android:gravity="center_vertical"
                         android:orientation="vertical"
                         android:paddingHorizontal="@dimen/r2w_screen_padding"
-                        android:paddingTop="24dp"
-                        android:paddingBottom="28dp">
+                        android:paddingTop="34dp"
+                        android:paddingBottom="18dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Store"
-                            android:textAppearance="?attr/textAppearanceDisplaySmall"
+                            android:textAppearance="?attr/textAppearanceHeadlineLarge"
                             android:textColor="@color/r2w_premium_text"
                             android:textStyle="bold" />
 
@@ -59,7 +61,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Find the best eSIM plan for your customer. Search, filter and compare live B2B pricing."
+                            android:text="Search, filter and compare live B2B eSIM pricing."
                             android:textAppearance="?attr/textAppearanceBodyLarge"
                             android:textColor="@color/r2w_premium_muted" />
 
@@ -72,10 +74,10 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#EAF2FF"
-                                android:paddingHorizontal="13dp"
-                                android:paddingVertical="8dp"
+                                android:background="@drawable/r2w_store_chip_soft"
+                                
+                                android:paddingHorizontal="11dp"
+                                android:paddingVertical="6dp"
                                 android:text="Live API"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="@color/r2w_premium_primary"
@@ -85,10 +87,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
-                                android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#EAF2FF"
-                                android:paddingHorizontal="13dp"
-                                android:paddingVertical="8dp"
+                                android:background="@drawable/r2w_store_chip_soft"
+                                
+                                android:paddingHorizontal="11dp"
+                                android:paddingVertical="6dp"
                                 android:text="Filtered"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="@color/r2w_premium_primary"
@@ -98,10 +100,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
-                                android:background="@drawable/wallet_request_status_badge"
-                                android:backgroundTint="#EAF2FF"
-                                android:paddingHorizontal="13dp"
-                                android:paddingVertical="8dp"
+                                android:background="@drawable/r2w_store_chip_soft"
+                                
+                                android:paddingHorizontal="11dp"
+                                android:paddingVertical="6dp"
                                 android:text="B2B Price"
                                 android:textAppearance="?attr/textAppearanceLabelMedium"
                                 android:textColor="@color/r2w_premium_primary"
@@ -114,16 +116,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="20dp">
+                    android:paddingHorizontal="18dp">
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        app:cardBackgroundColor="@color/r2w_premium_surface"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="9dp"
-                        app:strokeColor="@color/r2w_premium_border"
+                        android:layout_marginTop="0dp"
+                        app:cardBackgroundColor="@android:color/white"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:boxStrokeColor="#E4E9F2"
                         app:strokeWidth="1dp">
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -135,13 +137,13 @@
                             android:paddingHorizontal="14dp"
                             android:paddingTop="8dp"
                             android:paddingBottom="8dp"
-                            app:boxBackgroundColor="@color/r2w_premium_surface"
-                            app:boxCornerRadiusBottomEnd="20dp"
-                            app:boxCornerRadiusBottomStart="20dp"
-                            app:boxCornerRadiusTopEnd="20dp"
-                            app:boxCornerRadiusTopStart="20dp"
+                            app:boxBackgroundColor="@android:color/white"
+                            app:boxCornerRadiusBottomEnd="14dp"
+                            app:boxCornerRadiusBottomStart="14dp"
+                            app:boxCornerRadiusTopEnd="14dp"
+                            app:boxCornerRadiusTopStart="14dp"
                             app:endIconMode="clear_text"
-                            app:startIconDrawable="@drawable/ic_packages"
+                            app:startIconDrawable="@drawable/ic_search"
                             app:strokeColor="@color/r2w_premium_border">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -166,7 +168,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="20dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -183,8 +185,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/wallet_request_status_badge"
-                            android:backgroundTint="#EAF2FF"
+                            android:background="@drawable/r2w_store_chip_soft"
+                            
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="7dp"
                             android:text="Best Match"
@@ -204,7 +206,7 @@
                         android:id="@+id/packages_catalog_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="28dp"
+                        android:layout_marginTop="22dp"
                         android:text="All Packages"
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="@color/r2w_premium_text"
@@ -237,7 +239,10 @@
         android:id="@+id/packages_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_premium_surface"
+        android:background="@drawable/r2w_nav_bar_bg"
+        app:itemIconTint="@color/r2w_bottom_nav_colors"
+        app:itemTextColor="@color/r2w_bottom_nav_colors"
+        app:itemRippleColor="@android:color/transparent"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

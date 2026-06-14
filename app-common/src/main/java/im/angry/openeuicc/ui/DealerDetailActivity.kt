@@ -154,7 +154,7 @@ class DealerDetailActivity : AppCompatActivity() {
         name.text = dealer.name
         email.text = dealer.email.orEmpty()
         status.applyRoamStatusChip(dealer.statusLabel(), dealer.status)
-        balance.text = getString(R.string.dealer_balance_format, dealer.currentBalance)
+        balance.text = getString(R.string.dealer_balance_format, r2wMoney(dealer.currentBalance))
         stats.text = getString(
             R.string.dealer_detail_stats_format,
             dealer.totalOrders,
@@ -194,7 +194,7 @@ class DealerDetailActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.history_order_number).text = order.displayNumber()
             item.requireViewById<TextView>(R.id.history_package_name).text = PackageNameCleaner.clean(order.packageName)
             item.requireViewById<TextView>(R.id.history_created_date).text = order.createdAt.orEmpty()
-            item.requireViewById<TextView>(R.id.history_price).text = order.price.orEmpty()
+            item.requireViewById<TextView>(R.id.history_price).text = r2wMoney(order.price, "")
             item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(visibleProvider(order.provider))
             item.requireViewById<TextView>(R.id.history_status).applyRoamStatusChip(order.statusLabel(), order.status)
             orders.addView(item)

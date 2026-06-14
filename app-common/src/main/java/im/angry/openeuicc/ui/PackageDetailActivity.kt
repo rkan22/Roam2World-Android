@@ -107,7 +107,7 @@ class PackageDetailActivity : AppCompatActivity() {
 
         requireViewById<TextView>(R.id.package_detail_name).text = displayPackageName
         requireViewById<TextView>(R.id.package_detail_country).text = displayPackageName
-        requireViewById<TextView>(R.id.package_detail_price).text = intent.getStringExtra(EXTRA_PRICE)
+        requireViewById<TextView>(R.id.package_detail_price).text = r2wMoney(intent.getStringExtra(EXTRA_PRICE))
             ?: "0"
         setCoverageFlag(countryCode, country, coverage)
         requireViewById<TextView>(R.id.package_detail_visibility).text =

@@ -244,7 +244,7 @@ class WalletActivity : AppCompatActivity() {
     }
 
     private fun renderWallet(data: MobileWalletData) {
-        balance.text = data.currentBalance
+        balance.text = r2wMoney(data.currentBalance)
         renderLowBalanceWarning(data.currentBalance)
         renderQuickStats(data.transactions)
         renderTransactions(data.transactions)
@@ -380,7 +380,7 @@ class WalletActivity : AppCompatActivity() {
             }
 
             item.requireViewById<TextView>(R.id.transaction_amount).apply {
-                text = amountDisplay
+                text = r2wMoney(amountDisplay, "")
                 setTextColor(
                     android.graphics.Color.parseColor(
                         if (isDebit) "#D73535" else "#0F9F5A"

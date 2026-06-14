@@ -3,55 +3,57 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/r2w_premium_bg">
+    android:background="@drawable/r2w_profile_screen_soft">
 
-    <include layout="@layout/toolbar_activity" />
+    <include
+        layout="@layout/toolbar_activity"
+        android:visibility="gone" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/profile_scroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/profile_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="28dp">
+            android:paddingBottom="104dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="286dp"
-                android:background="@drawable/r2w_profile_header_bg"
+                android:layout_height="wrap_content"
+                android:background="@drawable/r2w_profile_button_soft"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:paddingHorizontal="22dp"
-                android:paddingTop="24dp">
+                android:paddingHorizontal="14dp"
+                android:paddingTop="18dp">
 
                 <TextView
                     android:id="@+id/profile_avatar"
-                    android:layout_width="92dp"
-                    android:layout_height="92dp"
-                    android:background="@drawable/r2w_profile_avatar_bg"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:background="@drawable/r2w_profile_avatar_soft"
                     android:gravity="center"
                     android:text="R2W"
-                    android:textColor="@color/r2w_premium_primary"
-                    android:textSize="28sp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/profile_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
+                    android:layout_marginTop="10dp"
                     android:gravity="center"
                     android:text="Roam2World User"
-                    android:textColor="@android:color/white"
-                    android:textSize="28sp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="23sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -61,21 +63,21 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="user@company.com"
-                    android:textColor="#DCEBFF"
+                    android:textColor="@color/r2w_text_secondary"
                     android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/profile_role"
                     android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginTop="14dp"
-                    android:background="@drawable/r2w_profile_role_badge"
+                    android:layout_height="32dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/r2w_profile_role_neutral"
                     android:gravity="center"
-                    android:minWidth="148dp"
+                    android:minWidth="128dp"
                     android:paddingHorizontal="18dp"
                     android:text="Premium Reseller"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
+                    android:textColor="@color/r2w_premium_primary"
+                    android:textSize="13.5sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -83,34 +85,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="18dp"
-                android:layout_marginTop="22dp"
-                android:background="@drawable/r2w_profile_card"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/r2w_profile_card_soft"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="14dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Personal Info"
                     android:textColor="@color/r2w_text_primary"
-                    android:textSize="20sp"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
+                    android:layout_height="76dp"
                     android:layout_marginTop="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_person"
@@ -129,17 +131,19 @@
                             android:layout_height="wrap_content"
                             android:text="Full Name"
                             android:textColor="@color/r2w_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/profile_full_name_value"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:layout_marginTop="3dp"
                             android:text="Roam2World User"
                             android:textColor="@color/r2w_text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="13.5sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -150,22 +154,22 @@
                         app:tint="@color/r2w_text_secondary" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEF1F5" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
+                    android:layout_height="76dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_profile_email" />
@@ -183,17 +187,19 @@
                             android:layout_height="wrap_content"
                             android:text="Email"
                             android:textColor="@color/r2w_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/profile_email_value"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:layout_marginTop="3dp"
                             android:text="user@company.com"
                             android:textColor="@color/r2w_text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="13.5sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -204,22 +210,22 @@
                         app:tint="@color/r2w_text_secondary" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEF1F5" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
+                    android:layout_height="76dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_profile_phone" />
@@ -237,17 +243,19 @@
                             android:layout_height="wrap_content"
                             android:text="Phone"
                             android:textColor="@color/r2w_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/profile_phone_value"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:layout_marginTop="3dp"
                             android:text="Not provided"
                             android:textColor="@color/r2w_text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="13.5sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -263,34 +271,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="18dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/r2w_profile_card"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/r2w_profile_card_soft"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="14dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Company Details"
                     android:textColor="@color/r2w_text_primary"
-                    android:textSize="20sp"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
+                    android:layout_height="76dp"
                     android:layout_marginTop="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_profile_company" />
@@ -308,17 +316,19 @@
                             android:layout_height="wrap_content"
                             android:text="Company Name"
                             android:textColor="@color/r2w_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/profile_account_type"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:layout_marginTop="3dp"
                             android:text="Roam2World B2B"
                             android:textColor="@color/r2w_text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="13.5sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -329,22 +339,22 @@
                         app:tint="@color/r2w_text_secondary" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEF1F5" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
+                    android:layout_height="76dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_profile_shield" />
@@ -362,7 +372,7 @@
                             android:layout_height="wrap_content"
                             android:text="Reseller ID"
                             android:textColor="@color/r2w_text_primary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -370,9 +380,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:text="B2B Telecom Workspace"
                             android:textColor="@color/r2w_text_secondary"
-                            android:textSize="14sp" />
+                            android:textSize="13.5sp" />
                     </LinearLayout>
 
                     <ImageView
@@ -388,44 +400,60 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="18dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/r2w_profile_card"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/r2w_profile_card_soft"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="14dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Security"
                     android:textColor="@color/r2w_text_primary"
-                    android:textSize="20sp"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
-                <com.google.android.material.button.MaterialButton
+                <LinearLayout
                     android:id="@+id/profile_settings"
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="76dp"
                     android:layout_marginTop="12dp"
-                    android:background="@android:color/transparent"
                     android:gravity="center_vertical"
-                    android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:insetTop="0dp"
-                    android:text="Change Password"
-                    android:textAllCaps="false"
-                    android:textColor="@color/r2w_text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@null"
-                    app:cornerRadius="0dp"
-                    app:icon="@drawable/ic_profile_lock"
-                    app:iconGravity="textStart"
-                    app:iconPadding="16dp"
-                    app:iconSize="42dp"
-                    app:iconTint="@color/r2w_premium_primary" />
+                    android:orientation="horizontal">
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E7EB" />
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
+
+                        <ImageView
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_profile_lock"
+                            app:tint="@color/r2w_text_secondary" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:text="Change Password"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_more_chevron"
+                        app:tint="@color/r2w_text_secondary" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEF1F5" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -434,13 +462,13 @@
                     android:orientation="horizontal">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="@drawable/r2w_profile_icon_box">
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/r2w_profile_icon_soft">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_profile_shield" />
@@ -453,7 +481,7 @@
                         android:layout_weight="1"
                         android:text="Two-Factor Authentication"
                         android:textColor="@color/r2w_text_primary"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -461,7 +489,7 @@
                         android:layout_height="wrap_content"
                         android:text="Off"
                         android:textColor="@color/r2w_text_secondary"
-                        android:textSize="14sp" />
+                        android:textSize="13.5sp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -470,12 +498,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="58dp"
                 android:layout_marginHorizontal="18dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/r2w_profile_logout_bg"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/r2w_profile_logout_soft"
                 android:gravity="center"
                 android:text="@string/logout"
                 android:textAllCaps="false"
-                android:textColor="@color/r2w_premium_danger"
+                android:textColor="#B42318"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 app:backgroundTint="@null"
@@ -483,7 +511,21 @@
                 app:icon="@drawable/ic_more_logout"
                 app:iconGravity="textStart"
                 app:iconPadding="10dp"
-                app:iconTint="@color/r2w_premium_danger" />
+                app:iconTint="#B42318" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/profile_bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/r2w_nav_bar_bg"
+        app:itemIconTint="@color/r2w_bottom_nav_colors"
+        app:itemTextColor="@color/r2w_bottom_nav_colors"
+        app:itemRippleColor="@android:color/transparent"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/activity_dashboard_bottom" />
 </androidx.constraintlayout.widget.ConstraintLayout>

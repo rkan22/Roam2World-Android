@@ -1,5 +1,17 @@
 package im.angry.openeuicc.ui
 
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+import com.google.android.material.bottomsheet.BottomSheetDialog
+
+
+import android.graphics.drawable.GradientDrawable
+
+import android.graphics.Color
+
+
+import android.widget.ImageView
+
 import java.time.OffsetDateTime
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -54,8 +66,8 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_purchase_history)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.apply {
-            title = "Orders"
-            setDisplayHomeAsUpEnabled(true)
+            title = ""
+            setDisplayHomeAsUpEnabled(false)
         }
 
         refresh = requireViewById(R.id.purchase_history_refresh)
@@ -64,6 +76,34 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         error = requireViewById(R.id.purchase_history_error)
         summary = requireViewById(R.id.purchase_history_summary)
         search = requireViewById(R.id.purchase_history_search)
+
+        setupBottomNavigation()
+
+        requireViewById<View>(R.id.purchase_history_search_icon).setOnClickListener {
+            requireViewById<View>(R.id.purchase_history_search_layout).visibility = View.VISIBLE
+            search.requestFocus()
+            val imm = getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+            imm?.showSoftInput(search, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        }
+
+        requireViewById<View>(R.id.purchase_history_filter_icon).setOnClickListener {
+            showOrderFilterSheet()
+        }
+        requireViewById<View>(R.id.purchase_history_filter_button).setOnClickListener {
+            showOrderFilterSheet()
+        }
+
+        requireViewById<View>(R.id.purchase_history_search_layout).setOnClickListener {
+            search.requestFocus()
+            val imm = getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+            imm?.showSoftInput(search, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        }
+        search.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                val imm = getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+                imm?.showSoftInput(search, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
 
         setupInsets()
         dateFilter = intent.getStringExtra("order_date_filter")
@@ -94,22 +134,24 @@ class PurchaseHistoryActivity : AppCompatActivity() {
     }
 
     private fun setupFilters() {
-        requireViewById<Chip>(R.id.purchase_history_tab_all).setOnClickListener {
+        requireViewById<TextView>(R.id.purchase_history_tab_all).setOnClickListener {
             filter = OrderFilter.ALL
             applyFilters()
         }
-        requireViewById<Chip>(R.id.purchase_history_tab_pending).setOnClickListener {
+        requireViewById<TextView>(R.id.purchase_history_tab_pending).setOnClickListener {
             filter = OrderFilter.PENDING
             applyFilters()
         }
-        requireViewById<Chip>(R.id.purchase_history_tab_completed).setOnClickListener {
+        requireViewById<TextView>(R.id.purchase_history_tab_completed).setOnClickListener {
             filter = OrderFilter.COMPLETED
             applyFilters()
         }
-        requireViewById<Chip>(R.id.purchase_history_tab_failed).setOnClickListener {
+        requireViewById<TextView>(R.id.purchase_history_tab_failed).setOnClickListener {
             filter = OrderFilter.FAILED
             applyFilters()
         }
+        updateOrderTabsModernUi()
+
         search.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = applyFilters()
@@ -155,7 +197,107 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         return refreshed
     }
 
+
+
+    private fun setupBottomNavigation() {
+        val bottomNav = requireViewById<BottomNavigationView>(R.id.purchase_history_bottom_nav)
+        bottomNav.selectedItemId = R.id.nav_more
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_packages -> {
+                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_wallet -> {
+                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_esims -> {
+                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_more -> {
+                    startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun showOrderFilterSheet() {
+        val dialog = BottomSheetDialog(this)
+        val content = layoutInflater.inflate(R.layout.order_filter_bottom_sheet, null)
+        dialog.setContentView(content)
+
+        content.findViewById<TextView>(R.id.order_filter_all).setOnClickListener {
+            dateFilter = null
+            applyFilters()
+            dialog.dismiss()
+        }
+
+        content.findViewById<TextView>(R.id.order_filter_today).setOnClickListener {
+            dateFilter = "TODAY"
+            applyFilters()
+            dialog.dismiss()
+        }
+
+        content.findViewById<TextView>(R.id.order_filter_month).setOnClickListener {
+            dateFilter = "MONTH"
+            applyFilters()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
+    private fun updateOrderTabsModernUi() {
+        val density = resources.displayMetrics.density
+
+        fun styleTab(viewId: Int, selected: Boolean) {
+            val tv = requireViewById<TextView>(viewId)
+
+            tv.setPadding(
+                (8 * density).toInt(),
+                (8 * density).toInt(),
+                (8 * density).toInt(),
+                (8 * density).toInt()
+            )
+            tv.textSize = 12f
+            tv.maxLines = 1
+            tv.isSingleLine = true
+            tv.includeFontPadding = false
+            tv.gravity = android.view.Gravity.CENTER
+
+            if (selected) {
+                tv.setTextColor(Color.parseColor("#2F5BFF"))
+                tv.setTypeface(tv.typeface, android.graphics.Typeface.BOLD)
+                tv.background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 16f * density
+                    setColor(Color.parseColor("#F1F5FF"))
+                    setStroke((1 * density).toInt(), Color.parseColor("#D6E2FF"))
+                }
+            } else {
+                tv.setTextColor(Color.parseColor("#667085"))
+                tv.setTypeface(tv.typeface, android.graphics.Typeface.NORMAL)
+                tv.background = null
+            }
+        }
+
+        styleTab(R.id.purchase_history_tab_all, filter == OrderFilter.ALL)
+        styleTab(R.id.purchase_history_tab_pending, filter == OrderFilter.PENDING)
+        styleTab(R.id.purchase_history_tab_completed, filter == OrderFilter.COMPLETED)
+        styleTab(R.id.purchase_history_tab_failed, filter == OrderFilter.FAILED)
+    }
+
     private fun applyFilters() {
+        updateOrderTabsModernUi()
         val q = search.text?.toString()?.trim().orEmpty().lowercase()
         val filtered = allOrders
             .filter { filter.matches(it.status) }
@@ -164,13 +306,21 @@ class PurchaseHistoryActivity : AppCompatActivity() {
                 q.isBlank() || listOfNotNull(
                     order.id,
                     order.orderNumber,
+                    order.displayNumber(),
                     order.packageName,
+                    PackageNameCleaner.clean(order.packageName),
                     order.price,
                     order.status,
+                    order.statusLabel(),
                     order.provider,
+                    providerDisplayName(order.provider),
                     order.createdAt,
+                    order.customerName(),
+                    order.customerPhone,
+                    order.customerEmail,
                     order.esim?.customerName(),
                     order.esim?.customerPhone,
+                    order.esim?.customerEmail,
                     order.esim?.iccid
                 ).joinToString(" ").lowercase().contains(q)
             }
@@ -204,41 +354,51 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         return parsed.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
     }
 
+
     private fun renderOrders(orderData: List<MobileOrder>) {
         orders.removeAllViews()
         empty.visibility = if (orderData.isEmpty()) View.VISIBLE else View.GONE
-        val processing = allOrders.count { OrderFilter.PENDING.matches(it.status) }
-        val completed = allOrders.count { OrderFilter.COMPLETED.matches(it.status) }
-        val failed = allOrders.count { OrderFilter.FAILED.matches(it.status) }
 
-        requireViewById<Chip>(R.id.purchase_history_tab_all).text = "All (${allOrders.size})"
-        requireViewById<Chip>(R.id.purchase_history_tab_pending).text = "Processing ($processing)"
-        requireViewById<Chip>(R.id.purchase_history_tab_completed).text = "Completed ($completed)"
-        requireViewById<Chip>(R.id.purchase_history_tab_failed).text = "Failed ($failed)"
+        requireViewById<TextView>(R.id.purchase_history_tab_all).text = "All"
+        requireViewById<TextView>(R.id.purchase_history_tab_pending).text = "Pending"
+        requireViewById<TextView>(R.id.purchase_history_tab_completed).text = "Done"
+        requireViewById<TextView>(R.id.purchase_history_tab_failed).text = "Failed"
 
-        summary.text = "${allOrders.size} orders - $processing processing - $completed completed - $failed failed"
-        if (orderData.isEmpty()) return
+        val inflater = layoutInflater
 
-        val inflater = LayoutInflater.from(this)
         orderData.forEach { order ->
             val item = inflater.inflate(R.layout.order_history_item, orders, false)
-            item.requireViewById<TextView>(R.id.history_order_number).text = order.displayNumber()
-            item.requireViewById<TextView>(R.id.history_package_name).text = PackageNameCleaner.clean(order.packageName)
-            item.requireViewById<TextView>(R.id.history_created_date).apply {
-                text = listOfNotNull(
-                    order.createdAt?.let { "Date: ${formatOrderDate(it)}" },
-                    order.esim?.customerName()?.let { "Customer: $it" },
-                    order.esim?.iccid?.let { "ICCID: $it" }
-                ).joinToString("\n")
-                visibility = if (text.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.history_price).apply {
-                text = order.price.orEmpty()
-                visibility = if (order.price.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.history_provider).applyRoamProviderChip(order.provider)
-            item.requireViewById<TextView>(R.id.history_status)
-                .applyRoamStatusChip(order.statusLabel(), order.status)
+
+            item.requireViewById<TextView>(R.id.history_order_number).text =
+                order.displayNumber()?.takeIf { it.isNotBlank() } ?: order.orderNumber ?: order.id ?: "Order"
+
+            val customerName = order.customerName()?.takeIf { it.isNotBlank() }
+            val customerPhone = order.customerPhone?.takeIf { it.isNotBlank() }
+            val customerEmail = order.customerEmail?.takeIf { it.isNotBlank() }
+            item.requireViewById<TextView>(R.id.history_customer_phone).text =
+                listOfNotNull(customerName, customerPhone, customerEmail).joinToString(" • ").ifBlank { "Customer details unavailable" }
+
+            item.requireViewById<TextView>(R.id.history_package_name).text =
+                PackageNameCleaner.clean(order.packageName).orEmpty().ifBlank { order.packageName ?: "Package" }
+
+            item.requireViewById<TextView>(R.id.history_created_date).text =
+                order.createdAt?.takeIf { it.isNotBlank() }?.let { formatOrderDate(it) }.orEmpty()
+
+            item.requireViewById<TextView>(R.id.history_price).text =
+                formatOrderPrice(order.price.orEmpty())
+
+            val logoView = item.requireViewById<android.widget.ImageView>(R.id.history_provider_logo)
+            val providerText = item.requireViewById<TextView>(R.id.history_provider)
+            logoView.setImageResource(R.drawable.r2w_order_doc_icon)
+            logoView.visibility = View.VISIBLE
+            providerText.text = ""
+            providerText.visibility = View.GONE
+
+            item.requireViewById<TextView>(R.id.history_status).applyOrderStatusBadge(
+                order.statusLabel(),
+                order.status
+            )
+
             item.setOnClickListener {
                 startActivity(MobileOrderDetailActivity.createIntent(this, order))
             }
@@ -259,6 +419,98 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         )
         finish()
         return null
+    }
+
+
+
+
+
+    private fun TextView.applyOrderStatusBadge(label: String?, rawStatus: String?) {
+        val display = label?.takeIf { it.isNotBlank() } ?: rawStatus.orEmpty()
+        val normalized = listOfNotNull(rawStatus, display).joinToString(" ").lowercase()
+
+        val isCompleted =
+            normalized.contains("complete") ||
+                normalized.contains("completed") ||
+                normalized.contains("confirmed") ||
+                normalized.contains("confirm") ||
+                normalized.contains("success") ||
+                normalized.contains("succeeded") ||
+                normalized.contains("installed") ||
+                normalized.contains("active")
+
+        val isFailed =
+            normalized.contains("fail") ||
+                normalized.contains("failed") ||
+                normalized.contains("cancel") ||
+                normalized.contains("cancelled") ||
+                normalized.contains("error") ||
+                normalized.contains("rejected")
+
+        val backgroundColor: Int
+        val textColor: Int
+
+        when {
+            isFailed -> {
+                backgroundColor = Color.rgb(254, 226, 226)
+                textColor = Color.rgb(185, 28, 28)
+            }
+            isCompleted -> {
+                backgroundColor = Color.rgb(220, 252, 231)
+                textColor = Color.rgb(22, 101, 52)
+            }
+            else -> {
+                backgroundColor = Color.rgb(254, 249, 195)
+                textColor = Color.rgb(133, 77, 14)
+            }
+        }
+
+        text = when {
+            isFailed -> "Cancelled"
+            isCompleted && normalized.contains("confirm") -> "Active"
+            isCompleted -> "Completed"
+            else -> "Pending"
+        }
+        setTextColor(textColor)
+        background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = 999f
+            setColor(backgroundColor)
+        }
+    }
+
+    private fun formatOrderPrice(value: String): String {
+        val clean = value.trim()
+        if (clean.isBlank()) return "$0"
+        if (clean.startsWith("$") || clean.startsWith("€") || clean.startsWith("£")) return clean
+        return "$$clean"
+    }
+
+    private fun providerLogoRes(provider: String?): Int {
+        val p = provider.orEmpty().lowercase()
+        return when {
+            p.contains("tgt") -> R.drawable.order_orange_logo
+            p.contains("esimcard") -> R.drawable.order_orange_logo
+            p.contains("orange") -> R.drawable.order_orange_logo
+            p.contains("airhubapp") -> R.drawable.vodafone_logo
+            p.contains("vodafone") -> R.drawable.vodafone_logo
+            p.contains("airalo") -> R.drawable.airalo_logo
+            else -> 0
+        }
+    }
+
+    private fun providerDisplayName(provider: String?): String {
+        val p = provider.orEmpty().trim()
+        return when {
+            p.isBlank() -> ""
+            p.equals("tgt", ignoreCase = true) -> "Orange"
+            p.contains("orange", ignoreCase = true) -> "Orange"
+            p.contains("esimcard", ignoreCase = true) -> "Orange"
+            p.contains("airhubapp", ignoreCase = true) -> "Vodafone"
+            p.contains("vodafone", ignoreCase = true) -> "Vodafone"
+            p.contains("airalo", ignoreCase = true) -> "Airalo"
+            else -> p
+        }
     }
 
     private enum class OrderFilter {

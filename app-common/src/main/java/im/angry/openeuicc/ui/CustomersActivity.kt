@@ -14,12 +14,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
@@ -99,7 +99,7 @@ class CustomersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customers)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = "Customers"
+        supportActionBar?.title = ""
 
         refresh = requireViewById(R.id.customers_refresh)
         bottomNav = requireViewById(R.id.customers_bottom_nav)
@@ -340,8 +340,8 @@ class CustomersActivity : AppCompatActivity() {
         val status = statusLabel(latest)
 
         val card = MaterialCardView(this).apply {
-            radius = dp(18).toFloat()
-            cardElevation = dp(3).toFloat()
+            radius = dp(16).toFloat()
+            cardElevation = 0f
             strokeWidth = dp(1)
             setStrokeColor(android.graphics.Color.parseColor("#E2E8F0"))
             setCardBackgroundColor(android.graphics.Color.WHITE)
@@ -349,7 +349,7 @@ class CustomersActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = dp(12)
+                bottomMargin = dp(10)
             }
             setOnClickListener { showCustomerDetails(customer) }
             isClickable = true
@@ -359,27 +359,27 @@ class CustomersActivity : AppCompatActivity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(16), dp(14), dp(14), dp(14))
+            setPadding(dp(12), dp(14), dp(10), dp(14))
         }
 
         val avatarWrap = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(70), dp(70))
+            layoutParams = LinearLayout.LayoutParams(dp(50), dp(50))
         }
 
         avatarWrap.addView(TextView(this).apply {
             text = initialsForCustomer(customer.name)
             gravity = Gravity.CENTER
             background = getDrawable(R.drawable.r2w_customer_avatar_bg)
-            setTextColor(getColor(R.color.r2w_premium_primary))
+            setTextColor(getColor(R.color.r2w_text_primary))
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            layoutParams = FrameLayout.LayoutParams(dp(64), dp(64), Gravity.CENTER)
+            layoutParams = FrameLayout.LayoutParams(dp(46), dp(46), Gravity.CENTER)
         })
 
         val info = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                leftMargin = dp(14)
+                leftMargin = dp(12)
             }
         }
 
@@ -406,7 +406,6 @@ class CustomersActivity : AppCompatActivity() {
             setPadding(0, dp(6), 0, 0)
             setTextColor(getColor(R.color.r2w_premium_primary))
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
         })
@@ -420,30 +419,17 @@ class CustomersActivity : AppCompatActivity() {
         right.addView(TextView(this).apply {
             text = "●  $status"
             gravity = Gravity.CENTER
-            minWidth = dp(92)
-            minHeight = dp(32)
-            setPadding(dp(10), 0, dp(10), 0)
+            minWidth = dp(82)
+            minHeight = dp(28)
+            setPadding(dp(8), 0, dp(8), 0)
             setTextColor(statusTextColor(status))
             background = getDrawable(statusBadgeBg(status))
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         })
 
-        right.addView(TextView(this).apply {
-            text = "Last Transaction"
-            setPadding(0, dp(8), 0, 0)
-            gravity = Gravity.END
-            setTextColor(getColor(R.color.r2w_text_secondary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-        })
-
-        right.addView(TextView(this).apply {
-            text = latest.createdAt?.let { formatCustomerDate(it) }?.takeIf { it.isNotBlank() } ?: "—"
-            gravity = Gravity.END
-            setTextColor(getColor(R.color.r2w_text_primary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            maxLines = 1
-        })
+        // Keep right side compact; date below status is enough.
+        // Date hidden on compact cards to keep the CRM list clean.
 
         row.addView(avatarWrap)
         row.addView(info)
@@ -460,59 +446,285 @@ class CustomersActivity : AppCompatActivity() {
         return card
     }
 
+
     private fun showCustomerDetails(customer: CustomerSummary) {
-        val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(8), dp(6), dp(8), dp(6))
-        }
-        content.addView(label("${customer.totalEsims} eSIMs • ${customer.activeEsims} active • ${customer.expiredEsims} expired", false))
-        customer.esims.forEach { record ->
-            val card = MaterialCardView(this).apply {
-                radius = dp(16).toFloat()
-                strokeWidth = dp(1)
-                setStrokeColor(getColor(R.color.r2w_premium_border))
-                setCardBackgroundColor(getColor(R.color.r2w_premium_surface))
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(12) }
+        val dialog = BottomSheetDialog(this)
+
+        fun chip(textValue: String): TextView =
+            TextView(this).apply {
+                text = textValue
+                gravity = Gravity.CENTER
+                setPadding(dp(12), 0, dp(12), 0)
+                minHeight = dp(32)
+                background = getDrawable(R.drawable.r2w_crm_sheet_chip)
+                setTextColor(getColor(R.color.r2w_text_primary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
             }
+
+        fun smallMeta(textValue: String): TextView =
+            TextView(this).apply {
+                text = textValue
+                setTextColor(getColor(R.color.r2w_text_secondary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+            }
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(10), dp(20), dp(18))
+            background = getDrawable(R.drawable.r2w_crm_soft_panel)
+        }
+
+        root.addView(View(this).apply {
+            background = getDrawable(R.drawable.r2w_crm_sheet_handle)
+            layoutParams = LinearLayout.LayoutParams(dp(48), dp(5)).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(16)
+            }
+        })
+
+        val headerCard = MaterialCardView(this).apply {
+            radius = dp(22).toFloat()
+            cardElevation = 0f
+            strokeWidth = dp(1)
+            setStrokeColor(android.graphics.Color.parseColor("#E4E9F2"))
+            setCardBackgroundColor(android.graphics.Color.WHITE)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(16), dp(16), dp(16))
+        }
+
+        header.addView(FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(64), dp(64))
+            addView(TextView(this@CustomersActivity).apply {
+                text = initialsForCustomer(customer.name)
+                gravity = Gravity.CENTER
+                background = getDrawable(R.drawable.r2w_customer_avatar_bg)
+                setTextColor(getColor(R.color.r2w_text_primary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams = FrameLayout.LayoutParams(dp(58), dp(58), Gravity.CENTER)
+            })
+        })
+
+        header.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                leftMargin = dp(14)
+            }
+
+            addView(TextView(this@CustomersActivity).apply {
+                text = customer.name
+                setTextColor(getColor(R.color.r2w_text_primary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineSmall)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+            })
+
+            addView(TextView(this@CustomersActivity).apply {
+                text = listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact information"
+                setPadding(0, dp(4), 0, 0)
+                setTextColor(getColor(R.color.r2w_text_secondary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+            })
+
+            addView(LinearLayout(this@CustomersActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, dp(10), 0, 0)
+
+                addView(chip("${customer.totalEsims} eSIMs"))
+                addView(chip("${customer.activeEsims} active").apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { leftMargin = dp(8) }
+                })
+                addView(chip("${customer.expiredEsims} expired").apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { leftMargin = dp(8) }
+                })
+            })
+        })
+
+        headerCard.addView(header)
+        root.addView(headerCard)
+
+        root.addView(TextView(this).apply {
+            text = "Customer eSIMs"
+            setPadding(0, dp(18), 0, dp(10))
+            setTextColor(getColor(R.color.r2w_text_primary))
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        })
+
+        val scroll = androidx.core.widget.NestedScrollView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+            isFillViewport = false
+        }
+
+        val listContent = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        customer.esims.forEach { record ->
+            val status = statusLabel(record)
+
+            val card = MaterialCardView(this).apply {
+                radius = dp(18).toFloat()
+                cardElevation = 0f
+                strokeWidth = dp(1)
+                setStrokeColor(android.graphics.Color.parseColor("#E4E9F2"))
+                setCardBackgroundColor(android.graphics.Color.WHITE)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = dp(12) }
+            }
+
             val body = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(dp(14), dp(12), dp(14), dp(12))
+                setPadding(dp(14), dp(14), dp(14), dp(14))
             }
-            body.addView(label(PackageNameCleaner.clean(record.packageName), true, com.google.android.material.R.style.TextAppearance_Material3_TitleMedium))
-            body.addView(label(
-                listOfNotNull(
-                    record.orderNumber?.let { "Order: $it" },
-                    record.iccid?.let { "ICCID: $it" },
-                    record.dataRemaining?.let { "Remaining: $it" },
-                    record.dataUsed?.let { "Used: $it" },
-                    record.createdAt?.let { "Created: ${formatCustomerDate(it)}" },
-                    record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" },
-                    record.status?.let { "Status: ${formatCustomerStatus(it)}" },
-                    record.provider?.let { "Provider: ${visibleProvider(it)}" }
-                ).joinToString("\n"),
-                false,
-                com.google.android.material.R.style.TextAppearance_Material3_BodySmall
-            ).apply { setPadding(0, dp(8), 0, 0) })
-            val row = LinearLayout(this).apply {
+
+            val topRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+
+            topRow.addView(FrameLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(dp(46), dp(46))
+                background = getDrawable(R.drawable.r2w_crm_sheet_icon_bg)
+                addView(ImageView(this@CustomersActivity).apply {
+                    setImageResource(R.drawable.ic_task_sim_card_download)
+                    setColorFilter(getColor(R.color.r2w_premium_primary))
+                    layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER)
+                })
+            })
+
+            topRow.addView(LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    leftMargin = dp(12)
+                }
+
+                addView(TextView(this@CustomersActivity).apply {
+                    text = PackageNameCleaner.clean(record.packageName).orEmpty().ifBlank { "eSIM Package" }
+                    setTextColor(getColor(R.color.r2w_text_primary))
+                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    maxLines = 1
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                })
+
+                addView(TextView(this@CustomersActivity).apply {
+                    text = listOfNotNull(
+                        record.provider?.let { visibleProvider(it) },
+                        record.createdAt?.let { formatCustomerDate(it) }
+                    ).filter { it.isNotBlank() }.joinToString(" • ").ifBlank { "Provider unavailable" }
+                    setPadding(0, dp(4), 0, 0)
+                    setTextColor(getColor(R.color.r2w_text_secondary))
+                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+                    maxLines = 1
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                })
+            })
+
+            topRow.addView(TextView(this).apply {
+                text = "●  $status"
+                gravity = Gravity.CENTER
+                minWidth = dp(84)
+                minHeight = dp(30)
+                setPadding(dp(10), 0, dp(10), 0)
+                setTextColor(statusTextColor(status))
+                background = getDrawable(statusBadgeBg(status))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            })
+
+            body.addView(topRow)
+
+            body.addView(LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(58), dp(10), 0, 0)
+
+                addView(smallMeta(record.iccid?.let { "ICCID: $it" } ?: "ICCID unavailable"))
+                addView(smallMeta(record.dataRemaining?.let { "Remaining: $it" } ?: "Remaining: —").apply {
+                    setPadding(0, dp(3), 0, 0)
+                })
+                addView(smallMeta(record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" } ?: "Expires: —").apply {
+                    setPadding(0, dp(3), 0, 0)
+                })
+            })
+
+            body.addView(LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 setBaselineAligned(false)
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(10) }
-            }
-            row.addView(button("QR / Detail") { openEsimDetail(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { rightMargin = dp(5) })
-            row.addView(button("Copy ICCID") { copyIccid(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply { leftMargin = dp(5) })
-            body.addView(row)
-            body.addView(button("Renew") { openRenewal(record) }.apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(44)).apply { topMargin = dp(8) }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = dp(12) }
+
+                addView(button("QR / Detail") { openEsimDetail(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply {
+                    rightMargin = dp(5)
+                })
+                addView(button("Copy ICCID") { copyIccid(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply {
+                    leftMargin = dp(5)
+                })
             })
+
+            body.addView(button("Renew") { openRenewal(record) }.apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    dp(44)
+                ).apply { topMargin = dp(8) }
+            })
+
             card.addView(body)
-            content.addView(card)
+            listContent.addView(card)
         }
-        AlertDialog.Builder(this)
-            .setTitle(customer.name)
-            .setView(content)
-            .setPositiveButton("Close", null)
-            .show()
+
+        scroll.addView(listContent)
+        root.addView(scroll)
+
+        val closeButton = MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+            text = "Close"
+            isAllCaps = false
+            cornerRadius = dp(16)
+            setTextColor(getColor(R.color.r2w_text_primary))
+            strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E4E9F2"))
+            strokeWidth = dp(1)
+            backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+            stateListAnimator = null
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(46)
+            ).apply { topMargin = dp(12) }
+            setOnClickListener { dialog.dismiss() }
+        }
+        root.addView(closeButton)
+
+        dialog.setContentView(root)
+        dialog.show()
     }
+
 
     private fun label(textValue: String, bold: Boolean, appearance: Int = com.google.android.material.R.style.TextAppearance_Material3_BodyMedium): TextView =
         TextView(this).apply {
@@ -525,13 +737,32 @@ class CustomersActivity : AppCompatActivity() {
     private fun button(textValue: String, action: () -> Unit): MaterialButton =
         MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
             text = textValue
+            isAllCaps = false
             gravity = Gravity.CENTER
-            cornerRadius = dp(14)
-            setTextColor(getColor(R.color.r2w_premium_primary))
-            strokeColor = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_border))
-            strokeWidth = dp(1)
-            backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_surface))
-            iconTint = android.content.res.ColorStateList.valueOf(getColor(R.color.r2w_premium_primary))
+            minHeight = dp(44)
+            cornerRadius = dp(16)
+            insetTop = 0
+            insetBottom = 0
+            iconPadding = dp(6)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+
+            val isPrimary = textValue.equals("QR / Detail", ignoreCase = true) ||
+                textValue.equals("Renew", ignoreCase = true)
+
+            if (isPrimary) {
+                setTextColor(getColor(R.color.r2w_premium_primary))
+                strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#D6E4FF"))
+                strokeWidth = dp(1)
+                backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#F3F7FF"))
+            } else {
+                setTextColor(getColor(R.color.r2w_text_primary))
+                strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E4E9F2"))
+                strokeWidth = dp(1)
+                backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+            }
+
+            stateListAnimator = null
             setOnClickListener { action() }
         }
 

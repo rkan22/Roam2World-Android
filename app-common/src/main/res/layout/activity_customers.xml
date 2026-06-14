@@ -3,9 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0637B8">
+    android:background="#F6F8FB">
 
-    <include layout="@layout/toolbar_activity" />
+    <include
+        layout="@layout/toolbar_activity"
+        android:visibility="gone" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/customers_refresh"
@@ -14,7 +16,7 @@
         app:layout_constraintBottom_toTopOf="@id/customers_bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/customers_scroll"
@@ -25,23 +27,27 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingStart="18dp"
+                android:paddingTop="34dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="92dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:background="@drawable/r2w_customer_hero_bg"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
                     android:orientation="vertical"
-                    android:paddingHorizontal="22dp"
-                    android:paddingTop="26dp"
-                    android:paddingBottom="24dp">
+                    android:paddingHorizontal="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Customer CRM"
-                        android:textColor="@android:color/white"
-                        android:textSize="32sp"
+                        android:textColor="#111827"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -49,36 +55,36 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="Manage and monitor your customers"
-                        android:textColor="#DCEBFF"
-                        android:textSize="17sp" />
+                        android:textColor="#667085"
+                        android:textSize="13sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="28dp"
+                        android:layout_marginTop="18dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="118dp"
+                            android:layout_height="104dp"
                             android:layout_marginEnd="6dp"
                             android:layout_weight="1"
-                            android:background="@drawable/r2w_customer_hero_stat"
+                            android:background="@drawable/r2w_crm_stat_card"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="16dp">
+                            android:padding="14dp">
 
                             <ImageView
-                                android:layout_width="46dp"
-                                android:layout_height="46dp"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_person"
-                                app:tint="@android:color/white" />
+                                app:tint="#2563EB" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
+                                android:layout_marginStart="10dp"
                                 android:layout_weight="1"
                                 android:orientation="vertical">
 
@@ -86,7 +92,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="Total Customers"
-                                    android:textColor="#EAF2FF"
+                                    android:textColor="#667085"
                                     android:textSize="13sp"
                                     android:textStyle="bold" />
 
@@ -95,40 +101,40 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="0"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="30sp"
+                                    android:textColor="#111827"
+                                    android:textSize="23sp"
                                     android:textStyle="bold" />
 
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="Across all regions"
-                                    android:textColor="#DCEBFF"
+                                    android:textColor="#98A2B3"
                                     android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="118dp"
+                            android:layout_height="104dp"
                             android:layout_marginStart="6dp"
                             android:layout_weight="1"
-                            android:background="@drawable/r2w_customer_hero_stat"
+                            android:background="@drawable/r2w_crm_stat_card"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:padding="16dp">
+                            android:padding="14dp">
 
                             <ImageView
-                                android:layout_width="46dp"
-                                android:layout_height="46dp"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_task_sim_card_download"
-                                app:tint="@android:color/white" />
+                                app:tint="#2563EB" />
 
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
+                                android:layout_marginStart="10dp"
                                 android:layout_weight="1"
                                 android:orientation="vertical">
 
@@ -136,7 +142,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="Active eSIMs"
-                                    android:textColor="#EAF2FF"
+                                    android:textColor="#667085"
                                     android:textSize="13sp"
                                     android:textStyle="bold" />
 
@@ -145,15 +151,15 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="0"
-                                    android:textColor="@android:color/white"
-                                    android:textSize="30sp"
+                                    android:textColor="#111827"
+                                    android:textSize="23sp"
                                     android:textStyle="bold" />
 
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="Currently active"
-                                    android:textColor="#DCEBFF"
+                                    android:textColor="#98A2B3"
                                     android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
@@ -163,12 +169,12 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-22dp"
-                    android:background="@drawable/r2w_customer_white_panel"
+                    android:layout_marginTop="18dp"
+                    android:background="@android:color/transparent"
                     android:orientation="vertical"
-                    android:paddingHorizontal="18dp"
-                    android:paddingTop="24dp"
-                    android:paddingBottom="28dp">
+                    android:paddingHorizontal="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/customers_search_layout"
@@ -177,11 +183,11 @@
                         android:layout_height="wrap_content"
                         android:hint="Search customers by name, email or phone..."
                         app:boxBackgroundColor="@android:color/white"
-                        app:boxCornerRadiusBottomEnd="18dp"
-                        app:boxCornerRadiusBottomStart="18dp"
-                        app:boxCornerRadiusTopEnd="18dp"
-                        app:boxCornerRadiusTopStart="18dp"
-                        app:boxStrokeColor="#DDE6F3"
+                        app:boxCornerRadiusBottomEnd="14dp"
+                        app:boxCornerRadiusBottomStart="14dp"
+                        app:boxCornerRadiusTopEnd="14dp"
+                        app:boxCornerRadiusTopStart="14dp"
+                        app:boxStrokeColor="#E4E9F2"
                         app:endIconMode="clear_text"
                         app:hintTextColor="@color/r2w_text_secondary"
                         app:startIconDrawable="@drawable/ic_search"
@@ -210,53 +216,53 @@
 
                             <TextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="44dp"
-                                android:background="@drawable/r2w_premium_primary_button"
+                                android:layout_height="38dp"
+                                android:background="@drawable/r2w_crm_chip_all"
                                 android:gravity="center"
-                                android:minWidth="88dp"
-                                android:paddingHorizontal="18dp"
+                                android:minWidth="70dp"
+                                android:paddingHorizontal="12dp"
                                 android:text="All"
-                                android:textColor="@android:color/white"
-                                android:textSize="15sp"
+                                android:textColor="#2563EB"
+                                android:textSize="13sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="44dp"
+                                android:layout_height="38dp"
                                 android:layout_marginStart="10dp"
                                 android:background="@drawable/r2w_customer_active_badge"
                                 android:gravity="center"
-                                android:minWidth="96dp"
-                                android:paddingHorizontal="18dp"
+                                android:minWidth="86dp"
+                                android:paddingHorizontal="12dp"
                                 android:text="●  Active"
                                 android:textColor="#168653"
-                                android:textSize="15sp"
+                                android:textSize="13sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="44dp"
+                                android:layout_height="38dp"
                                 android:layout_marginStart="10dp"
                                 android:background="@drawable/r2w_customer_expiring_badge"
                                 android:gravity="center"
-                                android:minWidth="106dp"
-                                android:paddingHorizontal="18dp"
+                                android:minWidth="94dp"
+                                android:paddingHorizontal="12dp"
                                 android:text="●  Pending"
                                 android:textColor="#F59E0B"
-                                android:textSize="15sp"
+                                android:textSize="13sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
-                                android:layout_height="44dp"
+                                android:layout_height="38dp"
                                 android:layout_marginStart="10dp"
                                 android:background="@drawable/r2w_customer_expired_badge"
                                 android:gravity="center"
-                                android:minWidth="100dp"
-                                android:paddingHorizontal="18dp"
+                                android:minWidth="86dp"
+                                android:paddingHorizontal="12dp"
                                 android:text="●  Expired"
                                 android:textColor="#DC2626"
-                                android:textSize="15sp"
+                                android:textSize="13sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </HorizontalScrollView>
@@ -305,7 +311,10 @@
         android:id="@+id/customers_bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/r2w_premium_bg"
+        android:background="@drawable/r2w_nav_bar_bg"
+        app:itemIconTint="@color/r2w_bottom_nav_colors"
+        app:itemTextColor="@color/r2w_bottom_nav_colors"
+        app:itemRippleColor="@android:color/transparent"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

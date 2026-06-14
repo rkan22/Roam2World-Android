@@ -72,8 +72,8 @@ class PurchaseConfirmationActivity : AppCompatActivity() {
             "Package: ${PackageNameCleaner.clean(intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: getString(R.string.packages_title))}"
         setPlainText(R.id.purchase_order_number, intent.getStringExtra(EXTRA_ORDER_NUMBER), "Order No")
         setPlainText(R.id.purchase_order_status, cleanVisibleValue(intent.getStringExtra(EXTRA_STATUS)), "Activation")
-        setPlainText(R.id.purchase_price, intent.getStringExtra(EXTRA_PRICE), "Price")
-        setPlainText(R.id.purchase_balance_after, intent.getStringExtra(EXTRA_BALANCE_AFTER), "Balance After")
+        setPlainText(R.id.purchase_price, r2wMoney(intent.getStringExtra(EXTRA_PRICE)), "Price")
+        setPlainText(R.id.purchase_balance_after, r2wMoney(intent.getStringExtra(EXTRA_BALANCE_AFTER)), "Balance After")
         setPlainText(R.id.purchase_iccid, intent.getStringExtra(EXTRA_ICCID), "ICCID")
         setPlainText(R.id.purchase_esim_id, intent.getStringExtra(EXTRA_ESIM_ID), "eSIM ID")
         setPlainText(R.id.purchase_activation_code, intent.getStringExtra(EXTRA_LPA_CODE), "Activation Code")

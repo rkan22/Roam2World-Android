@@ -3,13 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginStart="0dp"
+    android:layout_marginTop="0dp"
+    android:layout_marginEnd="0dp"
+    android:layout_marginBottom="10dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     app:cardBackgroundColor="@android:color/white"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
     app:strokeColor="@color/r2w_premium_border"
     app:strokeWidth="1dp">
 
@@ -20,15 +23,15 @@
         android:padding="14dp">
 
         <LinearLayout
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@drawable/r2w_package_icon_circle"
             android:gravity="center">
 
             <ImageView
                 android:id="@+id/package_icon"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_package_globe"
                 app:tint="@color/r2w_premium_primary" />
@@ -41,7 +44,7 @@
             android:layout_marginTop="12dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
             android:textColor="@color/r2w_premium_text"
             android:textStyle="bold" />
 
@@ -81,7 +84,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:maxLines="1"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
             android:textColor="@color/r2w_premium_text"
             android:textStyle="bold" />
 
@@ -90,13 +93,13 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:background="@drawable/r2w_premium_primary_button"
+            android:background="@drawable/r2w_store_buy_button_soft"
             android:text="Buy Now"
             android:textAllCaps="false"
-            android:textColor="@android:color/white"
+            android:textColor="@color/r2w_premium_primary"
             android:textStyle="bold"
             app:backgroundTint="@null"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="14dp" />
 
         <TextView
             android:id="@+id/package_country"

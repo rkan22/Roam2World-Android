@@ -236,7 +236,7 @@ class TransactionsActivity : AppCompatActivity() {
                 order.esim?.customerPhone?.let { "Phone: $it" },
                 order.esim?.iccid?.let { "ICCID: $it" },
                 order.provider?.let { "Provider: ${visibleProvider(it)}" },
-                order.price?.let { "Amount: $it" },
+                order.price?.let { "Amount: ${r2wMoney(it)}" },
                 order.createdAt?.let { "Date: ${formatTransactionDate(it)}" }
             ).joinToString("\n").ifBlank { "No extra order details" },
             false,

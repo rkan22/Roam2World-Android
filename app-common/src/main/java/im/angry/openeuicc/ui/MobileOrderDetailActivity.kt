@@ -62,7 +62,7 @@ class MobileOrderDetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_order_detail)
         setSupportActionBar(requireViewById(R.id.toolbar))
         supportActionBar?.apply {
-            title = getString(R.string.order_detail_title)
+            title = "Purchase History"
             setDisplayHomeAsUpEnabled(true)
         }
 
@@ -151,12 +151,19 @@ class MobileOrderDetailActivity : AppCompatActivity() {
             return
         }
 
-        requireViewById<TextView>(R.id.order_detail_heading).text = order.displayNumber()
+        requireViewById<TextView>(R.id.order_detail_heading).text = "Purchase History"
+        requireViewById<TextView>(R.id.order_detail_hero_title).text =
+            PackageNameCleaner.clean(order.packageName).ifBlank { "eSIM Package" }
+        requireViewById<TextView>(R.id.order_detail_hero_subtitle).text =
+            order.provider.orEmpty().ifBlank { "Provider unavailable" }
+        requireViewById<TextView>(R.id.order_detail_hero_status)
+            .applyModernDetailBadge(order.statusLabel(), order.status)
+
         setOptionalText(R.id.order_detail_number, order.displayNumber(), R.string.order_detail_number_format)
         setOptionalText(R.id.order_detail_package, PackageNameCleaner.clean(order.packageName), R.string.order_detail_package_format)
-        setOptionalText(R.id.order_detail_price, order.price, R.string.order_detail_price_format)
+        setOptionalText(R.id.order_detail_price, r2wMoney(order.price), R.string.order_detail_price_format)
         requireViewById<TextView>(R.id.order_detail_provider).applyRoamProviderChip(visibleProvider(order.provider))
-        requireViewById<TextView>(R.id.order_detail_status).applyRoamStatusChip(order.statusLabel(), order.status)
+        requireViewById<TextView>(R.id.order_detail_status).applyModernDetailBadge(order.statusLabel(), order.status)
         setOptionalText(R.id.order_detail_created, order.createdAt?.let { formatOrderDate(it) }, R.string.order_detail_created_format)
         setOptionalText(R.id.order_detail_esim_id, order.esimId, R.string.order_detail_esim_id_format)
         renderTimeline(order)
@@ -247,8 +254,21 @@ class MobileOrderDetailActivity : AppCompatActivity() {
 
     private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
         requireViewById<TextView>(viewId).apply {
-            text = value?.let { getString(formatResId, it) }.orEmpty()
-            visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
+            val label = when (viewId) {
+                R.id.order_detail_customer_name -> "Name"
+                R.id.order_detail_customer_phone -> "Phone"
+                R.id.order_detail_customer_email -> "Email"
+                R.id.order_detail_iccid -> "ICCID"
+                R.id.order_detail_provider -> "Provider"
+                R.id.order_detail_package -> "Package"
+                R.id.order_detail_esim_id -> "eSIM ID"
+                R.id.order_detail_number -> "Order Number"
+                R.id.order_detail_price -> "Price"
+                R.id.order_detail_created -> "Purchase Date"
+                else -> ""
+            }
+            text = if (label.isBlank()) value.orEmpty().ifBlank { "-" } else "$label    ${value.orEmpty().ifBlank { "-" }}"
+            visibility = View.VISIBLE
         }
     }
 
@@ -286,6 +306,38 @@ class MobileOrderDetailActivity : AppCompatActivity() {
             esimId = intent.getStringExtra(EXTRA_ESIM_ID),
         )
     }
+
+    private fun TextView.applyModernDetailBadge(label: String?, statusValue: String?) {
+        val status = statusValue.orEmpty().lowercase()
+        val normalized = when {
+            status.contains("pending") || status.contains("processing") || status.contains("waiting") -> "PENDING"
+            status.contains("completed") || status.contains("complete") || status.contains("confirmed") || status.contains("success") || status.contains("paid") -> "COMPLETED"
+            status.contains("failed") || status.contains("failure") || status.contains("cancel") || status.contains("refund") || status.contains("error") -> "FAILED"
+            else -> label.orEmpty().ifBlank { "STATUS" }.uppercase()
+        }
+
+        text = normalized
+
+        when (normalized) {
+            "PENDING" -> {
+                setBackgroundResource(R.drawable.r2w_detail_badge_pending)
+                setTextColor(getColor(android.R.color.holo_orange_dark))
+            }
+            "COMPLETED", "CONFIRMED", "SUCCESS", "PAID" -> {
+                setBackgroundResource(R.drawable.r2w_detail_badge_success)
+                setTextColor(getColor(android.R.color.holo_green_dark))
+            }
+            "FAILED", "CANCELLED", "REFUNDED" -> {
+                setBackgroundResource(R.drawable.r2w_detail_badge_failed)
+                setTextColor(getColor(android.R.color.holo_red_dark))
+            }
+            else -> {
+                setBackgroundResource(R.drawable.r2w_detail_badge_neutral)
+                setTextColor(getColor(R.color.r2w_text_secondary))
+            }
+        }
+    }
+
 
     companion object {
         private const val EXTRA_ID = "mobile_order.id"

@@ -86,7 +86,7 @@ class PackagesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_packages)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.packages_title)
+        supportActionBar?.title = ""
 
         refresh = requireViewById(R.id.packages_refresh)
         bottomNav = requireViewById(R.id.packages_bottom_nav)
@@ -822,7 +822,7 @@ private fun MobilePackage.dataSortValue(): Double =
 
         item.requireViewById<TextView>(R.id.package_title).text = mobilePackage.cleanPackageTitle()
         item.requireViewById<TextView>(R.id.package_specs).text = mobilePackage.cardValidityOnly()
-        item.requireViewById<TextView>(R.id.package_price).text = mobilePackage.priceFor(userRole)
+        item.requireViewById<TextView>(R.id.package_price).text = r2wMoney(mobilePackage.priceFor(userRole))
 
         item.requireViewById<android.widget.ImageView>(R.id.package_icon).apply {
             setImageResource(R.drawable.ic_package_globe)
@@ -1155,7 +1155,7 @@ private fun MobilePackage.dataSortValue(): Double =
 
     private fun MobilePackage.isRecommendedPackage(): Boolean {
         val text = searchableText()
-        val price = priceFor(userRole).replace("$", "").trim().toDoubleOrNull() ?: 0.0
+        val price = priceFor(userRole).replace(Regex("[^0-9.]"), "").trim().toDoubleOrNull() ?: 0.0
         return text.contains("europe") ||
             text.contains("turkey") ||
             text.contains("global") ||

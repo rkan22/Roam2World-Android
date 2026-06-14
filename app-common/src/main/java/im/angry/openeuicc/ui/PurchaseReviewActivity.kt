@@ -100,7 +100,7 @@ class PurchaseReviewActivity : AppCompatActivity() {
         requireViewById<TextView>(R.id.review_package_price).text = "Package Price: ${money(price)}"
         requireViewById<TextView>(R.id.review_tax).text = "Tax: ${money(tax)}"
         requireViewById<TextView>(R.id.review_total).text = "Total: ${money(total)}"
-        requireViewById<TextView>(R.id.review_current_balance).text = "Current Balance: ${intent.getStringExtra(EXTRA_CURRENT_BALANCE) ?: "--"}"
+        requireViewById<TextView>(R.id.review_current_balance).text = "Current Balance: ${r2wMoney(intent.getStringExtra(EXTRA_CURRENT_BALANCE))}"
         requireViewById<TextView>(R.id.review_balance_after).text = "Balance After Purchase: ${after?.let { money(it) } ?: "--"}"
         renderSimIccidRequirement()
     }

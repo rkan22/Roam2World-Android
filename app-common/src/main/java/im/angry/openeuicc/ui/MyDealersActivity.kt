@@ -127,7 +127,7 @@ class MyDealersActivity : AppCompatActivity() {
             val item = inflater.inflate(R.layout.dealer_list_item, dealers, false)
             item.requireViewById<TextView>(R.id.dealer_item_name).text = dealer.name
             item.requireViewById<TextView>(R.id.dealer_item_balance).text =
-                getString(R.string.dealer_balance_format, dealer.currentBalance)
+                getString(R.string.dealer_balance_format, r2wMoney(dealer.currentBalance))
             item.requireViewById<TextView>(R.id.dealer_item_orders).text =
                 getString(R.string.dealer_orders_format, dealer.totalOrders)
             item.requireViewById<TextView>(R.id.dealer_item_revenue).text =

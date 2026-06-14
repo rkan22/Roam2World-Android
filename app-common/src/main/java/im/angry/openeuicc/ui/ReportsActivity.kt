@@ -507,7 +507,7 @@ class ReportsActivity : AppCompatActivity() {
                     PackageNameCleaner.clean(order.packageName),
                     order.provider.orEmpty().replace("TGT", "Orange", ignoreCase = true).ifBlank { "-" },
                     formatReportStatus(order.statusLabel()),
-                    order.price.orEmpty().ifBlank { "-" },
+                    r2wMoney(order.price, "-"),
                     order.esimId.orEmpty().ifBlank { "-" }
                 )
 
@@ -592,14 +592,14 @@ class ReportsActivity : AppCompatActivity() {
             listOfNotNull(
                 order.displayNumber(),
                 PackageNameCleaner.clean(order.packageName),
-                order.price?.let { "Amount: $it" },
+                order.price?.let { "Amount: ${r2wMoney(it)}" },
                 order.statusLabel()?.let { "Status: ${formatReportStatus(it)}" },
                 order.createdAt?.let { "Date: ${formatReportDate(it)}" }
             ).joinToString("\n")
         }
 
         return listOfNotNull(
-            currentBalance?.let { "Current balance: $it" },
+            currentBalance?.let { "Current balance: ${r2wMoney(it)}" },
             "Orders: ${orders.size} total • $completed completed • $pending pending • $failed failed",
             latest.ifBlank { "No order data yet" }
         ).joinToString("\n\n")

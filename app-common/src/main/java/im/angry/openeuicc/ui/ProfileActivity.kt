@@ -7,7 +7,9 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.core.view.updatePadding
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.common.R
@@ -22,6 +24,7 @@ class ProfileActivity : AppCompatActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
     private lateinit var scroll: View
+    private lateinit var bottomNav: BottomNavigationView
     private lateinit var avatar: TextView
     private lateinit var name: TextView
     private lateinit var email: TextView
@@ -33,10 +36,11 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.r2w_profile)
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        supportActionBar?.title = ""
 
         scroll = requireViewById(R.id.profile_scroll)
+        bottomNav = requireViewById(R.id.profile_bottom_nav)
         avatar = requireViewById(R.id.profile_avatar)
         name = requireViewById(R.id.profile_name)
         email = requireViewById(R.id.profile_email)
@@ -44,8 +48,9 @@ class ProfileActivity : AppCompatActivity() {
         permissions = requireViewById(R.id.profile_permissions)
 
         setupInsets()
+        setupBottomNavigation()
 
-        requireViewById<MaterialButton>(R.id.profile_settings).setOnClickListener {
+        requireViewById<View>(R.id.profile_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
         requireViewById<MaterialButton>(R.id.profile_logout).setOnClickListener {
@@ -65,10 +70,37 @@ class ProfileActivity : AppCompatActivity() {
             window.decorView.rootView,
             arrayOf(
                 this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll)
+                mainViewPaddingInsetHandler(scroll),
+                { insets -> bottomNav.updatePadding(insets.left, bottomNav.paddingTop, insets.right, insets.bottom) }
             ),
             consume = false
         )
+    }
+
+    private fun setupBottomNavigation() {
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_dashboard -> {
+                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_packages -> {
+                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_wallet -> {
+                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_esims -> {
+                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                    false
+                }
+                R.id.nav_more -> true
+                else -> false
+            }
+        }
+        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
     }
 
     private fun loadProfile() {
@@ -88,7 +120,7 @@ class ProfileActivity : AppCompatActivity() {
         avatar.text = initials(displayName)
         name.text = displayName
         email.text = emailValue
-        role.text = "Premium $prettyRole"
+        role.text = prettyRole
         permissions.text = permissionsForRole(roleValue)
 
         findViewById<TextView>(R.id.profile_full_name_value)?.text = displayName
@@ -103,10 +135,10 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun permissionsForRole(role: String): String = when (role.lowercase()) {
-        "admin" -> "All modules • Dealer management • Reports • Wallet • eSIM Store"
-        "reseller" -> "Dealer management • Wallet • Reports • eSIM Store • Orange Recharge"
-        "dealer" -> "eSIM Store • Wallet • Orders • Orange Recharge"
-        else -> "eSIM Store • Wallet • Reports • OpenEUICC"
+        "admin" -> "All modules • Reports • Wallet"
+        "reseller" -> "Dealer management • Wallet • Reports"
+        "dealer" -> "Store • Wallet • Orders"
+        else -> "Store • Wallet • Reports"
     }
 
     private fun logout() {

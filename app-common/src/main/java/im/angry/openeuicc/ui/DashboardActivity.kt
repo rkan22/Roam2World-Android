@@ -204,8 +204,8 @@ class DashboardActivity : AppCompatActivity() {
         account.text = ""
         balance.text = "--"
         activeEsims.text = "--"
-        todaySales.text = "--"
-        monthlySalesKpi?.text = "--"
+        todaySales.text = r2wMoney(("--").toString())
+        monthlySalesKpi?.text = r2wMoney(("--").toString())
         activeEsimsKpi?.text = "--"
         expiredEsimsKpi?.text = "--"
         expiringSoonKpi?.text = "--"
@@ -259,9 +259,9 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun renderDashboard(data: MobileDashboardData) {
-        balance.text = data.currentBalance
-        todaySales.text = data.todaySales.ifBlank { "0.00" }
-        monthlySalesKpi?.text = data.monthlySales.ifBlank { "0.00" }
+        balance.text = r2wMoney(data.currentBalance)
+        todaySales.text = r2wMoney((data.todaySales.ifBlank { "0.00" }).toString())
+        monthlySalesKpi?.text = r2wMoney((data.monthlySales.ifBlank { "0.00" }).toString())
         activeEsimsKpi?.text = data.activeEsimCount.ifBlank { "0" }
         expiredEsimsKpi?.text = data.expiredEsimCount.ifBlank { "0" }
         expiringSoonKpi?.text = "--"
@@ -302,7 +302,7 @@ class DashboardActivity : AppCompatActivity() {
             item.requireViewById<TextView>(R.id.order_title).text = order.title
             item.requireViewById<TextView>(R.id.order_subtitle).text = order.subtitle
             item.requireViewById<TextView>(R.id.order_amount).apply {
-                text = order.amount.orEmpty()
+                text = r2wMoney(order.amount, "")
                 visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
             }
             item.requireViewById<TextView>(R.id.order_status).applyRoamStatusChip(order.status, order.status)
