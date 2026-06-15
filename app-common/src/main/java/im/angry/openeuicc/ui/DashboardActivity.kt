@@ -1,85 +1,38 @@
 package im.angry.openeuicc.ui
 
-import android.content.res.ColorStateList
-
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.progressindicator.LinearProgressIndicator
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileDashboardData
-import im.angry.openeuicc.auth.MobileDashboardOrder
-import im.angry.openeuicc.auth.MobileOrder
-import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
 import im.angry.openeuicc.ui.compose.screens.DashboardScreen
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
 
-class DashboardActivity : AppCompatActivity() {
+class DashboardActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var scroll: View
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var greeting: TextView
-    private lateinit var account: TextView
-    private lateinit var balance: TextView
-    private lateinit var todaySales: TextView
-    private var monthlySalesKpi: TextView? = null
-    private var activeEsimsKpi: TextView? = null
-    private var expiredEsimsKpi: TextView? = null
-    private var expiringSoonKpi: TextView? = null
-    private lateinit var activeEsims: TextView
-    private lateinit var ordersSummary: TextView
-    private lateinit var dealerSummaryCard: View
-    private lateinit var dealerSummary: TextView
-    private lateinit var manageDealers: MaterialButton
-    private lateinit var error: TextView
-    private lateinit var orders: LinearLayout
-    private lateinit var expiredSoonValue: TextView
-    private lateinit var expiredSoonSubtitle: TextView
-    private var currentRole: String? = null
     private val dashboardDataFlow = MutableStateFlow<MobileDashboardData?>(null)
     private var displayName by mutableStateOf("Admin")
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        
+
         setContent {
             val data by dashboardDataFlow.collectAsState()
             R2WTheme {
@@ -105,579 +58,39 @@ class DashboardActivity : AppCompatActivity() {
         loadDashboard()
     }
 
-    override fun onResume() {
-        super.onResume()
-        bottomNav.selectedItemId = R.id.nav_dashboard
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.activity_dashboard, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.my_dealers)?.isVisible = currentRole?.lowercase() == "reseller"
-        return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            R.id.reload -> {
-                loadDashboard()
-                true
-            }
-            R.id.purchase_history -> {
-                openPurchaseHistoryActivity()
-                true
-            }
-            R.id.my_dealers -> {
-                openMyDealersActivity()
-                true
-            }
-            R.id.logout -> {
-                logout()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll),
-                { insets ->
-                    bottomNav.updatePadding(insets.left, bottomNav.paddingTop, insets.right, insets.bottom)
-                }
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> true
-                R.id.nav_packages -> {
-                    openPackagesActivity()
-                    false
-                }
-                R.id.nav_wallet -> {
-                    openWalletActivity()
-                    false
-                }
-                R.id.nav_esims -> {
-                    openEsimActivity()
-                    false
-                }
-                R.id.nav_more -> {
-                    openMoreActivity()
-                    false
-                }
-                else -> false
-            }
-        }
-        bottomNav.selectedItemId = R.id.nav_dashboard
-    }
-
-    private fun setupQuickActions() {
-        requireViewById<MaterialButton>(R.id.dashboard_browse_packages).setOnClickListener { openPackagesActivity() }
-        requireViewById<MaterialButton>(R.id.dashboard_request_balance).setOnClickListener {
-            startActivity(Intent(this, WalletRequestActivity::class.java))
-        }
-        requireViewById<MaterialButton>(R.id.dashboard_view_history).setOnClickListener { openPurchaseHistoryActivity() }
-        manageDealers.setOnClickListener { openMyDealersActivity() }
-        addRenewalQuickActions()
-    }
-
-    private fun renderPlaceholders() {
-        greeting.text = getString(R.string.dashboard_greeting)
-        account.text = ""
-        balance.text = "--"
-        activeEsims.text = "--"
-        todaySales.text = r2wMoney(("--").toString())
-        monthlySalesKpi?.text = r2wMoney(("--").toString())
-        activeEsimsKpi?.text = "--"
-        expiredEsimsKpi?.text = "--"
-        expiringSoonKpi?.text = "--"
-        ordersSummary.text = "--"
-        dealerSummary.text = getString(R.string.dashboard_dealer_summary_value)
-        dealerSummaryCard.visibility = View.GONE
-        manageDealers.visibility = View.GONE
-        expiredSoonValue.text = "--"
-        expiredSoonSubtitle.text = "Loading expired eSIMs"
-        renderOrders(emptyList())
-    }
-
     private fun loadDashboard() {
         lifecycleScope.launch {
-            error.visibility = View.GONE
-            setLoading(true)
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            renderSession(session)
+            displayName = session.displayName ?: "Admin"
 
-            val dashboardResult = runCatching { authApi.dashboard(session) }
-            setLoading(false)
-
-            dashboardResult
-                .onSuccess { renderDashboard(it) }
-                .onFailure {
-                    error.text = it.message ?: getString(R.string.dashboard_load_failed)
-                    error.visibility = View.VISIBLE
-                }
+            runCatching {
+                authApi.dashboard(session)
+            }.onSuccess { dashboard ->
+                dashboardDataFlow.value = dashboard
+            }
         }
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return redirectToLogin()
+        val savedSession = withContext(Dispatchers.IO) {
+            tokenStore.getSession()
+        } ?: return redirectToLogin()
+
         if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
-        val refreshed = runCatching { authApi.refresh(savedSession) }.getOrNull() ?: return redirectToLogin()
-        withContext(Dispatchers.IO) { tokenStore.save(refreshed) }
+
+        val refreshed = runCatching {
+            authApi.refresh(savedSession)
+        }.getOrNull() ?: return redirectToLogin()
+
+        withContext(Dispatchers.IO) {
+            tokenStore.save(refreshed)
+        }
+
         return refreshed
-    }
-
-    private fun renderSession(session: AuthSession) {
-        currentRole = session.role
-        displayName = session.displayName ?: "Admin"
-    }
-
-    private fun renderDashboard(data: MobileDashboardData) {
-        dashboardDataFlow.value = data
-    }
-
-    private fun renderExpiredSoon(esimData: List<MobileEsim>) {
-        val expiring = esimData.filter { MobileEsimFilters.isExpiredSoon(it) }
-
-        expiredSoonValue.text = expiring.size.toString()
-        expiringSoonKpi?.text = expiring.size.toString()
-        expiredSoonSubtitle.text = if (expiring.isEmpty()) {
-            "No eSIMs expiring in 7 days"
-        } else {
-            "Tap to view expiring eSIMs"
-        }
-    }
-
-    private fun renderOrders(orderData: List<MobileDashboardOrder>) {
-        orders.removeAllViews()
-        if (orderData.isEmpty()) {
-            TextView(this).apply {
-                text = "No recent purchases yet"
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                orders.addView(this)
-            }
-            return
-        }
-
-        val inflater = LayoutInflater.from(this)
-        orderData.forEach { order ->
-            val item = inflater.inflate(R.layout.dashboard_order_item, orders, false)
-            item.requireViewById<TextView>(R.id.order_title).text = order.title
-            item.requireViewById<TextView>(R.id.order_subtitle).text = order.subtitle
-            item.requireViewById<TextView>(R.id.order_amount).apply {
-                text = r2wMoney(order.amount, "")
-                visibility = if (order.amount.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.order_status).applyRoamStatusChip(order.status, order.status)
-            item.setOnClickListener {
-                startActivity(
-                    MobileOrderDetailActivity.createIntent(
-                        this,
-                        MobileOrder(
-                            id = order.id,
-                            orderNumber = order.orderNumber,
-                            packageName = order.title,
-                            price = order.amount,
-                            status = order.status,
-                            createdAt = order.subtitle,
-                            provider = null,
-                            esimId = null
-                        )
-                    )
-                )
-            }
-            orders.addView(item)
-        }
-    }
-
-
-    private fun addTodaySalesKpiCard() {
-        val parent = requireViewById<LinearLayout>(R.id.dashboard_dynamic_kpis)
-
-        parent.removeAllViews()
-
-        val section = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = dp(16)
-            }
-        }
-
-        val row1 = createKpiRow()
-        todaySales = addDashboardKpiCard(row1, "Today's Sales", "Sales today")
-        monthlySalesKpi = addDashboardKpiCard(row1, "Monthly Sales", "This month")
-        section.addView(row1)
-
-        val row2 = createKpiRow()
-        activeEsimsKpi = addDashboardKpiCard(row2, "Active eSIMs", "Active", "ACTIVE")
-        expiredEsimsKpi = addDashboardKpiCard(row2, "Expired eSIMs", "Expired", "EXPIRED")
-        section.addView(row2)
-
-        expiringSoonKpi = addDashboardKpiCard(
-            section,
-            "Expiring in 7 Days",
-            "Next 7 days",
-            MobileEsimFilters.FILTER_EXPIRED_SOON,
-            fullWidth = true
-        )
-
-        val insertIndex = parent.indexOfChild(activeEsims.parent?.parent as? android.view.View) + 1
-        parent.addView(section, insertIndex.coerceAtLeast(0))
-    }
-
-    private fun createKpiRow(): LinearLayout {
-        return LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            isBaselineAligned = false
-            gravity = android.view.Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = dp(12)
-            }
-        }
-    }
-
-    private fun addDashboardKpiCard(
-        parent: LinearLayout,
-        title: String,
-        subtitle: String,
-        esimFilter: String? = null,
-        fullWidth: Boolean = false
-    ): TextView {
-        val isRow = parent.orientation == LinearLayout.HORIZONTAL
-        val childCountBeforeAdd = parent.childCount
-
-        val iconRes = when {
-            title.contains("Today", ignoreCase = true) -> R.drawable.ic_kpi_sales
-            title.contains("Monthly", ignoreCase = true) -> R.drawable.ic_kpi_calendar
-            title.contains("Active", ignoreCase = true) -> R.drawable.ic_kpi_esim
-            title.contains("Expired", ignoreCase = true) || title.contains("Expiring", ignoreCase = true) -> R.drawable.ic_kpi_expiring
-            else -> R.drawable.ic_kpi_sales
-        }
-
-        val iconBg = when {
-            title.contains("Active", ignoreCase = true) -> R.drawable.r2w_kpi_green_circle
-            title.contains("Expired", ignoreCase = true) || title.contains("Expiring", ignoreCase = true) -> R.drawable.r2w_kpi_orange_circle
-            else -> R.drawable.r2w_kpi_blue_circle
-        }
-
-        val card = MaterialCardView(this).apply {
-            radius = dp(18).toFloat()
-            cardElevation = dp(3).toFloat()
-            strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_border))
-            setCardBackgroundColor(getColor(R.color.r2w_card))
-            isClickable = esimFilter != null
-            isFocusable = esimFilter != null
-            if (esimFilter != null) {
-                setOnClickListener {
-                    startActivity(
-                        Intent(this@DashboardActivity, MobileEsimsActivity::class.java)
-                            .putExtra(MobileEsimFilters.FILTER_EXTRA_KEY, esimFilter)
-                    )
-                }
-            }
-
-            layoutParams = if (fullWidth || !isRow) {
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    dp(118)
-                ).apply {
-                    topMargin = dp(12)
-                }
-            } else {
-                LinearLayout.LayoutParams(
-                    0,
-                    dp(118),
-                    1f
-                ).apply {
-                    if (childCountBeforeAdd == 0) {
-                        marginEnd = dp(6)
-                    } else {
-                        marginStart = dp(6)
-                    }
-                }
-            }
-        }
-
-        val row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(dp(10), dp(10), dp(10), dp(10))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-        }
-
-        val iconBox = FrameLayout(this).apply {
-            background = getDrawable(iconBg)
-            layoutParams = LinearLayout.LayoutParams(dp(42), dp(42))
-        }
-
-        iconBox.addView(ImageView(this).apply {
-            setImageResource(iconRes)
-            layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), android.view.Gravity.CENTER)
-        })
-
-        val body = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1f
-            ).apply {
-                leftMargin = dp(10)
-            }
-        }
-
-        body.addView(TextView(this).apply {
-            text = title
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-            setTextColor(getColor(R.color.r2w_text_secondary))
-        })
-
-        val value = TextView(this).apply {
-            text = "--"
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-            setPadding(0, dp(6), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(getColor(R.color.r2w_text_primary))
-        }
-
-        body.addView(value)
-
-        body.addView(TextView(this).apply {
-            text = subtitle
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-            setPadding(0, dp(4), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            setTextColor(getColor(R.color.r2w_text_secondary))
-        })
-
-        row.addView(iconBox)
-        row.addView(body)
-        card.addView(row)
-        parent.addView(card)
-
-        return value
-    }
-
-
-    private fun addExpiredSoonKpiCard() {
-        val parent = requireViewById<LinearLayout>(R.id.dashboard_dynamic_kpis)
-
-        val card = MaterialCardView(this).apply {
-            radius = dp(18).toFloat()
-            cardElevation = dp(3).toFloat()
-            strokeWidth = dp(1)
-            setStrokeColor(getColor(R.color.r2w_border))
-            setCardBackgroundColor(getColor(R.color.r2w_card))
-            isClickable = true
-            isFocusable = true
-            setOnClickListener { openExpiredSoonEsims() }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(118)
-            ).apply {
-                topMargin = dp(12)
-            }
-        }
-
-        val row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(dp(10), dp(10), dp(10), dp(10))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-        }
-
-        val iconBox = FrameLayout(this).apply {
-            background = getDrawable(R.drawable.r2w_kpi_orange_circle)
-            layoutParams = LinearLayout.LayoutParams(dp(42), dp(42))
-        }
-
-        iconBox.addView(ImageView(this).apply {
-            setImageResource(R.drawable.ic_kpi_expiring)
-            layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), android.view.Gravity.CENTER)
-        })
-
-        val body = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1f
-            ).apply {
-                leftMargin = dp(10)
-            }
-        }
-
-        body.addView(TextView(this).apply {
-            text = "Expired eSIMs"
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-            setTextColor(getColor(R.color.r2w_text_secondary))
-            maxLines = 1
-        })
-
-        expiredSoonValue = TextView(this).apply {
-            text = "--"
-            setPadding(0, dp(6), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            setTextColor(getColor(R.color.r2w_text_primary))
-            maxLines = 1
-        }
-
-        body.addView(expiredSoonValue)
-
-        expiredSoonSubtitle = TextView(this).apply {
-            text = "Loading expiring eSIMs"
-            setPadding(0, dp(4), 0, 0)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-            setTextColor(getColor(R.color.r2w_text_secondary))
-            maxLines = 1
-        }
-
-        body.addView(expiredSoonSubtitle)
-
-        row.addView(iconBox)
-        row.addView(body)
-        card.addView(row)
-        parent.addView(card)
-    }
-
-
-    private fun addRenewalQuickActions() {
-        val quickActions = requireViewById<MaterialButton>(R.id.dashboard_view_history).parent?.parent as? LinearLayout ?: return
-
-        // Eski Buy eSIM / Wallet Request dahil tüm eski quick action içeriklerini kaldır.
-        quickActions.removeAllViews()
-
-        val actions = listOf(
-            "Orders" to { startActivity(Intent(this, PurchaseHistoryActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-            "Wallet" to { startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-            "Dealers" to { startActivity(Intent(this, MyDealersActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-
-            "Orange Recharge" to { startActivity(Intent(this, TgtSimRechargeActivity::class.java)) },
-            "Vodafone" to { startActivity(Intent(this, VodafoneRenewalActivity::class.java)) },
-            "Orange Check GB" to { startActivity(Intent(this, TgtCheckGbActivity::class.java)) }
-        )
-
-        actions.chunked(3).forEachIndexed { rowIndex, rowActions ->
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setBaselineAligned(false)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    topMargin = if (rowIndex == 0) dp(12) else dp(10)
-                }
-            }
-
-            rowActions.forEachIndexed { columnIndex, item ->
-                val params = LinearLayout.LayoutParams(0, dp(96), 1f).apply {
-                    leftMargin = if (columnIndex == 0) 0 else dp(5)
-                    rightMargin = if (columnIndex == 2) 0 else dp(5)
-                }
-
-                row.addView(createQuickActionButton(item.first) { item.second.invoke() }, params)
-            }
-
-            quickActions.addView(row)
-        }
-    }
-
-
-    private fun createQuickActionButton(label: String, action: () -> Unit): MaterialButton =
-        MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-            text = label
-            gravity = android.view.Gravity.CENTER
-            textAlignment = View.TEXT_ALIGNMENT_CENTER
-            isAllCaps = false
-            maxLines = 2
-            setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f)
-            setTextColor(getColor(R.color.r2w_text_primary))
-            cornerRadius = dp(18)
-            minHeight = 0
-            minimumHeight = 0
-            insetTop = 0
-            insetBottom = 0
-            setPadding(dp(4), dp(8), dp(4), dp(8))
-
-            icon = getDrawable(
-                when (label) {
-                    "Orders" -> R.drawable.ic_quick_orders
-                    "Wallet" -> R.drawable.ic_quick_wallet
-                    "Dealers" -> R.drawable.ic_quick_dealers
-                    "Orange Recharge" -> R.drawable.orange_logo
-                    "Vodafone" -> R.drawable.vodafone_logo
-                    "Orange Check GB" -> R.drawable.ic_quick_check_gb
-                    else -> R.drawable.ic_packages
-                }
-            )
-            iconGravity = MaterialButton.ICON_GRAVITY_TOP
-            iconPadding = dp(4)
-            iconSize = if (label == "Orange Recharge" || label == "Vodafone") dp(28) else dp(22)
-            iconTint = ColorStateList.valueOf(getColor(R.color.r2w_text_primary))
-            strokeColor = ColorStateList.valueOf(getColor(R.color.r2w_border))
-            setOnClickListener { action() }
-        }
-
-
-    private fun setLoading(loading: Boolean) {
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
-    }
-
-    private fun openExpiredSoonEsims() {
-        startActivity(
-            Intent(this, MobileEsimsActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                putExtra(MobileEsimFilters.FILTER_EXTRA_KEY, MobileEsimFilters.FILTER_EXPIRED_SOON)
-            }
-        )
     }
 
     private fun openWalletActivity() {
         startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-    }
-
-    private fun openPackagesActivity() {
-        startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-    }
-
-    private fun openEsimActivity() {
-        startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-    }
-
-    private fun openMoreActivity() {
-        startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
     }
 
     private fun openPurchaseHistoryActivity() {
@@ -688,30 +101,25 @@ class DashboardActivity : AppCompatActivity() {
         startActivity(Intent(this, MyDealersActivity::class.java))
     }
 
-    private fun logout() {
-        lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession().also { tokenStore.clear() } }
-            session?.let { runCatching { authApi.logout(it) } }
-            openLoginActivity()
-        }
-    }
-
     private fun redirectToLogin(): AuthSession? {
         tokenStore.clear()
-        openLoginActivity()
-        return null
-    }
-
-    private fun openLoginActivity() {
         startActivity(
             Intent(this, LoginActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
         )
         finish()
+        return null
     }
 
-    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+    private fun openExpiredSoonEsims() {
+        startActivity(
+            Intent(this, MobileEsimsActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                putExtra(MobileEsimFilters.FILTER_EXTRA_KEY, MobileEsimFilters.FILTER_EXPIRED_SOON)
+            }
+        )
+    }
 
     companion object {
         const val META_ESIM_ACTIVITY = "im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
