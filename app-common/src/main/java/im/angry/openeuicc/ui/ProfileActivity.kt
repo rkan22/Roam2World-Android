@@ -207,19 +207,6 @@ private fun ProfileScreen(
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }
-
-                        Button(
-                            onClick = onLogout,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
-                            shape = RoundedCornerShape(18.dp)
-                        ) {
-                            Text(
-                                text = "Logout",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
                     }
                 }
 

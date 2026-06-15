@@ -305,16 +305,6 @@ private fun WalletScreen(
                             }
                         }
                     }
-
-                    Button(
-                        onClick = onLogout,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
-                        shape = RoundedCornerShape(18.dp)
-                    ) {
-                        Text("Logout", fontWeight = FontWeight.Bold)
-                    }
-
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 

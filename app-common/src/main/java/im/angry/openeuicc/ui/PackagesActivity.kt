@@ -485,15 +485,6 @@ private fun PackagesScreen(
                             onAddToCart = { onAddToCart(mobilePackage) }
                         )
                     }
-
-                    OutlinedButton(
-                        onClick = onLogout,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp)
-                    ) {
-                        Text("Logout", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold)
-                    }
-
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
