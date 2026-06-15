@@ -82,11 +82,11 @@
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
-</resources>
-
     <!-- Splash Screen Theme -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/roam_primary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.OpenEUICC</item>
     </style>
+
+</resources>
