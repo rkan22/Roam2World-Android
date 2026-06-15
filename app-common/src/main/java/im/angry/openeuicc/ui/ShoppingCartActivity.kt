@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Box
 
 class ShoppingCartActivity : ComponentActivity() {
     private var renderKey by mutableIntStateOf(0)
@@ -211,6 +212,7 @@ private fun ShoppingCartScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
@@ -310,6 +312,12 @@ private fun ShoppingCartScreen(
                             Text("Cancel")
                         }
                     }
+                )
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Packages,
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
         }

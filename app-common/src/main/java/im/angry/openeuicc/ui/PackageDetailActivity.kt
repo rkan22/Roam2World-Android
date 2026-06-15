@@ -207,6 +207,7 @@ private fun PackageDetailScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -255,6 +256,12 @@ private fun PackageDetailScreen(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Packages,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

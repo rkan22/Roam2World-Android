@@ -44,6 +44,8 @@ import im.angry.openeuicc.common.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 class R2wStoreActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -188,6 +190,7 @@ private fun R2wStoreScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -320,6 +323,12 @@ private fun R2wStoreScreen(
                 ) {
                     Text("Geri")
                 }
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Packages,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

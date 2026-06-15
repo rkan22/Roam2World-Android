@@ -55,6 +55,8 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 class PurchaseHistoryActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -193,6 +195,7 @@ private fun PurchaseHistoryScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -327,6 +330,12 @@ private fun PurchaseHistoryScreen(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.More,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

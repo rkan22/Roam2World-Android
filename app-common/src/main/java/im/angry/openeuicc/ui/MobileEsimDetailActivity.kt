@@ -66,6 +66,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 class MobileEsimDetailActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -449,6 +451,7 @@ private fun MobileEsimDetailScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -504,6 +507,12 @@ private fun MobileEsimDetailScreen(
                 EsimRenewalCard(esim = esim)
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Esims,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 class WalletRequestActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -182,6 +184,7 @@ private fun WalletRequestScreen(
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -298,6 +301,12 @@ private fun WalletRequestScreen(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Wallet,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }
