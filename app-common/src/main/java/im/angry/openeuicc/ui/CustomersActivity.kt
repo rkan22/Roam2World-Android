@@ -377,7 +377,7 @@ class CustomersActivity : ComponentActivity() {
                         modifier = Modifier
                             .weight(1f)
                             .verticalScroll(rememberScrollState())
-                            .padding(20.dp),
+                            .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         CustomersHero(
@@ -436,13 +436,9 @@ class CustomersActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    CustomersBottomNav(
-                        onDashboard = onNavDashboard,
-                        onPackages = onNavPackages,
-                        onWallet = onNavWallet,
-                        onEsims = onNavEsims,
-                        onMore = onNavMore
-                    )
+                    R2wBottomNav(
+                    selected = R2wBottomTab.More
+                )
                 }
 
                 selectedCustomer?.let {

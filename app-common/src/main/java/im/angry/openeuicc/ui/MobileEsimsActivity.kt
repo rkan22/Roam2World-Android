@@ -281,7 +281,7 @@ private fun MobileEsimsScreen(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 HeroEsimsCard(
@@ -332,12 +332,8 @@ Spacer(modifier = Modifier.height(12.dp))
         }
     
 
-                BottomNavCard(
-                    orange = orange,
-                    onOpenDashboard = onOpenDashboard,
-                    onOpenPackages = onOpenPackages,
-                    onOpenWallet = onOpenWallet,
-                    onOpenMore = onOpenMore
+                R2wBottomNav(
+                    selected = R2wBottomTab.Esims
                 )
             }
         }

@@ -124,7 +124,7 @@ private fun ProfileScreen(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
@@ -223,12 +223,8 @@ private fun ProfileScreen(
                     }
                 }
 
-                ProfileBottomNav(
-                    orange = orange,
-                    onDashboard = onDashboard,
-                    onPackages = onPackages,
-                    onWallet = onWallet,
-                    onEsims = onEsims
+                R2wBottomNav(
+                    selected = R2wBottomTab.More
                 )
             }
         }

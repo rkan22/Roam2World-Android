@@ -202,7 +202,7 @@ private fun WalletScreen(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     WalletHero(
@@ -318,12 +318,8 @@ private fun WalletScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                WalletBottomNav(
-                    onDashboard = onDashboard,
-                    onPackages = onPackages,
-                    onWallet = {},
-                    onEsims = onEsims,
-                    onMore = onMore
+                R2wBottomNav(
+                    selected = R2wBottomTab.Wallet
                 )
             }
         }

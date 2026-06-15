@@ -155,7 +155,7 @@ private fun MoreScreen(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     MoreHero(orange = orange)
@@ -204,12 +204,8 @@ private fun MoreScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                MoreBottomNav(
-                    orange = orange,
-                    onDashboard = onDashboard,
-                    onPackages = onPackages,
-                    onWallet = onWallet,
-                    onEsims = onEsims
+                R2wBottomNav(
+                    selected = R2wBottomTab.More
                 )
             }
         }
