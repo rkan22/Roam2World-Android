@@ -4,35 +4,16 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.Gravity
-import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.updatePadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.textfield.TextInputEditText
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,158 +25,135 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class CustomersActivity : AppCompatActivity() {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
-    private fun formatCustomerDate(value: String?): String {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return ""
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-            OffsetDateTime.parse(raw).format(formatter)
-        } catch (_: Exception) {
-            raw
-        }
-    }
-
-
-    private fun visibleProvider(provider: String?): String =
-        formatCustomerStatus(
-            provider?.replace("TGT", "Orange", ignoreCase = true)
-                ?.replace("tgt", "Orange", ignoreCase = true)
-        )
-
-    private fun formatCustomerStatus(value: String?): String {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return "Unknown"
-        return raw
-            .replace("_", " ")
-            .replace("-", " ")
-            .split(" ")
-            .filter { it.isNotBlank() }
-            .joinToString(" ") { word ->
-                word.lowercase(Locale.ROOT).replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                }
-            }
-            .ifBlank { "Unknown" }
-    }
-
-
+class CustomersActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var refresh: SwipeRefreshLayout
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var summary: TextView
-    private lateinit var empty: TextView
-    private lateinit var error: TextView
-    private lateinit var list: LinearLayout
-    private lateinit var search: TextInputEditText
-
-    private var allCustomers: List<CustomerSummary> = emptyList()
+    private var allCustomers by mutableStateOf<List<CustomerSummary>>(emptyList())
+    private var query by mutableStateOf("")
+    private var loading by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
+    private var selectedCustomer by mutableStateOf<CustomerSummary?>(null)
+    private var refreshKey by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_customers)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = ""
 
-        refresh = requireViewById(R.id.customers_refresh)
-        bottomNav = requireViewById(R.id.customers_bottom_nav)
-        summary = requireViewById(R.id.customers_summary)
-        empty = requireViewById(R.id.customers_empty)
-        error = requireViewById(R.id.customers_error)
-        list = requireViewById(R.id.customers_list)
-        search = requireViewById(R.id.customers_search)
+        setContent {
+            CustomersScreen(
+                customers = filteredCustomers(),
+                allCustomers = allCustomers,
+                query = query,
+                loading = loading,
+                errorMessage = errorMessage,
+                selectedCustomer = selectedCustomer,
+                refreshKey = refreshKey,
+                onQueryChange = { query = it },
+                onRefresh = { loadCustomers() },
+                onOpenCustomer = { selectedCustomer = it },
+                onDismissCustomer = { selectedCustomer = null },
+                onOpenEsimDetail = { openEsimDetail(it) },
+                onCopyIccid = { copyIccid(it) },
+                onRenew = { openRenewal(it) },
+                onNavDashboard = { startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavPackages = { startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavWallet = { startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavEsims = { startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavMore = { finish() }
+            )
+        }
 
-        setupInsets()
-        setupBottomNavigation()
-        setupSearch()
-        refresh.setOnRefreshListener { loadCustomers() }
         loadCustomers()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
+        refreshKey += 1
     }
 
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(refresh),
-                { insets -> bottomNav.updatePadding(insets.left, bottomNav.paddingTop, insets.right, insets.bottom) }
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_packages -> {
-                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_wallet -> {
-                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_esims -> {
-                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_more -> true
-                else -> false
-            }
+    private fun filteredCustomers(): List<CustomerSummary> {
+        val clean = query.trim().lowercase(Locale.ROOT)
+        return if (clean.isBlank()) {
+            allCustomers
+        } else {
+            allCustomers.filter { it.searchText().lowercase(Locale.ROOT).contains(clean) }
         }
-        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
-    }
-
-    private fun setupSearch() {
-        search.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = applySearch()
-            override fun afterTextChanged(s: Editable?) = Unit
-        })
     }
 
     private fun loadCustomers() {
         lifecycleScope.launch {
-            error.visibility = View.GONE
-            empty.visibility = View.GONE
-            refresh.isRefreshing = true
+            loading = true
+            errorMessage = null
+
             val session = activeSessionOrReturnToLogin()
             if (session == null) {
-                refresh.isRefreshing = false
+                loading = false
                 return@launch
             }
+
             val result = runCatching { fetchEsimsWithCustomers(session) }
-            refresh.isRefreshing = false
+            loading = false
 
             result
                 .onSuccess {
                     allCustomers = buildCustomers(it)
-                    applySearch()
+                    refreshKey += 1
                 }
                 .onFailure {
-                    error.text = it.message ?: "Customers could not be loaded"
-                    error.visibility = View.VISIBLE
+                    errorMessage = it.message ?: "Customers could not be loaded"
                 }
         }
-    }
-
-    private fun applySearch() {
-        val query = search.text?.toString()?.trim().orEmpty().lowercase()
-        val filtered = if (query.isBlank()) allCustomers else allCustomers.filter { it.searchText().lowercase().contains(query) }
-        renderCustomers(filtered)
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
@@ -226,15 +184,22 @@ class CustomersActivity : AppCompatActivity() {
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", session.authorizationHeader)
         }
+
         try {
             val status = connection.responseCode
             val text = ((if (status in 200..299) connection.inputStream else connection.errorStream)
                 ?.bufferedReader()
                 ?.use { it.readText() }).orEmpty()
+
             if (status !in 200..299) throw IllegalStateException("Customers API failed with HTTP $status")
+
             val root = JSONObject(text)
             val data = root.optJSONObject("data") ?: root
-            val array = data.optJSONArray("esims") ?: data.optJSONArray("results") ?: root.optJSONArray("data") ?: JSONArray()
+            val array = data.optJSONArray("esims")
+                ?: data.optJSONArray("results")
+                ?: root.optJSONArray("data")
+                ?: JSONArray()
+
             (0 until array.length()).mapNotNull { index -> parseCustomerEsim(array.optJSONObject(index)) }
         } finally {
             connection.disconnect()
@@ -245,6 +210,7 @@ class CustomersActivity : AppCompatActivity() {
         json ?: return null
         val customer = json.optJSONObject("customer")
         val activation = json.optJSONObject("activation") ?: json.optJSONObject("activation_details")
+
         return CustomerEsimRecord(
             id = firstNotBlank(json.optString("id"), json.optString("esim_id"), json.optString("esimId")),
             iccid = firstNotBlank(json.optString("iccid"), activation?.optString("iccid")),
@@ -288,483 +254,7 @@ class CustomersActivity : AppCompatActivity() {
                     esims = sorted
                 )
             }
-            .sortedBy { it.name.lowercase() }
-
-
-    private fun initialsForCustomer(name: String): String =
-        name.split(" ")
-            .filter { it.isNotBlank() }
-            .take(2)
-            .map { it.first().uppercaseChar() }
-            .joinToString("")
-            .ifBlank { "CU" }
-
-    private fun statusLabel(record: CustomerEsimRecord): String =
-        when {
-            isExpired(record) -> "Expired"
-            record.status?.contains("pending", ignoreCase = true) == true -> "Pending"
-            else -> "Active"
-        }
-
-    private fun statusBadgeBg(label: String): Int =
-        when (label.lowercase(Locale.ENGLISH)) {
-            "expired" -> R.drawable.r2w_customer_expired_badge
-            "pending", "expiring" -> R.drawable.r2w_customer_expiring_badge
-            else -> R.drawable.r2w_customer_active_badge
-        }
-
-    private fun statusTextColor(label: String): Int =
-        when (label.lowercase(Locale.ENGLISH)) {
-            "expired" -> android.graphics.Color.parseColor("#DC2626")
-            "pending", "expiring" -> android.graphics.Color.parseColor("#F59E0B")
-            else -> android.graphics.Color.parseColor("#168653")
-        }
-
-
-    private fun renderCustomers(customers: List<CustomerSummary>) {
-        list.removeAllViews()
-        empty.visibility = if (customers.isEmpty()) View.VISIBLE else View.GONE
-
-        val totalCustomers = allCustomers.size
-        val totalActive = allCustomers.sumOf { it.activeEsims }
-
-        findViewById<TextView>(R.id.customers_total_count)?.text = totalCustomers.toString()
-        findViewById<TextView>(R.id.customers_active_count)?.text = totalActive.toString()
-
-        summary.text = "Showing ${customers.size} customers"
-        customers.forEach { customer -> list.addView(createCustomerCard(customer)) }
-    }
-
-    private fun createCustomerCard(customer: CustomerSummary): View {
-        val latest = customer.latestEsim
-        val status = statusLabel(latest)
-
-        val card = MaterialCardView(this).apply {
-            radius = dp(16).toFloat()
-            cardElevation = 0f
-            strokeWidth = dp(1)
-            setStrokeColor(android.graphics.Color.parseColor("#E2E8F0"))
-            setCardBackgroundColor(android.graphics.Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = dp(10)
-            }
-            setOnClickListener { showCustomerDetails(customer) }
-            isClickable = true
-            isFocusable = true
-        }
-
-        val row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(12), dp(14), dp(10), dp(14))
-        }
-
-        val avatarWrap = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(50), dp(50))
-        }
-
-        avatarWrap.addView(TextView(this).apply {
-            text = initialsForCustomer(customer.name)
-            gravity = Gravity.CENTER
-            background = getDrawable(R.drawable.r2w_customer_avatar_bg)
-            setTextColor(getColor(R.color.r2w_text_primary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            layoutParams = FrameLayout.LayoutParams(dp(46), dp(46), Gravity.CENTER)
-        })
-
-        val info = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                leftMargin = dp(12)
-            }
-        }
-
-        info.addView(TextView(this).apply {
-            text = customer.name
-            setTextColor(getColor(R.color.r2w_text_primary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        })
-
-        info.addView(TextView(this).apply {
-            text = listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact info"
-            setPadding(0, dp(4), 0, 0)
-            setTextColor(getColor(R.color.r2w_text_secondary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        })
-
-        info.addView(TextView(this).apply {
-            text = PackageNameCleaner.clean(latest.packageName).orEmpty().ifBlank { "Package unavailable" }
-            setPadding(0, dp(6), 0, 0)
-            setTextColor(getColor(R.color.r2w_premium_primary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        })
-
-        val right = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.END
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        right.addView(TextView(this).apply {
-            text = "●  $status"
-            gravity = Gravity.CENTER
-            minWidth = dp(82)
-            minHeight = dp(28)
-            setPadding(dp(8), 0, dp(8), 0)
-            setTextColor(statusTextColor(status))
-            background = getDrawable(statusBadgeBg(status))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-        })
-
-        // Keep right side compact; date below status is enough.
-        // Date hidden on compact cards to keep the CRM list clean.
-
-        row.addView(avatarWrap)
-        row.addView(info)
-        row.addView(right)
-        row.addView(ImageView(this).apply {
-            setImageResource(R.drawable.ic_more_chevron)
-            setColorFilter(getColor(R.color.r2w_text_secondary))
-            layoutParams = LinearLayout.LayoutParams(dp(24), dp(24)).apply {
-                leftMargin = dp(8)
-            }
-        })
-
-        card.addView(row)
-        return card
-    }
-
-
-    private fun showCustomerDetails(customer: CustomerSummary) {
-        val dialog = BottomSheetDialog(this)
-
-        fun chip(textValue: String): TextView =
-            TextView(this).apply {
-                text = textValue
-                gravity = Gravity.CENTER
-                setPadding(dp(12), 0, dp(12), 0)
-                minHeight = dp(32)
-                background = getDrawable(R.drawable.r2w_crm_sheet_chip)
-                setTextColor(getColor(R.color.r2w_text_primary))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-            }
-
-        fun smallMeta(textValue: String): TextView =
-            TextView(this).apply {
-                text = textValue
-                setTextColor(getColor(R.color.r2w_text_secondary))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-                maxLines = 1
-                ellipsize = android.text.TextUtils.TruncateAt.END
-            }
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(10), dp(20), dp(18))
-            background = getDrawable(R.drawable.r2w_crm_soft_panel)
-        }
-
-        root.addView(View(this).apply {
-            background = getDrawable(R.drawable.r2w_crm_sheet_handle)
-            layoutParams = LinearLayout.LayoutParams(dp(48), dp(5)).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                bottomMargin = dp(16)
-            }
-        })
-
-        val headerCard = MaterialCardView(this).apply {
-            radius = dp(22).toFloat()
-            cardElevation = 0f
-            strokeWidth = dp(1)
-            setStrokeColor(android.graphics.Color.parseColor("#E4E9F2"))
-            setCardBackgroundColor(android.graphics.Color.WHITE)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        val header = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(16), dp(16), dp(16), dp(16))
-        }
-
-        header.addView(FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(64), dp(64))
-            addView(TextView(this@CustomersActivity).apply {
-                text = initialsForCustomer(customer.name)
-                gravity = Gravity.CENTER
-                background = getDrawable(R.drawable.r2w_customer_avatar_bg)
-                setTextColor(getColor(R.color.r2w_text_primary))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleLarge)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                layoutParams = FrameLayout.LayoutParams(dp(58), dp(58), Gravity.CENTER)
-            })
-        })
-
-        header.addView(LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                leftMargin = dp(14)
-            }
-
-            addView(TextView(this@CustomersActivity).apply {
-                text = customer.name
-                setTextColor(getColor(R.color.r2w_text_primary))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_HeadlineSmall)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                maxLines = 1
-                ellipsize = android.text.TextUtils.TruncateAt.END
-            })
-
-            addView(TextView(this@CustomersActivity).apply {
-                text = listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact information"
-                setPadding(0, dp(4), 0, 0)
-                setTextColor(getColor(R.color.r2w_text_secondary))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                maxLines = 1
-                ellipsize = android.text.TextUtils.TruncateAt.END
-            })
-
-            addView(LinearLayout(this@CustomersActivity).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, dp(10), 0, 0)
-
-                addView(chip("${customer.totalEsims} eSIMs"))
-                addView(chip("${customer.activeEsims} active").apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { leftMargin = dp(8) }
-                })
-                addView(chip("${customer.expiredEsims} expired").apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { leftMargin = dp(8) }
-                })
-            })
-        })
-
-        headerCard.addView(header)
-        root.addView(headerCard)
-
-        root.addView(TextView(this).apply {
-            text = "Customer eSIMs"
-            setPadding(0, dp(18), 0, dp(10))
-            setTextColor(getColor(R.color.r2w_text_primary))
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-        })
-
-        val scroll = androidx.core.widget.NestedScrollView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1f
-            )
-            isFillViewport = false
-        }
-
-        val listContent = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-
-        customer.esims.forEach { record ->
-            val status = statusLabel(record)
-
-            val card = MaterialCardView(this).apply {
-                radius = dp(18).toFloat()
-                cardElevation = 0f
-                strokeWidth = dp(1)
-                setStrokeColor(android.graphics.Color.parseColor("#E4E9F2"))
-                setCardBackgroundColor(android.graphics.Color.WHITE)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { bottomMargin = dp(12) }
-            }
-
-            val body = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(14), dp(14), dp(14), dp(14))
-            }
-
-            val topRow = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-            }
-
-            topRow.addView(FrameLayout(this).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(46), dp(46))
-                background = getDrawable(R.drawable.r2w_crm_sheet_icon_bg)
-                addView(ImageView(this@CustomersActivity).apply {
-                    setImageResource(R.drawable.ic_task_sim_card_download)
-                    setColorFilter(getColor(R.color.r2w_premium_primary))
-                    layoutParams = FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER)
-                })
-            })
-
-            topRow.addView(LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                    leftMargin = dp(12)
-                }
-
-                addView(TextView(this@CustomersActivity).apply {
-                    text = PackageNameCleaner.clean(record.packageName).orEmpty().ifBlank { "eSIM Package" }
-                    setTextColor(getColor(R.color.r2w_text_primary))
-                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-                    setTypeface(typeface, android.graphics.Typeface.BOLD)
-                    maxLines = 1
-                    ellipsize = android.text.TextUtils.TruncateAt.END
-                })
-
-                addView(TextView(this@CustomersActivity).apply {
-                    text = listOfNotNull(
-                        record.provider?.let { visibleProvider(it) },
-                        record.createdAt?.let { formatCustomerDate(it) }
-                    ).filter { it.isNotBlank() }.joinToString(" • ").ifBlank { "Provider unavailable" }
-                    setPadding(0, dp(4), 0, 0)
-                    setTextColor(getColor(R.color.r2w_text_secondary))
-                    setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-                    maxLines = 1
-                    ellipsize = android.text.TextUtils.TruncateAt.END
-                })
-            })
-
-            topRow.addView(TextView(this).apply {
-                text = "●  $status"
-                gravity = Gravity.CENTER
-                minWidth = dp(84)
-                minHeight = dp(30)
-                setPadding(dp(10), 0, dp(10), 0)
-                setTextColor(statusTextColor(status))
-                background = getDrawable(statusBadgeBg(status))
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelMedium)
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-            })
-
-            body.addView(topRow)
-
-            body.addView(LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(58), dp(10), 0, 0)
-
-                addView(smallMeta(record.iccid?.let { "ICCID: $it" } ?: "ICCID unavailable"))
-                addView(smallMeta(record.dataRemaining?.let { "Remaining: $it" } ?: "Remaining: —").apply {
-                    setPadding(0, dp(3), 0, 0)
-                })
-                addView(smallMeta(record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" } ?: "Expires: —").apply {
-                    setPadding(0, dp(3), 0, 0)
-                })
-            })
-
-            body.addView(LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setBaselineAligned(false)
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply { topMargin = dp(12) }
-
-                addView(button("QR / Detail") { openEsimDetail(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply {
-                    rightMargin = dp(5)
-                })
-                addView(button("Copy ICCID") { copyIccid(record) }, LinearLayout.LayoutParams(0, dp(44), 1f).apply {
-                    leftMargin = dp(5)
-                })
-            })
-
-            body.addView(button("Renew") { openRenewal(record) }.apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    dp(44)
-                ).apply { topMargin = dp(8) }
-            })
-
-            card.addView(body)
-            listContent.addView(card)
-        }
-
-        scroll.addView(listContent)
-        root.addView(scroll)
-
-        val closeButton = MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-            text = "Close"
-            isAllCaps = false
-            cornerRadius = dp(16)
-            setTextColor(getColor(R.color.r2w_text_primary))
-            strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E4E9F2"))
-            strokeWidth = dp(1)
-            backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
-            stateListAnimator = null
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(46)
-            ).apply { topMargin = dp(12) }
-            setOnClickListener { dialog.dismiss() }
-        }
-        root.addView(closeButton)
-
-        dialog.setContentView(root)
-        dialog.show()
-    }
-
-
-    private fun label(textValue: String, bold: Boolean, appearance: Int = com.google.android.material.R.style.TextAppearance_Material3_BodyMedium): TextView =
-        TextView(this).apply {
-            text = textValue
-            setTextAppearance(appearance)
-            setTextColor(getColor(if (bold) R.color.r2w_premium_text else R.color.r2w_premium_muted))
-            if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
-        }
-
-    private fun button(textValue: String, action: () -> Unit): MaterialButton =
-        MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-            text = textValue
-            isAllCaps = false
-            gravity = Gravity.CENTER
-            minHeight = dp(44)
-            cornerRadius = dp(16)
-            insetTop = 0
-            insetBottom = 0
-            iconPadding = dp(6)
-            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_LabelLarge)
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-
-            val isPrimary = textValue.equals("QR / Detail", ignoreCase = true) ||
-                textValue.equals("Renew", ignoreCase = true)
-
-            if (isPrimary) {
-                setTextColor(getColor(R.color.r2w_premium_primary))
-                strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#D6E4FF"))
-                strokeWidth = dp(1)
-                backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#F3F7FF"))
-            } else {
-                setTextColor(getColor(R.color.r2w_text_primary))
-                strokeColor = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E4E9F2"))
-                strokeWidth = dp(1)
-                backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
-            }
-
-            stateListAnimator = null
-            setOnClickListener { action() }
-        }
+            .sortedBy { it.name.lowercase(Locale.ROOT) }
 
     private fun openEsimDetail(record: CustomerEsimRecord) {
         startActivity(MobileEsimDetailActivity.createIntent(this, record.toMobileEsim()))
@@ -772,7 +262,7 @@ class CustomersActivity : AppCompatActivity() {
 
     private fun openRenewal(record: CustomerEsimRecord) {
         copyIccid(record, forRenewal = true)
-        val provider = record.provider.orEmpty().lowercase()
+        val provider = record.provider.orEmpty().lowercase(Locale.ROOT)
         val target = if (provider.contains("airhub") || provider.contains("vodafone")) {
             VodafoneRenewalActivity::class.java
         } else {
@@ -787,8 +277,10 @@ class CustomersActivity : AppCompatActivity() {
             Toast.makeText(this, "ICCID not available", Toast.LENGTH_SHORT).show()
             return
         }
+
         getSystemService(ClipboardManager::class.java)
             .setPrimaryClip(ClipData.newPlainText("ICCID", value))
+
         Toast.makeText(
             this,
             if (forRenewal) "ICCID copied for renewal" else "ICCID copied",
@@ -802,10 +294,493 @@ class CustomersActivity : AppCompatActivity() {
         return runCatching { OffsetDateTime.parse(expires).isBefore(OffsetDateTime.now()) }.getOrDefault(false)
     }
 
+    private fun formatCustomerDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            OffsetDateTime.parse(raw).format(formatter)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun visibleProvider(provider: String?): String =
+        formatCustomerStatus(
+            provider?.replace("TGT", "Orange", ignoreCase = true)
+                ?.replace("tgt", "Orange", ignoreCase = true)
+        )
+
+    private fun formatCustomerStatus(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return "Unknown"
+        return raw
+            .replace("_", " ")
+            .replace("-", " ")
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase(Locale.ROOT).replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                }
+            }
+            .ifBlank { "Unknown" }
+    }
+
+    private fun statusLabel(record: CustomerEsimRecord): String =
+        when {
+            isExpired(record) -> "Expired"
+            record.status?.contains("pending", ignoreCase = true) == true -> "Pending"
+            else -> "Active"
+        }
+
+    private fun initialsForCustomer(name: String): String =
+        name.split(" ")
+            .filter { it.isNotBlank() }
+            .take(2)
+            .map { it.first().uppercaseChar() }
+            .joinToString("")
+            .ifBlank { "CU" }
+
     private fun firstNotBlank(vararg values: String?): String? =
         values.firstOrNull { !it.isNullOrBlank() && it != "null" }
 
-    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+    @Composable
+    private fun CustomersScreen(
+        customers: List<CustomerSummary>,
+        allCustomers: List<CustomerSummary>,
+        query: String,
+        loading: Boolean,
+        errorMessage: String?,
+        selectedCustomer: CustomerSummary?,
+        refreshKey: Int,
+        onQueryChange: (String) -> Unit,
+        onRefresh: () -> Unit,
+        onOpenCustomer: (CustomerSummary) -> Unit,
+        onDismissCustomer: () -> Unit,
+        onOpenEsimDetail: (CustomerEsimRecord) -> Unit,
+        onCopyIccid: (CustomerEsimRecord) -> Unit,
+        onRenew: (CustomerEsimRecord) -> Unit,
+        onNavDashboard: () -> Unit,
+        onNavPackages: () -> Unit,
+        onNavWallet: () -> Unit,
+        onNavEsims: () -> Unit,
+        onNavMore: () -> Unit
+    ) {
+        val bg = Color(0xFFF6F7FB)
+        val totalActive = remember(refreshKey, allCustomers) { allCustomers.sumOf { it.activeEsims } }
+
+        MaterialTheme {
+            Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CustomersHero(
+                            totalCustomers = allCustomers.size,
+                            activeEsims = totalActive,
+                            onRefresh = onRefresh,
+                            loading = loading
+                        )
+
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = onQueryChange,
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text("Search customers, eSIMs, ICCID") },
+                            shape = RoundedCornerShape(18.dp)
+                        )
+
+                        errorMessage?.let {
+                            InfoCard(title = "Customers could not be loaded") {
+                                Text(it, color = Color(0xFFDC2626))
+                                OutlinedButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+                                    Text("Try again")
+                                }
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Showing ${customers.size} customers",
+                                color = Color(0xFF6B7280),
+                                fontWeight = FontWeight.Bold
+                            )
+                            if (loading) {
+                                CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp, color = Color(0xFFFF7900))
+                            }
+                        }
+
+                        if (!loading && customers.isEmpty()) {
+                            InfoCard(title = "No customers found") {
+                                Text(
+                                    text = if (query.isBlank()) "Customer records will appear here after eSIM purchases." else "No customer matches your search.",
+                                    color = Color(0xFF6B7280)
+                                )
+                            }
+                        }
+
+                        customers.forEach { customer ->
+                            CustomerCard(customer = customer, onOpen = { onOpenCustomer(customer) })
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    R2wBottomNav(
+                    selected = R2wBottomTab.More
+                )
+                }
+
+                selectedCustomer?.let {
+                    CustomerDetailSheet(
+                        customer = it,
+                        onDismiss = onDismissCustomer,
+                        onOpenEsimDetail = onOpenEsimDetail,
+                        onCopyIccid = onCopyIccid,
+                        onRenew = onRenew
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun CustomersHero(
+        totalCustomers: Int,
+        activeEsims: Int,
+        onRefresh: () -> Unit,
+        loading: Boolean
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+        ) {
+            Column(
+                modifier = Modifier.padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column {
+                        Text(
+                            text = "Customers CRM",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "Live customer eSIM overview",
+                            color = Color.White.copy(alpha = 0.72f),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    Text(
+                        text = if (loading) "Loading..." else "Refresh",
+                        color = Color(0xFFFF7900),
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.clickable(enabled = !loading, onClick = onRefresh)
+                    )
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    HeroMetric("Customers", totalCustomers.toString(), Modifier.weight(1f))
+                    HeroMetric("Active eSIMs", activeEsims.toString(), Modifier.weight(1f))
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun HeroMetric(label: String, value: String, modifier: Modifier = Modifier) {
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.10f))
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(value, color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                Text(label, color = Color.White.copy(alpha = 0.72f), style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+
+    @Composable
+    private fun CustomerCard(customer: CustomerSummary, onOpen: () -> Unit) {
+        val latest = customer.latestEsim
+        val status = statusLabel(latest)
+        val statusColors = customerStatusColors(status)
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpen),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CustomerAvatar(customer.name)
+
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(
+                        customer.name,
+                        color = Color(0xFF17181C),
+                        fontWeight = FontWeight.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact info",
+                        color = Color(0xFF6B7280),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        PackageNameCleaner.clean(latest.packageName).orEmpty().ifBlank { "Package unavailable" },
+                        color = Color(0xFFFF7900),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        "${customer.totalEsims} eSIMs • ${customer.activeEsims} active • ${customer.expiredEsims} expired",
+                        color = Color(0xFF6B7280),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                StatusPill(status, statusColors)
+            }
+        }
+    }
+
+    @Composable
+    private fun CustomerAvatar(name: String) {
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .background(Color(0xFFFFEFE2), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initialsForCustomer(name),
+                color = Color(0xFF17181C),
+                fontWeight = FontWeight.Black
+            )
+        }
+    }
+
+    @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+    @Composable
+    private fun CustomerDetailSheet(
+        customer: CustomerSummary,
+        onDismiss: () -> Unit,
+        onOpenEsimDetail: (CustomerEsimRecord) -> Unit,
+        onCopyIccid: (CustomerEsimRecord) -> Unit,
+        onRenew: (CustomerEsimRecord) -> Unit
+    ) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = sheetState,
+            containerColor = Color(0xFFF6F7FB)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            CustomerAvatar(customer.name)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(customer.name, color = Color(0xFF17181C), fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    listOfNotNull(customer.email, customer.phone).firstOrNull { it.isNotBlank() } ?: "No contact information",
+                                    color = Color(0xFF6B7280),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            AssistChip(onClick = {}, label = { Text("${customer.totalEsims} eSIMs") })
+                            AssistChip(onClick = {}, label = { Text("${customer.activeEsims} active") })
+                            AssistChip(onClick = {}, label = { Text("${customer.expiredEsims} expired") })
+                        }
+                    }
+                }
+
+                Text("Customer eSIMs", color = Color(0xFF17181C), fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleMedium)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(520.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    customer.esims.forEach { record ->
+                        CustomerEsimCard(
+                            record = record,
+                            onOpenEsimDetail = { onOpenEsimDetail(record) },
+                            onCopyIccid = { onCopyIccid(record) },
+                            onRenew = { onRenew(record) }
+                        )
+                    }
+                }
+
+                OutlinedButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun CustomerEsimCard(
+        record: CustomerEsimRecord,
+        onOpenEsimDetail: () -> Unit,
+        onCopyIccid: () -> Unit,
+        onRenew: () -> Unit
+    ) {
+        val status = statusLabel(record)
+        val statusColors = customerStatusColors(status)
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color(0xFFFFEFE2), RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("SIM", color = Color(0xFFFF7900), fontWeight = FontWeight.Black)
+                    }
+
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            PackageNameCleaner.clean(record.packageName).orEmpty().ifBlank { "eSIM Package" },
+                            color = Color(0xFF17181C),
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            listOfNotNull(
+                                record.provider?.let { visibleProvider(it) },
+                                record.createdAt?.let { formatCustomerDate(it) }
+                            ).filter { it.isNotBlank() }.joinToString(" • ").ifBlank { "Provider unavailable" },
+                            color = Color(0xFF6B7280),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    StatusPill(status, statusColors)
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(record.iccid?.let { "ICCID: $it" } ?: "ICCID unavailable", color = Color(0xFF6B7280), style = MaterialTheme.typography.bodySmall)
+                    Text(record.dataRemaining?.let { "Remaining: $it" } ?: "Remaining: —", color = Color(0xFF6B7280), style = MaterialTheme.typography.bodySmall)
+                    Text(record.expiresAt?.let { "Expires: ${formatCustomerDate(it)}" } ?: "Expires: —", color = Color(0xFF6B7280), style = MaterialTheme.typography.bodySmall)
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedButton(onClick = onOpenEsimDetail, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
+                        Text("QR / Detail")
+                    }
+                    OutlinedButton(onClick = onCopyIccid, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
+                        Text("Copy ICCID")
+                    }
+                }
+
+                Button(
+                    onClick = onRenew,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Renew", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun StatusPill(label: String, colors: Pair<Color, Color>) {
+        Box(
+            modifier = Modifier
+                .background(colors.second, RoundedCornerShape(50))
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("●  $label", color = colors.first, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black)
+        }
+    }
+
+    private fun customerStatusColors(label: String): Pair<Color, Color> =
+        when (label.lowercase(Locale.ENGLISH)) {
+            "expired" -> Color(0xFFDC2626) to Color(0xFFFEE2E2)
+            "pending", "expiring" -> Color(0xFFF59E0B) to Color(0xFFFEF3C7)
+            else -> Color(0xFF168653) to Color(0xFFE4F8EC)
+        }
+
+@Composable
+    private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(title, color = Color(0xFF17181C), fontWeight = FontWeight.Black)
+                HorizontalDivider()
+                content()
+            }
+        }
+    }
 
     private data class CustomerEsimRecord(
         val id: String?,
@@ -839,7 +814,19 @@ class CustomersActivity : AppCompatActivity() {
         fun customerKey(): String = firstNotBlankStatic(customerPhone, customerEmail, customerName(), iccid, id) ?: "unknown"
 
         fun searchText(): String = listOfNotNull(
-            customerName(), customerPhone, customerEmail, iccid, packageName, provider, dataRemaining, dataUsed, orderNumber, orderId, status, createdAt, expiresAt
+            customerName(),
+            customerPhone,
+            customerEmail,
+            iccid,
+            packageName,
+            provider,
+            dataRemaining,
+            dataUsed,
+            orderNumber,
+            orderId,
+            status,
+            createdAt,
+            expiresAt
         ).joinToString(" ")
 
         fun toMobileEsim(): MobileEsim = MobileEsim(
@@ -878,7 +865,8 @@ class CustomersActivity : AppCompatActivity() {
         val latestEsim: CustomerEsimRecord,
         val esims: List<CustomerEsimRecord>
     ) {
-        fun searchText(): String = listOfNotNull(name, phone, email).joinToString(" ") + " " + esims.joinToString(" ") { it.searchText() }
+        fun searchText(): String =
+            listOfNotNull(name, phone, email).joinToString(" ") + " " + esims.joinToString(" ") { it.searchText() }
     }
 
     private companion object {

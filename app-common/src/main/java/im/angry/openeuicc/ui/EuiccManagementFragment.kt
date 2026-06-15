@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +27,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.core.EuiccChannel
@@ -368,6 +371,10 @@ open class EuiccManagementFragment : Fragment(), EuiccProfilesChangedListener,
         private lateinit var profile: LocalProfileInfo
         private var canEnable: Boolean = false
 
+        private fun dp(value: Int): Int {
+            return (value * root.resources.displayMetrics.density).toInt()
+        }
+
         fun setProfile(profile: LocalProfileInfo) {
             this.profile = profile
             name.text = profile.displayName
@@ -411,10 +418,151 @@ open class EuiccManagementFragment : Fragment(), EuiccProfilesChangedListener,
             // Prevent users from doing multiple things at once
             if (invalid || swipeRefresh.isRefreshing) return
 
-            PopupMenu(root.context, profileMenu).apply {
-                setOnMenuItemClickListener(::onMenuItemClicked)
-                populatePopupWithProfileActions(this, profile)
-                show()
+            val dialog = BottomSheetDialog(requireContext())
+            val container = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(22), dp(18), dp(22), dp(24))
+            }
+
+            container.addView(TextView(requireContext()).apply {
+                text = profile.displayName
+                textSize = 20f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(requireContext().getColor(android.R.color.black))
+            })
+
+            container.addView(TextView(requireContext()).apply {
+                text = profile.providerName.ifBlank { "Provider unavailable" }
+                textSize = 14f
+                setTextColor(requireContext().getColor(android.R.color.darker_gray))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    topMargin = dp(4)
+                    bottomMargin = dp(14)
+                }
+            })
+
+            container.addView(TextView(requireContext()).apply {
+                text = "ICCID  " + profile.iccid
+                textSize = 13f
+                setTextColor(requireContext().getColor(android.R.color.darker_gray))
+                background = requireContext().getDrawable(R.drawable.ou_profile_info_panel)
+                setPadding(dp(14), dp(12), dp(14), dp(12))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = dp(14)
+                }
+            })
+
+            if (profile.isEnabled) {
+                if (isUsb || disableSafeguardFlow.value) {
+                    container.addView(profileActionButton(
+                        text = getString(R.string.profile_disable),
+                        filled = true
+                    ) {
+                        dialog.dismiss()
+                        enableOrDisableProfile(profile.iccid, false)
+                    })
+                }
+            } else {
+                container.addView(profileActionButton(
+                    text = getString(R.string.profile_enable),
+                    filled = true
+                ) {
+                    dialog.dismiss()
+                    if (canEnable) {
+                        enableOrDisableProfile(profile.iccid, true)
+                    } else {
+                        val resId = R.string.toast_profile_enable_cross_class
+                        Toast.makeText(requireContext(), resId, Toast.LENGTH_LONG).show()
+                    }
+                })
+            }
+
+            container.addView(profileActionButton(
+                text = getString(R.string.profile_rename),
+                filled = false
+            ) {
+                dialog.dismiss()
+                ProfileRenameFragment.newInstance(
+                    slotId,
+                    portId,
+                    seId,
+                    profile.iccid,
+                    profile.displayName
+                ).show(childFragmentManager, ProfileRenameFragment.TAG)
+            })
+
+            container.addView(profileActionButton(
+                text = getString(R.string.profile_delete),
+                filled = false,
+                danger = true
+            ) {
+                dialog.dismiss()
+                ProfileDeleteFragment.newInstance(
+                    slotId,
+                    portId,
+                    seId,
+                    profile.iccid,
+                    profile.displayName
+                ).show(childFragmentManager, ProfileDeleteFragment.TAG)
+            })
+
+            dialog.setContentView(container)
+            dialog.show()
+        }
+
+        private fun profileActionButton(
+            text: String,
+            filled: Boolean,
+            danger: Boolean = false,
+            onClick: () -> Unit
+        ): MaterialButton {
+            return MaterialButton(requireContext()).apply {
+                this.text = text
+                textSize = 15f
+                cornerRadius = dp(16)
+                minHeight = dp(52)
+                insetTop = 0
+                insetBottom = 0
+                isAllCaps = false
+                setOnClickListener { onClick() }
+
+                if (filled) {
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(
+                        requireContext().getColor(R.color.r2w_premium_primary)
+                    )
+                    setTextColor(requireContext().getColor(android.R.color.white))
+                } else if (danger) {
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(
+                        requireContext().getColor(android.R.color.transparent)
+                    )
+                    strokeWidth = dp(1)
+                    strokeColor = android.content.res.ColorStateList.valueOf(
+                        requireContext().getColor(android.R.color.holo_red_dark)
+                    )
+                    setTextColor(requireContext().getColor(android.R.color.holo_red_dark))
+                } else {
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(
+                        requireContext().getColor(android.R.color.transparent)
+                    )
+                    strokeWidth = dp(1)
+                    strokeColor = android.content.res.ColorStateList.valueOf(
+                        requireContext().getColor(R.color.r2w_premium_primary)
+                    )
+                    setTextColor(requireContext().getColor(R.color.r2w_premium_primary))
+                }
+
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    dp(52)
+                ).apply {
+                    topMargin = dp(10)
+                }
             }
         }
 

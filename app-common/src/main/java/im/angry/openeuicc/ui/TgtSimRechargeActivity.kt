@@ -2,349 +2,181 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.NestedScrollView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.chip.Chip
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
-class TgtSimRechargeActivity : AppCompatActivity() {
+class TgtSimRechargeActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var scroll: View
-    private lateinit var simRechargeSection: LinearLayout
-    private lateinit var esimRenewalSection: LinearLayout
-    private lateinit var selectedPackage: TextView
-    private lateinit var iccidLayout: TextInputLayout
-    private lateinit var customerNameLayout: TextInputLayout
-    private lateinit var customerPhoneLayout: TextInputLayout
-    private lateinit var esimSearchIccidLayout: TextInputLayout
-    private lateinit var esimCustomerNameLayout: TextInputLayout
-    private lateinit var esimCustomerPhoneLayout: TextInputLayout
-    private lateinit var esimCustomerEmailLayout: TextInputLayout
-    private lateinit var iccid: TextInputEditText
-    private lateinit var customerName: TextInputEditText
-    private lateinit var customerPhone: TextInputEditText
-    private lateinit var esimSearchIccid: TextInputEditText
-    private lateinit var esimCustomerName: TextInputEditText
-    private lateinit var esimCustomerPhone: TextInputEditText
-    private lateinit var esimCustomerEmail: TextInputEditText
-    private lateinit var esimSearchButton: MaterialButton
-    private lateinit var esimRenewButton: MaterialButton
-    private lateinit var esimSearchResult: TextView
-    private lateinit var esimSelectedPackage: TextView
-    private lateinit var activate: MaterialButton
+    private var mode by mutableStateOf(TgtMode.ESIM_RENEWAL)
 
-    private var selectedPackageName = "10GB / 30 Days"
-    private var selectedRenewalDataGb = "10"
-    private var selectedRenewalPackageName = "10GB / 30 Days"
-    private var selectedRenewalEsim: MobileEsim? = null
+    private var selectedPackageName by mutableStateOf("10GB / 30 Days")
+    private var simIccid by mutableStateOf("")
+    private var simCustomerName by mutableStateOf("")
+    private var simCustomerPhone by mutableStateOf("")
+    private var simResultMessage by mutableStateOf<String?>(null)
+    private var simSubmitting by mutableStateOf(false)
+
+    private var selectedRenewalPackageName by mutableStateOf("10GB / 30 Days")
+    private var selectedRenewalDataGb by mutableStateOf("10")
+    private var esimIccid by mutableStateOf("")
+    private var esimCustomerName by mutableStateOf("")
+    private var esimCustomerPhone by mutableStateOf("")
+    private var esimCustomerEmail by mutableStateOf("")
+    private var esimResultMessage by mutableStateOf<String?>(null)
+    private var esimSubmitting by mutableStateOf(false)
+
+    private var simIccidError by mutableStateOf<String?>(null)
+    private var simNameError by mutableStateOf<String?>(null)
+    private var simPhoneError by mutableStateOf<String?>(null)
+
+    private var esimIccidError by mutableStateOf<String?>(null)
+    private var esimNameError by mutableStateOf<String?>(null)
+    private var esimPhoneError by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tgt_sim_recharge)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Orange Recharge"
-
-        scroll = requireNestedScrollView()
-        simRechargeSection = requireViewById(R.id.tgt_sim_recharge_section)
-        esimRenewalSection = requireViewById(R.id.tgt_esim_renewal_section)
-        selectedPackage = requireViewById(R.id.tgt_selected_package)
-        iccidLayout = requireViewById(R.id.tgt_iccid_layout)
-        customerNameLayout = requireViewById(R.id.tgt_customer_name_layout)
-        customerPhoneLayout = requireViewById(R.id.tgt_customer_phone_layout)
-        esimSearchIccidLayout = requireViewById(R.id.tgt_esim_search_iccid_layout)
-        esimCustomerNameLayout = requireViewById(R.id.tgt_esim_customer_name_layout)
-        esimCustomerPhoneLayout = requireViewById(R.id.tgt_esim_customer_phone_layout)
-        esimCustomerEmailLayout = requireViewById(R.id.tgt_esim_customer_email_layout)
-        iccid = requireViewById(R.id.tgt_iccid)
-        customerName = requireViewById(R.id.tgt_customer_name)
-        customerPhone = requireViewById(R.id.tgt_customer_phone)
-        esimSearchIccid = requireViewById(R.id.tgt_esim_search_iccid)
-        esimCustomerName = requireViewById(R.id.tgt_esim_customer_name)
-        esimCustomerPhone = requireViewById(R.id.tgt_esim_customer_phone)
-        esimCustomerEmail = requireViewById(R.id.tgt_esim_customer_email)
-        esimSearchButton = requireViewById(R.id.tgt_esim_search_button)
-        esimRenewButton = requireViewById(R.id.tgt_esim_renew_button)
-        esimSearchResult = requireViewById(R.id.tgt_esim_search_result)
-        esimSelectedPackage = requireViewById(R.id.tgt_esim_selected_package)
-        activate = requireViewById(R.id.tgt_activate)
-
-        setupInsets()
-        setupModeTabs()
-        setupPackageSelection()
-        setupRenewalPackageSelection()
-        renderRenewalPackageSelection()
-        setupActivation()
-        setupEsimRenewal()
-        renderSelectedPackage()
-        renderMode(isEsimRenewal = false)
         applyPrefilledIccid()
-    }
 
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
-    }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll)
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupModeTabs() {
-        requireViewById<View>(R.id.tgt_mode_sim).setOnClickListener {
-            renderMode(isEsimRenewal = false)
-        }
-        requireViewById<View>(R.id.tgt_mode_esim_renewal).setOnClickListener {
-            renderMode(isEsimRenewal = true)
-        }
-    }
-
-
-
-    private fun renderMode(isEsimRenewal: Boolean) {
-        simRechargeSection.visibility = if (isEsimRenewal) View.GONE else View.VISIBLE
-        esimRenewalSection.visibility = if (isEsimRenewal) View.VISIBLE else View.GONE
-
-        requireViewById<View>(R.id.tgt_mode_sim).setBackgroundResource(
-            if (!isEsimRenewal) R.drawable.r2w_orange_small_toggle_selected else R.drawable.r2w_orange_small_toggle_unselected
-        )
-        requireViewById<View>(R.id.tgt_mode_esim_renewal).setBackgroundResource(
-            if (isEsimRenewal) R.drawable.r2w_orange_small_toggle_selected else R.drawable.r2w_orange_small_toggle_unselected
-        )
-    }
-
-
-
-    private fun setupPackageSelection() {
-        requireViewById<View>(R.id.tgt_product_30d).setOnClickListener {
-            selectedPackageName = "10GB / 30 Days"
-            renderSelectedPackage()
-        }
-        requireViewById<View>(R.id.tgt_product_60d).setOnClickListener {
-            selectedPackageName = "20GB / 60 Days"
-            renderSelectedPackage()
-        }
-
-        listOf(
-            R.id.tgt_package_10gb_30d to "10GB / 30 Days",
-            R.id.tgt_package_20gb_30d to "20GB / 30 Days",
-            R.id.tgt_package_30gb_30d to "30GB / 30 Days",
-            R.id.tgt_package_50gb_30d to "50GB / 30 Days",
-            R.id.tgt_package_20gb_60d to "20GB / 60 Days",
-            R.id.tgt_package_60gb_60d to "60GB / 60 Days"
-        ).forEach { (viewId, packageName) ->
-            requireViewById<View>(viewId).setOnClickListener {
-                selectedPackageName = packageName
-                renderSelectedPackage()
-            }
+        setContent {
+            TgtRechargeScreen(
+                mode = mode,
+                selectedPackageName = selectedPackageName,
+                simIccid = simIccid,
+                simCustomerName = simCustomerName,
+                simCustomerPhone = simCustomerPhone,
+                simResultMessage = simResultMessage,
+                simSubmitting = simSubmitting,
+                simIccidError = simIccidError,
+                simNameError = simNameError,
+                simPhoneError = simPhoneError,
+                selectedRenewalPackageName = selectedRenewalPackageName,
+                selectedRenewalDataGb = selectedRenewalDataGb,
+                esimIccid = esimIccid,
+                esimCustomerName = esimCustomerName,
+                esimCustomerPhone = esimCustomerPhone,
+                esimCustomerEmail = esimCustomerEmail,
+                esimResultMessage = esimResultMessage,
+                esimSubmitting = esimSubmitting,
+                esimIccidError = esimIccidError,
+                esimNameError = esimNameError,
+                esimPhoneError = esimPhoneError,
+                onBack = { finish() },
+                onModeChange = { mode = it },
+                onSelectSimPackage = { selectedPackageName = it },
+                onSimIccidChange = { simIccid = it },
+                onSimNameChange = { simCustomerName = it },
+                onSimPhoneChange = { simCustomerPhone = it },
+                onSelectRenewalPackage = { packageName, dataGb ->
+                    selectedRenewalPackageName = packageName
+                    selectedRenewalDataGb = dataGb
+                },
+                onEsimIccidChange = { esimIccid = it },
+                onEsimNameChange = { esimCustomerName = it },
+                onEsimPhoneChange = { esimCustomerPhone = it },
+                onEsimEmailChange = { esimCustomerEmail = it },
+                onSubmitSim = {
+                    if (!validateSimForm()) return@TgtRechargeScreen
+                    submitRechargeRequest()
+                },
+                onSubmitEsim = {
+                    if (!validateEsimRenewalForm()) return@TgtRechargeScreen
+                    submitEsimRenewalRequest()
+                }
+            )
         }
     }
-
-
-
-    private fun setupRenewalPackageSelection() {
-        requireViewById<View>(R.id.tgt_esim_product_30d).setOnClickListener {
-            selectedRenewalPackageName = "10GB / 30 Days"
-            selectedRenewalDataGb = "10"
-            renderRenewalPackageSelection()
-        }
-        requireViewById<View>(R.id.tgt_esim_product_60d).setOnClickListener {
-            selectedRenewalPackageName = "20GB / 60 Days"
-            selectedRenewalDataGb = "20"
-            renderRenewalPackageSelection()
-        }
-
-        listOf(
-            R.id.tgt_esim_renewal_10gb to ("10GB / 30 Days" to "10"),
-            R.id.tgt_esim_renewal_20gb to ("20GB / 30 Days" to "20"),
-            R.id.tgt_esim_renewal_30gb to ("30GB / 30 Days" to "30"),
-            R.id.tgt_esim_renewal_50gb to ("50GB / 30 Days" to "50"),
-            R.id.tgt_esim_renewal_20gb_60d to ("20GB / 60 Days" to "20"),
-            R.id.tgt_esim_renewal_60gb_60d to ("60GB / 60 Days" to "60")
-        ).forEach { (viewId, packageInfo) ->
-            requireViewById<View>(viewId).setOnClickListener {
-                selectedRenewalPackageName = packageInfo.first
-                selectedRenewalDataGb = packageInfo.second
-                renderRenewalPackageSelection()
-            }
-        }
-    }
-
-
-
-
-
-
-    private fun renderRenewalPackageSelection() {
-        esimSelectedPackage.text = "Orange eSim\n$selectedRenewalPackageName"
-
-        val is60Days = selectedRenewalPackageName.contains("60 Days")
-        requireViewById<View>(R.id.tgt_esim_product_30d).setBackgroundResource(
-            if (!is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
-        )
-        requireViewById<View>(R.id.tgt_esim_product_60d).setBackgroundResource(
-            if (is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
-        )
-
-        listOf(
-            R.id.tgt_esim_renewal_10gb to "10GB / 30 Days",
-            R.id.tgt_esim_renewal_20gb to "20GB / 30 Days",
-            R.id.tgt_esim_renewal_30gb to "30GB / 30 Days",
-            R.id.tgt_esim_renewal_50gb to "50GB / 30 Days",
-            R.id.tgt_esim_renewal_20gb_60d to "20GB / 60 Days",
-            R.id.tgt_esim_renewal_60gb_60d to "60GB / 60 Days"
-        ).forEach { (viewId, packageName) ->
-            val selected = packageName == selectedRenewalPackageName
-            val view = requireViewById<TextView>(viewId)
-            view.setBackgroundResource(if (selected) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected)
-            view.setTextColor(getColor(if (selected) R.color.r2w_premium_primary else R.color.r2w_premium_text))
-            view.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
-        }
-    }
-
-
-
-    private fun setupActivation() {
-        activate.setOnClickListener {
-            if (!validateForm()) return@setOnClickListener
-            submitRechargeRequest()
-        }
-    }
-
-    private fun setupEsimRenewal() {
-        esimSearchButton.visibility = View.GONE
-        esimSearchResult.visibility = View.GONE
-        esimRenewButton.isEnabled = true
-
-        esimRenewButton.setOnClickListener {
-            if (!validateEsimRenewalForm()) return@setOnClickListener
-            submitEsimRenewalRequest()
-        }
-    }
-
-
 
     private fun applyPrefilledIccid() {
         val prefilled = intent.getStringExtra(EXTRA_RENEW_ICCID)
             ?: intent.getStringExtra(EXTRA_ICCID)
             ?: return
         if (prefilled.isBlank()) return
-        renderMode(isEsimRenewal = true)
-        esimSearchIccid.setText(prefilled)
-        esimSearchIccid.setSelection(esimSearchIccid.text?.length ?: 0)
+        mode = TgtMode.ESIM_RENEWAL
+        esimIccid = prefilled
     }
 
-
-
-    private fun searchTgtEsimForRenewal() {
-        clearEsimRenewalErrors()
-        val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
-        if (query.length < 6) {
-            esimSearchIccidLayout.error = "Enter ICCID or at least 6 digits"
-            return
-        }
-
+    private fun submitRechargeRequest() {
         lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
-            if (session == null) {
-                startActivity(
-                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    }
-                )
-                finish()
-                return@launch
+            val session = activeSessionOrReturnToLogin() ?: return@launch
+            simSubmitting = true
+            simResultMessage = null
+
+            val result = runCatching {
+                withContext(Dispatchers.IO) { postTgtRecharge(session) }
             }
 
-            setEsimSearching(true)
-            val result = runCatching {
-                withContext(Dispatchers.IO) { authApi.esims(session).esims }
-                    .firstOrNull { esim ->
-                        esim.provider?.contains("tgt", ignoreCase = true) == true &&
-                            esim.iccid?.contains(query, ignoreCase = true) == true
-                    }
-            }
-            setEsimSearching(false)
+            simSubmitting = false
 
             result
-                .onSuccess { esim ->
-                    selectedRenewalEsim = esim
-                    if (esim == null) {
-                        esimSearchResult.text = "No Orange eSim found for ICCID: $query"
-                        esimRenewButton.isEnabled = false
-                    } else {
-                        renderFoundTgtEsim(esim)
-                        esimRenewButton.isEnabled = true
-                    }
+                .onSuccess { message ->
+                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    simResultMessage = message
                 }
                 .onFailure { error ->
-                    selectedRenewalEsim = null
-                    esimRenewButton.isEnabled = false
-                    esimSearchResult.text = error.message ?: "Orange eSim search failed"
+                    val message = error.message ?: "Orange recharge request failed"
+                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    simResultMessage = message
                 }
         }
-    }
-
-    private fun renderFoundTgtEsim(esim: MobileEsim) {
-        esimSearchResult.text = listOf(
-            "Orange eSim found",
-            "ICCID: ${esim.iccid.orEmpty()}",
-            "Current plan: ${PackageNameCleaner.clean(esim.packageName)}",
-            "Selected renewal: ${selectedRenewalDataGb}GB",
-            "Status: ${esim.statusLabel()}"
-        ).joinToString("\n")
     }
 
     private fun submitEsimRenewalRequest() {
-        val query = esimSearchIccid.text?.toString()?.trim().orEmpty()
+        val query = esimIccid.trim()
 
         lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
-            if (session == null) {
-                startActivity(
-                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    }
-                )
-                finish()
-                return@launch
-            }
+            val session = activeSessionOrReturnToLogin() ?: return@launch
+            esimSubmitting = true
+            esimResultMessage = null
 
-            setEsimRenewing(true)
             val result = runCatching {
                 val esim = withContext(Dispatchers.IO) {
                     authApi.esims(session).esims.firstOrNull { esim ->
@@ -355,74 +187,46 @@ class TgtSimRechargeActivity : AppCompatActivity() {
 
                 withContext(Dispatchers.IO) { postTgtEsimRenewal(session, esim) }
             }
-            setEsimRenewing(false)
+
+            esimSubmitting = false
 
             result
                 .onSuccess { message ->
                     Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
-                    esimSearchResult.visibility = View.VISIBLE
-                    esimSearchResult.text = message
+                    esimResultMessage = message
                 }
                 .onFailure { error ->
-                    Toast.makeText(
-                        this@TgtSimRechargeActivity,
-                        error.message ?: "Orange eSim renewal request failed",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    esimSearchResult.visibility = View.VISIBLE
-                    esimSearchResult.text = error.message ?: "Orange eSim renewal request failed"
+                    val message = error.message ?: "Orange eSim renewal request failed"
+                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
+                    esimResultMessage = message
                 }
         }
     }
 
+    private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
+        val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        if (session != null) return session
 
-
-    private fun submitRechargeRequest() {
-        lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
-            if (session == null) {
-                startActivity(
-                    Intent(this@TgtSimRechargeActivity, LoginActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    }
-                )
-                finish()
-                return@launch
+        startActivity(
+            Intent(this, LoginActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
-
-            setSubmitting(true)
-            val result = runCatching {
-                withContext(Dispatchers.IO) { postTgtRecharge(session) }
-            }
-            setSubmitting(false)
-
-            result
-                .onSuccess { message ->
-                    Toast.makeText(this@TgtSimRechargeActivity, message, Toast.LENGTH_LONG).show()
-                    finish()
-                }
-                .onFailure { error ->
-                    Toast.makeText(
-                        this@TgtSimRechargeActivity,
-                        error.message ?: "Orange recharge request failed",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-        }
+        )
+        finish()
+        return null
     }
 
     private fun postTgtRecharge(session: AuthSession): String {
-        val requestUrl = tgtRechargeUrl()
         val body = JSONObject()
             .put("package_name", selectedPackageName)
-            .put("iccid", iccid.text?.toString()?.trim().orEmpty())
-            .put("customer_name", customerName.text?.toString()?.trim().orEmpty())
-            .put("customer_phone", customerPhone.text?.toString()?.trim().orEmpty())
+            .put("iccid", simIccid.trim())
+            .put("customer_name", simCustomerName.trim())
+            .put("customer_phone", simCustomerPhone.trim())
             .put("provider", "Orange Balkans")
             .put("source", "android")
 
         return postJsonRequest(
-            requestUrl = requestUrl,
+            requestUrl = tgtRechargeUrl(),
             authorizationHeader = session.authorizationHeader,
             body = body,
             fallbackMessage = "Orange recharge request submitted",
@@ -431,21 +235,23 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     }
 
     private fun postTgtEsimRenewal(session: AuthSession, esim: MobileEsim): String {
-        val requestUrl = tgtEsimRenewalUrl()
         val body = JSONObject()
             .put("iccid", esim.iccid.orEmpty())
             .put("renewal_data_gb", selectedRenewalDataGb)
-            .put("customer_name", esimCustomerName.text?.toString()?.trim().orEmpty())
-            .put("customer_phone", esimCustomerPhone.text?.toString()?.trim().orEmpty())
+            .put("customer_name", esimCustomerName.trim())
+            .put("customer_phone", esimCustomerPhone.trim())
             .put("source", "android")
 
-        esimCustomerEmail.text?.toString()?.trim()?.takeIf { it.isNotBlank() }?.let {
+        esimCustomerEmail.trim().takeIf { it.isNotBlank() }?.let {
             body.put("email", it)
         }
-        esim.id?.takeIf { it.isNotBlank() }?.let { body.put("esim_id", it) }
+
+        esim.id?.takeIf { it.isNotBlank() }?.let {
+            body.put("esim_id", it)
+        }
 
         return postJsonRequest(
-            requestUrl = requestUrl,
+            requestUrl = tgtEsimRenewalUrl(),
             authorizationHeader = session.authorizationHeader,
             body = body,
             fallbackMessage = "Orange eSim renewal submitted",
@@ -480,6 +286,7 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                 ?.use { it.readText() })
                 .orEmpty()
             val response = responseText.takeIf { it.isNotBlank() }?.let { JSONObject(it) }
+
             if (status !in 200..299 || response?.optBoolean("success", true) == false) {
                 val message = response?.optString("message")
                     ?.takeIf { it.isNotBlank() }
@@ -488,59 +295,54 @@ class TgtSimRechargeActivity : AppCompatActivity() {
                     ?: "$fallbackError with HTTP $status"
                 throw IllegalStateException(message)
             }
+
             response?.optString("message")?.takeIf { it.isNotBlank() } ?: fallbackMessage
         } finally {
             connection.disconnect()
         }
     }
 
-    private fun setSubmitting(submitting: Boolean) {
-        activate.isEnabled = !submitting
-        activate.text = if (submitting) "Submitting..." else getString(R.string.r2w_activate)
-    }
+    private fun validateSimForm(): Boolean {
+        simIccidError = null
+        simNameError = null
+        simPhoneError = null
 
-    private fun setEsimSearching(searching: Boolean) {
-        esimSearchButton.isEnabled = !searching
-        esimSearchButton.text = if (searching) "Searching..." else "Find Orange eSim"
-        if (searching) {
-            selectedRenewalEsim = null
-            esimRenewButton.isEnabled = false
+        var valid = true
+        if (simIccid.trim().length < 10) {
+            simIccidError = "Enter a valid ICCID"
+            valid = false
         }
-    }
-
-    private fun setEsimRenewing(renewing: Boolean) {
-        esimRenewButton.isEnabled = !renewing && selectedRenewalEsim != null
-        esimRenewButton.text = if (renewing) "Submitting..." else "Continue Renewal"
-    }
-
-    private fun renderSelectedPackage() {
-        selectedPackage.text = "Orange Balkans SIM\n$selectedPackageName"
-
-        val is60Days = selectedPackageName.contains("60 Days")
-        requireViewById<View>(R.id.tgt_product_30d).setBackgroundResource(
-            if (!is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
-        )
-        requireViewById<View>(R.id.tgt_product_60d).setBackgroundResource(
-            if (is60Days) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected
-        )
-
-        listOf(
-            R.id.tgt_package_10gb_30d to "10GB / 30 Days",
-            R.id.tgt_package_20gb_30d to "20GB / 30 Days",
-            R.id.tgt_package_30gb_30d to "30GB / 30 Days",
-            R.id.tgt_package_50gb_30d to "50GB / 30 Days",
-            R.id.tgt_package_20gb_60d to "20GB / 60 Days",
-            R.id.tgt_package_60gb_60d to "60GB / 60 Days"
-        ).forEach { (viewId, packageName) ->
-            val selected = packageName == selectedPackageName
-            val view = requireViewById<TextView>(viewId)
-            view.setBackgroundResource(if (selected) R.drawable.r2w_orange_card_selected else R.drawable.r2w_orange_card_unselected)
-            view.setTextColor(getColor(if (selected) R.color.r2w_premium_primary else R.color.r2w_premium_text))
-            view.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
+        if (simCustomerName.trim().isBlank()) {
+            simNameError = "Customer name is required"
+            valid = false
         }
+        if (simCustomerPhone.trim().length < 6) {
+            simPhoneError = "Enter a valid phone number"
+            valid = false
+        }
+        return valid
     }
 
+    private fun validateEsimRenewalForm(): Boolean {
+        esimIccidError = null
+        esimNameError = null
+        esimPhoneError = null
 
+        var valid = true
+        if (esimIccid.trim().length < 6) {
+            esimIccidError = "Enter Orange eSim ICCID"
+            valid = false
+        }
+        if (esimCustomerName.trim().isBlank()) {
+            esimNameError = "Customer name is required"
+            valid = false
+        }
+        if (esimCustomerPhone.trim().length < 6) {
+            esimPhoneError = "Phone number is required"
+            valid = false
+        }
+        return valid
+    }
 
     private fun tgtRechargeUrl(): String =
         "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/recharge/"
@@ -548,87 +350,489 @@ class TgtSimRechargeActivity : AppCompatActivity() {
     private fun tgtEsimRenewalUrl(): String =
         "${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/esim/renew/"
 
-    private fun validateForm(): Boolean {
-        clearErrors()
-
-        val iccidValue = iccid.text?.toString()?.trim().orEmpty()
-        val customerNameValue = customerName.text?.toString()?.trim().orEmpty()
-        val customerPhoneValue = customerPhone.text?.toString()?.trim().orEmpty()
-
-        var valid = true
-
-        if (iccidValue.length < 10) {
-            iccidLayout.error = "Enter a valid ICCID"
-            valid = false
-        }
-
-        if (customerNameValue.isBlank()) {
-            customerNameLayout.error = "Customer name is required"
-            valid = false
-        }
-
-        if (customerPhoneValue.length < 6) {
-            customerPhoneLayout.error = "Enter a valid phone number"
-            valid = false
-        }
-
-        return valid
-    }
-
-    private fun validateEsimRenewalForm(): Boolean {
-        clearEsimRenewalErrors()
-        var valid = true
-
-        val iccidValue = esimSearchIccid.text?.toString()?.trim().orEmpty()
-        if (iccidValue.length < 6) {
-            esimSearchIccidLayout.error = "Enter Orange eSim ICCID"
-            valid = false
-        }
-
-        if (esimCustomerName.text?.toString()?.trim().isNullOrEmpty()) {
-            esimCustomerNameLayout.error = "Customer name is required"
-            valid = false
-        }
-
-        if (esimCustomerPhone.text?.toString()?.trim().isNullOrEmpty()) {
-            esimCustomerPhoneLayout.error = "Phone number is required"
-            valid = false
-        }
-
-        return valid
-    }
-
-
-
-    private fun clearErrors() {
-        iccidLayout.error = null
-        customerNameLayout.error = null
-        customerPhoneLayout.error = null
-    }
-
-    private fun clearEsimRenewalErrors() {
-        esimSearchIccidLayout.error = null
-        esimCustomerNameLayout.error = null
-        esimCustomerPhoneLayout.error = null
-        esimCustomerEmailLayout.error = null
-    }
-
-    private fun requireNestedScrollView(): NestedScrollView =
-        findNestedScrollView(findViewById(android.R.id.content))
-            ?: error("TgtSimRechargeActivity requires a NestedScrollView")
-
-    private fun findNestedScrollView(view: View): NestedScrollView? {
-        if (view is NestedScrollView) return view
-        if (view is ViewGroup) {
-            for (index in 0 until view.childCount) {
-                findNestedScrollView(view.getChildAt(index))?.let { return it }
-            }
-        }
-        return null
-    }
-
     private companion object {
         const val EXTRA_RENEW_ICCID = "renew.iccid"
         const val EXTRA_ICCID = "iccid"
     }
 }
+
+private enum class TgtMode {
+    SIM_RECHARGE,
+    ESIM_RENEWAL
+}
+
+@Composable
+private fun TgtRechargeScreen(
+    mode: TgtMode,
+    selectedPackageName: String,
+    simIccid: String,
+    simCustomerName: String,
+    simCustomerPhone: String,
+    simResultMessage: String?,
+    simSubmitting: Boolean,
+    simIccidError: String?,
+    simNameError: String?,
+    simPhoneError: String?,
+    selectedRenewalPackageName: String,
+    selectedRenewalDataGb: String,
+    esimIccid: String,
+    esimCustomerName: String,
+    esimCustomerPhone: String,
+    esimCustomerEmail: String,
+    esimResultMessage: String?,
+    esimSubmitting: Boolean,
+    esimIccidError: String?,
+    esimNameError: String?,
+    esimPhoneError: String?,
+    onBack: () -> Unit,
+    onModeChange: (TgtMode) -> Unit,
+    onSelectSimPackage: (String) -> Unit,
+    onSimIccidChange: (String) -> Unit,
+    onSimNameChange: (String) -> Unit,
+    onSimPhoneChange: (String) -> Unit,
+    onSelectRenewalPackage: (String, String) -> Unit,
+    onEsimIccidChange: (String) -> Unit,
+    onEsimNameChange: (String) -> Unit,
+    onEsimPhoneChange: (String) -> Unit,
+    onEsimEmailChange: (String) -> Unit,
+    onSubmitSim: () -> Unit,
+    onSubmitEsim: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF7F7FA)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
+                    Text("Geri")
+                }
+
+                TgtHeroCard(orange = orange)
+
+                TgtModeSelector(
+                    mode = mode,
+                    orange = orange,
+                    onModeChange = onModeChange
+                )
+
+                if (mode == TgtMode.SIM_RECHARGE) {
+                    TgtSimRechargeSection(
+                        selectedPackageName = selectedPackageName,
+                        iccid = simIccid,
+                        customerName = simCustomerName,
+                        customerPhone = simCustomerPhone,
+                        resultMessage = simResultMessage,
+                        submitting = simSubmitting,
+                        iccidError = simIccidError,
+                        nameError = simNameError,
+                        phoneError = simPhoneError,
+                        orange = orange,
+                        onSelectPackage = onSelectSimPackage,
+                        onIccidChange = onSimIccidChange,
+                        onNameChange = onSimNameChange,
+                        onPhoneChange = onSimPhoneChange,
+                        onSubmit = onSubmitSim
+                    )
+                } else {
+                    TgtEsimRenewalSection(
+                        selectedRenewalPackageName = selectedRenewalPackageName,
+                        selectedRenewalDataGb = selectedRenewalDataGb,
+                        iccid = esimIccid,
+                        customerName = esimCustomerName,
+                        customerPhone = esimCustomerPhone,
+                        customerEmail = esimCustomerEmail,
+                        resultMessage = esimResultMessage,
+                        submitting = esimSubmitting,
+                        iccidError = esimIccidError,
+                        nameError = esimNameError,
+                        phoneError = esimPhoneError,
+                        orange = orange,
+                        onSelectPackage = onSelectRenewalPackage,
+                        onIccidChange = onEsimIccidChange,
+                        onNameChange = onEsimNameChange,
+                        onPhoneChange = onEsimPhoneChange,
+                        onEmailChange = onEsimEmailChange,
+                        onSubmit = onSubmitEsim
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        
+                R2wBottomNav(
+                    selected = R2wBottomTab.Esims,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TgtHeroCard(orange: Color) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(30.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Column(
+            modifier = Modifier.padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Orange Recharge",
+                color = orange,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "SIM recharge & eSIM renewal",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Orange Balkans SIM recharge veya mevcut Orange eSIM için data yenileme isteği gönder.",
+                color = Color.White.copy(alpha = 0.74f),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun TgtModeSelector(
+    mode: TgtMode,
+    orange: Color,
+    onModeChange: (TgtMode) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        TgtPackageButton(
+            label = "SIM Recharge",
+            selected = mode == TgtMode.SIM_RECHARGE,
+            selectedColor = orange,
+            onClick = { onModeChange(TgtMode.SIM_RECHARGE) }
+        )
+        TgtPackageButton(
+            label = "eSIM Renewal",
+            selected = mode == TgtMode.ESIM_RENEWAL,
+            selectedColor = orange,
+            onClick = { onModeChange(TgtMode.ESIM_RENEWAL) }
+        )
+    }
+}
+
+@Composable
+private fun TgtSimRechargeSection(
+    selectedPackageName: String,
+    iccid: String,
+    customerName: String,
+    customerPhone: String,
+    resultMessage: String?,
+    submitting: Boolean,
+    iccidError: String?,
+    nameError: String?,
+    phoneError: String?,
+    orange: Color,
+    onSelectPackage: (String) -> Unit,
+    onIccidChange: (String) -> Unit,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    TgtInfoCard(title = "Orange Balkans SIM") {
+        Text(
+            text = selectedPackageName,
+            color = Color(0xFF17181C),
+            fontWeight = FontWeight.Bold
+        )
+        TgtPackagePicker(
+            packages = simPackages(),
+            selected = selectedPackageName,
+            orange = orange,
+            onSelect = onSelectPackage
+        )
+    }
+
+    TgtInfoCard(title = "SIM Bilgileri") {
+        OutlinedTextField(
+            value = iccid,
+            onValueChange = onIccidChange,
+            label = { Text("ICCID") },
+            isError = iccidError != null,
+            supportingText = { iccidError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = customerName,
+            onValueChange = onNameChange,
+            label = { Text("Customer name") },
+            isError = nameError != null,
+            supportingText = { nameError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = customerPhone,
+            onValueChange = onPhoneChange,
+            label = { Text("Customer phone") },
+            isError = phoneError != null,
+            supportingText = { phoneError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    resultMessage?.takeIf { it.isNotBlank() }?.let {
+        TgtResultCard(it)
+    }
+
+    TgtSubmitButton(
+        text = "Activate",
+        submitting = submitting,
+        orange = orange,
+        onClick = onSubmit
+    )
+}
+
+@Composable
+private fun TgtEsimRenewalSection(
+    selectedRenewalPackageName: String,
+    selectedRenewalDataGb: String,
+    iccid: String,
+    customerName: String,
+    customerPhone: String,
+    customerEmail: String,
+    resultMessage: String?,
+    submitting: Boolean,
+    iccidError: String?,
+    nameError: String?,
+    phoneError: String?,
+    orange: Color,
+    onSelectPackage: (String, String) -> Unit,
+    onIccidChange: (String) -> Unit,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    TgtInfoCard(title = "Orange eSIM Renewal") {
+        Text(
+            text = "$selectedRenewalPackageName · ${selectedRenewalDataGb}GB",
+            color = Color(0xFF17181C),
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            renewalPackages().forEach { option ->
+                TgtPackageButton(
+                    label = option.packageName,
+                    selected = selectedRenewalPackageName == option.packageName,
+                    selectedColor = orange,
+                    onClick = { onSelectPackage(option.packageName, option.dataGb) }
+                )
+            }
+        }
+    }
+
+    TgtInfoCard(title = "eSIM Bilgileri") {
+        OutlinedTextField(
+            value = iccid,
+            onValueChange = onIccidChange,
+            label = { Text("Orange eSIM ICCID") },
+            isError = iccidError != null,
+            supportingText = { iccidError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = customerName,
+            onValueChange = onNameChange,
+            label = { Text("Customer name") },
+            isError = nameError != null,
+            supportingText = { nameError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = customerPhone,
+            onValueChange = onPhoneChange,
+            label = { Text("Customer phone") },
+            isError = phoneError != null,
+            supportingText = { phoneError?.let { Text(it) } },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = customerEmail,
+            onValueChange = onEmailChange,
+            label = { Text("Email optional") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    resultMessage?.takeIf { it.isNotBlank() }?.let {
+        TgtResultCard(it)
+    }
+
+    TgtSubmitButton(
+        text = "Continue Renewal",
+        submitting = submitting,
+        orange = orange,
+        onClick = onSubmit
+    )
+}
+
+@Composable
+private fun TgtInfoCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+@Composable
+private fun TgtPackagePicker(
+    packages: List<String>,
+    selected: String,
+    orange: Color,
+    onSelect: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        packages.forEach { packageName ->
+            TgtPackageButton(
+                label = packageName,
+                selected = selected == packageName,
+                selectedColor = orange,
+                onClick = { onSelect(packageName) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TgtPackageButton(
+    label: String,
+    selected: Boolean,
+    selectedColor: Color,
+    onClick: () -> Unit
+) {
+    val bg = if (selected) selectedColor else Color.White
+    val fg = if (selected) Color.White else Color(0xFF17181C)
+
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(999.dp),
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = bg)
+    ) {
+        Text(
+            text = label,
+            color = fg,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+private fun TgtSubmitButton(
+    text: String,
+    submitting: Boolean,
+    orange: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = !submitting,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = orange),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        if (submitting) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(18.dp),
+                    color = Color.White
+                )
+                Text("Submitting...")
+            }
+        } else {
+            Text(text)
+        }
+    }
+}
+
+@Composable
+private fun TgtResultCard(message: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF7ED))
+    ) {
+        Text(
+            text = message,
+            color = Color(0xFFC2410C),
+            modifier = Modifier.padding(18.dp),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+private data class TgtRenewalOption(
+    val packageName: String,
+    val dataGb: String
+)
+
+private fun simPackages(): List<String> =
+    listOf(
+        "10GB / 30 Days",
+        "20GB / 30 Days",
+        "30GB / 30 Days",
+        "50GB / 30 Days",
+        "20GB / 60 Days",
+        "60GB / 60 Days"
+    )
+
+private fun renewalPackages(): List<TgtRenewalOption> =
+    listOf(
+        TgtRenewalOption("10GB / 30 Days", "10"),
+        TgtRenewalOption("20GB / 30 Days", "20"),
+        TgtRenewalOption("30GB / 30 Days", "30"),
+        TgtRenewalOption("50GB / 30 Days", "50"),
+        TgtRenewalOption("20GB / 60 Days", "20"),
+        TgtRenewalOption("60GB / 60 Days", "60")
+    )

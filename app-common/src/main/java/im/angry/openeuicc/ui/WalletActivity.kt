@@ -2,21 +2,9 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.updatePadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -25,10 +13,6 @@ import im.angry.openeuicc.auth.MobileWalletData
 import im.angry.openeuicc.auth.MobileWalletRequest
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,193 +20,102 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
-class WalletActivity : AppCompatActivity() {
-
-    private fun formatWalletDate(value: String?): String {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return ""
-
-        val normalized = raw
-            .replace(" ", "T")
-            .replace(Regex("""(\.\d{3})\d+"""), "$1")
-            .let {
-                if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
-                    it
-                } else {
-                    "${it}Z"
-                }
-            }
-
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-            Instant.parse(normalized).atZone(ZoneId.systemDefault()).format(formatter)
-        } catch (_: Exception) {
-            raw
-        }
-    }
-
-    private fun formatWalletText(value: String?): String {
-        val raw = value.orEmpty()
-        val isoPattern = Regex("""\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?""")
-        return isoPattern.replace(raw) { matchResult -> formatWalletDate(matchResult.value) }
-    }
-
-
+class WalletActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var refresh: SwipeRefreshLayout
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var balance: TextView
-    private lateinit var error: TextView
-    private lateinit var requests: LinearLayout
-    private lateinit var transactions: LinearLayout
-    private lateinit var requestBalance: MaterialButton
-    private lateinit var requestHistory: MaterialButton
+    private var loading by mutableStateOf(false)
+    private var walletData by mutableStateOf<MobileWalletData?>(null)
+    private var recentRequests by mutableStateOf<List<MobileWalletRequest>>(emptyList())
+    private var errorMessage by mutableStateOf<String?>(null)
+    private var requestError by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.wallet_title)
 
-        refresh = requireViewById(R.id.wallet_refresh)
-        bottomNav = requireViewById(R.id.wallet_bottom_nav)
-        balance = requireViewById(R.id.wallet_balance)
-        error = requireViewById(R.id.wallet_error)
-        requests = requireViewById(R.id.wallet_requests)
-        transactions = requireViewById(R.id.wallet_transactions)
-        requestBalance = requireViewById(R.id.wallet_request_balance)
-        requestHistory = requireViewById(R.id.wallet_request_history)
+        setContent {
+            WalletScreen(
+                loading = loading,
+                walletData = walletData,
+                recentRequests = recentRequests,
+                errorMessage = errorMessage,
+                requestError = requestError,
+                onRefresh = { loadWallet() },
+                onRequestBalance = { startActivity(Intent(this, WalletRequestActivity::class.java)) },
+                onRequestHistory = { startActivity(Intent(this, WalletRequestHistoryActivity::class.java)) },
+                onTransactions = { startActivity(Intent(this, TransactionsActivity::class.java)) },
+                onPurchaseHistory = { startActivity(Intent(this, PurchaseHistoryActivity::class.java)) },
+                onLogout = { logout() },
+                onDashboard = { startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onPackages = { startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onEsims = { startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onMore = { startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) }
+            )
+        }
 
-        setupInsets()
-        setupBottomNavigation()
-        setupRefresh()
-        setupActions()
-        renderPlaceholders()
         loadWallet()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        bottomNav.selectedItemId = R.id.nav_wallet
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.activity_dashboard, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            R.id.reload -> {
-                loadWallet()
-                true
-            }
-
-            R.id.purchase_history -> {
-                openPurchaseHistoryActivity()
-                true
-            }
-
-            R.id.logout -> {
-                logout()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(refresh),
-                { insets ->
-                    bottomNav.updatePadding(
-                        insets.left,
-                        bottomNav.paddingTop,
-                        insets.right,
-                        insets.bottom
-                    )
-                }
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    openDashboardActivity()
-                    false
-                }
-                R.id.nav_packages -> {
-                    openPackagesActivity()
-                    false
-                }
-                R.id.nav_wallet -> true
-                R.id.nav_esims -> {
-                    openEsimActivity()
-                    false
-                }
-                R.id.nav_more -> {
-                    openMoreActivity()
-                    false
-                }
-                else -> false
-            }
-        }
-        bottomNav.selectedItemId = R.id.nav_wallet
-    }
-
-    private fun setupRefresh() {
-        refresh.setOnRefreshListener {
-            loadWallet()
-        }
-    }
-
-    private fun setupActions() {
-        requestBalance.setOnClickListener {
-            startActivity(Intent(this, WalletRequestActivity::class.java))
-        }
-        requestHistory.setOnClickListener {
-            startActivity(Intent(this, WalletRequestHistoryActivity::class.java))
-        }
-    }
-
-    private fun renderPlaceholders() {
-        balance.text = "--"
-        renderRequests(emptyList())
-        renderTransactions(emptyList())
     }
 
     private fun loadWallet() {
         lifecycleScope.launch {
-            error.visibility = View.GONE
-            setLoading(true)
-            val session = activeSessionOrReturnToLogin() ?: return@launch
-            val walletResult = runCatching {
-                authApi.wallet(session)
+            loading = true
+            errorMessage = null
+            requestError = null
+
+            val session = activeSessionOrReturnToLogin()
+            if (session == null) {
+                loading = false
+                return@launch
             }
-            val requestResult = runCatching {
-                authApi.walletRequests(session)
-            }
-            setLoading(false)
+
+            val walletResult = runCatching { authApi.wallet(session) }
+            val requestResult = runCatching { authApi.walletRequests(session) }
+
+            loading = false
 
             walletResult
-                .onSuccess { renderWallet(it) }
-                .onFailure {
-                    error.text = it.message ?: getString(R.string.wallet_load_failed)
-                    error.visibility = View.VISIBLE
-                }
+                .onSuccess { walletData = it }
+                .onFailure { errorMessage = it.message ?: "Wallet could not be loaded" }
+
             requestResult
-                .onSuccess { renderRequests(it.take(3)) }
-                .onFailure { renderRequests(emptyList(), it.message ?: getString(R.string.wallet_request_history_failed)) }
+                .onSuccess { recentRequests = it.take(3) }
+                .onFailure {
+                    recentRequests = emptyList()
+                    requestError = it.message ?: "Wallet request history failed"
+                }
         }
     }
 
@@ -241,220 +134,6 @@ class WalletActivity : AppCompatActivity() {
             tokenStore.save(refreshed)
         }
         return refreshed
-    }
-
-    private fun renderWallet(data: MobileWalletData) {
-        balance.text = r2wMoney(data.currentBalance)
-        renderLowBalanceWarning(data.currentBalance)
-        renderQuickStats(data.transactions)
-        renderTransactions(data.transactions)
-    }
-
-    private fun renderRequests(requestData: List<MobileWalletRequest>, errorText: String? = null) {
-        requests.removeAllViews()
-        if (!errorText.isNullOrBlank()) {
-            TextView(this).apply {
-                text = errorText
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(getColor(R.color.r2w_premium_danger))
-                requests.addView(this)
-            }
-            return
-        }
-        if (requestData.isEmpty()) {
-            TextView(this).apply {
-                text = getString(R.string.wallet_request_history_empty)
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(getColor(R.color.r2w_premium_muted))
-                requests.addView(this)
-            }
-            return
-        }
-
-        val inflater = LayoutInflater.from(this)
-        requestData.forEach { request ->
-            val item = inflater.inflate(R.layout.wallet_request_history_item, requests, false)
-            item.requireViewById<TextView>(R.id.wallet_request_item_amount).text =
-                getString(R.string.wallet_request_amount_currency, request.amount, request.currency)
-            item.requireViewById<TextView>(R.id.wallet_request_item_status)
-                .applyRoamStatusChip(request.statusLabel(), request.status)
-            item.requireViewById<TextView>(R.id.wallet_request_item_created).apply {
-                text = formatWalletDate(request.createdAt)
-                visibility = if (request.createdAt.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.wallet_request_item_note).apply {
-                text = request.note.orEmpty()
-                visibility = if (request.note.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            item.requireViewById<TextView>(R.id.wallet_request_item_reviewed).apply {
-                text = request.reviewedAt?.let { getString(R.string.wallet_request_reviewed_at, formatWalletDate(it)) }.orEmpty()
-                visibility = if (request.reviewedAt.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-            requests.addView(item)
-        }
-    }
-
-    private fun renderQuickStats(transactionData: List<MobileTransaction>) {
-        val totalTransactions = transactionData.size
-        val last = transactionData.firstOrNull()
-        val lastActivity = listOfNotNull(
-            last?.title?.takeIf { it.isNotBlank() },
-            last?.subtitle?.takeIf { it.isNotBlank() }?.let { formatWalletText(it) }
-        ).joinToString(" • ").ifBlank { "No activity yet" }
-        val completedCount = transactionData.count {
-            it.status.orEmpty().lowercase().contains("complete") ||
-                it.status.orEmpty().lowercase().contains("success") ||
-                it.status.orEmpty().lowercase().contains("approved")
-        }
-
-        requireViewById<TextView>(R.id.wallet_quick_stats_text).text =
-            "Recent transactions: $totalTransactions\nCompleted: $completedCount\nLast activity: $lastActivity"
-    }
-
-    private fun renderLowBalanceWarning(balanceText: String?) {
-        val card = requireViewById<View>(R.id.wallet_low_balance_card)
-        val balanceValue = balanceText
-            ?.replace(Regex("[^0-9.,-]"), "")
-            ?.replace(",", ".")
-            ?.toDoubleOrNull()
-
-        card.visibility =
-            if (balanceValue != null && balanceValue < 20.0) View.VISIBLE else View.GONE
-    }
-
-    private fun renderTransactions(transactionData: List<MobileTransaction>) {
-        transactions.removeAllViews()
-        if (transactionData.isEmpty()) {
-            TextView(this).apply {
-                text = getString(R.string.wallet_empty_transactions)
-                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-                setTextColor(com.google.android.material.color.MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant))
-                transactions.addView(this)
-            }
-            return
-        }
-
-        val inflater = LayoutInflater.from(this)
-        transactionData.forEach { transaction ->
-            val item = inflater.inflate(R.layout.wallet_transaction_item, transactions, false)
-
-            val amountRaw = transaction.amount.trim()
-            val titleRaw = transaction.title.trim()
-            val statusRaw = transaction.status.orEmpty().trim()
-            val combined = "$amountRaw $titleRaw $statusRaw".lowercase(Locale.ENGLISH)
-
-            val isDebit =
-                amountRaw.startsWith("-") ||
-                    combined.contains("debit") ||
-                    combined.contains("purchase") ||
-                    combined.contains("charge") ||
-                    combined.contains("deduct") ||
-                    combined.contains("vendor")
-
-            val statusKey = statusRaw.lowercase(Locale.ENGLISH)
-            val isFailed = statusKey.contains("fail") || statusKey.contains("cancel") || statusKey.contains("reject")
-            val isPending = statusKey.contains("pending") || statusKey.contains("review") || statusKey.contains("processing")
-
-            val typeLabel = if (isDebit) "Debit" else "Credit"
-            val amountDisplay = when {
-                amountRaw.isBlank() -> ""
-                amountRaw.startsWith("+") || amountRaw.startsWith("-") -> amountRaw
-                isDebit -> "- $amountRaw"
-                else -> "+ $amountRaw"
-            }
-
-            item.requireViewById<FrameLayout>(R.id.transaction_icon_bg).setBackgroundResource(
-                if (isDebit) R.drawable.wallet_debit_icon_bg else R.drawable.wallet_credit_icon_bg
-            )
-
-            item.requireViewById<ImageView>(R.id.transaction_icon).setImageResource(
-                if (isDebit) R.drawable.ic_wallet_arrow_up else R.drawable.ic_wallet_arrow_down
-            )
-
-            item.requireViewById<TextView>(R.id.transaction_title).text = typeLabel
-            item.requireViewById<TextView>(R.id.transaction_subtitle).text = formatWalletText(transaction.subtitle)
-
-            item.requireViewById<TextView>(R.id.transaction_description).apply {
-                text = formatWalletText(transaction.title).ifBlank { typeLabel }
-                visibility = if (text.isNullOrBlank()) View.GONE else View.VISIBLE
-            }
-
-            item.requireViewById<TextView>(R.id.transaction_amount).apply {
-                text = r2wMoney(amountDisplay, "")
-                setTextColor(
-                    android.graphics.Color.parseColor(
-                        if (isDebit) "#D73535" else "#0F9F5A"
-                    )
-                )
-            }
-
-            item.requireViewById<TextView>(R.id.transaction_status).apply {
-                val cleanStatus = statusRaw
-                    .replace("_", " ")
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
-                    .ifBlank { if (isFailed) "Failed" else "Completed" }
-
-                text = cleanStatus
-                setTextColor(
-                    android.graphics.Color.parseColor(
-                        when {
-                            isFailed -> "#D73535"
-                            isPending -> "#F97316"
-                            else -> "#0F9F5A"
-                        }
-                    )
-                )
-                setBackgroundResource(
-                    when {
-                        isFailed -> R.drawable.wallet_status_failed_bg
-                        isPending -> R.drawable.wallet_status_pending_bg
-                        else -> R.drawable.wallet_status_completed_bg
-                    }
-                )
-            }
-
-            transactions.addView(item)
-        }
-    }
-
-    private fun setLoading(loading: Boolean) {
-        refresh.isRefreshing = loading
-    }
-
-    private fun openDashboardActivity() {
-        startActivity(
-            Intent(this, DashboardActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openPackagesActivity() {
-        startActivity(
-            Intent(this, PackagesActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openEsimActivity() {
-        startActivity(
-            Intent(this, MobileEsimsActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openMoreActivity() {
-        startActivity(
-            Intent(this, MoreActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openPurchaseHistoryActivity() {
-        startActivity(Intent(this, PurchaseHistoryActivity::class.java))
     }
 
     private fun logout() {
@@ -487,5 +166,408 @@ class WalletActivity : AppCompatActivity() {
         )
         finish()
     }
+}
 
+@Composable
+private fun WalletScreen(
+    loading: Boolean,
+    walletData: MobileWalletData?,
+    recentRequests: List<MobileWalletRequest>,
+    errorMessage: String?,
+    requestError: String?,
+    onRefresh: () -> Unit,
+    onRequestBalance: () -> Unit,
+    onRequestHistory: () -> Unit,
+    onTransactions: () -> Unit,
+    onPurchaseHistory: () -> Unit,
+    onLogout: () -> Unit,
+    onDashboard: () -> Unit,
+    onPackages: () -> Unit,
+    onEsims: () -> Unit,
+    onMore: () -> Unit
+) {
+    val bg = Color(0xFFF7F7FA)
+    val balanceText = walletData?.currentBalance
+    val transactions = walletData?.transactions.orEmpty()
+    val lowBalance = balanceText
+        ?.replace(Regex("[^0-9.,-]"), "")
+        ?.replace(",", ".")
+        ?.toDoubleOrNull()
+        ?.let { it < 20.0 } == true
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    WalletHero(
+                        balance = walletData?.currentBalance?.let { r2wMoney(it) } ?: "--",
+                        loading = loading,
+                        onRefresh = onRefresh,
+                        onRequestBalance = onRequestBalance,
+                        onRequestHistory = onRequestHistory
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onTransactions,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Transactions")
+                        }
+                        OutlinedButton(
+                            onClick = onPurchaseHistory,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Orders")
+                        }
+                    }
+
+                    errorMessage?.let {
+                        WalletCard(title = "Error") {
+                            Text(it, color = Color(0xFFDC2626), fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
+                    if (loading) {
+                        WalletCard(title = "Loading") {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    if (lowBalance) {
+                        WalletCard(title = "Low balance") {
+                            Text(
+                                text = "Your wallet balance is low. Request balance or contact support before new purchases.",
+                                color = Color(0xFFD97706),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    WalletCard(title = "Quick stats") {
+                        val total = transactions.size
+                        val completed = transactions.count {
+                            val status = it.status.orEmpty().lowercase()
+                            status.contains("complete") || status.contains("success") || status.contains("approved")
+                        }
+                        val last = transactions.firstOrNull()
+                        val lastActivity = listOfNotNull(
+                            last?.title?.takeIf { it.isNotBlank() },
+                            last?.subtitle?.takeIf { it.isNotBlank() }?.let { formatWalletText(it) }
+                        ).joinToString(" • ").ifBlank { "No activity yet" }
+
+                        Text(
+                            text = "Recent transactions: $total\nCompleted: $completed\nLast activity: $lastActivity",
+                            color = Color(0xFF6B7280),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    WalletCard(title = "Recent balance requests") {
+                        requestError?.let {
+                            Text(it, color = Color(0xFFDC2626), fontWeight = FontWeight.SemiBold)
+                        }
+
+                        if (recentRequests.isEmpty() && requestError == null) {
+                            Text(
+                                text = "No wallet requests yet.",
+                                color = Color(0xFF6B7280)
+                            )
+                        } else {
+                            recentRequests.forEach { request ->
+                                WalletRequestPreview(request)
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+
+                    WalletCard(title = "Recent transactions") {
+                        if (transactions.isEmpty()) {
+                            Text(
+                                text = "No wallet transactions yet.",
+                                color = Color(0xFF6B7280)
+                            )
+                        } else {
+                            transactions.take(8).forEach { transaction ->
+                                WalletTransactionPreview(transaction)
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text("Logout", fontWeight = FontWeight.Bold)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                R2wBottomNav(
+                    selected = R2wBottomTab.Wallet
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletHero(
+    balance: String,
+    loading: Boolean,
+    onRefresh: () -> Unit,
+    onRequestBalance: () -> Unit,
+    onRequestHistory: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Column(
+            modifier = Modifier.padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "Wallet",
+                        color = orange,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = balance,
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = "Available balance",
+                        color = Color.White.copy(alpha = 0.72f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Text(
+                    text = if (loading) "Loading" else "Refresh",
+                    color = orange,
+                    modifier = Modifier.clickable(enabled = !loading, onClick = onRefresh),
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Button(
+                    onClick = onRequestBalance,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = orange),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Request", fontWeight = FontWeight.Bold)
+                }
+
+                OutlinedButton(
+                    onClick = onRequestHistory,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("History")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletRequestPreview(request: MobileWalletRequest) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = "${request.amount} ${request.currency}",
+                color = Color(0xFF17181C),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = formatWalletDate(request.createdAt).ifBlank { "No date" },
+                color = Color(0xFF6B7280),
+                style = MaterialTheme.typography.bodySmall
+            )
+            if (!request.note.isNullOrBlank()) {
+                Text(
+                    text = request.note,
+                    color = Color(0xFF6B7280),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        Text(
+            text = request.statusLabel(),
+            color = statusColor(request.status),
+            fontWeight = FontWeight.Black,
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+
+@Composable
+private fun WalletTransactionPreview(transaction: MobileTransaction) {
+    val amountRaw = transaction.amount.trim()
+    val titleRaw = transaction.title.trim()
+    val statusRaw = transaction.status.orEmpty().trim()
+    val combined = "$amountRaw $titleRaw $statusRaw".lowercase(Locale.ENGLISH)
+
+    val isDebit =
+        amountRaw.startsWith("-") ||
+            combined.contains("debit") ||
+            combined.contains("purchase") ||
+            combined.contains("charge") ||
+            combined.contains("deduct") ||
+            combined.contains("vendor")
+
+    val amountDisplay = when {
+        amountRaw.isBlank() -> ""
+        amountRaw.startsWith("+") || amountRaw.startsWith("-") -> amountRaw
+        isDebit -> "- $amountRaw"
+        else -> "+ $amountRaw"
+    }
+
+    val statusKey = statusRaw.lowercase(Locale.ENGLISH)
+    val cleanStatus = statusRaw
+        .replace("_", " ")
+        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+        .ifBlank {
+            if (
+                statusKey.contains("fail") ||
+                statusKey.contains("cancel") ||
+                statusKey.contains("reject")
+            ) {
+                "Failed"
+            } else {
+                "Completed"
+            }
+        }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = if (isDebit) "Debit" else "Credit",
+                color = Color(0xFF17181C),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = formatWalletText(transaction.title).ifBlank { formatWalletText(transaction.subtitle) },
+                color = Color(0xFF6B7280),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = cleanStatus,
+                color = statusColor(statusRaw),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Text(
+            text = r2wMoney(amountDisplay, ""),
+            color = if (isDebit) Color(0xFFDC2626) else Color(0xFF15803D),
+            fontWeight = FontWeight.Black
+        )
+    }
+}
+
+@Composable
+private fun WalletCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+private fun formatWalletDate(value: String?): String {
+    val raw = value?.trim().orEmpty()
+    if (raw.isBlank()) return ""
+
+    val normalized = raw
+        .replace(" ", "T")
+        .replace(Regex("""(\.\d{3})\d+"""), "$1")
+        .let {
+            if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
+                it
+            } else {
+                "${it}Z"
+            }
+        }
+
+    return runCatching {
+        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+        Instant.parse(normalized).atZone(ZoneId.systemDefault()).format(formatter)
+    }.getOrElse { raw }
+}
+
+private fun formatWalletText(value: String?): String {
+    val raw = value.orEmpty()
+    val isoPattern = Regex("""\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?""")
+    return isoPattern.replace(raw) { matchResult -> formatWalletDate(matchResult.value) }
+}
+
+private fun statusColor(statusValue: String?): Color {
+    val status = statusValue.orEmpty().lowercase(Locale.ENGLISH)
+    return when {
+        status.contains("failed") || status.contains("failure") || status.contains("cancel") || status.contains("reject") || status.contains("error") -> Color(0xFFDC2626)
+        status.contains("pending") || status.contains("review") || status.contains("processing") || status.contains("waiting") -> Color(0xFFD97706)
+        else -> Color(0xFF15803D)
+    }
 }

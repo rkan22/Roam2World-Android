@@ -29,4 +29,16 @@
     <color name="r2w_report_border">#E2E8F0</color>
     <color name="r2w_report_success">#16A34A</color>
     <color name="r2w_report_danger">#EF4444</color>
+    <color name="r2w_clean_bg">#F7F9FC</color>
+    <color name="r2w_clean_surface">#FFFFFF</color>
+    <color name="r2w_clean_surface_soft">#F3F6FB</color>
+    <color name="r2w_clean_text">#081A3A</color>
+    <color name="r2w_clean_muted">#6B7280</color>
+    <color name="r2w_clean_primary">#145CFF</color>
+    <color name="r2w_clean_primary_soft">#EAF1FF</color>
+    <color name="r2w_clean_orange">#FF7A1A</color>
+    <color name="r2w_clean_border">#E5EAF2</color>
+    <color name="r2w_clean_success">#10B981</color>
+    <color name="r2w_clean_warning">#F59E0B</color>
+    <color name="r2w_clean_error">#EF4444</color>
 </resources>

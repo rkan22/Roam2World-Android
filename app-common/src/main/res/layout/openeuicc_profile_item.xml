@@ -3,103 +3,147 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    app:cardCornerRadius="@dimen/r2w_card_radius"
-    app:cardBackgroundColor="@color/r2w_premium_surface"
-    app:cardElevation="4dp"
-    app:strokeColor="@color/r2w_premium_border"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/r2w_clean_surface"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/r2w_clean_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="14dp">
+
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/r2w_clean_icon_circle">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:src="@drawable/r2w_ic_sim_clean" />
+
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/openeuicc_profile_name"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Orange Europe 50GB"
-                    android:textAppearance="?attr/textAppearanceTitleSmall"
-                    android:textColor="@color/r2w_premium_text"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/r2w_clean_text"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/openeuicc_profile_iccid"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="ICCID 89320400012345678"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="@color/r2w_premium_muted" />
+                    android:id="@+id/openeuicc_profile_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="26dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/r2w_clean_connected_chip"
+                    android:gravity="center"
+                    android:minWidth="64dp"
+                    android:paddingStart="9dp"
+                    android:paddingEnd="9dp"
+                    android:textColor="@color/r2w_clean_success"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
             </LinearLayout>
 
             <TextView
-                android:id="@+id/openeuicc_profile_status"
-                android:layout_width="wrap_content"
+                android:id="@+id/openeuicc_profile_provider"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/r2w_chip_success"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="6dp"
-                android:text="Active"
-                android:textAppearance="?attr/textAppearanceLabelMedium"
-                android:textColor="@color/r2w_premium_success"
-                android:textStyle="bold" />
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/r2w_clean_muted"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/openeuicc_profile_iccid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="middle"
+                android:maxLines="1"
+                android:textColor="@color/r2w_clean_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/openeuicc_profile_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/r2w_clean_muted"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openeuicc_profile_switch"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minHeight="0dp"
+                    android:minWidth="76dp"
+                    android:text="Enable"
+                    android:textAllCaps="false"
+                    android:textColor="@color/r2w_clean_primary"
+                    android:textSize="12sp"
+                    app:cornerRadius="14dp"
+                    app:strokeColor="@color/r2w_clean_border"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openeuicc_profile_delete"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minHeight="0dp"
+                    android:minWidth="76dp"
+                    android:text="Delete"
+                    android:textAllCaps="false"
+                    android:textColor="@color/r2w_clean_error"
+                    android:textSize="12sp"
+                    app:cornerRadius="14dp"
+                    app:strokeColor="@color/r2w_clean_border"
+                    app:strokeWidth="1dp" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/openeuicc_profile_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="25 May 2024"
-            android:textAppearance="?attr/textAppearanceBodySmall"
-            android:textColor="@color/r2w_premium_muted" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/openeuicc_profile_switch"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:text="Switch"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:strokeColor="@color/r2w_premium_primary"
-                app:strokeWidth="1dp"
-                android:textColor="@color/r2w_premium_primary" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/openeuicc_profile_delete"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:text="Delete"
-                app:cornerRadius="@dimen/r2w_button_radius"
-                app:strokeColor="@color/r2w_premium_danger"
-                app:strokeWidth="1dp"
-                android:textColor="@color/r2w_premium_danger" />
-        </LinearLayout>
     </LinearLayout>
+
 </com.google.android.material.card.MaterialCardView>

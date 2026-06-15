@@ -28,7 +28,12 @@
         <activity
             android:name="im.angry.openeuicc.ui.LoginActivity"
             android:exported="true">
-        
+                </activity>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
+            android:exported="true"
+            tools:replace="android:exported">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -136,7 +141,10 @@
                 android:resource="@xml/r2w_file_paths" />
         </provider>
 
-    </application>
+            <activity
+            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
+            android:exported="false" />
+</application>
 
     <queries>
         <package android:name="com.android.stk" />

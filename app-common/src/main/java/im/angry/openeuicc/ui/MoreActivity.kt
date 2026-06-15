@@ -1,278 +1,113 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.updatePadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
-class MoreActivity : AppCompatActivity() {
-    private val supportWhatsAppNumber = "905XXXXXXXXX"
-    private val supportEmailAddress = "support@roam2world.com"
-
+class MoreActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val api by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
-    private lateinit var scroll: View
-    private lateinit var bottomNav: BottomNavigationView
-    private lateinit var profile: View
-    private lateinit var customers: View
-    private lateinit var esimHistory: View
-    private lateinit var openEuicc: View
-    private lateinit var tgtRecharge: View
-    private lateinit var tgtCheckGb: View
-    private lateinit var vodafoneRenewal: View
-    private lateinit var orders: View
-    private lateinit var notifications: View
-    private lateinit var reports: View
-    private lateinit var support: View
-    private lateinit var settings: View
-    private lateinit var logoutButton: View
-    private lateinit var notificationsText: TextView
+
+    private var unreadCount by mutableStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_more)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.title = getString(R.string.r2w_more)
 
-        scroll = requireViewById(R.id.more_scroll)
-        bottomNav = requireViewById(R.id.more_bottom_nav)
-        profile = requireViewById(R.id.more_profile)
-        customers = requireViewById(R.id.more_customers)
-        esimHistory = requireViewById(R.id.more_esim_history)
-        openEuicc = requireViewById(R.id.more_openeuicc)
-        tgtRecharge = requireViewById(R.id.more_tgt_recharge)
-        tgtCheckGb = requireViewById(R.id.more_tgt_check_gb)
-        vodafoneRenewal = requireViewById(R.id.more_vodafone_renewal)
-        orders = requireViewById(R.id.more_orders)
-        notifications = requireViewById(R.id.more_notifications)
-        notificationsText = requireViewById(R.id.more_notifications_text)
-        reports = requireViewById(R.id.more_reports)
-        support = requireViewById(R.id.more_support)
-        settings = requireViewById(R.id.more_settings)
-        logoutButton = requireViewById(R.id.more_logout)
+        setContent {
+            MoreScreen(
+                unreadCount = unreadCount,
+                onProfile = { startActivity(Intent(this, ProfileActivity::class.java)) },
+                onCustomers = { startActivity(Intent(this, CustomersActivity::class.java)) },
+                onOpenEuicc = { startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java)) },
+                onTgtRecharge = { startActivity(Intent(this, TgtSimRechargeActivity::class.java)) },
+                onTgtCheckGb = { startActivity(Intent(this, TgtCheckGbActivity::class.java)) },
+                onVodafoneRenewal = { startActivity(Intent(this, VodafoneRenewalActivity::class.java)) },
+                onOrders = { startActivity(Intent(this, PurchaseHistoryActivity::class.java)) },
+                onTransactions = { startActivity(Intent(this, TransactionsActivity::class.java)) },
+                onReports = { startActivity(Intent(this, ReportsActivity::class.java)) },
+                onSupport = { startActivity(Intent(this, SupportActivity::class.java)) },
+                onSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
+                onLogs = { startActivity(Intent(this, LogsActivity::class.java)) },
+                onLogout = { logout() },
+                onDashboard = {
+                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                },
+                onPackages = {
+                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                },
+                onWallet = {
+                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                },
+                onEsims = {
+                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                }
+            )
+        }
 
-        setupInsets()
-        setupBottomNavigation()
-        setupActions()
-        applyRoleVisibility()
+        loadNotificationBadge()
     }
 
     override fun onResume() {
         super.onResume()
-        bottomNav.selectedItemId = R.id.nav_more
         loadNotificationBadge()
     }
-
 
     private fun loadNotificationBadge() {
         lifecycleScope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
-            val unreadCount = if (session != null) {
+            unreadCount = if (session != null) {
                 withContext(Dispatchers.IO) {
                     runCatching { api.mobileNotifications(session).unreadCount }.getOrDefault(0)
                 }
             } else {
                 0
             }
-
-            notificationsText.text = if (unreadCount > 0) {
-                "Notifications ($unreadCount)"
-            } else {
-                "Notifications"
-            }
-        }
-    }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll),
-                { insets ->
-                    bottomNav.updatePadding(
-                        insets.left,
-                        bottomNav.paddingTop,
-                        insets.right,
-                        insets.bottom
-                    )
-                }
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_packages -> {
-                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_wallet -> {
-                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_esims -> {
-                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_more -> true
-                else -> false
-            }
-        }
-        bottomNav.selectedItemId = R.id.nav_more
-    }
-
-    private fun setupActions() {
-        profile.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-        customers.setOnClickListener {
-            startActivity(Intent(this, CustomersActivity::class.java))
-        }
-        esimHistory.setOnClickListener {
-            startActivity(Intent(this, PurchaseHistoryActivity::class.java))
-        }
-        openEuicc.setOnClickListener {
-            startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
-        }
-        tgtRecharge.setOnClickListener {
-            startActivity(Intent(this, TgtSimRechargeActivity::class.java))
-        }
-        tgtCheckGb.setOnClickListener {
-            startActivity(Intent(this, TgtCheckGbActivity::class.java))
-        }
-        vodafoneRenewal.setOnClickListener {
-            startActivity(Intent(this, VodafoneRenewalActivity::class.java))
-        }
-        orders.setOnClickListener {
-            startActivity(Intent(this, PurchaseHistoryActivity::class.java))
-        }
-        notifications.setOnClickListener {
-            startActivity(Intent(this, MobileNotificationsActivity::class.java))
-        }
-        reports.setOnClickListener {
-            startActivity(Intent(this, ReportsActivity::class.java))
-        }
-        support.setOnClickListener {
-            showSupportOptions()
-        }
-        settings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-        logoutButton.setOnClickListener {
-            logout()
-        }
-    }
-
-    private fun applyRoleVisibility() {
-        lifecycleScope.launch {
-            val role = withContext(Dispatchers.IO) { tokenStore.getSession()?.role.orEmpty().lowercase() }
-            when (role) {
-                "admin" -> showAllBusinessItems()
-                "reseller" -> showAllBusinessItems()
-                "dealer" -> showAllBusinessItems()
-                else -> showAllBusinessItems()
-            }
-        }
-    }
-
-    private fun showAllBusinessItems() {
-        customers.visibility = View.VISIBLE
-        esimHistory.visibility = View.GONE
-        openEuicc.visibility = View.VISIBLE
-        tgtRecharge.visibility = View.VISIBLE
-        tgtCheckGb.visibility = View.VISIBLE
-        vodafoneRenewal.visibility = View.VISIBLE
-        orders.visibility = View.VISIBLE
-        notifications.visibility = View.GONE
-        reports.visibility = View.VISIBLE
-        support.visibility = View.VISIBLE
-    }
-
-    private fun showSupportOptions() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_support_options, null, false)
-        val dialog = AlertDialog.Builder(this)
-            .setView(view)
-            .create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        view.findViewById<MaterialButton>(R.id.support_whatsapp).setOnClickListener {
-            dialog.dismiss()
-            openSupportWhatsApp()
-        }
-
-        view.findViewById<MaterialButton>(R.id.support_email).setOnClickListener {
-            dialog.dismiss()
-            openSupportEmail()
-        }
-
-        view.findViewById<TextView>(R.id.support_cancel).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
-
-    private fun openSupportWhatsApp() {
-        val cleanNumber = supportWhatsAppNumber
-            .replace("+", "")
-            .replace(" ", "")
-            .replace("-", "")
-            .trim()
-
-        if (cleanNumber.isBlank() || cleanNumber.contains("X")) {
-            Toast.makeText(this, "Support WhatsApp number is not configured", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val message = Uri.encode("Hello, I need support about Roam2World.")
-        val uri = Uri.parse("https://wa.me/$cleanNumber?text=$message")
-        runCatching {
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }.onFailure {
-            Toast.makeText(this, "WhatsApp could not be opened", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun openSupportEmail() {
-        val uri = Uri.parse("mailto:$supportEmailAddress")
-        val intent = Intent(Intent.ACTION_SENDTO, uri).apply {
-            putExtra(Intent.EXTRA_SUBJECT, "Roam2World Support")
-            putExtra(Intent.EXTRA_TEXT, "Hello, I need support about Roam2World.")
-        }
-
-        runCatching {
-            startActivity(Intent.createChooser(intent, "Send support email"))
-        }.onFailure {
-            Toast.makeText(this, "No email app found", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -288,3 +123,214 @@ class MoreActivity : AppCompatActivity() {
         }
     }
 }
+
+@Composable
+private fun MoreScreen(
+    unreadCount: Int,
+    onProfile: () -> Unit,
+    onCustomers: () -> Unit,
+    onOpenEuicc: () -> Unit,
+    onTgtRecharge: () -> Unit,
+    onTgtCheckGb: () -> Unit,
+    onVodafoneRenewal: () -> Unit,
+    onOrders: () -> Unit,
+    onTransactions: () -> Unit,
+    onReports: () -> Unit,
+    onSupport: () -> Unit,
+    onSettings: () -> Unit,
+    onLogs: () -> Unit,
+    onLogout: () -> Unit,
+    onDashboard: () -> Unit,
+    onPackages: () -> Unit,
+    onWallet: () -> Unit,
+    onEsims: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF7F7FA)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    MoreHero(orange = orange)
+
+                    MoreCard(title = "Account") {
+                        MoreRow("Profile", "Account details and permissions", "👤", onProfile)
+                        MoreRow("Customers", "Customer management", "👥", onCustomers)
+                    }
+
+                    MoreCard(title = "eSIM Tools") {
+                        MoreRow("OpenEUICC", "Native eUICC integration tools", "📲", onOpenEuicc)
+                        MoreRow("TGT Recharge", "Top-up and renewal flow", "🔄", onTgtRecharge)
+                        MoreRow("TGT Check GB", "Check remaining package data", "📶", onTgtCheckGb)
+                        MoreRow("Vodafone Renewal", "Vodafone renewal request", "🧾", onVodafoneRenewal)
+                    }
+
+                    MoreCard(title = "Business") {
+                        MoreRow("Orders", "Purchase history and order details", "🛒", onOrders)
+                        MoreRow("Transactions", "Search and filter all order transactions", "💳", onTransactions)
+                        MoreRow("Reports", "Business reports", "📊", onReports)
+                        val context = LocalContext.current
+                        MoreRow("Notifications ($unreadCount)", "Mobile notifications and order alerts", "🔔") {
+                            context.startActivity(Intent(context, MobileNotificationsActivity::class.java))
+                        }
+                    }
+
+                    MoreCard(title = "Help & Settings") {
+                        MoreRow("Support", "Help and quick actions", "💬", onSupport)
+                        MoreRow("Settings", "App preferences", "⚙️", onSettings)
+                        MoreRow("Logs", "View and save recent debug logs", "LOG", onLogs)
+                    }
+
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626)),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(
+                            text = "Logout",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 6.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                R2wBottomNav(
+                    selected = R2wBottomTab.More
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoreHero(orange: Color) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Row(
+            modifier = Modifier.padding(22.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(58.dp)
+                    .height(58.dp)
+                    .clip(CircleShape)
+                    .background(orange),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "R2W",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "More",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = "Roam2World tools and account actions",
+                    color = Color.White.copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoreCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+@Composable
+private fun MoreRow(
+    title: String,
+    subtitle: String,
+    symbol: String,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = symbol,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color(0xFF17181C),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = subtitle,
+                    color = Color(0xFF6B7280),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            Text(
+                text = "›",
+                color = Color(0xFF9CA3AF),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+

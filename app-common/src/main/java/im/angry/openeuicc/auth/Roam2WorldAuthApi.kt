@@ -1788,12 +1788,12 @@ class Roam2WorldAuthApi(baseUrl: String) {
 
             Log.d(TAG, "HTTP $status $method $endpointLabel $requestUrl contentType=${contentType.orEmpty()}")
             if (responseText.isBlank()) {
-                Log.d(TAG, "Raw response body: <empty>")
+                // Raw response body logging disabled
                 return
             }
 
             responseText.chunked(LOG_CHUNK_SIZE).forEachIndexed { index, chunk ->
-                Log.d(TAG, "Raw response body[$index]: $chunk")
+                // Raw response body chunk logging disabled
             }
         }
     }

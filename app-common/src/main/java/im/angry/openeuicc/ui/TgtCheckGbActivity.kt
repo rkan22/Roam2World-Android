@@ -2,112 +2,110 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import java.net.HttpURLConnection
-import java.net.URL
 import kotlin.math.roundToInt
 
-class TgtCheckGbActivity : AppCompatActivity() {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
-    private fun formatTgtDate(value: String): String {
-        if (value.isBlank()) return ""
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-            Instant.parse(value).atZone(ZoneId.systemDefault()).format(formatter)
-        } catch (_: Exception) {
-            value
-        }
-    }
-
-    private fun formatTgtStatus(value: String): String {
-        return when (value.uppercase(Locale.ROOT)) {
-            "INUSE" -> "In Use"
-            "ACTIVATED" -> "Activated"
-            "NOTACTIVE" -> "Not Activated"
-            "USED" -> "Used Up"
-            "EXPIRED" -> "Expired"
-            "ABANDON" -> "Abandoned"
-            "TERMINATION" -> "Terminated"
-            else -> value.ifBlank { "Unknown" }
-        }
-    }
-
-
+class TgtCheckGbActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
-    private lateinit var scroll: View
-    private lateinit var iccidLayout: TextInputLayout
-    private lateinit var iccidInput: TextInputEditText
-    private lateinit var checkButton: MaterialButton
-    private lateinit var result: TextView
+    private var iccid by mutableStateOf("")
+    private var iccidError by mutableStateOf<String?>(null)
+    private var loading by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
+    private var usage by mutableStateOf<TgtUsageUi?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tgt_check_gb)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Orange Check GB"
 
-        scroll = requireViewById(R.id.tgt_check_gb_scroll)
-        iccidLayout = requireViewById(R.id.tgt_check_gb_iccid_layout)
-        iccidInput = requireViewById(R.id.tgt_check_gb_iccid)
-        checkButton = requireViewById(R.id.tgt_check_gb_button)
-        result = requireViewById(R.id.tgt_check_gb_result)
+        iccid = intent.getStringExtra("renew.iccid")
+            ?: intent.getStringExtra("iccid")
+            ?: ""
 
-        setupInsets()
-        checkButton.setOnClickListener { checkGb() }
-        findViewById<MaterialButton>(R.id.tgt_usage_topup).setOnClickListener {
-            startActivity(Intent(this, TgtSimRechargeActivity::class.java).apply {
-                putExtra("renew.iccid", iccidInput.text?.toString()?.trim().orEmpty())
-            })
+        setContent {
+            TgtCheckGbScreen(
+                iccid = iccid,
+                iccidError = iccidError,
+                loading = loading,
+                errorMessage = errorMessage,
+                usage = usage,
+                onIccidChange = {
+                    iccid = it
+                    iccidError = null
+                    errorMessage = null
+                },
+                onBack = { finish() },
+                onCheckGb = { checkGb() },
+                onTopUp = { openTopUp() }
+            )
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
-    }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll)
-            ),
-            consume = false
-        )
     }
 
     private fun checkGb() {
-        iccidLayout.error = null
-        val iccid = iccidInput.text?.toString()?.trim().orEmpty()
-        if (iccid.length < 6) {
-            iccidLayout.error = "Enter ICCID"
+        iccidError = null
+        errorMessage = null
+
+        val cleanIccid = iccid.trim()
+        if (cleanIccid.length < 6) {
+            iccidError = "Enter ICCID"
             return
         }
 
@@ -123,19 +121,30 @@ class TgtCheckGbActivity : AppCompatActivity() {
                 return@launch
             }
 
-            setLoading(true)
+            loading = true
             val response = runCatching {
-                withContext(Dispatchers.IO) { postUsage(session, iccid) }
+                withContext(Dispatchers.IO) { postUsage(session, cleanIccid) }
             }
-            setLoading(false)
+            loading = false
 
             response
-                .onSuccess { renderUsage(it) }
+                .onSuccess {
+                    usage = parseUsage(it, cleanIccid)
+                }
                 .onFailure {
-                    Toast.makeText(this@TgtCheckGbActivity, it.message ?: "Orange Check GB failed", Toast.LENGTH_LONG).show()
-                    result.text = it.message ?: "Orange Check GB failed"
+                    val message = it.message ?: "Orange Check GB failed"
+                    errorMessage = message
+                    Toast.makeText(this@TgtCheckGbActivity, message, Toast.LENGTH_LONG).show()
                 }
         }
+    }
+
+    private fun openTopUp() {
+        startActivity(
+            Intent(this, TgtSimRechargeActivity::class.java).apply {
+                putExtra("renew.iccid", iccid.trim())
+            }
+        )
     }
 
     private fun postUsage(session: AuthSession, iccid: String): JSONObject {
@@ -165,10 +174,11 @@ class TgtCheckGbActivity : AppCompatActivity() {
         if (statusCode !in 200..299 || !json.optBoolean("success", false)) {
             throw IllegalStateException(json.optString("error").ifBlank { "Orange usage check failed" })
         }
+
         return json
     }
 
-    private fun renderUsage(response: JSONObject) {
+    private fun parseUsage(response: JSONObject, fallbackIccid: String): TgtUsageUi {
         val usage = response.optJSONObject("usage") ?: JSONObject()
         val raw = response.optJSONObject("raw") ?: JSONObject()
         val rawData = raw.optJSONObject("data") ?: JSONObject()
@@ -211,70 +221,376 @@ class TgtCheckGbActivity : AppCompatActivity() {
             rawData.optString("packageName")
         ) ?: "Orange Package"
 
-        val iccid = response.optString("iccid").ifBlank { iccidInput.text?.toString()?.trim().orEmpty() }
+        val resultIccid = response.optString("iccid").ifBlank { fallbackIccid }
 
-        findViewById<com.google.android.material.progressindicator.LinearProgressIndicator>(R.id.tgt_usage_progress).progress = percent
-        findViewById<TextView>(R.id.tgt_usage_remaining).text = remainingText
-        findViewById<TextView>(R.id.tgt_usage_total).text = "of $totalText"
-        findViewById<TextView>(R.id.tgt_usage_percent).text = "$percent% Used"
-        findViewById<TextView>(R.id.tgt_usage_package).text = packageName
-        findViewById<TextView>(R.id.tgt_usage_iccid).text = iccid.ifBlank { "ICCID unavailable" }
-        findViewById<TextView>(R.id.tgt_usage_allowance).text = totalText
-        findViewById<TextView>(R.id.tgt_usage_activated).text = startDate
-        findViewById<TextView>(R.id.tgt_usage_expires).text = endDate
-        findViewById<TextView>(R.id.tgt_usage_status).apply {
-            text = statusText
-            if (statusText.contains("expired", ignoreCase = true)) {
-                setBackgroundResource(R.drawable.r2w_customer_expired_badge)
-                setTextColor(android.graphics.Color.parseColor("#DC2626"))
-            } else {
-                setBackgroundResource(R.drawable.r2w_customer_active_badge)
-                setTextColor(android.graphics.Color.parseColor("#168653"))
-            }
-        }
-
-        result.visibility = View.GONE
-        result.text = listOf(
-            "Total: $totalText",
-            "Used: $usedText",
-            "Remaining: $remainingText",
-            "Status: $statusText"
-        ).joinToString("\n")
+        return TgtUsageUi(
+            packageName = packageName,
+            iccid = resultIccid.ifBlank { "ICCID unavailable" },
+            status = statusText,
+            totalText = totalText,
+            usedText = usedText,
+            remainingText = remainingText,
+            percentUsed = percent,
+            activatedAt = startDate,
+            expiresAt = endDate
+        )
     }
 
+    private fun formatTgtDate(value: String): String {
+        if (value.isBlank()) return ""
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            Instant.parse(value).atZone(ZoneId.systemDefault()).format(formatter)
+        } catch (_: Exception) {
+            value
+        }
+    }
+
+    private fun formatTgtStatus(value: String): String =
+        when (value.uppercase(Locale.ROOT)) {
+            "INUSE" -> "In Use"
+            "ACTIVATED" -> "Activated"
+            "NOTACTIVE" -> "Not Activated"
+            "USED" -> "Used Up"
+            "EXPIRED" -> "Expired"
+            "ABANDON" -> "Abandoned"
+            "TERMINATION" -> "Terminated"
+            else -> value.ifBlank { "Unknown" }
+        }
 
     private fun firstNotBlank(vararg values: String?): String? =
         values.firstOrNull { !it.isNullOrBlank() && it != "null" }
 
     private fun firstNumber(primary: JSONObject, secondary: JSONObject, vararg keys: String): Double? {
         for (key in keys) {
-            val p = primary.opt(key)
-            val pValue = numberValue(p)
+            val pValue = numberValue(primary.opt(key))
             if (pValue != null) return pValue
 
-            val s = secondary.opt(key)
-            val sValue = numberValue(s)
+            val sValue = numberValue(secondary.opt(key))
             if (sValue != null) return sValue
         }
         return null
     }
 
-    private fun numberValue(value: Any?): Double? {
-        return when (value) {
+    private fun numberValue(value: Any?): Double? =
+        when (value) {
             is Number -> value.toDouble()
             is String -> value.trim().replace(",", ".").toDoubleOrNull()
             else -> null
         }
-    }
 
     private fun formatGb(mb: Double): String {
         val gb = mb / 1024.0
         val rounded = (gb * 100).roundToInt() / 100.0
         return "$rounded GB"
     }
+}
 
-    private fun setLoading(loading: Boolean) {
-        checkButton.isEnabled = !loading
-        checkButton.text = if (loading) "Checking..." else "Check GB"
+private data class TgtUsageUi(
+    val packageName: String,
+    val iccid: String,
+    val status: String,
+    val totalText: String,
+    val usedText: String,
+    val remainingText: String,
+    val percentUsed: Int,
+    val activatedAt: String,
+    val expiresAt: String
+)
+
+@Composable
+private fun TgtCheckGbScreen(
+    iccid: String,
+    iccidError: String?,
+    loading: Boolean,
+    errorMessage: String?,
+    usage: TgtUsageUi?,
+    onIccidChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onCheckGb: () -> Unit,
+    onTopUp: () -> Unit
+) {
+    val bg = Color(0xFFF6F7FB)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OrangeUsageHero(
+                        usage = usage,
+                        loading = loading,
+                        onBack = onBack
+                    )
+
+                    usage?.let {
+                        UsageCard(usage = it)
+                    } ?: InfoCard(title = "Orange Check GB") {
+                        Text(
+                            "Enter an Orange ICCID to check package allowance, remaining data and expiry details.",
+                            color = Color(0xFF6B7280)
+                        )
+                    }
+
+                    errorMessage?.let {
+                        InfoCard(title = "Check failed") {
+                            Text(it, color = Color(0xFFDC2626))
+                        }
+                    }
+
+                    InfoCard(title = "Check by ICCID") {
+                        OutlinedTextField(
+                            value = iccid,
+                            onValueChange = onIccidChange,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("ICCID") },
+                            singleLine = true,
+                            isError = iccidError != null,
+                            supportingText = { iccidError?.let { Text(it) } },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            shape = RoundedCornerShape(18.dp)
+                        )
+
+                        Button(
+                            onClick = onCheckGb,
+                            enabled = !loading,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            if (loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                            } else {
+                                Text("Check GB", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    InfoCard(title = "Need more data?") {
+                        Text("Open Orange recharge with this ICCID prefilled.", color = Color(0xFF6B7280))
+                        OutlinedButton(
+                            onClick = onTopUp,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("Top up / Recharge")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+                }
+
+                Surface(shadowElevation = 8.dp, color = Color.White) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onBack,
+                            enabled = !loading,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("Back")
+                        }
+                        Button(
+                            onClick = onCheckGb,
+                            enabled = !loading,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text(if (loading) "Checking..." else "Check GB", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
+@Composable
+private fun OrangeUsageHero(
+    usage: TgtUsageUi?,
+    loading: Boolean,
+    onBack: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Column(modifier = Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        "Orange Check GB",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        usage?.packageName ?: "Check remaining package data",
+                        color = Color.White.copy(alpha = 0.72f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Text(
+                    "Back",
+                    color = Color(0xFFFF7900),
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.clickable(enabled = !loading, onClick = onBack)
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(58.dp)
+                        .background(Color(0xFFFFEFE2), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("GB", color = Color(0xFFFF7900), fontWeight = FontWeight.Black)
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        usage?.remainingText ?: "-- GB",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        usage?.let { "Remaining of ${it.totalText}" } ?: "Remaining data will appear here",
+                        color = Color.White.copy(alpha = 0.72f)
+                    )
+                }
+
+                usage?.let {
+                    StatusPill(it.status, statusColors(it.status))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UsageCard(usage: TgtUsageUi) {
+    InfoCard(title = "Usage details") {
+        Text(
+            usage.packageName,
+            color = Color(0xFF17181C),
+            fontWeight = FontWeight.Black,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(usage.iccid, color = Color(0xFF6B7280), style = MaterialTheme.typography.bodySmall)
+
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(12.dp)
+                    .background(Color(0xFFE5E7EB), RoundedCornerShape(50))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth((usage.percentUsed / 100f).coerceIn(0f, 1f))
+                        .height(12.dp)
+                        .background(Color(0xFFFF7900), RoundedCornerShape(50))
+                )
+            }
+            Text("${usage.percentUsed}% Used", color = Color(0xFF6B7280), fontWeight = FontWeight.Bold)
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            UsageMetric("Remaining", usage.remainingText, Modifier.weight(1f))
+            UsageMetric("Used", usage.usedText, Modifier.weight(1f))
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            UsageMetric("Allowance", usage.totalText, Modifier.weight(1f))
+            UsageMetric("Status", usage.status, Modifier.weight(1f))
+        }
+
+        DetailLine("Activated", usage.activatedAt)
+        DetailLine("Expires", usage.expiresAt)
+    }
+}
+
+@Composable
+private fun UsageMetric(label: String, value: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(value, color = Color(0xFF17181C), fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(label, color = Color(0xFF6B7280), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun DetailLine(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = Color(0xFF6B7280), fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(value, color = Color(0xFF17181C), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun StatusPill(label: String, colors: Pair<Color, Color>) {
+    Box(
+        modifier = Modifier
+            .background(colors.second, RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("●  $label", color = colors.first, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Black)
+    }
+}
+
+@Composable
+private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(title, color = Color(0xFF17181C), fontWeight = FontWeight.Black)
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+private fun statusColors(status: String): Pair<Color, Color> =
+    if (status.contains("expired", ignoreCase = true) || status.contains("terminated", ignoreCase = true)) {
+        Color(0xFFDC2626) to Color(0xFFFEE2E2)
+    } else {
+        Color(0xFF168653) to Color(0xFFE4F8EC)
+    }
