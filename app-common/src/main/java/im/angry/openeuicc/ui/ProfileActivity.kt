@@ -275,51 +275,6 @@ private fun ProfileLine(label: String, value: String) {
     }
 }
 
-@Composable
-private fun ProfileBottomNav(
-    orange: Color,
-    onDashboard: () -> Unit,
-    onPackages: () -> Unit,
-    onWallet: () -> Unit,
-    onEsims: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NavText("Home", onDashboard)
-            NavText("Store", onPackages)
-            NavText("Wallet", onWallet)
-            NavText("eSIMs", onEsims)
-            Text(
-                text = "More",
-                color = orange,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black
-            )
-        }
-    }
-}
-
-@Composable
-private fun NavText(text: String, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Text(text)
-    }
-}
-
 private fun initials(value: String): String {
     val parts = value.split(" ").filter { it.isNotBlank() }
     return parts.take(2).map { it.first().uppercaseChar() }.joinToString("").ifBlank { "R2W" }

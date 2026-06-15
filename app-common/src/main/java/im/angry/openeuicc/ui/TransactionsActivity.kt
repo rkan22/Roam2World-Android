@@ -405,48 +405,6 @@ private fun InfoCard(
     }
 }
 
-@Composable
-private fun TransactionsBottomNav(
-    onDashboard: () -> Unit,
-    onPackages: () -> Unit,
-    onWallet: () -> Unit,
-    onEsims: () -> Unit,
-    onMore: () -> Unit
-) {
-    Surface(shadowElevation = 8.dp, color = Color.White) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomNavText("Home", onDashboard)
-            BottomNavText("Packages", onPackages)
-            BottomNavText("Wallet", onWallet)
-            BottomNavText("eSIMs", onEsims)
-            BottomNavText("More", onMore, selected = true)
-        }
-    }
-}
-
-@Composable
-private fun BottomNavText(
-    text: String,
-    onClick: () -> Unit,
-    selected: Boolean = false
-) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        color = if (selected) Color(0xFFFF7900) else Color(0xFF6B7280),
-        fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold,
-        style = MaterialTheme.typography.labelMedium
-    )
-}
-
 private fun formatTransactionDate(value: String?): String {
     val raw = value?.trim().orEmpty()
     if (raw.isBlank()) return ""

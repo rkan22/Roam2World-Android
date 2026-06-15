@@ -648,48 +648,6 @@ private fun PackagesInfoCard(
     }
 }
 
-@Composable
-private fun PackagesBottomNav(
-    onDashboard: () -> Unit,
-    onPackages: () -> Unit,
-    onWallet: () -> Unit,
-    onEsims: () -> Unit,
-    onMore: () -> Unit
-) {
-    Surface(shadowElevation = 8.dp, color = Color.White) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PackagesBottomNavText("Home", onDashboard)
-            PackagesBottomNavText("Packages", onPackages, selected = true)
-            PackagesBottomNavText("Wallet", onWallet)
-            PackagesBottomNavText("eSIMs", onEsims)
-            PackagesBottomNavText("More", onMore)
-        }
-    }
-}
-
-@Composable
-private fun PackagesBottomNavText(
-    text: String,
-    onClick: () -> Unit,
-    selected: Boolean = false
-) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        color = if (selected) Color(0xFFFF7900) else Color(0xFF6B7280),
-        fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold,
-        style = MaterialTheme.typography.labelMedium
-    )
-}
-
 private fun sortPackages(
     packages: List<MobilePackage>,
     sort: StoreSort,

@@ -542,62 +542,6 @@ private fun EsimListCard(
 }
 
 @Composable
-private fun BottomNavCard(
-    orange: Color,
-    onOpenDashboard: () -> Unit,
-    onOpenPackages: () -> Unit,
-    onOpenWallet: () -> Unit,
-    onOpenMore: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            EsimsBottomNavText("Home", onOpenDashboard)
-            EsimsBottomNavText("Packages", onOpenPackages)
-            EsimsBottomNavText("Wallet", onOpenWallet)
-            Text(
-                text = "eSIMs",
-                color = orange,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Black
-            )
-            EsimsBottomNavText("More", onOpenMore)
-        }
-    }
-}
-
-@Composable
-private fun EsimsBottomNavText(
-    text: String,
-    onClick: () -> Unit
-) {
-    Text(
-        text = text,
-        color = Color(0xFF6B7280),
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 8.dp)
-    )
-}
-
-
-
-
-
-@Composable
 private fun InfoCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit

@@ -786,46 +786,7 @@ class ReportsActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    private fun ReportsBottomNav(
-        onDashboard: () -> Unit,
-        onPackages: () -> Unit,
-        onWallet: () -> Unit,
-        onEsims: () -> Unit,
-        onMore: () -> Unit
-    ) {
-        Surface(shadowElevation = 8.dp, color = Color.White) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 10.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BottomNavText("Dashboard", false, onDashboard)
-                BottomNavText("Packages", false, onPackages)
-                BottomNavText("Wallet", false, onWallet)
-                BottomNavText("eSIMs", false, onEsims)
-                BottomNavText("More", true, onMore)
-            }
-        }
-    }
-
-    @Composable
-    private fun BottomNavText(label: String, selected: Boolean, onClick: () -> Unit) {
-        Text(
-            text = label,
-            color = if (selected) Color(0xFFFF7900) else Color(0xFF6B7280),
-            fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(horizontal = 6.dp, vertical = 8.dp)
-        )
-    }
-
-    @Composable
+@Composable
     private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
         Card(
             modifier = Modifier.fillMaxWidth(),
