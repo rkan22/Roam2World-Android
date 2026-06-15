@@ -200,7 +200,7 @@ private fun PurchaseHistoryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scroll)
-                    .padding(20.dp),
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Card(

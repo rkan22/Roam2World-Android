@@ -218,7 +218,7 @@ private fun ShoppingCartScreen(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CartHero(

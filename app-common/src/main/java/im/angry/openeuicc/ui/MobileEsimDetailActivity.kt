@@ -456,7 +456,7 @@ private fun MobileEsimDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

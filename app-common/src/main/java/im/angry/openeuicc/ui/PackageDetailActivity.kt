@@ -212,7 +212,7 @@ private fun PackageDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
