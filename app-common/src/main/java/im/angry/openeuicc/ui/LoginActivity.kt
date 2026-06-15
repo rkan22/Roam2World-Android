@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
@@ -17,39 +19,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +37,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import im.angry.openeuicc.ui.compose.theme.Primary
+import im.angry.openeuicc.ui.compose.theme.R2WTheme
 
 class LoginActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -73,31 +54,35 @@ class LoginActivity : ComponentActivity() {
     private var statusIsError by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         logLoginEndpoint()
 
         setContent {
-            LoginScreen(
-                email = email,
-                password = password,
-                emailError = emailError,
-                passwordError = passwordError,
-                busy = busy,
-                statusMessage = statusMessage,
-                statusIsError = statusIsError,
-                onEmailChange = {
-                    email = it
-                    emailError = null
-                    statusMessage = null
-                },
-                onPasswordChange = {
-                    password = it
-                    passwordError = null
-                    statusMessage = null
-                },
-                onSubmit = { submitLogin() }
-            )
+            R2WTheme {
+                LoginScreen(
+                    email = email,
+                    password = password,
+                    emailError = emailError,
+                    passwordError = passwordError,
+                    busy = busy,
+                    statusMessage = statusMessage,
+                    statusIsError = statusIsError,
+                    onEmailChange = {
+                        email = it
+                        emailError = null
+                        statusMessage = null
+                    },
+                    onPasswordChange = {
+                        password = it
+                        passwordError = null
+                        statusMessage = null
+                    },
+                    onSubmit = { submitLogin() }
+                )
+            }
         }
 
         restoreSession()
@@ -232,169 +217,135 @@ private fun LoginScreen(
     onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
-    val orange = Color(0xFFFF7900)
-    val bg = Color(0xFFF6F7FB)
+    val bg = MaterialTheme.colorScheme.background
 
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .verticalScroll(rememberScrollState())
-                    .padding(22.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+    Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Hero section with Logo
+            Surface(
+                modifier = Modifier.size(100.dp),
+                shape = CircleShape,
+                color = Primary.copy(alpha = 0.1f)
             ) {
-                LoginHero(orange = orange)
+                Box(contentAlignment = Alignment.Center) {
+                    Text("R2W", color = Primary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                }
+            }
 
-                Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(32.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(22.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    Text(
+                        "Sign in",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Use your Roam2World account to continue.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = onEmailChange,
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Email") },
+                        singleLine = true,
+                        isError = emailError != null,
+                        supportingText = { emailError?.let { Text(it) } },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = onPasswordChange,
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Password") },
+                        singleLine = true,
+                        isError = passwordError != null,
+                        supportingText = { passwordError?.let { Text(it) } },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    if (busy) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Primary
+                        )
+                    }
+
+                    statusMessage?.let {
+                        Text(
+                            text = it,
+                            color = if (statusIsError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Button(
+                        onClick = onSubmit,
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            "Sign in",
-                            color = Color(0xFF17181C),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Black
-                        )
-                        Text(
-                            "Use your Roam2World account to continue.",
-                            color = Color(0xFF6B7280)
-                        )
-
-                        OutlinedTextField(
-                            value = email,
-                            onValueChange = onEmailChange,
-                            enabled = !busy,
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Email") },
-                            singleLine = true,
-                            isError = emailError != null,
-                            supportingText = { emailError?.let { Text(it) } },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            shape = RoundedCornerShape(18.dp)
-                        )
-
-                        OutlinedTextField(
-                            value = password,
-                            onValueChange = onPasswordChange,
-                            enabled = !busy,
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Password") },
-                            singleLine = true,
-                            isError = passwordError != null,
-                            supportingText = { passwordError?.let { Text(it) } },
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
-                            shape = RoundedCornerShape(18.dp)
-                        )
-
                         if (busy) {
-                            LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = orange,
-                                trackColor = Color(0xFFFFE2C4)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = Color.White
                             )
-                        }
-
-                        statusMessage?.let {
+                        } else {
                             Text(
-                                text = it,
-                                color = if (statusIsError) Color(0xFFDC2626) else Color(0xFF6B7280),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold
+                                "Login",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 4.dp)
                             )
-                        }
-
-                        Button(
-                            onClick = onSubmit,
-                            enabled = !busy,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = orange),
-                            shape = RoundedCornerShape(18.dp)
-                        ) {
-                            if (busy) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        strokeWidth = 2.dp,
-                                        color = Color.White
-                                    )
-                                    Text("Please wait", fontWeight = FontWeight.Bold)
-                                }
-                            } else {
-                                Text(
-                                    "Login",
-                                    fontWeight = FontWeight.Black,
-                                    modifier = Modifier.padding(vertical = 6.dp)
-                                )
-                            }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Text(
-                    "Secure access to eSIM, wallet, packages and customer tools.",
-                    color = Color(0xFF6B7280),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
-        }
-    }
-}
 
-@Composable
-private fun LoginHero(orange: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Box(
-            modifier = Modifier
-                .size(78.dp)
-                .background(orange, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
-                "R2W",
-                color = Color.White,
-                fontWeight = FontWeight.Black,
-                style = MaterialTheme.typography.titleLarge
+                "Secure access to eSIM, wallet and telecom tools.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall
             )
         }
-
-        Text(
-            "Roam2World",
-            color = Color(0xFF17181C),
-            fontWeight = FontWeight.Black,
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Text(
-            "Mobile eSIM Partner Portal",
-            color = Color(0xFF6B7280),
-            fontWeight = FontWeight.SemiBold
-        )
     }
 }
