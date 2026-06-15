@@ -4,20 +4,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.color.MaterialColors
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
@@ -27,41 +16,88 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LoginActivity : AppCompatActivity() {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+
+class LoginActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var emailLayout: TextInputLayout
-    private lateinit var passwordLayout: TextInputLayout
-    private lateinit var emailInput: TextInputEditText
-    private lateinit var passwordInput: TextInputEditText
-    private lateinit var loginButton: MaterialButton
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var statusText: TextView
+    private var email by mutableStateOf("")
+    private var password by mutableStateOf("")
+    private var emailError by mutableStateOf<String?>(null)
+    private var passwordError by mutableStateOf<String?>(null)
+    private var busy by mutableStateOf(false)
+    private var statusMessage by mutableStateOf<String?>(null)
+    private var statusIsError by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-        setupInsets()
-
-        emailLayout = requireViewById(R.id.email_layout)
-        passwordLayout = requireViewById(R.id.password_layout)
-        emailInput = requireViewById(R.id.email_input)
-        passwordInput = requireViewById(R.id.password_input)
-        loginButton = requireViewById(R.id.login_button)
-        progress = requireViewById(R.id.login_progress)
-        statusText = requireViewById(R.id.login_status)
 
         logLoginEndpoint()
-        loginButton.setOnClickListener { submitLogin() }
-        passwordInput.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                submitLogin()
-                true
-            } else {
-                false
-            }
+
+        setContent {
+            LoginScreen(
+                email = email,
+                password = password,
+                emailError = emailError,
+                passwordError = passwordError,
+                busy = busy,
+                statusMessage = statusMessage,
+                statusIsError = statusIsError,
+                onEmailChange = {
+                    email = it
+                    emailError = null
+                    statusMessage = null
+                },
+                onPasswordChange = {
+                    password = it
+                    passwordError = null
+                    statusMessage = null
+                },
+                onSubmit = { submitLogin() }
+            )
         }
 
         restoreSession()
@@ -70,17 +106,6 @@ class LoginActivity : AppCompatActivity() {
     private fun logLoginEndpoint() {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Login endpoint: ${authApi.loginEndpointUrl}")
-        }
-    }
-
-    private fun setupInsets() {
-        val root = requireViewById<View>(R.id.login_root)
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
-            val bars = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            view.updatePadding(bars.left, bars.top, bars.right, bars.bottom)
-            WindowInsetsCompat.CONSUMED
         }
     }
 
@@ -116,19 +141,20 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun submitLogin() {
-        val email = emailInput.text?.toString()?.trim().orEmpty()
-        val password = passwordInput.text?.toString().orEmpty()
+        val cleanEmail = email.trim()
+        val cleanPassword = password
 
-        emailLayout.error = null
-        passwordLayout.error = null
+        emailError = null
+        passwordError = null
+        statusMessage = null
 
         var valid = true
-        if (email.isBlank()) {
-            emailLayout.error = getString(R.string.login_email_required)
+        if (cleanEmail.isBlank()) {
+            emailError = getString(R.string.login_email_required)
             valid = false
         }
-        if (password.isBlank()) {
-            passwordLayout.error = getString(R.string.login_password_required)
+        if (cleanPassword.isBlank()) {
+            passwordError = getString(R.string.login_password_required)
             valid = false
         }
         if (!valid) return
@@ -136,7 +162,7 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             setBusy(true, getString(R.string.login_signing_in))
             val result = runCatching {
-                authApi.login(email, password).also { session ->
+                authApi.login(cleanEmail, cleanPassword).also { session ->
                     withContext(Dispatchers.IO) {
                         tokenStore.save(session)
                     }
@@ -168,28 +194,18 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun setBusy(busy: Boolean, message: String? = null) {
-        loginButton.isEnabled = !busy
-        emailInput.isEnabled = !busy
-        passwordInput.isEnabled = !busy
-        progress.visibility = if (busy) View.VISIBLE else View.GONE
+    private fun setBusy(value: Boolean, message: String? = null) {
+        busy = value
         if (message == null) {
-            statusText.visibility = View.INVISIBLE
+            statusMessage = null
         } else {
             showStatus(message, isError = false)
         }
     }
 
     private fun showStatus(message: String, isError: Boolean) {
-        statusText.text = message
-        statusText.setTextColor(
-            if (isError) {
-                MaterialColors.getColor(statusText, com.google.android.material.R.attr.colorError)
-            } else {
-                MaterialColors.getColor(statusText, com.google.android.material.R.attr.colorOnSurfaceVariant)
-            }
-        )
-        statusText.visibility = View.VISIBLE
+        statusMessage = message
+        statusIsError = isError
     }
 
     private fun targetActivityName(): String? {
@@ -200,5 +216,185 @@ class LoginActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "LoginActivity"
         const val META_TARGET_ACTIVITY = "im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
+    }
+}
+
+@Composable
+private fun LoginScreen(
+    email: String,
+    password: String,
+    emailError: String?,
+    passwordError: String?,
+    busy: Boolean,
+    statusMessage: String?,
+    statusIsError: Boolean,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onSubmit: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF6F7FB)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(22.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LoginHero(orange = orange)
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(32.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(22.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Text(
+                            "Sign in",
+                            color = Color(0xFF17181C),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            "Use your Roam2World account to continue.",
+                            color = Color(0xFF6B7280)
+                        )
+
+                        OutlinedTextField(
+                            value = email,
+                            onValueChange = onEmailChange,
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Email") },
+                            singleLine = true,
+                            isError = emailError != null,
+                            supportingText = { emailError?.let { Text(it) } },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            shape = RoundedCornerShape(18.dp)
+                        )
+
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = onPasswordChange,
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Password") },
+                            singleLine = true,
+                            isError = passwordError != null,
+                            supportingText = { passwordError?.let { Text(it) } },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+                            shape = RoundedCornerShape(18.dp)
+                        )
+
+                        if (busy) {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = orange,
+                                trackColor = Color(0xFFFFE2C4)
+                            )
+                        }
+
+                        statusMessage?.let {
+                            Text(
+                                text = it,
+                                color = if (statusIsError) Color(0xFFDC2626) else Color(0xFF6B7280),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Button(
+                            onClick = onSubmit,
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = orange),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            if (busy) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color.White
+                                    )
+                                    Text("Please wait", fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Text(
+                                    "Login",
+                                    fontWeight = FontWeight.Black,
+                                    modifier = Modifier.padding(vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Text(
+                    "Secure access to eSIM, wallet, packages and customer tools.",
+                    color = Color(0xFF6B7280),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoginHero(orange: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(
+            modifier = Modifier
+                .size(78.dp)
+                .background(orange, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "R2W",
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+
+        Text(
+            "Roam2World",
+            color = Color(0xFF17181C),
+            fontWeight = FontWeight.Black,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Text(
+            "Mobile eSIM Partner Portal",
+            color = Color(0xFF6B7280),
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }

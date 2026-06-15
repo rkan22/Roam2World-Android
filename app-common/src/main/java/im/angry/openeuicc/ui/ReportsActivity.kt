@@ -1,117 +1,88 @@
 package im.angry.openeuicc.ui
 
+import android.content.ClipData
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
-import android.view.View
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.core.content.FileProvider
-import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.button.MaterialButton
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileOrder
 import im.angry.openeuicc.auth.MobileDealer
+import im.angry.openeuicc.auth.MobileOrder
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
 import java.io.File
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ReportsActivity : AppCompatActivity() {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 
-    private fun parseReportInstant(value: String?): Instant? {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return null
-
-        val normalized = raw
-            .replace(" ", "T")
-            .replace(Regex("""(\.\d{3})\d+"""), "$1")
-            .let {
-                if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
-                    it
-                } else {
-                    "${it}Z"
-                }
-            }
-
-        return runCatching { Instant.parse(normalized) }.getOrNull()
-    }
-
-    private fun formatReportDate(value: String?): String {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return ""
-        return parseReportInstant(raw)
-            ?.atZone(ZoneId.systemDefault())
-            ?.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
-            ?: raw
-    }
-
-    private fun formatReportStatus(value: String?): String {
-        val raw = value?.trim().orEmpty()
-        if (raw.isBlank()) return "Unknown"
-        return raw
-            .replace("_", " ")
-            .replace("-", " ")
-            .split(" ")
-            .filter { it.isNotBlank() }
-            .joinToString(" ") { word ->
-                word.lowercase(Locale.ROOT).replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                }
-            }
-            .ifBlank { "Unknown" }
-    }
-
-
+class ReportsActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var scroll: NestedScrollView
-    private lateinit var status: TextView
-    private lateinit var revenue: TextView
-    private lateinit var revenueDelta: TextView
-    private lateinit var sales: TextView
-    private lateinit var salesDelta: TextView
-    private lateinit var profit: TextView
-    private lateinit var activeEsims: TextView
-    private lateinit var salesOverview: TextView
-    private lateinit var providerUsage: TextView
-    private lateinit var dealerPerformance: TextView
-    private lateinit var failedOrders: TextView
-    private lateinit var profitOverview: TextView
-    private lateinit var filterToday: MaterialButton
-    private lateinit var filterSevenDays: MaterialButton
-    private lateinit var filterThirtyDays: MaterialButton
-    private lateinit var filterAll: MaterialButton
-    private lateinit var exportCsv: MaterialButton
-    private lateinit var bottomNav: BottomNavigationView
-
-    private var reportRange: ReportRange = ReportRange.THIRTY_DAYS
-    private var loadedOrders: List<MobileOrder> = emptyList()
-    private var loadedDealers: List<MobileDealer> = emptyList()
-    private var loadedWalletBalance: String? = null
-    private var loadedActiveEsims: String? = null
+    private var reportRange by mutableStateOf(ReportRange.THIRTY_DAYS)
+    private var loadedOrders by mutableStateOf<List<MobileOrder>>(emptyList())
+    private var loadedDealers by mutableStateOf<List<MobileDealer>>(emptyList())
+    private var loadedWalletBalance by mutableStateOf<String?>(null)
+    private var loadedActiveEsims by mutableStateOf<String?>(null)
+    private var loading by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
 
     private enum class ReportRange {
         TODAY,
@@ -121,140 +92,46 @@ class ReportsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_reports)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.r2w_reports)
 
-        scroll = requireViewById(R.id.reports_scroll)
-        status = requireViewById(R.id.reports_status)
-        revenue = requireViewById(R.id.reports_revenue)
-        revenueDelta = requireViewById(R.id.reports_revenue_delta)
-        sales = requireViewById(R.id.reports_sales)
-        salesDelta = requireViewById(R.id.reports_sales_delta)
-        profit = requireViewById(R.id.reports_profit)
-        activeEsims = requireViewById(R.id.reports_active_esims)
-        salesOverview = requireViewById(R.id.reports_sales_overview)
-        providerUsage = requireViewById(R.id.reports_provider_usage)
-        dealerPerformance = requireViewById(R.id.reports_dealer_performance)
-        failedOrders = requireViewById(R.id.reports_failed_orders)
-        profitOverview = requireViewById(R.id.reports_profit_overview)
-        filterToday = requireViewById(R.id.reports_filter_today)
-        filterSevenDays = requireViewById(R.id.reports_filter_7_days)
-        filterThirtyDays = requireViewById(R.id.reports_filter_30_days)
-        filterAll = requireViewById(R.id.reports_filter_all)
-        exportCsv = requireViewById(R.id.reports_export_csv)
-        bottomNav = requireViewById(R.id.reports_bottom_nav)
-
-        setupInsets()
-        setupFilters()
-        setupBottomNavigation()
-        renderLoading()
-        loadReports()
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
-    }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll)
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupBottomNavigation() {
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_dashboard -> {
-                    startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_packages -> {
-                    startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_wallet -> {
-                    startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_esims -> {
-                    startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                R.id.nav_more -> {
-                    startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                    false
-                }
-                else -> false
+        setContent {
+            val summary = remember(reportRange, loadedOrders, loadedDealers, loadedWalletBalance, loadedActiveEsims, loading, errorMessage) {
+                buildReportSummary()
             }
-        }
-        bottomNav.menu.findItem(R.id.nav_more)?.isChecked = true
-    }
 
-    private fun setupFilters() {
-        filterToday.setOnClickListener { applyReportRange(ReportRange.TODAY) }
-        filterSevenDays.setOnClickListener { applyReportRange(ReportRange.SEVEN_DAYS) }
-        filterThirtyDays.setOnClickListener { applyReportRange(ReportRange.THIRTY_DAYS) }
-        filterAll.setOnClickListener { applyReportRange(ReportRange.ALL) }
-        exportCsv.setOnClickListener { exportReportPdf() }
-        updateFilterButtons()
-    }
-
-    private fun applyReportRange(range: ReportRange) {
-        reportRange = range
-        updateFilterButtons()
-        renderReports()
-    }
-
-    private fun updateFilterButtons() {
-        val buttons = listOf(
-            filterToday to ReportRange.TODAY,
-            filterSevenDays to ReportRange.SEVEN_DAYS,
-            filterThirtyDays to ReportRange.THIRTY_DAYS,
-            filterAll to ReportRange.ALL
-        )
-
-        buttons.forEach { (button, range) ->
-            val selected = range == reportRange
-            button.isSelected = selected
-            button.alpha = 1.0f
-            button.strokeWidth = 0
-            button.setTextColor(
-                getColor(if (selected) android.R.color.white else R.color.r2w_text_primary)
-            )
-            button.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                getColor(if (selected) R.color.r2w_premium_primary else android.R.color.white)
+            ReportsScreen(
+                summary = summary,
+                reportRange = reportRange,
+                loading = loading,
+                errorMessage = errorMessage,
+                onBack = { finish() },
+                onRefresh = { loadReports() },
+                onRange = {
+                    reportRange = it
+                },
+                onExportPdf = { exportReportPdf() },
+                onNavDashboard = { startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavPackages = { startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavWallet = { startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavEsims = { startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
+                onNavMore = { startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) }
             )
         }
-    }
 
-    private fun renderLoading() {
-        status.text = "Loading live reports..."
-        revenue.text = "--"
-        revenueDelta.text = "Live orders"
-        sales.text = "--"
-        salesDelta.text = "Live orders"
-        profit.text = "--"
-        activeEsims.text = "--"
-        salesOverview.text = "Loading sales overview..."
-        providerUsage.text = "Loading provider usage..."
-        dealerPerformance.text = "Loading dealer performance..."
-        failedOrders.text = "Loading failed orders..."
-        profitOverview.text = "Loading profit overview..."
+        loadReports()
     }
 
     private fun loadReports() {
         lifecycleScope.launch {
-            val session = activeSessionOrReturnToLogin() ?: return@launch
+            loading = true
+            errorMessage = null
+
+            val session = activeSessionOrReturnToLogin()
+            if (session == null) {
+                loading = false
+                return@launch
+            }
+
             val dashboardRequest = async { runCatching { authApi.dashboard(session) } }
             val ordersRequest = async { runCatching { authApi.orders(session) } }
             val walletRequest = async { runCatching { authApi.wallet(session) } }
@@ -262,17 +139,24 @@ class ReportsActivity : AppCompatActivity() {
 
             val dashboard = dashboardRequest.await().getOrNull()
             val wallet = walletRequest.await().getOrNull()
+            val ordersResult = ordersRequest.await()
+            val dealersResult = dealersRequest.await()
 
-            loadedOrders = ordersRequest.await().getOrNull()?.orders.orEmpty()
-            loadedDealers = dealersRequest.await().getOrNull()?.dealers.orEmpty()
+            loadedOrders = ordersResult.getOrNull()?.orders.orEmpty()
+            loadedDealers = dealersResult.getOrNull()?.dealers.orEmpty()
             loadedWalletBalance = wallet?.currentBalance
             loadedActiveEsims = dashboard?.activeEsimCount
 
-            renderReports()
+            errorMessage = listOfNotNull(
+                ordersResult.exceptionOrNull()?.message?.let { "Orders: $it" },
+                dealersResult.exceptionOrNull()?.message?.let { "Dealers: $it" }
+            ).joinToString("\n").ifBlank { null }
+
+            loading = false
         }
     }
 
-    private fun renderReports() {
+    private fun buildReportSummary(): ReportSummary {
         val orders = filteredOrders()
         val totalRevenue = orders.mapNotNull { amount(it.price) }.fold(BigDecimal.ZERO, BigDecimal::add)
         val totalProfit = totalRevenue.multiply(BigDecimal("0.22"))
@@ -281,23 +165,26 @@ class ReportsActivity : AppCompatActivity() {
         val pendingOrders = orders.count { it.statusLabel()?.contains("Pending", ignoreCase = true) == true }
         val failedOrderCount = orders.count { it.statusLabel()?.contains("Failed", ignoreCase = true) == true }
 
-        revenue.text = currency(totalRevenue)
-        revenueDelta.text = "↑ Live • ${orders.size} orders"
-        sales.text = completedOrders.toString()
-        salesDelta.text = "↑ $pendingOrders pending • $failedOrderCount failed"
-        profit.text = currency(totalProfit)
-        activeEsims.text = "Active eSIMs\n${loadedActiveEsims ?: "--"}\nLive dashboard"
-
-        salesOverview.text = buildSalesOverview(orders, loadedWalletBalance)
-        providerUsage.text = buildProviderUsage(orders)
-        failedOrders.text = buildFailedOrders(orders)
-        profitOverview.text = buildProfitOverview(totalRevenue, totalProfit, orders)
-        dealerPerformance.text = buildDealerPerformance(loadedDealers)
-        status.text = if (orders.isEmpty()) {
-            getString(R.string.reports_empty_status, rangeLabel())
-        } else {
-            getString(R.string.reports_loaded_status, orders.size, loadedDealers.size, rangeLabel())
-        }
+        return ReportSummary(
+            status = if (orders.isEmpty()) {
+                "No report data for ${rangeLabel()} yet."
+            } else {
+                "Live report data loaded • ${orders.size} orders • ${loadedDealers.size} dealers • ${rangeLabel()}"
+            },
+            revenue = currency(totalRevenue),
+            revenueDelta = "↑ Live • ${orders.size} orders",
+            sales = completedOrders.toString(),
+            salesDelta = "↑ $pendingOrders pending • $failedOrderCount failed",
+            profit = currency(totalProfit),
+            activeEsims = loadedActiveEsims ?: "--",
+            salesOverview = buildSalesOverview(orders, loadedWalletBalance),
+            providerUsage = buildProviderUsage(orders),
+            dealerPerformance = buildDealerPerformance(loadedDealers),
+            failedOrders = buildFailedOrders(orders),
+            profitOverview = buildProfitOverview(totalRevenue, totalProfit, orders),
+            orderCount = orders.size,
+            dealerCount = loadedDealers.size
+        )
     }
 
     private fun filteredOrders(): List<MobileOrder> {
@@ -318,23 +205,10 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun rangeLabel(): String =
         when (reportRange) {
-            ReportRange.TODAY -> getString(R.string.reports_filter_today)
-            ReportRange.SEVEN_DAYS -> getString(R.string.reports_filter_7_days)
-            ReportRange.THIRTY_DAYS -> getString(R.string.reports_filter_30_days)
-            ReportRange.ALL -> getString(R.string.reports_filter_all)
-        }
-
-    private fun buildDealerPerformance(dealers: List<MobileDealer>): String =
-        if (dealers.isEmpty()) {
-            getString(R.string.reports_empty_dealer_performance)
-        } else {
-            dealers.take(5).mapIndexed { index, dealer ->
-                listOf(
-                    "${index + 1}. ${dealer.name}",
-                    "Orders: ${dealer.totalOrders}",
-                    "Balance: ${dealer.currentBalance}"
-                ).joinToString("\n")
-            }.joinToString("\n\n")
+            ReportRange.TODAY -> "Today"
+            ReportRange.SEVEN_DAYS -> "7 days"
+            ReportRange.THIRTY_DAYS -> "30 days"
+            ReportRange.ALL -> "All"
         }
 
     private fun exportReportPdf() {
@@ -358,33 +232,33 @@ class ReportsActivity : AppCompatActivity() {
             var y = 42f
 
             val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(24, 38, 58)
+                color = android.graphics.Color.rgb(24, 38, 58)
                 textSize = 18f
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
             val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(95, 107, 124)
+                color = android.graphics.Color.rgb(95, 107, 124)
                 textSize = 10f
             }
             val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
+                color = android.graphics.Color.WHITE
                 textSize = 8.5f
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(32, 45, 64)
+                color = android.graphics.Color.rgb(32, 45, 64)
                 textSize = 8.5f
             }
             val mutedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(95, 107, 124)
+                color = android.graphics.Color.rgb(95, 107, 124)
                 textSize = 8.5f
             }
             val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(224, 230, 238)
+                color = android.graphics.Color.rgb(224, 230, 238)
                 strokeWidth = 1f
             }
             val headerBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(37, 99, 235)
+                color = android.graphics.Color.rgb(37, 99, 235)
                 style = Paint.Style.FILL
             }
 
@@ -404,21 +278,21 @@ class ReportsActivity : AppCompatActivity() {
             val totalActiveEsims = loadedActiveEsims ?: "--"
 
             val summaryLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(95, 107, 124)
+                color = android.graphics.Color.rgb(95, 107, 124)
                 textSize = 8.5f
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
             val summaryValuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(24, 38, 58)
+                color = android.graphics.Color.rgb(24, 38, 58)
                 textSize = 14f
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             }
             val summaryCardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(246, 249, 253)
+                color = android.graphics.Color.rgb(246, 249, 253)
                 style = Paint.Style.FILL
             }
             val summaryStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.rgb(224, 230, 238)
+                color = android.graphics.Color.rgb(224, 230, 238)
                 style = Paint.Style.STROKE
                 strokeWidth = 1f
             }
@@ -504,7 +378,7 @@ class ReportsActivity : AppCompatActivity() {
                     order.displayNumber(),
                     formatReportDate(order.createdAt),
                     order.customerName().orEmpty().ifBlank { "-" },
-                    PackageNameCleaner.clean(order.packageName),
+                    PackageNameCleaner.clean(order.packageName).orEmpty().ifBlank { "-" },
                     order.provider.orEmpty().replace("TGT", "Orange", ignoreCase = true).ifBlank { "-" },
                     formatReportStatus(order.statusLabel()),
                     r2wMoney(order.price, "-"),
@@ -539,31 +413,25 @@ class ReportsActivity : AppCompatActivity() {
             type = "application/pdf"
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.reports_export_subject, rangeLabel()))
             putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newUri(contentResolver, "Roam2World report", uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        startActivity(Intent.createChooser(intent, getString(R.string.reports_export_title)))
-    }
+        val chooser = Intent.createChooser(intent, getString(R.string.reports_export_title)).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
 
-    private fun csvEscape(value: String): String {
-        val escaped = value.replace("\"", "\"\"")
-        return "\"$escaped\""
+        startActivity(chooser)
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) {
-            tokenStore.getSession()
-        } ?: return redirectToLogin()
+        val savedSession = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return redirectToLogin()
 
         if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
 
-        val refreshed = runCatching {
-            authApi.refresh(savedSession)
-        }.getOrNull() ?: return redirectToLogin()
+        val refreshed = runCatching { authApi.refresh(savedSession) }.getOrNull() ?: return redirectToLogin()
 
-        withContext(Dispatchers.IO) {
-            tokenStore.save(refreshed)
-        }
+        withContext(Dispatchers.IO) { tokenStore.save(refreshed) }
         return refreshed
     }
 
@@ -577,6 +445,62 @@ class ReportsActivity : AppCompatActivity() {
         finish()
         return null
     }
+
+    private fun parseReportInstant(value: String?): Instant? {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return null
+
+        val normalized = raw
+            .replace(" ", "T")
+            .replace(Regex("""(\.\d{3})\d+"""), "$1")
+            .let {
+                if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
+                    it
+                } else {
+                    "${it}Z"
+                }
+            }
+
+        return runCatching { Instant.parse(normalized) }.getOrNull()
+    }
+
+    private fun formatReportDate(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return ""
+        return parseReportInstant(raw)
+            ?.atZone(ZoneId.systemDefault())
+            ?.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH))
+            ?: raw
+    }
+
+    private fun formatReportStatus(value: String?): String {
+        val raw = value?.trim().orEmpty()
+        if (raw.isBlank()) return "Unknown"
+        return raw
+            .replace("_", " ")
+            .replace("-", " ")
+            .split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { word ->
+                word.lowercase(Locale.ROOT).replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                }
+            }
+            .ifBlank { "Unknown" }
+    }
+
+    private fun buildDealerPerformance(dealers: List<MobileDealer>): String =
+        if (dealers.isEmpty()) {
+            getString(R.string.reports_empty_dealer_performance)
+        } else {
+            dealers.take(5).mapIndexed { index, dealer ->
+                listOf(
+                    "${index + 1}. ${dealer.name}",
+                    "Orders: ${dealer.totalOrders}",
+                    "Balance: ${dealer.currentBalance}"
+                ).joinToString("\n")
+            }.joinToString("\n\n")
+        }
 
     private fun buildSalesOverview(orders: List<MobileOrder>, currentBalance: String?): String {
         val completed = orders.count { it.statusLabel()?.contains("Completed", ignoreCase = true) == true }
@@ -604,7 +528,6 @@ class ReportsActivity : AppCompatActivity() {
             latest.ifBlank { "No order data yet" }
         ).joinToString("\n\n")
     }
-
 
     private fun visibleProvider(provider: String?): String =
         formatReportStatus(
@@ -635,7 +558,7 @@ class ReportsActivity : AppCompatActivity() {
                 status.contains("Error", ignoreCase = true)
         }
         if (orders.isEmpty()) return "No order data yet"
-        val percent = if (orders.isEmpty()) 0 else (failed.size * 100) / orders.size
+        val percent = (failed.size * 100) / orders.size
         return "${failed.size} failed orders\n$percent% of total orders"
     }
 
@@ -661,4 +584,267 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun currency(value: BigDecimal): String =
         "€${value.setScale(2, java.math.RoundingMode.HALF_UP)}"
+
+    private data class ReportSummary(
+        val status: String,
+        val revenue: String,
+        val revenueDelta: String,
+        val sales: String,
+        val salesDelta: String,
+        val profit: String,
+        val activeEsims: String,
+        val salesOverview: String,
+        val providerUsage: String,
+        val dealerPerformance: String,
+        val failedOrders: String,
+        val profitOverview: String,
+        val orderCount: Int,
+        val dealerCount: Int
+    )
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun ReportsScreen(
+        summary: ReportSummary,
+        reportRange: ReportRange,
+        loading: Boolean,
+        errorMessage: String?,
+        onBack: () -> Unit,
+        onRefresh: () -> Unit,
+        onRange: (ReportRange) -> Unit,
+        onExportPdf: () -> Unit,
+        onNavDashboard: () -> Unit,
+        onNavPackages: () -> Unit,
+        onNavWallet: () -> Unit,
+        onNavEsims: () -> Unit,
+        onNavMore: () -> Unit
+    ) {
+        val bg = Color(0xFFF6F7FB)
+
+        MaterialTheme {
+            Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        ReportsHero(
+                            status = summary.status,
+                            loading = loading,
+                            onBack = onBack,
+                            onRefresh = onRefresh,
+                            onExportPdf = onExportPdf
+                        )
+
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ReportRangeButton("Today", reportRange == ReportRange.TODAY) { onRange(ReportRange.TODAY) }
+                            ReportRangeButton("7 days", reportRange == ReportRange.SEVEN_DAYS) { onRange(ReportRange.SEVEN_DAYS) }
+                            ReportRangeButton("30 days", reportRange == ReportRange.THIRTY_DAYS) { onRange(ReportRange.THIRTY_DAYS) }
+                            ReportRangeButton("All", reportRange == ReportRange.ALL) { onRange(ReportRange.ALL) }
+                        }
+
+                        errorMessage?.let {
+                            InfoCard(title = "Some reports could not be loaded") {
+                                Text(it, color = Color(0xFFDC2626))
+                                OutlinedButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+                                    Text("Try again")
+                                }
+                            }
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            KpiCard("Revenue", summary.revenue, summary.revenueDelta, Modifier.weight(1f))
+                            KpiCard("Sales", summary.sales, summary.salesDelta, Modifier.weight(1f))
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            KpiCard("Profit", summary.profit, "Estimated margin", Modifier.weight(1f))
+                            KpiCard("Active eSIMs", summary.activeEsims, "Live dashboard", Modifier.weight(1f))
+                        }
+
+                        InfoCard("Sales overview") {
+                            Text(summary.salesOverview, color = Color(0xFF334155))
+                        }
+
+                        InfoCard("Provider usage") {
+                            Text(summary.providerUsage, color = Color(0xFF334155))
+                        }
+
+                        InfoCard("Dealer performance") {
+                            Text(summary.dealerPerformance, color = Color(0xFF334155))
+                        }
+
+                        InfoCard("Failed orders") {
+                            Text(summary.failedOrders, color = Color(0xFF334155))
+                        }
+
+                        InfoCard("Profit overview") {
+                            Text(summary.profitOverview, color = Color(0xFF334155))
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    ReportsBottomNav(
+                        onDashboard = onNavDashboard,
+                        onPackages = onNavPackages,
+                        onWallet = onNavWallet,
+                        onEsims = onNavEsims,
+                        onMore = onNavMore
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ReportsHero(
+        status: String,
+        loading: Boolean,
+        onBack: () -> Unit,
+        onRefresh: () -> Unit,
+        onExportPdf: () -> Unit
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(32.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+        ) {
+            Column(modifier = Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Reports", color = Color.White, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
+                        Text(status, color = Color.White.copy(alpha = 0.72f), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    }
+                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Back", color = Color(0xFFFF7900), fontWeight = FontWeight.Black, modifier = Modifier.clickable(onClick = onBack))
+                        Text(if (loading) "Loading..." else "Refresh", color = Color.White.copy(alpha = 0.78f), fontWeight = FontWeight.Bold, modifier = Modifier.clickable(enabled = !loading, onClick = onRefresh))
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .background(Color(0xFFFFEFE2), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("📊", fontWeight = FontWeight.Black)
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Live business intelligence", color = Color.White, fontWeight = FontWeight.Black)
+                        Text("Orders, providers, dealers and PDF export", color = Color.White.copy(alpha = 0.72f))
+                    }
+                }
+
+                Button(
+                    onClick = onExportPdf,
+                    enabled = !loading,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    if (loading) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)
+                    } else {
+                        Text("Export PDF", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ReportRangeButton(label: String, selected: Boolean, onClick: () -> Unit) {
+        if (selected) {
+            Button(
+                onClick = onClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                shape = RoundedCornerShape(50)
+            ) {
+                Text(label, fontWeight = FontWeight.Bold)
+            }
+        } else {
+            OutlinedButton(onClick = onClick, shape = RoundedCornerShape(50)) {
+                Text(label)
+            }
+        }
+    }
+
+    @Composable
+    private fun KpiCard(title: String, value: String, subtitle: String, modifier: Modifier = Modifier) {
+        Card(
+            modifier = modifier,
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(title, color = Color(0xFF64748B), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                Text(value, color = Color(0xFF0F172A), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(subtitle, color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+
+    @Composable
+    private fun ReportsBottomNav(
+        onDashboard: () -> Unit,
+        onPackages: () -> Unit,
+        onWallet: () -> Unit,
+        onEsims: () -> Unit,
+        onMore: () -> Unit
+    ) {
+        Surface(shadowElevation = 8.dp, color = Color.White) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 10.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BottomNavText("Dashboard", false, onDashboard)
+                BottomNavText("Packages", false, onPackages)
+                BottomNavText("Wallet", false, onWallet)
+                BottomNavText("eSIMs", false, onEsims)
+                BottomNavText("More", true, onMore)
+            }
+        }
+    }
+
+    @Composable
+    private fun BottomNavText(label: String, selected: Boolean, onClick: () -> Unit) {
+        Text(
+            text = label,
+            color = if (selected) Color(0xFFFF7900) else Color(0xFF6B7280),
+            fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 6.dp, vertical = 8.dp)
+        )
+    }
+
+    @Composable
+    private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(title, color = Color(0xFF17181C), fontWeight = FontWeight.Black)
+                HorizontalDivider()
+                content()
+            }
+        }
+    }
 }

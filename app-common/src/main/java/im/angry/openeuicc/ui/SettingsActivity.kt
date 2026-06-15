@@ -1,110 +1,224 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
-import com.google.android.material.materialswitch.MaterialSwitch
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
-class SettingsActivity : AppCompatActivity() {
-    private lateinit var scroll: View
-    private lateinit var notificationsSwitch: MaterialSwitch
-    private lateinit var biometricSwitch: MaterialSwitch
-    private lateinit var darkModeSwitch: MaterialSwitch
-
-    private val prefs by lazy { getSharedPreferences("r2w_mobile_settings", MODE_PRIVATE) }
-
+class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Settings"
 
-        scroll = requireViewById(R.id.settings_scroll)
-        notificationsSwitch = requireViewById(R.id.settings_notifications_switch)
-        biometricSwitch = requireViewById(R.id.settings_biometric_switch)
-        darkModeSwitch = requireViewById(R.id.settings_dark_mode_switch)
-
-        setupInsets()
-        setupSettings()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(scroll)
-            ),
-            consume = false
-        )
-    }
-
-    private fun setupSettings() {
-        findViewById<TextView>(R.id.settings_version).text = "Roam2World Mobile"
-
-        notificationsSwitch.isChecked = prefs.getBoolean("notifications_enabled", true)
-        biometricSwitch.isChecked = prefs.getBoolean("biometric_login_enabled", false)
-        darkModeSwitch.isChecked = prefs.getBoolean("dark_mode_enabled", false)
-
-        notificationsSwitch.setOnCheckedChangeListener { _, checked ->
-            prefs.edit { putBoolean("notifications_enabled", checked) }
-            Toast.makeText(this, if (checked) "Notifications enabled" else "Notifications disabled", Toast.LENGTH_SHORT).show()
-        }
-
-        biometricSwitch.setOnCheckedChangeListener { _, checked ->
-            prefs.edit { putBoolean("biometric_login_enabled", checked) }
-            Toast.makeText(this, if (checked) "Biometric login enabled" else "Biometric login disabled", Toast.LENGTH_SHORT).show()
-        }
-
-        darkModeSwitch.setOnCheckedChangeListener { _, checked ->
-            prefs.edit { putBoolean("dark_mode_enabled", checked) }
-            AppCompatDelegate.setDefaultNightMode(
-                if (checked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        setContent {
+            SettingsScreen(
+                onBack = { finish() },
+                onOpenNotificationSettings = {
+                    runCatching {
+                        startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                        })
+                    }.onFailure {
+                        startActivity(Intent(Settings.ACTION_SETTINGS))
+                    }
+                },
+                onOpenLocaleSettings = {
+                    startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
+                }
             )
-            recreate()
-        }
-
-        findViewById<View>(R.id.settings_language_row).setOnClickListener {
-            openLanguageSettings()
         }
     }
+}
 
-    private fun openLanguageSettings() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val uri = Uri.fromParts("package", packageName, null)
-            val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, uri)
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-                return
+@Composable
+private fun SettingsScreen(
+    onBack: () -> Unit,
+    onOpenNotificationSettings: () -> Unit,
+    onOpenLocaleSettings: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF7F7FA)
+
+    val notificationsEnabled = remember { mutableStateOf(true) }
+    val biometricEnabled = remember { mutableStateOf(false) }
+    val darkModeEnabled = remember { mutableStateOf(false) }
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
+                    Text("Geri")
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(22.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Settings",
+                            color = orange,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Uygulama Tercihleri",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "Bildirim, güvenlik ve sistem ayarlarını yönet.",
+                            color = Color.White.copy(alpha = 0.72f),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                SettingsCard(title = "Tercihler") {
+                    SettingsSwitchRow(
+                        title = "Bildirimler",
+                        subtitle = "Sipariş ve eSIM durum bildirimleri",
+                        checked = notificationsEnabled.value,
+                        onCheckedChange = { notificationsEnabled.value = it }
+                    )
+                    SettingsSwitchRow(
+                        title = "Biometric",
+                        subtitle = "Desteklenen cihazlarda hızlı giriş",
+                        checked = biometricEnabled.value,
+                        onCheckedChange = { biometricEnabled.value = it }
+                    )
+                    SettingsSwitchRow(
+                        title = "Dark Mode",
+                        subtitle = "Koyu tema tercihi",
+                        checked = darkModeEnabled.value,
+                        onCheckedChange = { darkModeEnabled.value = it }
+                    )
+                }
+
+                SettingsCard(title = "Sistem") {
+                    SettingsActionButton("Bildirim ayarlarını aç", orange, onOpenNotificationSettings)
+                    SettingsActionButton("Dil ayarlarını aç", orange, onOpenLocaleSettings)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
+    }
+}
 
-        Toast.makeText(this, "Language settings are managed by system settings", Toast.LENGTH_LONG).show()
-        startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
+@Composable
+private fun SettingsCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = subtitle,
+                color = Color(0xFF6B7280),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun SettingsActionButton(
+    text: String,
+    orange: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = orange),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
     }
 }

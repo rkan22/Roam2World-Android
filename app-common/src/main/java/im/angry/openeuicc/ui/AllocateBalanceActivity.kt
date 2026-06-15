@@ -2,159 +2,156 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 
-class AllocateBalanceActivity : AppCompatActivity() {
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+
+class AllocateBalanceActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var amountLayout: TextInputLayout
-    private lateinit var amountInput: TextInputEditText
-    private lateinit var submit: MaterialButton
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var error: TextView
-    private lateinit var success: TextView
-
     private val dealerId: String? by lazy { intent.getStringExtra(EXTRA_DEALER_ID) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_allocate_balance)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.apply {
-            title = getString(R.string.dealer_allocate_title)
-            setDisplayHomeAsUpEnabled(true)
-        }
-
-        amountLayout = requireViewById(R.id.allocate_balance_amount_layout)
-        amountInput = requireViewById(R.id.allocate_balance_amount)
-        submit = requireViewById(R.id.allocate_balance_submit)
-        progress = requireViewById(R.id.allocate_balance_progress)
-        error = requireViewById(R.id.allocate_balance_error)
-        success = requireViewById(R.id.allocate_balance_success)
-        requireViewById<TextView>(R.id.allocate_balance_dealer).text =
-            intent.getStringExtra(EXTRA_DEALER_NAME) ?: getString(R.string.dealer_detail_title)
-
-        setupInsets()
-        submit.setOnClickListener { submitAllocation() }
+    private val dealerName: String by lazy {
+        intent.getStringExtra(EXTRA_DEALER_NAME).orEmpty().ifBlank { "Dealer detail" }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
+    private var amount by mutableStateOf("")
+    private var amountError by mutableStateOf<String?>(null)
+    private var loading by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
+    private var successMessage by mutableStateOf<String?>(null)
 
-            else -> super.onOptionsItemSelected(item)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            AllocateBalanceScreen(
+                dealerName = dealerName,
+                amount = amount,
+                amountError = amountError,
+                loading = loading,
+                errorMessage = errorMessage,
+                successMessage = successMessage,
+                onAmountChange = {
+                    amount = it
+                    amountError = null
+                    errorMessage = null
+                    successMessage = null
+                },
+                onBack = { finish() },
+                onSubmit = { submitAllocation() }
+            )
         }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(requireViewById(R.id.allocate_balance_scroll))
-            ),
-            consume = false
-        )
     }
 
     private fun submitAllocation() {
         clearMessages()
+
         val id = dealerId
         if (id.isNullOrBlank()) {
-            error.text = getString(R.string.dealer_detail_missing)
-            error.visibility = View.VISIBLE
+            errorMessage = "Dealer detail is unavailable."
             return
         }
 
-        val amount = amountInput.text?.toString()?.trim().orEmpty()
-        if (amount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
-            amountLayout.error = getString(R.string.dealer_allocate_amount_required)
+        val cleanAmount = amount.trim().replace(",", ".")
+        if (cleanAmount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
+            amountError = "Enter an amount greater than 0."
             return
         }
 
         lifecycleScope.launch {
-            setLoading(true)
+            loading = true
+
             val session = activeSessionOrReturnToLogin()
             if (session == null) {
-                setLoading(false)
+                loading = false
                 return@launch
             }
 
             val result = runCatching {
-                authApi.allocateDealerBalance(session, id, amount)
+                authApi.allocateDealerBalance(session, id, cleanAmount)
             }
-            setLoading(false)
+
+            loading = false
+
             result
                 .onSuccess {
-                    success.text = getString(
-                        R.string.dealer_allocate_success,
-                        it.amount,
-                        it.currency,
-                        it.dealer.currentBalance
-                    )
-                    success.visibility = View.VISIBLE
-                    amountInput.text?.clear()
+                    successMessage = "Allocated ${it.amount} ${it.currency}. Dealer balance is now ${it.dealer.currentBalance}."
+                    amount = ""
                     setResult(RESULT_OK)
                     finish()
                 }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.dealer_allocate_failed)
-                    error.visibility = View.VISIBLE
+                    errorMessage = it.message ?: "Could not allocate dealer balance."
                 }
         }
     }
 
     private fun clearMessages() {
-        amountLayout.error = null
-        error.visibility = View.GONE
-        success.visibility = View.GONE
-    }
-
-    private fun setLoading(loading: Boolean) {
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
-        submit.isEnabled = !loading
+        amountError = null
+        errorMessage = null
+        successMessage = null
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) {
-            tokenStore.getSession()
-        } ?: return redirectToLogin()
+        val savedSession = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return redirectToLogin()
 
         if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
 
-        val refreshed = runCatching {
-            authApi.refresh(savedSession)
-        }.getOrNull() ?: return redirectToLogin()
+        val refreshed = runCatching { authApi.refresh(savedSession) }.getOrNull() ?: return redirectToLogin()
 
-        withContext(Dispatchers.IO) {
-            tokenStore.save(refreshed)
-        }
+        withContext(Dispatchers.IO) { tokenStore.save(refreshed) }
         return refreshed
     }
 
@@ -172,5 +169,201 @@ class AllocateBalanceActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_DEALER_ID = "dealer_id"
         const val EXTRA_DEALER_NAME = "dealer_name"
+    }
+}
+
+@Composable
+private fun AllocateBalanceScreen(
+    dealerName: String,
+    amount: String,
+    amountError: String?,
+    loading: Boolean,
+    errorMessage: String?,
+    successMessage: String?,
+    onAmountChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onSubmit: () -> Unit
+) {
+    val bg = Color(0xFFF6F7FB)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AllocateHero(
+                        dealerName = dealerName,
+                        loading = loading,
+                        onBack = onBack
+                    )
+
+                    errorMessage?.let {
+                        InfoCard(title = "Allocation failed") {
+                            Text(it, color = Color(0xFFDC2626))
+                        }
+                    }
+
+                    successMessage?.let {
+                        InfoCard(title = "Allocation successful") {
+                            Text(it, color = Color(0xFF168653), fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    InfoCard(title = "Allocation amount") {
+                        Text(
+                            "Move balance from your reseller wallet to this dealer. This action affects real wallet balance.",
+                            color = Color(0xFF6B7280)
+                        )
+
+                        OutlinedTextField(
+                            value = amount,
+                            onValueChange = onAmountChange,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Amount") },
+                            singleLine = true,
+                            isError = amountError != null,
+                            supportingText = { amountError?.let { Text(it) } },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            shape = RoundedCornerShape(18.dp)
+                        )
+                    }
+
+                    InfoCard(title = "Safety check") {
+                        Text(
+                            "Only press Allocate balance when you are ready to send this amount to the dealer.",
+                            color = Color(0xFF6B7280)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+                }
+
+                Surface(shadowElevation = 8.dp, color = Color.White) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = onBack,
+                            enabled = !loading,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("Back")
+                        }
+
+                        Button(
+                            onClick = onSubmit,
+                            enabled = !loading,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            if (loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                            } else {
+                                Text("Allocate balance", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AllocateHero(
+    dealerName: String,
+    loading: Boolean,
+    onBack: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Column(modifier = Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        "Allocate balance",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        dealerName,
+                        color = Color.White.copy(alpha = 0.72f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Text(
+                    text = "Back",
+                    color = Color(0xFFFF7900),
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.clickable(enabled = !loading, onClick = onBack)
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(54.dp)
+                        .background(Color(0xFFFFEFE2), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("$", color = Color(0xFFFF7900), fontWeight = FontWeight.Black)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Dealer wallet top-up", color = Color.White, fontWeight = FontWeight.Black)
+                    Text("Funds are transferred from reseller balance", color = Color.White.copy(alpha = 0.72f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                title,
+                color = Color(0xFF17181C),
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            HorizontalDivider()
+            content()
+        }
     }
 }

@@ -2,150 +2,133 @@ package im.angry.openeuicc.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 
-class WalletRequestActivity : AppCompatActivity() {
+class WalletRequestActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
-    private lateinit var amountLayout: TextInputLayout
-    private lateinit var currencyLayout: TextInputLayout
-    private lateinit var noteLayout: TextInputLayout
-    private lateinit var amountInput: TextInputEditText
-    private lateinit var currencyInput: TextInputEditText
-    private lateinit var noteInput: TextInputEditText
-    private lateinit var submit: MaterialButton
-    private lateinit var history: MaterialButton
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var error: TextView
-    private lateinit var success: TextView
+    private var amount by mutableStateOf("")
+    private var currency by mutableStateOf("USD")
+    private var note by mutableStateOf("")
+    private var loading by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
+    private var successMessage by mutableStateOf<String?>(null)
+    private var amountError by mutableStateOf<String?>(null)
+    private var currencyError by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet_request)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.apply {
-            title = getString(R.string.wallet_request_title)
-            setDisplayHomeAsUpEnabled(true)
+
+        setContent {
+            WalletRequestScreen(
+                amount = amount,
+                currency = currency,
+                note = note,
+                loading = loading,
+                errorMessage = errorMessage,
+                successMessage = successMessage,
+                amountError = amountError,
+                currencyError = currencyError,
+                onAmountChange = { amount = it },
+                onCurrencyChange = { currency = it.uppercase().take(3) },
+                onNoteChange = { note = it },
+                onSubmit = { submitRequest() },
+                onHistory = { startActivity(Intent(this, WalletRequestHistoryActivity::class.java)) },
+                onBack = { finish() }
+            )
         }
-
-        amountLayout = requireViewById(R.id.wallet_request_amount_layout)
-        currencyLayout = requireViewById(R.id.wallet_request_currency_layout)
-        noteLayout = requireViewById(R.id.wallet_request_note_layout)
-        amountInput = requireViewById(R.id.wallet_request_amount)
-        currencyInput = requireViewById(R.id.wallet_request_currency)
-        noteInput = requireViewById(R.id.wallet_request_note)
-        submit = requireViewById(R.id.wallet_request_submit)
-        history = requireViewById(R.id.wallet_request_view_history)
-        progress = requireViewById(R.id.wallet_request_progress)
-        error = requireViewById(R.id.wallet_request_error)
-        success = requireViewById(R.id.wallet_request_success)
-
-        currencyInput.setText("USD")
-        setupInsets()
-        submit.setOnClickListener { submitRequest() }
-        history.setOnClickListener {
-            startActivity(Intent(this, WalletRequestHistoryActivity::class.java))
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(requireViewById(R.id.wallet_request_scroll))
-            ),
-            consume = false
-        )
     }
 
     private fun submitRequest() {
         clearMessages()
-        val amount = amountInput.text?.toString()?.trim().orEmpty()
-        val currency = currencyInput.text?.toString()?.trim()?.uppercase().orEmpty()
-        val note = noteInput.text?.toString()?.trim().orEmpty()
 
-        if (amount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
-            amountLayout.error = getString(R.string.wallet_request_amount_required)
+        val cleanAmount = amount.trim()
+        val cleanCurrency = currency.trim().uppercase()
+        val cleanNote = note.trim()
+
+        if (cleanAmount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
+            amountError = "Amount is required"
             return
         }
-        if (currency.length != 3 || !currency.all { it.isLetter() }) {
-            currencyLayout.error = getString(R.string.wallet_request_currency_required)
+
+        if (cleanCurrency.length != 3 || !cleanCurrency.all { it.isLetter() }) {
+            currencyError = "Currency must be 3 letters"
             return
         }
 
         lifecycleScope.launch {
-            setLoading(true)
+            loading = true
             val session = activeSessionOrReturnToLogin()
             if (session == null) {
-                setLoading(false)
+                loading = false
                 return@launch
             }
 
             val result = runCatching {
-                authApi.createWalletRequest(session, amount, currency, note)
+                authApi.createWalletRequest(session, cleanAmount, cleanCurrency, cleanNote)
             }
-            setLoading(false)
+
+            loading = false
             result
                 .onSuccess {
-                    success.text = getString(R.string.wallet_request_created, it.amount, it.currency)
-                    success.visibility = View.VISIBLE
-                    amountInput.text?.clear()
-                    noteInput.text?.clear()
+                    successMessage = "Wallet request created: ${it.amount} ${it.currency}"
+                    amount = ""
+                    note = ""
+                    currency = cleanCurrency
                 }
                 .onFailure {
-                    error.text = it.message ?: getString(R.string.wallet_request_failed)
-                    error.visibility = View.VISIBLE
+                    errorMessage = it.message ?: "Wallet request failed"
                 }
         }
     }
 
     private fun clearMessages() {
-        amountLayout.error = null
-        currencyLayout.error = null
-        noteLayout.error = null
-        error.visibility = View.GONE
-        success.visibility = View.GONE
-    }
-
-    private fun setLoading(loading: Boolean) {
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
-        submit.isEnabled = !loading
-        history.isEnabled = !loading
+        amountError = null
+        currencyError = null
+        errorMessage = null
+        successMessage = null
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
@@ -174,5 +157,175 @@ class WalletRequestActivity : AppCompatActivity() {
         )
         finish()
         return null
+    }
+}
+
+@Composable
+private fun WalletRequestScreen(
+    amount: String,
+    currency: String,
+    note: String,
+    loading: Boolean,
+    errorMessage: String?,
+    successMessage: String?,
+    amountError: String?,
+    currencyError: String?,
+    onAmountChange: (String) -> Unit,
+    onCurrencyChange: (String) -> Unit,
+    onNoteChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onHistory: () -> Unit,
+    onBack: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF7F7FA)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
+                    Text("Geri")
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(22.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Wallet",
+                            color = orange,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Request Balance",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "Create a wallet balance request for your Roam2World account.",
+                            color = Color.White.copy(alpha = 0.72f),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                WalletRequestCard(title = "Request details") {
+                    OutlinedTextField(
+                        value = amount,
+                        onValueChange = onAmountChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Amount") },
+                        isError = amountError != null,
+                        supportingText = { amountError?.let { Text(it) } },
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = currency,
+                        onValueChange = onCurrencyChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Currency") },
+                        isError = currencyError != null,
+                        supportingText = { currencyError?.let { Text(it) } },
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = note,
+                        onValueChange = onNoteChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Note") },
+                        minLines = 3
+                    )
+
+                    errorMessage?.let {
+                        Text(
+                            text = it,
+                            color = Color(0xFFDC2626),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    successMessage?.let {
+                        Text(
+                            text = it,
+                            color = Color(0xFF15803D),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    if (loading) {
+                        CircularProgressIndicator()
+                    }
+
+                    Button(
+                        onClick = onSubmit,
+                        enabled = !loading,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = orange),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text(
+                            text = if (loading) "Submitting..." else "Submit request",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = onHistory,
+                        enabled = !loading,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text("View request history")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletRequestCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
     }
 }

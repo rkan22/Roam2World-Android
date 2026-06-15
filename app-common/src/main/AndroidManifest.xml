@@ -113,5 +113,28 @@
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
 
-    </application>
+            <activity
+            android:name="im.angry.openeuicc.ui.ShoppingCartActivity"
+            android:exported="false" />
+
+        <activity
+        android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
+        android:exported="false" />
+    <activity
+        android:name="im.angry.openeuicc.ui.R2wStoreActivity"
+        android:exported="false" />
+    <activity
+        android:name="im.angry.openeuicc.ui.R2wInstallHelpActivity"
+        android:exported="false" />
+    <activity
+        android:name="im.angry.openeuicc.ui.R2wActivationCodeActivity"
+        android:exported="false" />
+    <activity
+        android:name="im.angry.openeuicc.ui.R2wPackageDetailActivity"
+        android:exported="false" />
+        <activity android:name="im.angry.openeuicc.ui.TransactionsActivity" android:exported="false" />
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
+            android:exported="false" />
+</application>
 </manifest>

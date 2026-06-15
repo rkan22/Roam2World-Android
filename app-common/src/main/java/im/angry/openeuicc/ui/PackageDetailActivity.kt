@@ -3,177 +3,74 @@ package im.angry.openeuicc.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.progressindicator.LinearProgressIndicator
-import im.angry.openeuicc.auth.AuthSession
-import im.angry.openeuicc.auth.AuthTokenStore
-import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileActivationDetails
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import im.angry.openeuicc.auth.MobilePackage
-import im.angry.openeuicc.auth.MobilePackagePurchaseRequest
-import im.angry.openeuicc.auth.MobilePackagePurchaseResult
-import im.angry.openeuicc.auth.Roam2WorldAuthApi
-import im.angry.openeuicc.common.BuildConfig
-import im.angry.openeuicc.common.R
-import im.angry.openeuicc.util.activityToolbarInsetHandler
-import im.angry.openeuicc.util.mainViewPaddingInsetHandler
-import im.angry.openeuicc.util.setupRootViewSystemBarInsets
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.util.UUID
 
-class PackageDetailActivity : AppCompatActivity() {
-    private val tokenStore by lazy { AuthTokenStore(this) }
-    private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
-
-    private lateinit var purchaseButton: MaterialButton
-    private lateinit var progress: LinearProgressIndicator
-    private lateinit var error: TextView
-
+class PackageDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_package_detail)
-        setSupportActionBar(requireViewById(R.id.toolbar))
-        supportActionBar?.apply {
-            title = getString(R.string.package_detail_title)
-            setDisplayHomeAsUpEnabled(true)
-        }
 
-        setupInsets()
-        purchaseButton = requireViewById(R.id.package_purchase_button)
-        progress = requireViewById(R.id.package_purchase_progress)
-        error = requireViewById(R.id.package_purchase_error)
-        purchaseButton.setOnClickListener {
-            startActivity(CustomerInfoActivity.createIntent(this, intent))
+        setContent {
+            PackageDetailScreen(
+                packageName = displayPackageName(),
+                countryLine = countryDisplay(),
+                price = r2wMoney(intent.getStringExtra(EXTRA_PRICE)),
+                data = intent.getStringExtra(EXTRA_DATA).orEmpty(),
+                validity = intent.getStringExtra(EXTRA_VALIDITY).orEmpty(),
+                network = displayProvider(),
+                coverage = coverageDisplay(),
+                description = descriptionText(),
+                visibility = intent.getStringExtra(EXTRA_VISIBILITY).orEmpty(),
+                onBack = { finish() },
+                onBuy = {
+                    startActivity(CustomerInfoActivity.createIntent(this, intent))
+                }
+            )
         }
-        renderDetails()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
-        }
-
-    private fun setupInsets() {
-        setupRootViewSystemBarInsets(
-            window.decorView.rootView,
-            arrayOf(
-                this::activityToolbarInsetHandler,
-                mainViewPaddingInsetHandler(requireViewById(R.id.package_detail_scroll))
-            ),
-            consume = false
-        )
-    }
-
-    private fun renderDetails() {
+    private fun displayPackageName(): String {
+        val rawName = intent.getStringExtra(EXTRA_NAME).orEmpty()
+        val data = intent.getStringExtra(EXTRA_DATA)
         val country = intent.getStringExtra(EXTRA_COUNTRY)
         val countryCode = intent.getStringExtra(EXTRA_COUNTRY_CODE)
         val coverage = intent.getStringExtra(EXTRA_COVERAGE)
+        val network = intent.getStringExtra(EXTRA_NETWORK)
 
-        val rawPackageName = intent.getStringExtra(EXTRA_NAME).orEmpty()
-        val cleanProviderName = cleanDetailProviderName(
-            intent.getStringExtra(EXTRA_NETWORK),
-            intent.getStringExtra(EXTRA_COVERAGE),
-            country
-        )
-        val cleanPackageName = cleanDetailPackageName(
-            rawPackageName,
-            intent.getStringExtra(EXTRA_DATA),
-            cleanProviderName
-        )
-
-        val displayPackageName = marketingDetailPackageName(
-            providerName = cleanProviderName,
-            data = intent.getStringExtra(EXTRA_DATA),
-            country = country,
-            countryCode = countryCode,
-            coverage = coverage,
-            rawPackageName = rawPackageName
-        )
-
-        requireViewById<TextView>(R.id.package_detail_name).text = displayPackageName
-        requireViewById<TextView>(R.id.package_detail_country).text = displayPackageName
-        requireViewById<TextView>(R.id.package_detail_price).text = r2wMoney(intent.getStringExtra(EXTRA_PRICE))
-            ?: "0"
-        setCoverageFlag(countryCode, country, coverage)
-        requireViewById<TextView>(R.id.package_detail_visibility).text =
-            "Stay connected with fast and reliable data."
-
-        setOptionalText(R.id.package_detail_data, intent.getStringExtra(EXTRA_DATA), R.string.package_detail_data_format)
-        setOptionalText(R.id.package_detail_validity, intent.getStringExtra(EXTRA_VALIDITY), R.string.package_detail_validity_format)
-        requireViewById<TextView>(R.id.package_detail_network).visibility = View.GONE
-        requireViewById<TextView>(R.id.package_detail_coverage).text = "150+ Countries"
-        requireViewById<TextView>(R.id.package_detail_description).text =
-            "Stay connected across ${displayPackageName.removePrefix("Orange ").substringBeforeLast(" ")} with fast and reliable data."
-    }
-
-    private fun setCoverageFlag(countryCode: String?, country: String?, coverage: String?) {
-        val imageView = requireViewById<android.widget.ImageView>(R.id.package_detail_coverage_flag)
-
-        val code = countryCode
-            ?.trim()
-            ?.lowercase()
-            ?.takeIf { it.length == 2 && it.all { char -> char in 'a'..'z' } }
-
-        val flagResId = code?.let {
-            resources.getIdentifier("flag_$it", "drawable", packageName)
-        } ?: 0
-
-        if (flagResId != 0) {
-            imageView.setImageResource(flagResId)
-            return
-        }
-
-        val text = listOfNotNull(country, coverage)
-            .joinToString(" ")
-            .lowercase()
-
-        val fallbackRes = when {
-            text.contains("turkey") || text.contains("türkiye") ->
-                resources.getIdentifier("flag_tr", "drawable", packageName)
-            text.contains("europe") || text.contains("europa") ->
-                resources.getIdentifier("flag_eu", "drawable", packageName)
-            else -> 0
-        }
-
-        if (fallbackRes != 0) {
-            imageView.setImageResource(fallbackRes)
-        } else {
-            imageView.setImageResource(R.drawable.ic_package_globe)
-        }
-    }
-
-    private fun marketingDetailPackageName(
-        providerName: String?,
-        data: String?,
-        country: String?,
-        countryCode: String?,
-        coverage: String?,
-        rawPackageName: String
-    ): String {
-        val provider = "Orange"
-
-        val allText = listOfNotNull(
-            rawPackageName,
-            providerName,
-            country,
-            countryCode,
-            coverage
-        )
+        val allText = listOfNotNull(rawName, country, countryCode, coverage, network)
             .joinToString(" ")
             .lowercase()
 
@@ -181,236 +78,70 @@ class PackageDetailActivity : AppCompatActivity() {
             allText.contains("balkan") -> "Balkans"
             allText.contains("europe") || allText.contains("eu ") || allText.contains("europa") -> "Europe"
             allText.contains("turkey") || allText.contains("türkiye") || countryCode.equals("TR", ignoreCase = true) -> "Turkey"
+            country?.isNotBlank() == true && !country.equals("Multi-country", ignoreCase = true) -> country
             else -> "World"
         }
 
-        val dataLabel = data?.trim()?.takeIf { it.isNotBlank() }
+        val dataLabel = data?.trim()?.takeIf { it.isNotBlank() } ?: extractDataFromName(rawName)
 
-        return listOfNotNull(provider, region, dataLabel)
+        return listOfNotNull("Orange", region, dataLabel)
             .joinToString(" ")
+            .replace(Regex("\\s+"), " ")
             .trim()
-            .ifBlank { "Orange World" }
+            .ifBlank { PackageNameCleaner.clean(rawName).ifBlank { "Orange eSIM Package" } }
     }
 
-    private fun purchasePackage() {
-        lifecycleScope.launch {
-            error.visibility = View.GONE
-            setLoading(true)
-
-            val session = activeSessionOrReturnToLogin()
-            if (session == null) {
-                setLoading(false)
-                return@launch
-            }
-
-            val price = intent.getStringExtra(EXTRA_PRICE) ?: "0"
-            val priceAmount = decimalAmount(price)
-            if (priceAmount == null) {
-                showPurchaseError(getString(R.string.package_purchase_price_unavailable))
-                return@launch
-            }
-
-            if (isDemoPackage()) {
-                setLoading(false)
-                startActivity(PurchaseConfirmationActivity.createIntent(this@PackageDetailActivity, demoPurchaseResult(price)))
-                return@launch
-            }
-
-            val wallet = runCatching {
-                authApi.wallet(session)
-            }.getOrElse {
-                showPurchaseError(it.message ?: getString(R.string.package_purchase_wallet_failed))
-                return@launch
-            }
-
-            val balanceAmount = decimalAmount(wallet.currentBalance)
-            if (balanceAmount == null || balanceAmount < priceAmount) {
-                showPurchaseError(getString(R.string.package_purchase_insufficient_balance))
-                return@launch
-            }
-
-            val purchase = runCatching {
-                authApi.purchasePackage(
-                    session,
-                    MobilePackagePurchaseRequest(
-                        packageId = intent.getStringExtra(EXTRA_ID),
-                        provider = intent.getStringExtra(EXTRA_PROVIDER),
-                        packageName = intent.getStringExtra(EXTRA_NAME)
-                            ?: getString(R.string.package_detail_title),
-                        packageDescription = intent.getStringExtra(EXTRA_DESCRIPTION),
-                        country = intent.getStringExtra(EXTRA_COUNTRY),
-                        price = price,
-                        role = intent.getStringExtra(EXTRA_ROLE)
-                    )
-                )
-            }
-
-            setLoading(false)
-            purchase
-                .onSuccess {
-                    startActivity(PurchaseConfirmationActivity.createIntent(this@PackageDetailActivity, it))
-                }
-                .onFailure {
-                    error.text = it.message ?: getString(R.string.package_purchase_failed)
-                    error.visibility = View.VISIBLE
-                }
-        }
-    }
-
-    private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) {
-            tokenStore.getSession()
-        } ?: return redirectToLogin()
-
-        if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
-
-        val refreshed = runCatching {
-            authApi.refresh(savedSession)
-        }.getOrNull() ?: return redirectToLogin()
-
-        withContext(Dispatchers.IO) {
-            tokenStore.save(refreshed)
-        }
-        return refreshed
-    }
-
-    private fun showPurchaseError(message: String) {
-        setLoading(false)
-        error.text = message
-        error.visibility = View.VISIBLE
-    }
-
-    private fun setLoading(loading: Boolean) {
-        purchaseButton.isEnabled = !loading
-        progress.visibility = if (loading) View.VISIBLE else View.GONE
-    }
-
-    private fun decimalAmount(value: String?): BigDecimal? {
-        val normalized = value
+    private fun extractDataFromName(rawName: String): String? =
+        Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE)
+            .find(rawName)
+            ?.value
+            ?.uppercase()
+            ?.replace("GB", " GB")
+            ?.replace(Regex("\\s+"), " ")
             ?.trim()
-            ?.replace(",", ".")
-            ?.replace(Regex("[^0-9.-]"), "")
-            ?.takeIf { it.isNotBlank() }
-        return normalized?.toBigDecimalOrNull()
-    }
 
-    private fun isDemoPackage(): Boolean =
-        intent.getStringExtra(EXTRA_ID)?.startsWith("demo-") == true
-
-    private fun demoPurchaseResult(price: String): MobilePackagePurchaseResult =
-        MobilePackagePurchaseResult(
-            orderId = "demo-${UUID.randomUUID()}",
-            orderNumber = "DEMO-${System.currentTimeMillis().toString().takeLast(6)}",
-            status = "demo_success",
-            packageName = intent.getStringExtra(EXTRA_NAME) ?: getString(R.string.package_detail_title),
-            price = price,
-            balanceAfter = null,
-            activation = MobileActivationDetails(
-                lpaCode = null,
-                smdpAddress = null,
-                matchingId = null,
-                confirmationCodeRequired = false,
-                qrCode = null,
-                qrCodeUrl = null,
-                iccid = "DEMO-ICCID",
-                esimId = intent.getStringExtra(EXTRA_ID)
-            )
+    private fun displayProvider(): String {
+        val joined = listOf(
+            intent.getStringExtra(EXTRA_PROVIDER),
+            intent.getStringExtra(EXTRA_NETWORK),
+            intent.getStringExtra(EXTRA_COVERAGE),
+            intent.getStringExtra(EXTRA_COUNTRY)
         )
-
-    private fun redirectToLogin(): AuthSession? {
-        tokenStore.clear()
-        startActivity(
-            Intent(this, LoginActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-        )
-        finish()
-        return null
-    }
-
-    private fun cleanDetailProviderName(network: String?, coverage: String?, country: String?): String {
-        val joined = listOf(network, coverage, country)
             .filterNotNull()
             .joinToString(" ")
             .lowercase()
 
         return when {
-            joined.contains("orange world") || joined.contains("global") -> "Orange World"
-            joined.contains("orange balkans") || joined.contains("balkans") -> "Orange Balkans"
             joined.contains("vodafone") -> "Vodafone Europe"
-            joined.contains("orange") || joined.contains("europe") -> "Orange Europe"
-            !country.isNullOrBlank() -> country
+            joined.contains("balkan") -> "Orange Balkans"
+            joined.contains("europe") -> "Orange Europe"
+            joined.contains("orange") -> "Orange"
             else -> "Roam2World"
         }
     }
 
-    private fun cleanDetailPackageName(rawName: String, data: String?, provider: String): String {
-        val dataLabel = cleanDetailDataLabel(rawName, data)
-        return listOf(provider, dataLabel)
+    private fun countryDisplay(): String {
+        val country = intent.getStringExtra(EXTRA_COUNTRY)?.takeIf { it.isNotBlank() } ?: "Global"
+        val code = intent.getStringExtra(EXTRA_COUNTRY_CODE)?.takeIf { it.isNotBlank() }?.uppercase()
+        val flag = code?.let { codeToFlag(it) }.orEmpty()
+        return listOf(flag, country, code?.let { "($it)" })
+            .filterNotNull()
             .filter { it.isNotBlank() }
             .joinToString(" ")
-            .ifBlank { cleanRawDetailName(rawName) }
-    }
-
-    private fun cleanDetailDataLabel(rawName: String, data: String?): String {
-        data?.takeIf { it.isNotBlank() }?.let { return normalizeGbLabel(it) }
-
-        val match = Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(rawName)
-        return match?.value?.let { normalizeGbLabel(it) }.orEmpty()
-    }
-
-    private fun normalizeGbLabel(value: String): String =
-        value
-            .uppercase()
-            .replace("GB", " GB")
-            .replace(Regex("""\s+"""), " ")
             .trim()
-
-    private fun cleanRawDetailName(rawName: String): String =
-        rawName
-            .replace("【Esim】", "", ignoreCase = true)
-            .replace("【SIMCARD】", "SIM Card", ignoreCase = true)
-            .replace("—", " ")
-            .replace("–", " ")
-            .replace(Regex("""\(valid for .*?\)""", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("""\([^)]*\)"""), "")
-            .replace(Regex("""\s+"""), " ")
-            .trim()
-
-    private fun setOptionalText(viewId: Int, value: String?, formatResId: Int) {
-        requireViewById<TextView>(viewId).apply {
-            text = value?.let { getString(formatResId, it) }.orEmpty()
-            visibility = if (value.isNullOrBlank()) View.GONE else View.VISIBLE
-        }
     }
 
-    private fun flaggedCountryDisplay(country: String?, countryCode: String?, coverage: String?): String {
-        val cleanCountry = country?.takeIf { it.isNotBlank() } ?: "Global"
-        if (cleanCountry.equals("Multi-country", ignoreCase = true)) {
-            return flaggedCoverageDisplay(coverage)?.let { "Multi-country\n$it" } ?: "Multi-country"
-        }
-        val flag = countryCode?.let { codeToFlag(it) } ?: countryNameToFlag(cleanCountry) ?: ""
-        val code = countryCode?.takeIf { it.isNotBlank() }?.uppercase()?.let { " - $it" }.orEmpty()
-        return "$flag $cleanCountry$code"
-    }
+    private fun coverageDisplay(): String =
+        intent.getStringExtra(EXTRA_COVERAGE)
+            ?.takeIf { it.isNotBlank() }
+            ?: "150+ Countries"
 
-    private fun flaggedCoverageDisplay(coverage: String?): String? {
-        val items = coverage
-            ?.split(",", "\n")
-            ?.map { it.trim() }
-            ?.filter { it.isNotBlank() }
-            ?.distinct()
-            .orEmpty()
-        if (items.isEmpty()) return null
-        return items.joinToString(", ") { name ->
-            val flag = countryNameToFlag(name) ?: codeToFlagOrNull(name) ?: ""
-            "$flag $name"
-        }
-    }
+    private fun descriptionText(): String {
+        val rawDescription = intent.getStringExtra(EXTRA_DESCRIPTION)?.takeIf { it.isNotBlank() }
+        if (rawDescription != null) return rawDescription
 
-    private fun codeToFlagOrNull(value: String): String? {
-        val code = value.trim().uppercase()
-        return if (code.length == 2 && code.all { it in 'A'..'Z' }) codeToFlag(code) else null
+        val name = displayPackageName()
+        return "Stay connected with fast and reliable mobile data using $name."
     }
 
     private fun codeToFlag(code: String): String {
@@ -420,8 +151,6 @@ class PackageDetailActivity : AppCompatActivity() {
         val second = Character.codePointAt(normalized, 1) - 'A'.code + 0x1F1E6
         return String(Character.toChars(first)) + String(Character.toChars(second))
     }
-
-    private fun countryNameToFlag(name: String): String? = COUNTRY_NAME_TO_CODE[name.trim().lowercase()]?.let { codeToFlag(it) }
 
     companion object {
         private const val EXTRA_ID = "package.id"
@@ -438,61 +167,6 @@ class PackageDetailActivity : AppCompatActivity() {
         private const val EXTRA_NETWORK = "package.network"
         private const val EXTRA_COVERAGE = "package.coverage"
         private const val EXTRA_DESCRIPTION = "package.description"
-
-        private val COUNTRY_NAME_TO_CODE = mapOf(
-            "albania" to "AL",
-            "andorra" to "AD",
-            "austria" to "AT",
-            "belarus" to "BY",
-            "belgium" to "BE",
-            "bosnia and herzegovina" to "BA",
-            "bulgaria" to "BG",
-            "croatia" to "HR",
-            "cyprus" to "CY",
-            "czech republic" to "CZ",
-            "czechia" to "CZ",
-            "denmark" to "DK",
-            "estonia" to "EE",
-            "finland" to "FI",
-            "france" to "FR",
-            "germany" to "DE",
-            "greece" to "GR",
-            "hungary" to "HU",
-            "iceland" to "IS",
-            "ireland" to "IE",
-            "italy" to "IT",
-            "kosovo" to "XK",
-            "latvia" to "LV",
-            "liechtenstein" to "LI",
-            "lithuania" to "LT",
-            "luxembourg" to "LU",
-            "malta" to "MT",
-            "moldova" to "MD",
-            "monaco" to "MC",
-            "montenegro" to "ME",
-            "netherlands" to "NL",
-            "north macedonia" to "MK",
-            "norway" to "NO",
-            "poland" to "PL",
-            "portugal" to "PT",
-            "romania" to "RO",
-            "san marino" to "SM",
-            "serbia" to "RS",
-            "slovakia" to "SK",
-            "slovenia" to "SI",
-            "spain" to "ES",
-            "sweden" to "SE",
-            "switzerland" to "CH",
-            "turkey" to "TR",
-            "türkiye" to "TR",
-            "ukraine" to "UA",
-            "united kingdom" to "GB",
-            "united states" to "US",
-            "usa" to "US",
-            "canada" to "CA",
-            "australia" to "AU",
-            "global" to ""
-        )
 
         fun createIntent(context: Context, mobilePackage: MobilePackage, role: String?): Intent =
             Intent(context, PackageDetailActivity::class.java).apply {
@@ -511,5 +185,194 @@ class PackageDetailActivity : AppCompatActivity() {
                 putExtra(EXTRA_COVERAGE, mobilePackage.coverage)
                 putExtra(EXTRA_DESCRIPTION, mobilePackage.description)
             }
+    }
+}
+
+@Composable
+private fun PackageDetailScreen(
+    packageName: String,
+    countryLine: String,
+    price: String,
+    data: String,
+    validity: String,
+    network: String,
+    coverage: String,
+    description: String,
+    visibility: String,
+    onBack: () -> Unit,
+    onBuy: () -> Unit
+) {
+    val orange = Color(0xFFFF7900)
+    val bg = Color(0xFFF7F7FA)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
+                    Text("Geri")
+                }
+
+                PackageHeroCard(
+                    packageName = packageName,
+                    countryLine = countryLine,
+                    price = price,
+                    orange = orange
+                )
+
+                PackageInfoCard(title = "Paket Detayları") {
+                    if (data.isNotBlank()) DetailLine("Data", data)
+                    if (validity.isNotBlank()) DetailLine("Validity", validity)
+                    DetailLine("Network", network)
+                    DetailLine("Coverage", coverage)
+                    if (visibility.isNotBlank()) DetailLine("Visibility", visibility)
+                }
+
+                PackageInfoCard(title = "Açıklama") {
+                    Text(
+                        text = description,
+                        color = Color(0xFF4B5563),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Button(
+                    onClick = onBuy,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = orange),
+                    shape = RoundedCornerShape(22.dp)
+                ) {
+                    Text(
+                        text = "Satın Almaya Devam Et",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun PackageHeroCard(
+    packageName: String,
+    countryLine: String,
+    price: String,
+    orange: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+    ) {
+        Column(
+            modifier = Modifier.padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .width(48.dp)
+                        .height(48.dp)
+                        .clip(CircleShape)
+                        .background(orange),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "R2W",
+                        color = Color.White,
+                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "Roam2World eSIM",
+                        color = orange,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = countryLine.ifBlank { "Global" },
+                        color = Color.White.copy(alpha = 0.70f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Text(
+                text = packageName,
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "Stay connected with fast and reliable data.",
+                color = Color.White.copy(alpha = 0.74f),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = price,
+                color = orange,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Black
+            )
+        }
+    }
+}
+
+@Composable
+private fun PackageInfoCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = title,
+                color = Color(0xFF17181C),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            HorizontalDivider()
+            content()
+        }
+    }
+}
+
+@Composable
+private fun DetailLine(label: String, value: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = label,
+            color = Color(0xFF6B7280),
+            style = MaterialTheme.typography.labelMedium
+        )
+        Text(
+            text = value,
+            color = Color(0xFF17181C),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
