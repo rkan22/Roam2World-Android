@@ -31,9 +31,6 @@
         <item name="android:statusBarColor">?attr/colorSurfaceVariant</item>
         <item name="android:colorBackground">?attr/colorSurface</item>
         <item name="dialogCornerRadius">28dp</item>
-            <item name="fontFamily">sans-serif</item>
-        <item name="android:fontFamily">sans-serif</item>
-
         <item name="android:fontFamily">@font/r2w_google_sans</item>
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
@@ -53,13 +50,30 @@
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
 
+    <style name="Theme.OpenEUICC.MaterialComponents" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/roam_primary</item>
+        <item name="colorPrimaryDark">@color/roam_primary</item>
+        <item name="colorAccent">@color/roam_primary</item>
+        <item name="colorOnPrimary">@color/roam_on_primary</item>
+        <item name="colorSecondary">@color/roam_secondary</item>
+        <item name="colorOnSecondary">@color/roam_on_secondary</item>
+        <item name="colorSurface">@color/roam_surface</item>
+        <item name="colorOnSurface">@color/roam_on_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/r2w_clean_bg</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorBackground">@color/r2w_clean_bg</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:fontFamily">@font/r2w_google_sans</item>
+        <item name="fontFamily">@font/r2w_google_sans</item>
+    </style>
+
     <style name="ToolbarTheme" parent="Widget.Material3.Toolbar">
         <item name="android:background">?attr/colorSurface</item>
         <item name="titleTextColor">?attr/colorOnSurface</item>
         <item name="navigationIconTint">?attr/colorOnSurface</item>
-            <item name="fontFamily">sans-serif</item>
-        <item name="android:fontFamily">sans-serif</item>
-
         <item name="android:fontFamily">@font/r2w_google_sans</item>
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
@@ -68,9 +82,6 @@
         <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
         <item name="dialogCornerRadius">28dp</item>
-            <item name="fontFamily">sans-serif</item>
-        <item name="android:fontFamily">sans-serif</item>
-
         <item name="android:fontFamily">@font/r2w_google_sans</item>
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
@@ -90,9 +101,6 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-            <item name="fontFamily">sans-serif</item>
-        <item name="android:fontFamily">sans-serif</item>
-
         <item name="android:fontFamily">@font/r2w_google_sans</item>
         <item name="fontFamily">@font/r2w_google_sans</item>
     </style>
