@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/r2w_clean_surface"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="22dp"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/r2w_clean_border"
                 app:strokeWidth="1dp">
@@ -43,19 +43,19 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:paddingStart="14dp"
-                    android:paddingTop="12dp"
+                    android:paddingTop="14dp"
                     android:paddingEnd="14dp"
-                    android:paddingBottom="12dp">
+                    android:paddingBottom="14dp">
 
                     <FrameLayout
-                        android:layout_width="46dp"
-                        android:layout_height="46dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:layout_marginEnd="12dp"
                         android:background="@drawable/r2w_clean_icon_circle">
 
                         <ImageView
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/r2w_ic_globe_clean" />
@@ -74,7 +74,7 @@
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="Roam2World"
+                            android:text="OpenEUICC Manager"
                             android:textColor="@color/r2w_clean_text"
                             android:textSize="23sp"
                             android:textStyle="bold" />
@@ -84,8 +84,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:ellipsize="end"
-                            android:maxLines="1"
-                            android:text="Global eSIM control center"
+                            android:maxLines="2"
+                            android:text="Install and manage device eSIM profiles"
                             android:textColor="@color/r2w_clean_muted"
                             android:textSize="13sp" />
 
@@ -106,18 +106,6 @@
                             android:textStyle="bold" />
 
                     </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/openeuicc_open_r2w_home"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="10dp"
-                        android:text="Roam2World Home"
-                        android:textAllCaps="false"
-                        android:textColor="@color/r2w_clean_primary"
-                        app:cornerRadius="16dp"
-                        app:strokeColor="@color/r2w_clean_border" />
 
                 </LinearLayout>
 
@@ -294,10 +282,10 @@
                         android:orientation="horizontal">
 
                         <FrameLayout
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:layout_marginEnd="12dp"
-                            android:background="@drawable/r2w_clean_orange_circle">
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/r2w_clean_icon_circle">
 
                             <ImageView
                                 android:layout_width="28dp"
@@ -331,7 +319,7 @@
                                 android:layout_marginTop="4dp"
                                 android:ellipsize="end"
                                 android:maxLines="2"
-                                android:text="QR, activation code, or manual install"
+                                android:text="Use QR, activation code, or native OpenEUICC install"
                                 android:textColor="@color/r2w_clean_muted"
                                 android:textSize="14sp" />
 
@@ -345,7 +333,7 @@
                         android:layout_height="54dp"
                         android:layout_marginTop="14dp"
                         android:background="@drawable/r2w_clean_primary_button"
-                        android:text="Install"
+                        android:text="Install New eSIM"
                         android:textAllCaps="false"
                         android:textColor="@android:color/white"
                         android:textStyle="bold"
@@ -378,12 +366,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
-                    android:background="@drawable/r2w_clean_orange_chip"
+                    android:background="@drawable/r2w_clean_connected_chip"
                     android:gravity="center"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
-                    android:text="B2B"
-                    android:textColor="@color/r2w_clean_orange"
+                    android:text="Live"
+                    android:textColor="@color/r2w_clean_success"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -434,7 +422,7 @@
                             android:layout_height="50dp"
                             android:layout_marginEnd="6dp"
                             android:layout_weight="1"
-                            android:text="Refresh"
+                            android:text="Refresh Profiles"
                             android:textAllCaps="false"
                             android:textColor="@color/r2w_clean_primary"
                             app:cornerRadius="16dp"
@@ -450,7 +438,7 @@
                             android:layout_height="50dp"
                             android:layout_marginStart="6dp"
                             android:layout_weight="1"
-                            android:text="Advanced"
+                            android:text="Native App"
                             android:textAllCaps="false"
                             android:textColor="@color/r2w_clean_muted"
                             app:cornerRadius="16dp"
