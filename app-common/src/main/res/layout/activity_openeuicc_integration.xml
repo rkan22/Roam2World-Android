@@ -40,72 +40,88 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingTop="14dp"
-                    android:paddingEnd="14dp"
-                    android:paddingBottom="14dp">
-
-                    <FrameLayout
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/r2w_clean_icon_circle">
-
-                        <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:layout_gravity="center"
-                            android:contentDescription="@null"
-                            android:src="@drawable/r2w_ic_globe_clean" />
-
-                    </FrameLayout>
+                    android:orientation="vertical"
+                    android:padding="14dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:minWidth="0dp"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="match_parent"
+                        <FrameLayout
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/r2w_clean_icon_circle">
+
+                            <ImageView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/r2w_ic_globe_clean" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:text="OpenEUICC Manager"
-                            android:textColor="@color/r2w_clean_text"
-                            android:textSize="23sp"
-                            android:textStyle="bold" />
+                            android:layout_weight="1"
+                            android:minWidth="0dp"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            android:text="Install and manage device eSIM profiles"
-                            android:textColor="@color/r2w_clean_muted"
-                            android:textSize="13sp" />
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="OpenEUICC Manager"
+                                android:textColor="@color/r2w_clean_text"
+                                android:textSize="23sp"
+                                android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/openeuicc_native_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="28dp"
-                            android:layout_marginTop="8dp"
-                            android:background="@drawable/r2w_clean_connected_chip"
-                            android:ellipsize="end"
-                            android:gravity="center"
-                            android:maxLines="1"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:text="Ready • OpenEUICC"
-                            android:textColor="@color/r2w_clean_success"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:text="Install and manage device eSIM profiles"
+                                android:textColor="@color/r2w_clean_muted"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/openeuicc_native_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="28dp"
+                                android:layout_marginTop="8dp"
+                                android:background="@drawable/r2w_clean_connected_chip"
+                                android:ellipsize="end"
+                                android:gravity="center"
+                                android:maxLines="1"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:text="Ready • OpenEUICC"
+                                android:textColor="@color/r2w_clean_success"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/openeuicc_open_r2w_home"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="12dp"
+                        android:text="Roam2World Home"
+                        android:textAllCaps="false"
+                        android:textColor="@color/r2w_clean_primary"
+                        app:cornerRadius="16dp"
+                        app:strokeColor="@color/r2w_clean_border" />
 
                 </LinearLayout>
 
