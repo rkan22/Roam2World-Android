@@ -19,6 +19,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import im.angry.openeuicc.ui.compose.theme.Border
+import im.angry.openeuicc.ui.compose.theme.Primary
+import im.angry.openeuicc.ui.compose.theme.TextSecondary
 
 enum class R2wBottomTab {
     Home,
@@ -34,7 +37,6 @@ fun R2wBottomNav(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val orange = Color(0xFFF97316)
 
     fun open(target: Class<*>) {
         context.startActivity(
@@ -50,8 +52,9 @@ fun R2wBottomNav(
             .navigationBarsPadding()
             .padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        shape = RoundedCornerShape(24.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Border)
     ) {
         Row(
             modifier = Modifier
@@ -62,7 +65,6 @@ fun R2wBottomNav(
             R2wBottomNavText(
                 text = "Home",
                 selected = selected == R2wBottomTab.Home,
-                orange = orange,
                 onClick = {
                     if (selected != R2wBottomTab.Home) open(DashboardActivity::class.java)
                 }
@@ -70,7 +72,6 @@ fun R2wBottomNav(
             R2wBottomNavText(
                 text = "Packages",
                 selected = selected == R2wBottomTab.Packages,
-                orange = orange,
                 onClick = {
                     if (selected != R2wBottomTab.Packages) open(PackagesActivity::class.java)
                 }
@@ -78,7 +79,6 @@ fun R2wBottomNav(
             R2wBottomNavText(
                 text = "Wallet",
                 selected = selected == R2wBottomTab.Wallet,
-                orange = orange,
                 onClick = {
                     if (selected != R2wBottomTab.Wallet) open(WalletActivity::class.java)
                 }
@@ -86,7 +86,6 @@ fun R2wBottomNav(
             R2wBottomNavText(
                 text = "eSIMs",
                 selected = selected == R2wBottomTab.Esims,
-                orange = orange,
                 onClick = {
                     if (selected != R2wBottomTab.Esims) open(MobileEsimsActivity::class.java)
                 }
@@ -94,7 +93,6 @@ fun R2wBottomNav(
             R2wBottomNavText(
                 text = "More",
                 selected = selected == R2wBottomTab.More,
-                orange = orange,
                 onClick = {
                     if (selected != R2wBottomTab.More) open(MoreActivity::class.java)
                 }
@@ -107,17 +105,16 @@ fun R2wBottomNav(
 private fun R2wBottomNavText(
     text: String,
     selected: Boolean,
-    orange: Color,
     onClick: () -> Unit
 ) {
     Text(
         text = text,
-        color = if (selected) Color.White else Color(0xFF6B7280),
+        color = if (selected) Color.White else TextSecondary,
         fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
         fontSize = 12.sp,
         modifier = Modifier
             .background(
-                color = if (selected) orange else Color.Transparent,
+                color = if (selected) Primary else Color.Transparent,
                 shape = RoundedCornerShape(999.dp)
             )
             .clickable(onClick = onClick)
