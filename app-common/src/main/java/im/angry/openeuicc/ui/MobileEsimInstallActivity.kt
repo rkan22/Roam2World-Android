@@ -65,7 +65,6 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.MobileEsim
-import im.angry.openeuicc.core.EuiccChannelManager
 import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
 import im.angry.openeuicc.util.LPAString
 import kotlinx.coroutines.Dispatchers
@@ -83,33 +82,28 @@ private val InstallOrange = Color(0xFFF59E0B)
 private val InstallRed = Color(0xFFDC2626)
 
 class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
-    private var installCode: String = ""
-    private var lpaPayload: String = ""
-
+    private var installCode = ""
+    private var lpaPayload = ""
     private var loading by mutableStateOf(false)
     private var errorMessage by mutableStateOf<String?>(null)
     private var retryVisible by mutableStateOf(false)
     private var startEnabled by mutableStateOf(false)
-
     private var compatibilityStatus by mutableStateOf("Waiting")
     private var deviceStatus by mutableStateOf("Waiting")
     private var downloadStatus by mutableStateOf("Waiting")
     private var smdpText by mutableStateOf("")
     private var matchingIdText by mutableStateOf("")
     private var actionLabel by mutableStateOf("Check USB Reader")
-
     private var usbDevice: UsbDevice? = null
     private var readerReady = false
 
-    private val usbManager: UsbManager by lazy {
-        getSystemService(Context.USB_SERVICE) as UsbManager
-    }
+    private val usbManager: UsbManager by lazy { getSystemService(Context.USB_SERVICE) as UsbManager }
+    private lateinit var usbPendingIntent: PendingIntent
 
     private val usbPermissionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != ACTION_USB_PERMISSION) return
-            val granted = usbDevice?.let { usbManager.hasPermission(it) } == true
-            if (granted) {
+            if (usbDevice?.let { usbManager.hasPermission(it) } == true) {
                 checkUsbReader()
             } else {
                 loading = false
@@ -123,42 +117,21 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         }
     }
 
-    private lateinit var usbPendingIntent: PendingIntent
-
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         configureSystemBars()
         installCode = intent.getStringExtra(EXTRA_INSTALL_CODE).orEmpty()
-
-        usbPendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            Intent(ACTION_USB_PERMISSION),
-            PendingIntent.FLAG_IMMUTABLE
-        )
+        usbPendingIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE)
         val filter = IntentFilter(ACTION_USB_PERMISSION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(usbPermissionReceiver, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            registerReceiver(usbPermissionReceiver, filter)
-        }
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) registerReceiver(usbPermissionReceiver, filter, Context.RECEIVER_EXPORTED) else registerReceiver(usbPermissionReceiver, filter)
         setInitialState()
-
         setContent {
             MobileEsimInstallScreen(
-                loading = loading,
-                error = errorMessage,
-                retryVisible = retryVisible,
-                startEnabled = startEnabled,
-                compatibilityStatus = compatibilityStatus,
-                deviceStatus = deviceStatus,
-                downloadStatus = downloadStatus,
-                smdpText = smdpText,
-                matchingIdText = matchingIdText,
-                actionLabel = actionLabel,
+                loading, errorMessage, retryVisible, startEnabled,
+                compatibilityStatus, deviceStatus, downloadStatus,
+                smdpText, matchingIdText, actionLabel,
                 onBack = { finish() },
                 onRetry = { checkUsbReader() },
                 onStart = { onPrimaryAction() }
@@ -167,16 +140,11 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     }
 
     override fun onDestroy() {
-        try {
-            unregisterReceiver(usbPermissionReceiver)
-        } catch (_: Exception) {
-        }
+        try { unregisterReceiver(usbPermissionReceiver) } catch (_: Exception) {}
         super.onDestroy()
     }
 
-    override fun onInit() {
-        runPreflight()
-    }
+    override fun onInit() = runPreflight()
 
     private fun configureSystemBars() {
         window.statusBarColor = AndroidColor.rgb(248, 250, 255)
@@ -206,9 +174,8 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
             setInitialState()
             loading = true
             compatibilityStatus = "Checking"
-
             val parsed = runCatching {
-                val payload = if (installCode.startsWith("LPA:", ignoreCase = true)) installCode else "LPA:$installCode"
+                val payload = if (installCode.startsWith("LPA:", true)) installCode else "LPA:$installCode"
                 LPAString.parse(payload).also { lpaPayload = payload }
             }.getOrElse {
                 compatibilityStatus = "Failed"
@@ -216,7 +183,6 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                 showFailure("The activation code could not be parsed.")
                 return@launch
             }
-
             compatibilityStatus = "Passed"
             smdpText = parsed.address
             matchingIdText = parsed.matchingId ?: "Unavailable"
@@ -226,9 +192,8 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
 
     private suspend fun findUsbCcidReader(): UsbDevice? = withContext(Dispatchers.IO) {
         usbManager.deviceList.values.firstOrNull { device ->
-            (0 until device.interfaceCount).any { index ->
-                val usbInterface = device.getInterface(index)
-                usbInterface.interfaceClass == UsbConstants.USB_CLASS_CSCID
+            (0 until device.interfaceCount).any { idx ->
+                device.getInterface(idx).interfaceClass == UsbConstants.USB_CLASS_CSCID
             }
         }
     }
@@ -243,15 +208,12 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
             deviceStatus = "Checking"
             downloadStatus = "Waiting"
             actionLabel = "Checking Reader"
-
             val device = findUsbCcidReader()
             usbDevice = device
-
             when {
                 device == null -> {
                     loading = false
                     deviceStatus = "Connect Reader"
-                    downloadStatus = "Waiting"
                     actionLabel = "Check USB Reader"
                     startEnabled = true
                     errorMessage = "Connect the USB eUICC reader, then run the check again."
@@ -259,7 +221,6 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                 !usbManager.hasPermission(device) -> {
                     loading = false
                     deviceStatus = "Permission Required"
-                    downloadStatus = "Waiting"
                     actionLabel = "Grant USB Permission"
                     startEnabled = true
                     errorMessage = "USB reader found. Grant permission before continuing."
@@ -297,23 +258,18 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     private fun launchDownloadWizard() {
         if (lpaPayload.isBlank()) return
         downloadStatus = "Launching"
-        startActivity(
-            DownloadWizardActivity.newIntent(this, EuiccChannelManager.USB_CHANNEL_ID).apply {
-                action = Intent.ACTION_VIEW
-                data = lpaPayload.toUri()
-            }
-        )
+        startActivity(Intent(this, DownloadWizardActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            data = lpaPayload.toUri()
+            putExtra("selectedLogicalSlot", -1)
+        })
         finish()
     }
 
     companion object {
         private const val EXTRA_INSTALL_CODE = "mobile_esim_install.install_code"
         private const val ACTION_USB_PERMISSION = "im.angry.openeuicc.USB_PERMISSION"
-
-        fun createIntent(context: Context, esim: MobileEsim): Intent =
-            Intent(context, MobileEsimInstallActivity::class.java).apply {
-                putExtra(EXTRA_INSTALL_CODE, esim.installCode())
-            }
+        fun createIntent(context: Context, esim: MobileEsim): Intent = Intent(context, MobileEsimInstallActivity::class.java).apply { putExtra(EXTRA_INSTALL_CODE, esim.installCode()) }
     }
 }
 
@@ -334,10 +290,7 @@ private fun MobileEsimInstallScreen(
     onStart: () -> Unit
 ) {
     Surface(Modifier.fillMaxSize(), color = InstallBg) {
-        Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Header(loading, onBack)
             InstallHero()
             if (!error.isNullOrBlank()) ErrorCard(error, onRetry, retryVisible)
@@ -354,26 +307,13 @@ private fun MobileEsimInstallScreen(
                 }
             }
             InstallCard("Next Step", Icons.Default.Download) {
-                Text(
-                    "Connect the USB eUICC reader, grant permission if requested, then continue to install this eSIM profile.",
-                    color = InstallMuted,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
-                )
-                Button(
-                    onClick = onStart,
-                    enabled = startEnabled,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = InstallBlue, disabledContainerColor = InstallBlue.copy(alpha = .35f)),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
+                Text("Connect the USB eUICC reader, grant permission if requested, then continue to install this eSIM profile.", color = InstallMuted, fontSize = 14.sp, lineHeight = 20.sp)
+                Button(onClick = onStart, enabled = startEnabled, modifier = Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.buttonColors(containerColor = InstallBlue, disabledContainerColor = InstallBlue.copy(alpha = .35f)), shape = RoundedCornerShape(14.dp)) {
                     Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(22.dp))
                     Text(actionLabel, color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
                 }
                 if (retryVisible) {
-                    OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, InstallBlue.copy(alpha = .45f))) {
-                        Text("Run Checks Again", color = InstallBlue, fontWeight = FontWeight.Bold)
-                    }
+                    OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, InstallBlue.copy(alpha = .45f))) { Text("Run Checks Again", color = InstallBlue, fontWeight = FontWeight.Bold) }
                 }
             }
         }
@@ -394,9 +334,7 @@ private fun InstallHero() {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(Color.Transparent), elevation = CardDefaults.cardElevation(3.dp)) {
         Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(InstallBlue, InstallBlueDark))).padding(22.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(62.dp).clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = .17f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.SimCard, null, tint = Color.White, modifier = Modifier.size(36.dp))
-                }
+                Box(Modifier.size(62.dp).clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = .17f)), contentAlignment = Alignment.Center) { Icon(Icons.Default.SimCard, null, tint = Color.White, modifier = Modifier.size(36.dp)) }
                 Column(Modifier.padding(start = 14.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("Ready for OpenEUICC", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
                     Text("Send this eSIM to an external USB eUICC reader.", color = Color.White.copy(alpha = .82f), fontSize = 14.sp, lineHeight = 20.sp)
@@ -411,9 +349,7 @@ private fun InstallCard(title: String, icon: ImageVector, content: @Composable C
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, InstallBorder), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).clip(RoundedCornerShape(999.dp)).background(InstallBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
-                    Icon(icon, null, tint = InstallBlue, modifier = Modifier.size(24.dp))
-                }
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(999.dp)).background(InstallBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = InstallBlue, modifier = Modifier.size(24.dp)) }
                 Text(title, color = InstallText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
             }
             HorizontalDivider(color = InstallBorder)
@@ -453,9 +389,7 @@ private fun ErrorCard(error: String, onRetry: () -> Unit, retryVisible: Boolean)
             Text("Reader check", color = InstallRed, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
             Text(error, color = Color(0xFF7F1D1D), fontSize = 14.sp)
             if (retryVisible) {
-                OutlinedButton(onClick = onRetry, shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, InstallRed.copy(alpha = .4f))) {
-                    Text("Try Again", color = InstallRed, fontWeight = FontWeight.Bold)
-                }
+                OutlinedButton(onClick = onRetry, shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, InstallRed.copy(alpha = .4f))) { Text("Try Again", color = InstallRed, fontWeight = FontWeight.Bold) }
             }
         }
     }
