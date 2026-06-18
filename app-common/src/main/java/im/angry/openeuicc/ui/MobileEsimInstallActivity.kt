@@ -6,8 +6,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.graphics.Color as AndroidColor
+import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Build
@@ -69,7 +69,6 @@ import im.angry.openeuicc.core.EuiccChannelManager
 import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
 import im.angry.openeuicc.util.LPAString
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -225,6 +224,15 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         }
     }
 
+    private suspend fun findUsbCcidReader(): UsbDevice? = withContext(Dispatchers.IO) {
+        usbManager.deviceList.values.firstOrNull { device ->
+            (0 until device.interfaceCount).any { index ->
+                val usbInterface = device.getInterface(index)
+                usbInterface.interfaceClass == UsbConstants.USB_CLASS_CSCID
+            }
+        }
+    }
+
     private fun checkUsbReader() {
         lifecycleScope.launch {
             loading = true
@@ -236,23 +244,7 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
             downloadStatus = "Waiting"
             actionLabel = "Checking Reader"
 
-            val result = withContext(Dispatchers.IO) {
-                runCatching { euiccChannelManager.tryOpenUsbEuiccChannel() }
-            }.getOrElse {
-                null
-            }
-
-            if (result == null) {
-                loading = false
-                deviceStatus = "Reader Check Failed"
-                downloadStatus = "Waiting"
-                actionLabel = "Check USB Reader"
-                startEnabled = true
-                errorMessage = "Could not check the USB reader. Connect the reader and try again."
-                return@launch
-            }
-
-            val (device, canOpen) = result
+            val device = findUsbCcidReader()
             usbDevice = device
 
             when {
@@ -264,7 +256,7 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                     startEnabled = true
                     errorMessage = "Connect the USB eUICC reader, then run the check again."
                 }
-                !canOpen && !usbManager.hasPermission(device) -> {
+                !usbManager.hasPermission(device) -> {
                     loading = false
                     deviceStatus = "Permission Required"
                     downloadStatus = "Waiting"
@@ -272,35 +264,14 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                     startEnabled = true
                     errorMessage = "USB reader found. Grant permission before continuing."
                 }
-                canOpen || usbManager.hasPermission(device) -> {
-                    val seIds = if (canOpen) {
-                        withContext(Dispatchers.IO) {
-                            runCatching {
-                                euiccChannelManager.flowEuiccSecureElements(EuiccChannelManager.USB_CHANNEL_ID, 0).toList()
-                            }.getOrDefault(emptyList())
-                        }
-                    } else {
-                        emptyList()
-                    }
+                else -> {
                     loading = false
                     readerReady = true
-                    deviceStatus = when {
-                        canOpen && seIds.isNotEmpty() -> "USB Reader Ready • ${seIds.size} SE"
-                        canOpen -> "USB Reader Ready"
-                        else -> "USB Permission Granted"
-                    }
+                    deviceStatus = "USB Permission Granted"
                     downloadStatus = "Ready"
                     actionLabel = "Continue to Installation"
                     startEnabled = true
                     errorMessage = null
-                }
-                else -> {
-                    loading = false
-                    deviceStatus = "Reader Not Ready"
-                    downloadStatus = "Waiting"
-                    actionLabel = "Check USB Reader"
-                    startEnabled = true
-                    errorMessage = "Reader detected but not ready. Reconnect it or grant permission again."
                 }
             }
         }
