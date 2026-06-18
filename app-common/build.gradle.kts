@@ -56,6 +56,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("io.coil-kt:coil-compose:2.6.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     testImplementation("junit:junit:4.13.2")
@@ -68,4 +69,3 @@ dependencies {
 configurations.matching { it.name.startsWith("kotlinCompilerPluginClasspath") }.configureEach {
     project.dependencies.add(this.name, "androidx.compose.compiler:compiler:1.5.14")
 }
-
