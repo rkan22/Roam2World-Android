@@ -24,10 +24,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.SimCard
@@ -235,7 +235,7 @@ private fun EsimDetailsCard(packageName: String, iccid: String, esimId: String, 
         DetailRow(Icons.Default.Today, "Purchase Date", SimpleDateFormat("MMM d yyyy", Locale.US).format(Date()))
         DetailRow(Icons.Default.CheckCircle, "Activation", if (iccid.isNotBlank() || esimId.isNotBlank()) "Available" else "Pending", valueColor = if (iccid.isNotBlank() || esimId.isNotBlank()) SuccessGreen else SuccessMuted)
         if (price.isNotBlank()) DetailRow(Icons.Default.ReceiptLong, "Price", price)
-        if (balanceAfter.isNotBlank() && balanceAfter != "-") DetailRow(Icons.Default.Wallet, "Balance After", balanceAfter)
+        if (balanceAfter.isNotBlank() && balanceAfter != "-") DetailRow(Icons.Default.CreditCard, "Balance After", balanceAfter)
     }
 }
 
