@@ -324,13 +324,17 @@ private fun PurchaseReviewScreen(
         Column(Modifier.fillMaxSize()) {
             Header(onBack)
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp, vertical = 18.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 18.dp, vertical = 18.dp)
+                    .padding(bottom = 160.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 ReviewCard("Order Summary", Icons.Default.Person) {
                     ReviewRow(Icons.Default.Person, "Customer", customerName)
                     ReviewRow(Icons.Default.Phone, "Phone", customerPhone.ifBlank { "--" })
-                    ReviewRow(Icons.Default.SimCard, "Package", packageName.ifBlank { "eSIM Package" })
+                    ReviewRow(Icons.Default.SimCard, "Package", packageName.ifBlank { "eSIM Package" }, valueMaxLines = 2)
                     ReviewRow(Icons.Default.Business, "Provider", provider)
                 }
                 ReviewCard("Price Breakdown", Icons.Default.AttachMoney) {
@@ -390,11 +394,11 @@ private fun ReviewCard(title: String, icon: ImageVector, content: @Composable Co
 }
 
 @Composable
-private fun ReviewRow(icon: ImageVector, label: String, value: String) {
+private fun ReviewRow(icon: ImageVector, label: String, value: String, valueMaxLines: Int = 1) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, null, tint = ReviewMuted, modifier = Modifier.size(22.dp))
         Text(label, color = ReviewMuted, fontSize = 15.sp, modifier = Modifier.padding(start = 14.dp).weight(1f))
-        Text(value, color = ReviewText, fontSize = 15.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(value, color = ReviewText, fontSize = 15.sp, fontWeight = FontWeight.Medium, maxLines = valueMaxLines, overflow = TextOverflow.Ellipsis)
     }
 }
 
