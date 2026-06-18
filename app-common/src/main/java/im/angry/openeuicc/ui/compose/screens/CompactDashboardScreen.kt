@@ -71,21 +71,7 @@ fun CompactDashboardScreen(
     onWalletClick: () -> Unit,
     onActionClick: (String) -> Unit
 ) {
-    Scaffold(
-        containerColor = B2BBg,
-        floatingActionButton = {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                color = B2BBlue,
-                shape = RoundedCornerShape(999.dp),
-                shadowElevation = 10.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(30.dp))
-                }
-            }
-        }
-    ) { padding ->
+    Scaffold(containerColor = B2BBg) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
@@ -107,7 +93,7 @@ fun CompactDashboardScreen(
                 }
                 item { CompactRecent(data?.recentOrders.orEmpty()) { onActionClick("orders") } }
                 item { CompactActions(onActionClick) }
-                item { Spacer(Modifier.height(86.dp)) }
+                item { Spacer(Modifier.height(72.dp)) }
             }
             CompactBottomNav(onActionClick)
         }
@@ -250,7 +236,7 @@ private fun CompactBottomNav(onActionClick: (String) -> Unit) {
             CompactBottomItem(Icons.Default.SimCard, "eSIMs", false) { onActionClick("check_gb") }
             CompactBottomItem(Icons.Default.People, "Customers", false) { onActionClick("crm") }
             CompactBottomItem(Icons.Default.ReceiptLong, "Orders", false) { onActionClick("orders") }
-            CompactBottomItem(Icons.Default.Add, "More", false) { onActionClick("more") }
+            CompactBottomItem(Icons.Default.GridView, "More", false) { onActionClick("more") }
         }
     }
 }
