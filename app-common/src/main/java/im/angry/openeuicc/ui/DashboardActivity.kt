@@ -1,6 +1,7 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -32,6 +34,7 @@ class DashboardActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        configureSystemBars()
 
         setContent {
             val data by dashboardDataFlow.collectAsState()
@@ -60,6 +63,15 @@ class DashboardActivity : ComponentActivity() {
 
         authApi.logMobileEndpointConfiguration()
         loadDashboard()
+    }
+
+    private fun configureSystemBars() {
+        window.statusBarColor = Color.rgb(248, 250, 255)
+        window.navigationBarColor = Color.BLACK
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = false
+        }
     }
 
     private fun loadDashboard() {
