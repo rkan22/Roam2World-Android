@@ -311,6 +311,10 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
         abstract fun createNextFragment(): DownloadWizardStepFragment?
         abstract fun createPrevFragment(): DownloadWizardStepFragment?
 
+        protected fun refreshButtons() {
+            (requireActivity() as DownloadWizardActivity).refreshButtons()
+        }
+
         protected fun gotoNextFragment(next: DownloadWizardStepFragment? = null) {
             val realNext = next ?: createNextFragment()
             (requireActivity() as DownloadWizardActivity).showFragment(
