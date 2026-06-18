@@ -148,7 +148,9 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                 val payload = if (installCode.startsWith("LPA:", ignoreCase = true)) installCode else "LPA:$installCode"
                 LPAString.parse(payload).also { lpaPayload = payload }
             }.getOrElse {
-                showFailure("Invalid activation code")
+                compatibilityStatus = "Failed"
+                deviceStatus = "Not Checked"
+                showFailure("The activation code could not be parsed.")
                 return@launch
             }
 
@@ -158,17 +160,19 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
             deviceStatus = "Checking"
 
             val openEuiccPorts = runCatching { euiccChannelManager.flowAllOpenEuiccPorts().toList() }.getOrElse {
-                showFailure("Device check failed")
+                deviceStatus = "External Reader"
+                downloadStatus = "Ready"
+                loading = false
+                startEnabled = true
                 return@launch
             }
 
             val platformHasEuicc = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
-            if (openEuiccPorts.isEmpty() && !platformHasEuicc) {
-                showFailure("No compatible eUICC device found")
-                return@launch
+            deviceStatus = when {
+                openEuiccPorts.isNotEmpty() -> "USB Reader Ready"
+                platformHasEuicc -> "Native eSIM Ready"
+                else -> "External Reader"
             }
-
-            deviceStatus = "Passed"
             downloadStatus = "Ready"
             loading = false
             startEnabled = true
@@ -230,7 +234,7 @@ private fun MobileEsimInstallScreen(
             if (!error.isNullOrBlank()) ErrorCard(error, onRetry, retryVisible)
             InstallCard("Preflight Checks", Icons.Default.Security) {
                 CheckRow("Activation code", compatibilityStatus)
-                CheckRow("Device eSIM support", deviceStatus)
+                CheckRow("Install target", deviceStatus)
                 CheckRow("OpenEUICC download wizard", downloadStatus)
             }
             if (smdpText.isNotBlank() || matchingIdText.isNotBlank()) {
@@ -242,7 +246,7 @@ private fun MobileEsimInstallScreen(
             }
             InstallCard("Next Step", Icons.Default.Download) {
                 Text(
-                    "When all checks pass, OpenEUICC will open the native download wizard and install the eSIM profile on this device.",
+                    "OpenEUICC will ask you to select a native eSIM slot or an external USB eUICC reader, then continue with these activation details.",
                     color = InstallMuted,
                     fontSize = 14.sp,
                     lineHeight = 20.sp
@@ -286,7 +290,7 @@ private fun InstallHero() {
                 }
                 Column(Modifier.padding(start = 14.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("Ready for OpenEUICC", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Validate activation details and continue to the native eSIM installer.", color = Color.White.copy(alpha = .82f), fontSize = 14.sp, lineHeight = 20.sp)
+                    Text("Send this eSIM to a native slot or external USB eUICC reader.", color = Color.White.copy(alpha = .82f), fontSize = 14.sp, lineHeight = 20.sp)
                 }
             }
         }
