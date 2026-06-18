@@ -48,6 +48,12 @@
             android:label="Confirm Purchase" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
+            android:exported="false"
+            android:label="Install eSIM"
+            android:theme="@style/Theme.OpenEUICC.AppCompat" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
             android:label="OpenEUICC" />
@@ -105,7 +111,7 @@
             android:name="im.angry.openeuicc.service.EuiccChannelManagerService"
             android:exported="false"
             android:foregroundServiceType="shortService" />
-            <activity
+             <activity
             android:name="im.angry.openeuicc.ui.TgtCheckGbActivity"
             android:exported="false" />
 
@@ -113,7 +119,7 @@
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
 
-            <activity
+             <activity
             android:name="im.angry.openeuicc.ui.ShoppingCartActivity"
             android:exported="false" />
 
