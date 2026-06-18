@@ -12,8 +12,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -223,7 +223,6 @@ class PurchaseReviewActivity : ComponentActivity() {
     }
 
     private fun money(value: BigDecimal): String = "$${value.setScale(2, RoundingMode.HALF_UP)}"
-
     private fun customerName(): String = listOfNotNull(intent.getStringExtra(EXTRA_CUSTOMER_FIRST_NAME), intent.getStringExtra(EXTRA_CUSTOMER_LAST_NAME)).filter { it.isNotBlank() }.joinToString(" ").ifBlank { "Customer" }
 
     private fun displayProvider(): String {
@@ -257,7 +256,6 @@ class PurchaseReviewActivity : ComponentActivity() {
     }
 
     private fun extractDataFromName(rawName: String): String = Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(rawName)?.value?.uppercase()?.replace("GB", " GB")?.replace(Regex("\\s+"), " ")?.trim().orEmpty()
-
     private fun isDemoPackage(): Boolean = intent.getStringExtra(EXTRA_ID)?.startsWith("demo-") == true
 
     private fun demoPurchaseResult(price: String): MobilePackagePurchaseResult =
@@ -370,16 +368,14 @@ private fun PurchaseReviewScreen(
 
 @Composable
 private fun Header(onBack: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(92.dp).background(Brush.horizontalGradient(listOf(ReviewBlue, ReviewBlueDark)))
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().height(92.dp).background(Brush.horizontalGradient(listOf(ReviewBlue, ReviewBlueDark)))) {
         Icon(Icons.Default.ArrowBack, null, tint = Color.White, modifier = Modifier.align(Alignment.CenterStart).padding(start = 18.dp).size(30.dp).clickable(onClick = onBack))
         Text("Confirm Purchase", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
-private fun ReviewCard(title: String, icon: ImageVector, content: @Composable Column.() -> Unit) {
+private fun ReviewCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReviewBorder), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
