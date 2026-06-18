@@ -57,7 +57,7 @@
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
             android:label="OpenEUICC"
-            android:theme="@style/Theme.OpenEUICC.AppCompat" />
+            android:theme="@style/Theme.OpenEUICC.MaterialComponents" />
 
         <activity
             android:name="im.angry.openeuicc.ui.ReportsActivity"
@@ -127,30 +127,6 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.R2wStoreActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.R2wInstallHelpActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.R2wActivationCodeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.R2wPackageDetailActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.TransactionsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
             android:exported="false" />
     </application>
 </manifest>
