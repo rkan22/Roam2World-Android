@@ -85,4 +85,7 @@ private fun MobilePackage.matchesStoreTab(tab: String): Boolean { val h = listOf
 private fun MobilePackage.storeTitleV2(): String = listOfNotNull(country.takeIf { it.isNotBlank() } ?: name, dataAmount?.takeIf { it.isNotBlank() }).joinToString(" ")
 private fun String.shortStoreLabel(): String = when { contains("Turkey", true) -> "Roam2W.\nTurkey"; contains("Europe", true) && contains("Orange", true) -> "Orange\nEurope"; contains("Balkans", true) -> "Orange\nBalkans"; contains("World", true) -> "Orange\nWorld"; contains("Vodafone", true) -> "Vodafone\nEurope"; else -> this }
 private fun MobilePackage.priceNumber(role: String?): Double = priceFor(role).filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: 0.0
-private fun moneyV2(raw: String): String = NumberFormat.getCurrencyInstance(Locale.US).format(raw.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return raw)
+private fun moneyV2(raw: String): String {
+    val parsed = raw.filter { it.isDigit() || it == '.' }.toDoubleOrNull()
+    return if (parsed == null) raw else NumberFormat.getCurrencyInstance(Locale.US).format(parsed)
+}
