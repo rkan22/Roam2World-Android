@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -91,6 +90,7 @@ class CustomerInfoActivity : ComponentActivity() {
             CustomerInfoScreen(
                 packageName = displayPackageName(),
                 packageMeta = packageMeta(),
+                billingCycle = billingCycle(),
                 packagePrice = r2wMoney(intent.getStringExtra(EXTRA_PRICE).orEmpty()),
                 firstName = firstName,
                 lastName = lastName,
@@ -119,14 +119,40 @@ class CustomerInfoActivity : ComponentActivity() {
         }
     }
 
-    private fun displayPackageName(): String =
-        PackageNameCleaner.clean(intent.getStringExtra(EXTRA_NAME)).ifBlank { "eSIM Package" }
+    private fun displayPackageName(): String {
+        val provider = displayProviderPrefix()
+        val region = displayRegion()
+        val data = intent.getStringExtra(EXTRA_DATA)?.trim().orEmpty().ifBlank { extractDataFromName(intent.getStringExtra(EXTRA_NAME).orEmpty()) }
+        return listOf(provider, region, data).filter { it.isNotBlank() }.joinToString(" ").ifBlank { "eSIM Package" }
+    }
 
-    private fun packageMeta(): String = listOfNotNull(
-        intent.getStringExtra(EXTRA_DATA),
-        intent.getStringExtra(EXTRA_VALIDITY),
-        intent.getStringExtra(EXTRA_COUNTRY)
+    private fun displayProviderPrefix(): String {
+        val text = listOfNotNull(intent.getStringExtra(EXTRA_PROVIDER), intent.getStringExtra(EXTRA_NETWORK), intent.getStringExtra(EXTRA_NAME)).joinToString(" ").lowercase()
+        return if (text.contains("vodafone")) "Vodafone" else "Orange"
+    }
+
+    private fun displayRegion(): String {
+        val text = listOfNotNull(intent.getStringExtra(EXTRA_COUNTRY), intent.getStringExtra(EXTRA_COUNTRY_CODE), intent.getStringExtra(EXTRA_COVERAGE), intent.getStringExtra(EXTRA_NAME)).joinToString(" ").lowercase()
+        return when {
+            text.contains("turkey") || text.contains("türkiye") || text.contains(" tr") || text == "tr" -> "Turkey"
+            text.contains("balkan") -> "Balkans"
+            text.contains("europe") -> "Europe"
+            text.contains("world") || text.contains("global") || text.contains("multi-country") -> "World"
+            else -> intent.getStringExtra(EXTRA_COUNTRY)?.takeIf { it.isNotBlank() } ?: "World"
+        }
+    }
+
+    private fun extractDataFromName(rawName: String): String =
+        Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(rawName)?.value?.uppercase()?.replace("GB", " GB")?.replace(Regex("\\s+"), " ")?.trim().orEmpty()
+
+    private fun packageMeta(): String = listOf(
+        intent.getStringExtra(EXTRA_DATA).orEmpty(),
+        billingCycle(),
+        displayRegion()
     ).filter { it.isNotBlank() }.joinToString(" • ")
+
+    private fun billingCycle(): String =
+        intent.getStringExtra(EXTRA_VALIDITY)?.takeIf { it.isNotBlank() } ?: "30 day"
 
     private fun validateForm(): Boolean {
         firstNameError = null
@@ -191,6 +217,7 @@ class CustomerInfoActivity : ComponentActivity() {
 private fun CustomerInfoScreen(
     packageName: String,
     packageMeta: String,
+    billingCycle: String,
     packagePrice: String,
     firstName: String,
     lastName: String,
@@ -210,10 +237,7 @@ private fun CustomerInfoScreen(
     Surface(Modifier.fillMaxSize(), color = CustomerBg) {
         Box(Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 150.dp),
+                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 150.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -226,20 +250,13 @@ private fun CustomerInfoScreen(
                 CustomerField("Last Name", "Enter last name", lastName, lastNameError, onLastNameChange, Icons.Default.Person)
                 CustomerField("Phone Number", "Enter phone number", phone, phoneError, onPhoneChange, Icons.Default.Phone)
 
-                SelectedPackageCard(packageName, packageMeta, packagePrice)
-
+                SelectedPackageCard(packageName, packageMeta, billingCycle, packagePrice)
                 errorMessage?.takeIf { it.isNotBlank() }?.let { ErrorCard(it) }
             }
 
             Surface(Modifier.align(Alignment.BottomCenter).fillMaxWidth(), color = CustomerBg.copy(alpha = 0.96f)) {
                 Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Button(
-                        onClick = onContinue,
-                        enabled = !loading,
-                        modifier = Modifier.fillMaxWidth().height(58.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = CustomerBlue),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
+                    Button(onClick = onContinue, enabled = !loading, modifier = Modifier.fillMaxWidth().height(58.dp), colors = ButtonDefaults.buttonColors(containerColor = CustomerBlue), shape = RoundedCornerShape(14.dp)) {
                         if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White) else Text("Continue", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                     }
                     Text("Cancel", color = CustomerBlue, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp).clickable(onClick = onCancel))
@@ -253,34 +270,16 @@ private fun CustomerInfoScreen(
 private fun CustomerField(label: String, placeholder: String, value: String, error: String?, onChange: (String) -> Unit, icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, color = CustomerMuted, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-        OutlinedTextField(
-            value = value,
-            onValueChange = onChange,
-            placeholder = { Text(placeholder) },
-            leadingIcon = { Icon(icon, null, tint = CustomerMuted) },
-            isError = error != null,
-            supportingText = { error?.let { Text(it) } },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = CustomerBlue,
-                unfocusedBorderColor = CustomerBorder,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
-            )
-        )
+        OutlinedTextField(value = value, onValueChange = onChange, placeholder = { Text(placeholder) }, leadingIcon = { Icon(icon, null, tint = CustomerMuted) }, isError = error != null, supportingText = { error?.let { Text(it) } }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CustomerBlue, unfocusedBorderColor = CustomerBorder, focusedContainerColor = Color.White, unfocusedContainerColor = Color.White))
     }
 }
 
 @Composable
-private fun SelectedPackageCard(packageName: String, packageMeta: String, packagePrice: String) {
+private fun SelectedPackageCard(packageName: String, packageMeta: String, billingCycle: String, packagePrice: String) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, CustomerBorder), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(54.dp).clip(RoundedCornerShape(999.dp)).background(CustomerBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.SimCard, null, tint = CustomerBlue, modifier = Modifier.size(30.dp))
-                }
+                Box(Modifier.size(54.dp).clip(RoundedCornerShape(999.dp)).background(CustomerBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) { Icon(Icons.Default.SimCard, null, tint = CustomerBlue, modifier = Modifier.size(30.dp)) }
                 Column(Modifier.padding(start = 14.dp)) {
                     Text("Selected Package", color = CustomerText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
                     Text(packageName, color = CustomerBlue, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -288,7 +287,7 @@ private fun SelectedPackageCard(packageName: String, packageMeta: String, packag
                 }
             }
             Box(Modifier.fillMaxWidth().height(1.dp).background(CustomerBorder))
-            InfoRow(Icons.Default.CalendarMonth, "Billing Cycle", packageMeta.ifBlank { "30 day" })
+            InfoRow(Icons.Default.CalendarMonth, "Billing Cycle", billingCycle)
             InfoRow(Icons.Default.Sell, "Price", packagePrice)
             InfoRow(Icons.Default.Security, "Support Level", "Priority Support")
         }
@@ -306,9 +305,7 @@ private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label
 
 @Composable
 private fun ErrorCard(message: String) {
-    Surface(color = Color(0xFFFFEAEA), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, Color(0xFFFFCACA))) {
-        Text(message, color = Color(0xFFB91C1C), modifier = Modifier.padding(14.dp), fontWeight = FontWeight.Bold)
-    }
+    Surface(color = Color(0xFFFFEAEA), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, Color(0xFFFFCACA))) { Text(message, color = Color(0xFFB91C1C), modifier = Modifier.padding(14.dp), fontWeight = FontWeight.Bold) }
 }
 
 private fun r2wMoney(raw: String): String {
