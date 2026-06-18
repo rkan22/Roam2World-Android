@@ -20,20 +20,20 @@
             android:name="im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
             android:value="im.angry.openeuicc.ui.UnprivilegedMainActivity" />
 
-        <!-- https://web.dev/get-installed-related-apps/?hl=en -->
         <meta-data
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
 
         <activity
             android:name="im.angry.openeuicc.ui.LoginActivity"
-            android:exported="true">
-                </activity>
+            android:exported="true"
+            android:theme="@style/Theme.OpenEUICC" />
 
         <activity
             android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
             android:exported="true"
-            tools:replace="android:exported">
+            android:theme="@style/Theme.OpenEUICC"
+            tools:replace="android:exported,android:theme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -42,7 +42,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.DashboardActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.OpenEUICC" />
 
         <activity
             android:name="im.angry.openeuicc.ui.WalletActivity"
@@ -125,11 +126,10 @@
                 android:name="autoStoreLocales"
                 android:value="true" />
         </service>
-    
+
         <activity
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -141,10 +141,10 @@
                 android:resource="@xml/r2w_file_paths" />
         </provider>
 
-            <activity
+        <activity
             android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
             android:exported="false" />
-</application>
+    </application>
 
     <queries>
         <package android:name="com.android.stk" />
