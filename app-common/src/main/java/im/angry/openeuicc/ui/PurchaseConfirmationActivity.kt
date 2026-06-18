@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,14 +23,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.SimCard
-import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -57,13 +56,17 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
 import im.angry.openeuicc.auth.MobilePackagePurchaseResult
 import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-private val SuccessBlue = Color(0xFF1263F1)
-private val SuccessBlueDark = Color(0xFF0649B8)
+private val SuccessBlue = Color(0xFF0B84FF)
+private val SuccessGreen = Color(0xFF2FB344)
+private val SuccessGreenLight = Color(0xFFEAF8EE)
 private val SuccessText = Color(0xFF111827)
 private val SuccessMuted = Color(0xFF6B7280)
 private val SuccessBorder = Color(0xFFE5E7EB)
-private val SuccessBg = Color(0xFFF8FAFF)
+private val SuccessBg = Color(0xFFFAFCFF)
 
 class PurchaseConfirmationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +76,6 @@ class PurchaseConfirmationActivity : ComponentActivity() {
 
         val packageName = cleanPackageName(intent.getStringExtra(EXTRA_PACKAGE_NAME).orEmpty())
         val orderNumber = intent.getStringExtra(EXTRA_ORDER_NUMBER).orEmpty()
-        val status = cleanVisibleValue(intent.getStringExtra(EXTRA_STATUS).orEmpty())
         val price = r2wMoney(intent.getStringExtra(EXTRA_PRICE)).orEmpty()
         val balanceAfter = r2wMoney(intent.getStringExtra(EXTRA_BALANCE_AFTER)).orEmpty()
         val lpaCode = intent.getStringExtra(EXTRA_LPA_CODE).orEmpty()
@@ -89,7 +91,6 @@ class PurchaseConfirmationActivity : ComponentActivity() {
             PurchaseConfirmationScreen(
                 packageName = packageName,
                 orderNumber = orderNumber,
-                status = status,
                 price = price,
                 balanceAfter = balanceAfter,
                 lpaCode = lpaCode,
@@ -109,7 +110,7 @@ class PurchaseConfirmationActivity : ComponentActivity() {
     }
 
     private fun configureSystemBars() {
-        window.statusBarColor = AndroidColor.rgb(248, 250, 255)
+        window.statusBarColor = AndroidColor.rgb(250, 252, 255)
         window.navigationBarColor = AndroidColor.BLACK
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = true
@@ -120,20 +121,11 @@ class PurchaseConfirmationActivity : ComponentActivity() {
     private fun launchInstallFlow(installCode: String) {
         if (installCode.isBlank()) return
         val lpaUri = if (installCode.startsWith("LPA:", ignoreCase = true)) installCode else "LPA:$installCode"
-        startActivity(
-            DownloadWizardActivity.newIntent(this).apply {
-                action = Intent.ACTION_VIEW
-                data = lpaUri.toUri()
-            }
-        )
+        startActivity(DownloadWizardActivity.newIntent(this).apply { action = Intent.ACTION_VIEW; data = lpaUri.toUri() })
     }
 
     private fun openDashboard() {
-        startActivity(
-            Intent(this, R2wComposeHomeActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-        )
+        startActivity(Intent(this, R2wComposeHomeActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) })
         finish()
     }
 
@@ -177,7 +169,6 @@ class PurchaseConfirmationActivity : ComponentActivity() {
 private fun PurchaseConfirmationScreen(
     packageName: String,
     orderNumber: String,
-    status: String,
     price: String,
     balanceAfter: String,
     lpaCode: String,
@@ -199,80 +190,78 @@ private fun PurchaseConfirmationScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            SuccessHero(packageName, orderNumber)
-
-            SuccessCard("Order Details", Icons.Default.ReceiptLong) {
-                InfoRow(Icons.Default.CheckCircle, "Status", status.ifBlank { "Successful" })
-                InfoRow(Icons.Default.Sell, "Price", price.ifBlank { "-" })
-                InfoRow(Icons.Default.Wallet, "Balance After", balanceAfter.ifBlank { "-" })
-                if (iccid.isNotBlank()) InfoRow(Icons.Default.SimCard, "ICCID", iccid, valueMaxLines = 2)
-                if (esimId.isNotBlank()) InfoRow(Icons.Default.SimCard, "eSIM ID", esimId, valueMaxLines = 2)
-            }
-
-            ActivationCard(lpaCode, smdp, matchingId, qrCode, qrUrl)
+            SuccessHero()
+            EsimDetailsCard(packageName, iccid, esimId, price, balanceAfter)
+            ActivationDetailsCard(lpaCode, smdp, matchingId, qrCode, qrUrl, orderNumber)
 
             Button(
                 onClick = onInstall,
                 enabled = canInstall,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SuccessBlue, disabledContainerColor = SuccessBlue.copy(alpha = .40f)),
-                shape = RoundedCornerShape(14.dp)
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(22.dp))
-                Text(if (canInstall) "Install eSIM" else "Installation Code Pending", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
+                Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                Text(if (canInstall) "Install eSIM Now" else "Installation Code Pending", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
+                Text("›", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp))
             }
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = onOpenProfiles, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
-                    Text("Profiles", color = SuccessBlue, fontWeight = FontWeight.Bold)
-                }
-                OutlinedButton(onClick = onOpenEsims, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
-                    Text("My eSIMs", color = SuccessBlue, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBorder)) {
-                Icon(Icons.Default.Home, null, tint = SuccessText, modifier = Modifier.size(21.dp))
-                Text("Back to Dashboard", color = SuccessText, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
-            }
+            ActionButton("Open OpenEUICC", Icons.Default.OpenInNew, onOpenProfiles)
+            ActionButton("View eSIM Detail", Icons.Default.SimCard, onOpenEsims)
+            ActionButton("Back to Dashboard", Icons.Default.Home, onHome)
         }
     }
 }
 
 @Composable
-private fun SuccessHero(packageName: String, orderNumber: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(3.dp)
-    ) {
-        Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(SuccessBlue, SuccessBlueDark))).padding(24.dp), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.size(78.dp).clip(RoundedCornerShape(999.dp)).background(Color.White.copy(alpha = .18f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(56.dp))
-                }
-                Text("Purchase Successful", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-                Text(packageName.ifBlank { "Roam2World eSIM Package" }, color = Color.White.copy(alpha = .92f), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                if (orderNumber.isNotBlank()) {
-                    Surface(color = Color.White.copy(alpha = .16f), shape = RoundedCornerShape(999.dp)) {
-                        Text("Order #$orderNumber", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp))
-                    }
-                }
+private fun SuccessHero() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(top = 26.dp, bottom = 12.dp)) {
+        Box(Modifier.size(120.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreenLight), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(92.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreen), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(68.dp))
             }
         }
+        Text("Purchase Successful", color = SuccessText, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+        Text("Your eSIM has been purchased successfully\nand is ready to install.", color = SuccessMuted, fontSize = 18.sp, lineHeight = 25.sp, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+private fun EsimDetailsCard(packageName: String, iccid: String, esimId: String, price: String, balanceAfter: String) {
+    SuccessCard("eSIM Details", Icons.Default.SimCard) {
+        DetailRow(Icons.Default.SimCard, "ICCID", iccid.ifBlank { esimId.ifBlank { "Pending" } }, copyIcon = iccid.isNotBlank() || esimId.isNotBlank())
+        DetailRow(Icons.Default.ReceiptLong, "Provider", providerFromPackage(packageName))
+        DetailRow(Icons.Default.SimCard, "Package", packageName.ifBlank { "Roam2World eSIM Package" })
+        DetailRow(Icons.Default.Today, "Purchase Date", SimpleDateFormat("MMM d yyyy", Locale.US).format(Date()))
+        DetailRow(Icons.Default.CheckCircle, "Activation", if (iccid.isNotBlank() || esimId.isNotBlank()) "Available" else "Pending", valueColor = if (iccid.isNotBlank() || esimId.isNotBlank()) SuccessGreen else SuccessMuted)
+        if (price.isNotBlank()) DetailRow(Icons.Default.ReceiptLong, "Price", price)
+        if (balanceAfter.isNotBlank() && balanceAfter != "-") DetailRow(Icons.Default.Wallet, "Balance After", balanceAfter)
+    }
+}
+
+@Composable
+private fun ActivationDetailsCard(lpaCode: String, smdp: String, matchingId: String, qrCode: String, qrUrl: String, orderNumber: String) {
+    val empty = lpaCode.isBlank() && smdp.isBlank() && matchingId.isBlank() && qrCode.isBlank() && qrUrl.isBlank() && orderNumber.isBlank()
+    if (empty) return
+    SuccessCard("Installation Details", Icons.Default.QrCode2) {
+        if (orderNumber.isNotBlank()) ActivationInfoBlock("Order Number", orderNumber)
+        if (matchingId.isNotBlank()) ActivationInfoBlock("Matching ID", matchingId)
+        if (lpaCode.isNotBlank()) ActivationInfoBlock("Activation Code", lpaCode)
+        if (smdp.isNotBlank()) ActivationInfoBlock("SM-DP+", smdp)
+        if (qrCode.isNotBlank()) ActivationInfoBlock("QR", qrCode)
+        if (qrUrl.isNotBlank()) ActivationInfoBlock("QR URL", qrUrl)
     }
 }
 
 @Composable
 private fun SuccessCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, SuccessBorder), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, SuccessBorder), elevation = CardDefaults.cardElevation(4.dp)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(46.dp).clip(RoundedCornerShape(999.dp)).background(SuccessBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
-                    Icon(icon, null, tint = SuccessBlue, modifier = Modifier.size(25.dp))
+                Box(Modifier.size(46.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreen.copy(alpha = .14f)), contentAlignment = Alignment.Center) {
+                    Icon(icon, null, tint = SuccessGreen, modifier = Modifier.size(25.dp))
                 }
-                Text(title, color = SuccessText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
+                Text(title, color = SuccessGreen, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
             }
             HorizontalDivider(color = SuccessBorder)
             content()
@@ -281,34 +270,50 @@ private fun SuccessCard(title: String, icon: ImageVector, content: @Composable C
 }
 
 @Composable
-private fun ActivationCard(lpaCode: String, smdp: String, matchingId: String, qrCode: String, qrUrl: String) {
-    val empty = lpaCode.isBlank() && smdp.isBlank() && matchingId.isBlank() && qrCode.isBlank() && qrUrl.isBlank()
-    SuccessCard("Activation Details", Icons.Default.QrCode2) {
-        if (empty) {
-            Text("Activation details are being prepared. You can check My eSIMs again in a moment.", color = SuccessMuted, fontSize = 14.sp, lineHeight = 20.sp)
-        } else {
-            if (lpaCode.isNotBlank()) InfoRow(Icons.Default.QrCode2, "Activation Code", lpaCode, valueMaxLines = 3)
-            if (smdp.isNotBlank()) InfoRow(Icons.Default.QrCode2, "SM-DP+", smdp, valueMaxLines = 2)
-            if (matchingId.isNotBlank()) InfoRow(Icons.Default.QrCode2, "Matching ID", matchingId, valueMaxLines = 2)
-            if (qrCode.isNotBlank()) InfoRow(Icons.Default.QrCode2, "QR", qrCode, valueMaxLines = 3)
-            if (qrUrl.isNotBlank()) InfoRow(Icons.Default.QrCode2, "QR URL", qrUrl, valueMaxLines = 3)
+private fun DetailRow(icon: ImageVector, label: String, value: String, valueColor: Color = SuccessText, copyIcon: Boolean = false) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = SuccessGreen, modifier = Modifier.size(25.dp))
+        Text(label, color = SuccessText, fontSize = 16.sp, modifier = Modifier.padding(start = 14.dp).weight(1f))
+        Text(value, color = valueColor, fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End)
+        if (copyIcon) Icon(Icons.Default.ContentCopy, null, tint = SuccessGreen, modifier = Modifier.padding(start = 8.dp).size(21.dp))
+    }
+}
+
+@Composable
+private fun ActivationInfoBlock(label: String, value: String) {
+    Surface(color = Color(0xFFF8FAFF), shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, SuccessBorder)) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text(label, color = SuccessMuted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = SuccessText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 4, overflow = TextOverflow.Ellipsis, lineHeight = 19.sp)
         }
     }
 }
 
 @Composable
-private fun InfoRow(icon: ImageVector, label: String, value: String, valueMaxLines: Int = 1) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = SuccessMuted, modifier = Modifier.size(21.dp))
-        Text(label, color = SuccessMuted, fontSize = 14.sp, modifier = Modifier.padding(start = 12.dp).weight(1f))
-        Text(value, color = SuccessText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = valueMaxLines, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End)
+private fun ActionButton(text: String, icon: ImageVector, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(10.dp), border = BorderStroke(1.dp, SuccessBlue)) {
+        Icon(icon, null, tint = SuccessBlue, modifier = Modifier.size(22.dp))
+        Text(text, color = SuccessBlue, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f).padding(start = 12.dp), textAlign = TextAlign.Center)
+        Text("›", color = SuccessBlue, fontSize = 26.sp, fontWeight = FontWeight.Bold)
     }
 }
 
-private fun cleanVisibleValue(value: String): String =
-    value.replace("TGT", "Orange", ignoreCase = true).replace("tgt", "Orange", ignoreCase = true).replace("demo_success", "Successful", ignoreCase = true)
+private fun providerFromPackage(packageName: String): String = if (packageName.contains("vodafone", true)) "Vodafone" else "Orange"
 
-private fun cleanPackageName(value: String): String = PackageNameCleaner.clean(value)
+private fun cleanPackageName(value: String): String {
+    val cleaned = PackageNameCleaner.clean(value)
+    val data = Regex("""(\d+(?:\.\d+)?)\s*GB""", RegexOption.IGNORE_CASE).find(cleaned)?.value?.uppercase()?.replace("GB", " GB")?.replace(Regex("\\s+"), " ")?.trim().orEmpty()
+    val lower = cleaned.lowercase()
+    val region = when {
+        lower.contains("turkey") || lower.contains("türkiye") -> "Turkey"
+        lower.contains("europe") -> "Europe"
+        lower.contains("balkan") -> "Balkans"
+        lower.contains("world") || lower.contains("global") -> "World"
+        else -> "Turkey"
+    }
+    val provider = if (lower.contains("vodafone")) "Vodafone" else "Orange"
+    return listOf(provider, region, data).filter { it.isNotBlank() }.joinToString(" ").ifBlank { cleaned }
+}
 
 private fun r2wMoney(value: String?): String? {
     val clean = value?.trim()?.takeIf { it.isNotBlank() } ?: return null
