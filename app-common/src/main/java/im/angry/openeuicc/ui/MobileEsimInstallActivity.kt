@@ -272,15 +272,23 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                     startEnabled = true
                     errorMessage = "USB reader found. Grant permission before continuing."
                 }
-                canOpen -> {
-                    val seIds = withContext(Dispatchers.IO) {
-                        runCatching {
-                            euiccChannelManager.flowEuiccSecureElements(EuiccChannelManager.USB_CHANNEL_ID, 0).toList()
-                        }.getOrDefault(emptyList())
+                canOpen || usbManager.hasPermission(device) -> {
+                    val seIds = if (canOpen) {
+                        withContext(Dispatchers.IO) {
+                            runCatching {
+                                euiccChannelManager.flowEuiccSecureElements(EuiccChannelManager.USB_CHANNEL_ID, 0).toList()
+                            }.getOrDefault(emptyList())
+                        }
+                    } else {
+                        emptyList()
                     }
                     loading = false
                     readerReady = true
-                    deviceStatus = if (seIds.isEmpty()) "USB Reader Ready" else "USB Reader Ready • ${seIds.size} SE"
+                    deviceStatus = when {
+                        canOpen && seIds.isNotEmpty() -> "USB Reader Ready • ${seIds.size} SE"
+                        canOpen -> "USB Reader Ready"
+                        else -> "USB Permission Granted"
+                    }
                     downloadStatus = "Ready"
                     actionLabel = "Continue to Installation"
                     startEnabled = true
@@ -447,7 +455,7 @@ private fun InstallCard(title: String, icon: ImageVector, content: @Composable C
 private fun CheckRow(label: String, value: String) {
     val normalized = value.lowercase()
     val color = when {
-        normalized.contains("passed") || normalized.contains("ready") -> InstallGreen
+        normalized.contains("passed") || normalized.contains("ready") || normalized.contains("granted") -> InstallGreen
         normalized.contains("blocked") || normalized.contains("failed") || normalized.contains("denied") -> InstallRed
         normalized.contains("checking") || normalized.contains("launching") || normalized.contains("permission") -> InstallBlue
         else -> InstallOrange
