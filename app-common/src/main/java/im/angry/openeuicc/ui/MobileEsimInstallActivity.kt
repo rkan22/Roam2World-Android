@@ -3,28 +3,39 @@ package im.angry.openeuicc.ui
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,18 +43,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.MobileEsim
-import im.angry.openeuicc.common.R
 import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
 import im.angry.openeuicc.util.LPAString
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+
+private val InstallBlue = Color(0xFF1263F1)
+private val InstallBlueDark = Color(0xFF0649B8)
+private val InstallText = Color(0xFF111827)
+private val InstallMuted = Color(0xFF6B7280)
+private val InstallBorder = Color(0xFFE5E7EB)
+private val InstallBg = Color(0xFFF8FAFF)
+private val InstallGreen = Color(0xFF16A34A)
+private val InstallOrange = Color(0xFFF59E0B)
+private val InstallRed = Color(0xFFDC2626)
 
 class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     private var installCode: String = ""
@@ -54,15 +82,16 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     private var retryVisible by mutableStateOf(false)
     private var startEnabled by mutableStateOf(false)
 
-    private var compatibilityStatus by mutableStateOf("")
-    private var deviceStatus by mutableStateOf("")
-    private var downloadStatus by mutableStateOf("")
+    private var compatibilityStatus by mutableStateOf("Waiting")
+    private var deviceStatus by mutableStateOf("Waiting")
+    private var downloadStatus by mutableStateOf("Waiting")
     private var smdpText by mutableStateOf("")
     private var matchingIdText by mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        actionBar?.hide()
+        configureSystemBars()
         installCode = intent.getStringExtra(EXTRA_INSTALL_CODE).orEmpty()
         setInitialState()
 
@@ -88,14 +117,23 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         runPreflight()
     }
 
+    private fun configureSystemBars() {
+        window.statusBarColor = AndroidColor.rgb(248, 250, 255)
+        window.navigationBarColor = AndroidColor.BLACK
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = false
+        }
+    }
+
     private fun setInitialState() {
         loading = false
         errorMessage = null
         retryVisible = false
         startEnabled = false
-        compatibilityStatus = getString(R.string.mobile_esim_install_step_waiting)
-        deviceStatus = getString(R.string.mobile_esim_install_step_waiting)
-        downloadStatus = getString(R.string.mobile_esim_install_step_waiting)
+        compatibilityStatus = "Waiting"
+        deviceStatus = "Waiting"
+        downloadStatus = "Waiting"
         smdpText = ""
         matchingIdText = ""
     }
@@ -104,44 +142,34 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         lifecycleScope.launch {
             setInitialState()
             loading = true
-            compatibilityStatus = getString(R.string.mobile_esim_install_step_running)
+            compatibilityStatus = "Checking"
 
             val parsed = runCatching {
-                val payload = if (installCode.startsWith("LPA:", ignoreCase = true)) {
-                    installCode
-                } else {
-                    "LPA:$installCode"
-                }
+                val payload = if (installCode.startsWith("LPA:", ignoreCase = true)) installCode else "LPA:$installCode"
                 LPAString.parse(payload).also { lpaPayload = payload }
             }.getOrElse {
-                showFailure(getString(R.string.mobile_esim_install_invalid_code))
+                showFailure("Invalid activation code")
                 return@launch
             }
 
-            compatibilityStatus = getString(R.string.mobile_esim_install_step_passed)
-            smdpText = getString(R.string.mobile_esim_smdp_format, parsed.address)
-            matchingIdText = getString(
-                R.string.mobile_esim_matching_id_format,
-                parsed.matchingId ?: getString(R.string.mobile_esim_value_unavailable)
-            )
+            compatibilityStatus = "Passed"
+            smdpText = parsed.address
+            matchingIdText = parsed.matchingId ?: "Unavailable"
+            deviceStatus = "Checking"
 
-            deviceStatus = getString(R.string.mobile_esim_install_step_running)
-
-            val openEuiccPorts = runCatching {
-                euiccChannelManager.flowAllOpenEuiccPorts().toList()
-            }.getOrElse {
-                showFailure(getString(R.string.mobile_esim_install_device_check_failed))
+            val openEuiccPorts = runCatching { euiccChannelManager.flowAllOpenEuiccPorts().toList() }.getOrElse {
+                showFailure("Device check failed")
                 return@launch
             }
 
             val platformHasEuicc = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
             if (openEuiccPorts.isEmpty() && !platformHasEuicc) {
-                showFailure(getString(R.string.mobile_esim_install_device_unsupported))
+                showFailure("No compatible eUICC device found")
                 return@launch
             }
 
-            deviceStatus = getString(R.string.mobile_esim_install_step_passed)
-            downloadStatus = getString(R.string.mobile_esim_install_ready)
+            deviceStatus = "Passed"
+            downloadStatus = "Ready"
             loading = false
             startEnabled = true
         }
@@ -152,12 +180,12 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         errorMessage = message
         retryVisible = true
         startEnabled = false
-        downloadStatus = getString(R.string.mobile_esim_install_step_blocked)
+        downloadStatus = "Blocked"
     }
 
     private fun launchDownloadWizard() {
         if (lpaPayload.isBlank()) return
-        downloadStatus = getString(R.string.mobile_esim_install_launching)
+        downloadStatus = "Launching"
         startActivity(
             DownloadWizardActivity.newIntent(this).apply {
                 action = Intent.ACTION_VIEW
@@ -192,196 +220,128 @@ private fun MobileEsimInstallScreen(
     onRetry: () -> Unit,
     onStart: () -> Unit
 ) {
-    val orange = Color(0xFFFF6A00)
-    val bg = Color(0xFFF7F7FA)
-
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
-                        Text("Geri")
-                    }
-
-                    if (loading) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(top = 10.dp)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp))
-                            Text("Kontrol ediliyor...")
-                        }
-                    }
+    Surface(Modifier.fillMaxSize(), color = InstallBg) {
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Header(loading, onBack)
+            InstallHero()
+            if (!error.isNullOrBlank()) ErrorCard(error, onRetry, retryVisible)
+            InstallCard("Preflight Checks", Icons.Default.Security) {
+                CheckRow("Activation code", compatibilityStatus)
+                CheckRow("Device eSIM support", deviceStatus)
+                CheckRow("OpenEUICC download wizard", downloadStatus)
+            }
+            if (smdpText.isNotBlank() || matchingIdText.isNotBlank()) {
+                InstallCard("Manual Installation Info", Icons.Default.QrCode2) {
+                    InfoLine("SM-DP+", smdpText)
+                    HorizontalDivider(color = InstallBorder)
+                    InfoLine("Matching ID", matchingIdText)
                 }
-
-                HeroInstallCard(orange)
-
-                if (!error.isNullOrBlank()) {
-                    ErrorCard(error = error, onRetry = onRetry, retryVisible = retryVisible)
+            }
+            InstallCard("Next Step", Icons.Default.Download) {
+                Text(
+                    "When all checks pass, OpenEUICC will open the native download wizard and install the eSIM profile on this device.",
+                    color = InstallMuted,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+                Button(
+                    onClick = onStart,
+                    enabled = startEnabled,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = InstallBlue, disabledContainerColor = InstallBlue.copy(alpha = .35f)),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(22.dp))
+                    Text("Start Installation", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 10.dp))
                 }
-
-                InfoCard(title = "Kurulum Ön Kontrol") {
-                    StepRow("Aktivasyon kodu", compatibilityStatus)
-                    StepRow("Cihaz eSIM desteği", deviceStatus)
-                    StepRow("İndirme sihirbazı", downloadStatus)
-                }
-
-                if (smdpText.isNotBlank() || matchingIdText.isNotBlank()) {
-                    InfoCard(title = "Manuel Kurulum Bilgileri") {
-                        DetailRow("SMDP", smdpText)
-                        DetailRow("Matching ID", matchingIdText)
+                if (retryVisible) {
+                    OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, InstallBlue.copy(alpha = .45f))) {
+                        Text("Run Checks Again", color = InstallBlue, fontWeight = FontWeight.Bold)
                     }
                 }
-
-                InfoCard(title = "Sonraki Adım") {
-                    Text(
-                        text = "Kontroller geçerse OpenEUICC indirme sihirbazını açıp eSIM profilini cihaza kurabilirsin.",
-                        color = Color(0xFF50535C),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Button(
-                        onClick = onStart,
-                        enabled = startEnabled,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = orange),
-                        shape = RoundedCornerShape(18.dp)
-                    ) {
-                        Text("OpenEUICC ile Kuruluma Başla")
-                    }
-
-                    if (retryVisible) {
-                        OutlinedButton(
-                            onClick = onRetry,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(18.dp)
-                        ) {
-                            Text("Tekrar Kontrol Et")
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
 }
 
 @Composable
-private fun HeroInstallCard(orange: Color) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
-    ) {
-        Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "eSIM Kurulumu",
-                color = orange,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "OpenEUICC ile güvenli kurulum",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Aktivasyon kodu doğrulanır, cihaz eSIM desteği kontrol edilir ve ardından native OpenEUICC sihirbazı açılır.",
-                color = Color.White.copy(alpha = 0.74f),
-                style = MaterialTheme.typography.bodyMedium
-            )
+private fun Header(loading: Boolean, onBack: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.ArrowBack, null, tint = InstallText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
+        Text("Install eSIM", color = InstallText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 16.dp).weight(1f))
+        if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp, color = InstallBlue)
+    }
+}
+
+@Composable
+private fun InstallHero() {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(Color.Transparent), elevation = CardDefaults.cardElevation(3.dp)) {
+        Box(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(InstallBlue, InstallBlueDark))).padding(22.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(62.dp).clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = .17f)), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.SimCard, null, tint = Color.White, modifier = Modifier.size(36.dp))
+                }
+                Column(Modifier.padding(start = 14.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Ready for OpenEUICC", color = Color.White, fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("Validate activation details and continue to the native eSIM installer.", color = Color.White.copy(alpha = .82f), fontSize = 14.sp, lineHeight = 20.sp)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun InfoCard(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = title,
-                color = Color(0xFF17181C),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            HorizontalDivider()
+private fun InstallCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, InstallBorder), elevation = CardDefaults.cardElevation(2.dp)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(999.dp)).background(InstallBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
+                    Icon(icon, null, tint = InstallBlue, modifier = Modifier.size(24.dp))
+                }
+                Text(title, color = InstallText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
+            }
+            HorizontalDivider(color = InstallBorder)
             content()
         }
     }
 }
 
 @Composable
-private fun StepRow(label: String, value: String) {
+private fun CheckRow(label: String, value: String) {
     val normalized = value.lowercase()
-    val pill = when {
-        normalized.contains("passed") || normalized.contains("ready") || normalized.contains("başar") ->
-            Color(0xFFDCFCE7) to Color(0xFF166534)
-        normalized.contains("blocked") || normalized.contains("failed") || normalized.contains("unsupported") ->
-            Color(0xFFFEE2E2) to Color(0xFFB91C1C)
-        normalized.contains("running") || normalized.contains("kontrol") ->
-            Color(0xFFDBEAFE) to Color(0xFF1D4ED8)
-        else ->
-            Color(0xFFFEF9C3) to Color(0xFF854D0E)
+    val color = when {
+        normalized.contains("passed") || normalized.contains("ready") -> InstallGreen
+        normalized.contains("blocked") || normalized.contains("failed") || normalized.contains("unsupported") -> InstallRed
+        normalized.contains("checking") || normalized.contains("launching") -> InstallBlue
+        else -> InstallOrange
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(pill.first, RoundedCornerShape(16.dp))
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(label, color = Color(0xFF50535C), style = MaterialTheme.typography.bodySmall)
-        Text(value.ifBlank { "-" }, color = pill.second, fontWeight = FontWeight.Bold)
+    Row(Modifier.fillMaxWidth().background(color.copy(alpha = .10f), RoundedCornerShape(12.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.CheckCircle, null, tint = color, modifier = Modifier.size(22.dp))
+        Text(label, color = InstallText, fontSize = 15.sp, modifier = Modifier.padding(start = 10.dp).weight(1f))
+        Text(value.ifBlank { "Waiting" }, color = color, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, color = Color(0xFF686B73), style = MaterialTheme.typography.bodySmall)
-        Text(value.ifBlank { "-" }, color = Color(0xFF17181C), fontWeight = FontWeight.SemiBold)
+private fun InfoLine(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, color = InstallMuted, fontSize = 14.sp, modifier = Modifier.weight(.36f))
+        Text(value.ifBlank { "—" }, color = InstallText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(.64f))
     }
 }
 
 @Composable
 private fun ErrorCard(error: String, onRetry: () -> Unit, retryVisible: Boolean) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEAEA))
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text("Kurulum kontrolü başarısız", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold)
-            Text(error, color = Color(0xFF7F1D1D))
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color(0xFFFFEAEA)), border = BorderStroke(1.dp, Color(0xFFFFCACA))) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("Installation check failed", color = InstallRed, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            Text(error, color = Color(0xFF7F1D1D), fontSize = 14.sp)
             if (retryVisible) {
-                OutlinedButton(onClick = onRetry) {
-                    Text("Tekrar Dene")
+                OutlinedButton(onClick = onRetry, shape = RoundedCornerShape(12.dp), border = BorderStroke(1.dp, InstallRed.copy(alpha = .4f))) {
+                    Text("Try Again", color = InstallRed, fontWeight = FontWeight.Bold)
                 }
             }
         }
