@@ -551,7 +551,30 @@ private fun extractValidityFromPackage(packageName: String?): String {
     return match?.let { "${it.groupValues[1]} Days" }.orEmpty()
 }
 
-private fun displayEsimData(esim: MobileEsim): String = cleanEsimValue(esim.dataRemaining).ifBlank { cleanEsimValue(esim.dataUsed) }.ifBlank { extractDataFromPackage(esim.packageName) }.ifBlank { "—" }
+private fun displayEsimData(esim: MobileEsim): String =
+    formatDataAmount(esim.dataRemaining)
+        .ifBlank { formatDataAmount(esim.dataUsed) }
+        .ifBlank { extractDataFromPackage(esim.packageName) }
+        .ifBlank { "—" }
+
+private fun formatDataAmount(value: String?): String {
+    val cleaned = cleanEsimValue(value)
+    if (cleaned.isBlank()) return ""
+    val number = Regex("""(\d+(?:[.,]\d+)?)""").find(cleaned)?.groupValues?.getOrNull(1)?.replace(",", ".")?.toDoubleOrNull() ?: return cleaned
+    val upper = cleaned.uppercase(Locale.ENGLISH)
+    return when {
+        upper.contains("GB") -> "${trimNumber(number)} GB"
+        upper.contains("MB") -> "${trimNumber(number / 1024.0)} GB"
+        number >= 1024.0 -> "${trimNumber(number / 1024.0)} GB"
+        else -> trimNumber(number)
+    }
+}
+
+private fun trimNumber(value: Double): String {
+    val raw = String.format(Locale.US, "%.2f", value)
+    return raw.trimEnd('0').trimEnd('.')
+}
+
 private fun displayEsimValidity(esim: MobileEsim): String = extractValidityFromPackage(esim.packageName).ifBlank { "—" }
 private fun displayEsimExpiry(esim: MobileEsim): String = esim.expiresAt?.let { formatProviderDate(it) }.orEmpty().ifBlank { esim.lastRenewal?.renewExpirationTime?.let { formatProviderDate(it) }.orEmpty() }.ifBlank { esim.lastRenewal?.activatedEndTime?.let { formatProviderDate(it) }.orEmpty() }.ifBlank { "—" }
 
