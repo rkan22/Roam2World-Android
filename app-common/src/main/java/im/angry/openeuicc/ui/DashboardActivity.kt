@@ -42,14 +42,16 @@ class DashboardActivity : ComponentActivity() {
                     onWalletClick = { openWalletActivity() },
                     onActionClick = { action ->
                         when (action) {
-                            "orders" -> openPurchaseHistoryActivity()
+                            "store", "packages" -> startActivity(Intent(this, PackagesActivity::class.java))
+                            "orders", "history", "transactions" -> openPurchaseHistoryActivity()
                             "wallet" -> openWalletActivity()
-                            "orange", "recharge" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
+                            "orange", "recharge", "tgt" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
                             "vodafone" -> startActivity(Intent(this, VodafoneRenewalActivity::class.java))
-                            "crm" -> openMyDealersActivity()
+                            "crm", "customers", "dealers" -> openMyDealersActivity()
                             "reports" -> startActivity(Intent(this, ReportsActivity::class.java))
-                            "check_gb" -> startActivity(Intent(this, MobileEsimsActivity::class.java))
+                            "check_gb", "esims" -> startActivity(Intent(this, MobileEsimsActivity::class.java))
                             "openeuicc" -> startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
+                            "more" -> startActivity(Intent(this, MoreActivity::class.java))
                         }
                     }
                 )
