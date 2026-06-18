@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SimCard
-import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.MobileDashboardData
 import im.angry.openeuicc.auth.MobileDashboardOrder
+import java.text.NumberFormat
+import java.util.Locale
 
 private val R2WBlue = Color(0xFF1263F1)
 private val R2WBlueDark = Color(0xFF0047D8)
@@ -62,7 +63,6 @@ private val R2WBorder = Color(0xFFE5E7EB)
 private val R2WBackground = Color(0xFFF8FAFF)
 private val R2WGreen = Color(0xFF12A150)
 private val R2WOrange = Color(0xFFF97316)
-private val R2WPurple = Color(0xFF7C3AED)
 private val R2WTeal = Color(0xFF14B8A6)
 
 @Composable
@@ -76,13 +76,13 @@ fun DashboardScreen(
         containerColor = R2WBackground,
         floatingActionButton = {
             Surface(
-                modifier = Modifier.size(58.dp),
+                modifier = Modifier.size(54.dp),
                 color = R2WBlue,
                 shape = RoundedCornerShape(999.dp),
-                shadowElevation = 12.dp
+                shadowElevation = 10.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
+                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(30.dp))
                 }
             }
         }
@@ -97,26 +97,26 @@ fun DashboardScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item { Spacer(modifier = Modifier.height(10.dp)) }
+                item { Spacer(modifier = Modifier.height(2.dp)) }
                 item { DashboardHeader(userName = userName) }
                 item { RoleTabs() }
                 item {
                     WalletHeroCard(
-                        balance = data?.currentBalance ?: "$2,450.50",
+                        balance = formatDashboardMoney(data?.currentBalance, "$2,450.50"),
                         onAddFunds = onWalletClick,
                         onTransactions = { onActionClick("wallet") }
                     )
                 }
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             DashboardMetricCard(
                                 icon = Icons.Default.Assessment,
                                 iconTint = R2WBlue,
                                 title = "Today Sales",
-                                value = data?.todaySales ?: "$1,234",
+                                value = formatDashboardMoney(data?.todaySales, "$1,234"),
                                 caption = "↗ 12.5%",
                                 modifier = Modifier.weight(1f)
                             )
@@ -124,12 +124,12 @@ fun DashboardScreen(
                                 icon = Icons.Default.CalendarMonth,
                                 iconTint = R2WBlue,
                                 title = "Monthly Sales",
-                                value = data?.monthlySales ?: "$15,678",
+                                value = formatDashboardMoney(data?.monthlySales, "$15,678"),
                                 caption = "↗ 18.3%",
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             DashboardMetricCard(
                                 icon = Icons.Default.SimCard,
                                 iconTint = R2WTeal,
@@ -159,7 +159,7 @@ fun DashboardScreen(
                 item {
                     QuickActionsCard(onActionClick = onActionClick)
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(76.dp)) }
             }
 
             DashboardBottomNav(onActionClick = onActionClick)
@@ -175,59 +175,40 @@ private fun DashboardHeader(userName: String) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Roam",
-                    color = R2WText,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "2",
-                    color = R2WTeal,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "World",
-                    color = R2WText,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                Text("Roam", color = R2WText, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+                Text("2", color = R2WTeal, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
+                Text("World", color = R2WText, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                 Box(
                     modifier = Modifier
-                        .padding(start = 8.dp)
+                        .padding(start = 7.dp)
                         .clip(RoundedCornerShape(6.dp))
                         .background(R2WBlue)
                         .padding(horizontal = 7.dp, vertical = 3.dp)
                 ) {
-                    Text("B2B", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text("B2B", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
-            Spacer(modifier = Modifier.height(18.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Welcome back, ",
-                    color = R2WText,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = userName.ifBlank { "Admin" },
-                    color = R2WBlue,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Welcome back, ${userName.ifBlank { "Admin" }}",
+                color = R2WText,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             Text(
                 text = "Here's what's happening with your business today.",
                 color = R2WMuted,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2
             )
         }
-        IconButton(onClick = { }) {
+        IconButton(onClick = { }, modifier = Modifier.size(40.dp)) {
             Box {
-                Icon(Icons.Default.Notifications, contentDescription = null, tint = R2WText, modifier = Modifier.size(28.dp))
+                Icon(Icons.Default.Notifications, contentDescription = null, tint = R2WText, modifier = Modifier.size(25.dp))
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -259,9 +240,9 @@ private fun RoleTabs() {
 @Composable
 private fun RoleTab(title: String, icon: ImageVector, selected: Boolean, modifier: Modifier) {
     Surface(
-        modifier = modifier.height(44.dp),
+        modifier = modifier.height(38.dp),
         color = Color.White,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(13.dp),
         border = if (selected) BorderStroke(1.dp, R2WBlue) else null
     ) {
         Row(
@@ -269,12 +250,12 @@ private fun RoleTab(title: String, icon: ImageVector, selected: Boolean, modifie
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, contentDescription = null, tint = if (selected) R2WBlue else R2WMuted, modifier = Modifier.size(18.dp))
+            Icon(icon, contentDescription = null, tint = if (selected) R2WBlue else R2WMuted, modifier = Modifier.size(16.dp))
             Text(
                 text = title,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = 7.dp),
                 color = if (selected) R2WBlue else R2WMuted,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -290,7 +271,7 @@ private fun WalletHeroCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .height(134.dp),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = R2WBlue),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
@@ -299,39 +280,39 @@ private fun WalletHeroCard(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Brush.horizontalGradient(listOf(R2WBlue, R2WBlueDark)))
-                .padding(22.dp)
+                .padding(18.dp)
         ) {
             Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                Text("Wallet Balance", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Text("Wallet Balance", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 Text(
                     text = balance,
                     color = Color.White,
-                    fontSize = 36.sp,
+                    fontSize = 33.sp,
                     fontWeight = FontWeight.ExtraBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text("≈ $13,482.56 USD", color = Color.White.copy(alpha = 0.86f), fontSize = 13.sp)
+                Text("≈ $13,482.56 USD", color = Color.White.copy(alpha = 0.86f), fontSize = 12.sp)
             }
             Surface(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .clickable(onClick = onAddFunds),
-                color = Color.White,
+                color = Color.White.copy(alpha = 0.92f),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(18.dp))
-                    Text("Add Funds", color = R2WBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Add, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(17.dp))
+                    Text("Add Funds", color = R2WBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Text(
                 text = "View Transactions ›",
                 color = Color.White,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -352,7 +333,7 @@ private fun DashboardMetricCard(
     captionColor: Color = R2WGreen
 ) {
     Card(
-        modifier = modifier.height(112.dp),
+        modifier = modifier.height(96.dp),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, R2WBorder),
@@ -361,28 +342,28 @@ private fun DashboardMetricCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(14.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(54.dp)
-                    .clip(RoundedCornerShape(18.dp))
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(iconTint.copy(alpha = 0.13f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(28.dp))
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(25.dp))
             }
-            Column(modifier = Modifier.padding(start = 12.dp)) {
-                Text(title, color = R2WMuted, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                Text(value, color = R2WText, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+            Column(modifier = Modifier.padding(start = 10.dp)) {
+                Text(title, color = R2WMuted, fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 2)
+                Text(value, color = R2WText, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                 Surface(color = captionColor.copy(alpha = 0.10f), shape = RoundedCornerShape(10.dp)) {
                     Text(
                         text = caption,
                         color = captionColor,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
             }
@@ -401,13 +382,13 @@ private fun RecentPurchasesCard(
         border = BorderStroke(1.dp, R2WBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Recent Purchases", color = R2WText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                Text("Recent Purchases", color = R2WText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
                 Text(
                     "View All",
                     color = R2WBlue,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable(onClick = onViewAll)
                 )
@@ -416,7 +397,7 @@ private fun RecentPurchasesCard(
                 listOf(
                     MobileDashboardOrder("1", "ORD-2025-0512-1021", "Global Connect LLC", "10 × Europe eSIM • May 25, 2025", "$200.00", "Completed")
                 )
-            }.take(2)
+            }.take(1)
             displayOrders.forEach { order ->
                 PurchaseRow(order)
             }
@@ -433,35 +414,35 @@ private fun PurchaseRow(order: MobileDashboardOrder) {
         border = BorderStroke(1.dp, R2WBorder)
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(54.dp)
+                    .size(46.dp)
                     .clip(RoundedCornerShape(999.dp))
                     .background(R2WBlue.copy(alpha = 0.10f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Business, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(26.dp))
+                Icon(Icons.Default.Business, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(23.dp))
             }
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 14.dp)
+                    .padding(start = 12.dp)
             ) {
-                Text(order.title, color = R2WText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(order.subtitle, color = R2WMuted, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(order.title, color = R2WText, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(order.subtitle, color = R2WMuted, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(order.amount ?: "$200.00", color = R2WText, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                Text(formatDashboardMoney(order.amount, "$200.00"), color = R2WText, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
                 Surface(color = statusColor(order.status).copy(alpha = 0.11f), shape = RoundedCornerShape(10.dp)) {
                     Text(
                         text = order.status ?: "Completed",
                         color = statusColor(order.status),
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
             }
@@ -477,16 +458,16 @@ private fun QuickActionsCard(onActionClick: (String) -> Unit) {
         border = BorderStroke(1.dp, R2WBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text("Quick Actions", color = R2WText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Quick Actions", color = R2WText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickActionButton(Icons.Default.ShoppingCart, "Buy eSIM", { onActionClick("store") }, Modifier.weight(1f))
                 QuickActionButton(Icons.Default.GridView, "OpenEUICC", { onActionClick("openeuicc") }, Modifier.weight(1f))
                 QuickActionButton(Icons.Default.ReceiptLong, "eSIM History", { onActionClick("orders") }, Modifier.weight(1f))
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                QuickActionButton(Icons.Default.AccountBalanceWallet, "Wallet Request", { onActionClick("wallet") }, Modifier.weight(1f))
-                QuickActionButton(Icons.Default.Refresh, "TGT SIM Recharge", { onActionClick("recharge") }, Modifier.weight(1f))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                QuickActionButton(Icons.Default.AccountBalanceWallet, "Wallet", { onActionClick("wallet") }, Modifier.weight(1f))
+                QuickActionButton(Icons.Default.Refresh, "TGT Recharge", { onActionClick("recharge") }, Modifier.weight(1f))
             }
         }
     }
@@ -501,7 +482,7 @@ private fun QuickActionButton(
 ) {
     Surface(
         modifier = modifier
-            .height(96.dp)
+            .height(82.dp)
             .clickable(onClick = onClick),
         color = Color.White,
         shape = RoundedCornerShape(16.dp),
@@ -509,13 +490,13 @@ private fun QuickActionButton(
         shadowElevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(icon, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(30.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(label, color = R2WText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
+            Icon(icon, contentDescription = null, tint = R2WBlue, modifier = Modifier.size(26.dp))
+            Spacer(modifier = Modifier.height(7.dp))
+            Text(label, color = R2WText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
         }
     }
 }
@@ -531,7 +512,8 @@ private fun DashboardBottomNav(onActionClick: (String) -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .height(70.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -550,11 +532,11 @@ private fun BottomNavItem(icon: ImageVector, title: String, selected: Boolean, o
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 5.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(icon, contentDescription = null, tint = if (selected) R2WBlue else R2WMuted, modifier = Modifier.size(24.dp))
-        Text(title, color = if (selected) R2WBlue else R2WMuted, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+        Icon(icon, contentDescription = null, tint = if (selected) R2WBlue else R2WMuted, modifier = Modifier.size(23.dp))
+        Text(title, color = if (selected) R2WBlue else R2WMuted, fontSize = 10.sp, fontWeight = FontWeight.Medium, maxLines = 1)
     }
 }
 
@@ -565,4 +547,13 @@ private fun statusColor(status: String?): Color {
         normalized.contains("pending") || normalized.contains("process") -> R2WBlue
         else -> R2WGreen
     }
+}
+
+private fun formatDashboardMoney(value: String?, fallback: String): String {
+    val raw = value?.trim().orEmpty()
+    if (raw.isBlank()) return fallback
+    if (raw.any { it == '$' || it == '€' || it == '₺' || it.isLetter() }) return raw
+    val numeric = raw.replace(",", "").toDoubleOrNull() ?: return raw
+    val formatter = NumberFormat.getCurrencyInstance(Locale.US)
+    return formatter.format(numeric)
 }
