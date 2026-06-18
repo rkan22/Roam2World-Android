@@ -151,8 +151,7 @@ class CustomerInfoActivity : ComponentActivity() {
         displayRegion()
     ).filter { it.isNotBlank() }.joinToString(" • ")
 
-    private fun billingCycle(): String =
-        intent.getStringExtra(EXTRA_VALIDITY)?.takeIf { it.isNotBlank() } ?: "30 day"
+    private fun billingCycle(): String = normalizeValidity(intent.getStringExtra(EXTRA_VALIDITY).orEmpty())
 
     private fun validateForm(): Boolean {
         firstNameError = null
@@ -311,4 +310,12 @@ private fun ErrorCard(message: String) {
 private fun r2wMoney(raw: String): String {
     val numeric = raw.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: return raw
     return NumberFormat.getCurrencyInstance(Locale.US).format(numeric)
+}
+
+private fun normalizeValidity(raw: String): String {
+    val value = raw.trim()
+    if (value.isBlank()) return "30 Days"
+    val days = Regex("""(\d+)\s*day[s]?""", RegexOption.IGNORE_CASE).find(value)?.groupValues?.getOrNull(1)
+    if (days != null) return "$days Days"
+    return value.replace(" day", " Days", ignoreCase = true).replace(" days", " Days", ignoreCase = true)
 }
