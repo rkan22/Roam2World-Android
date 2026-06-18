@@ -78,6 +78,7 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
         setContentView(R.layout.activity_download_wizard)
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // Make back == prev
                 onPrevPressed()
             }
         })
@@ -131,6 +132,9 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
     }
 
     private fun handleDeepLink() {
+        // If we get an LPA string from deep-link intents, extract from there.
+        // Note that `onRestoreInstanceState` could override this with user input,
+        // but that _is_ the desired behavior.
         val uri = intent.data ?: return
         if (uri.scheme.contentEquals("lpa", ignoreCase = true)) {
             val parsed = LPAString.parse(uri.schemeSpecificPart)
@@ -217,7 +221,9 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
                     val (slotId, seId) = DownloadWizardSlotSelectFragment.decodeSyntheticSlotId(
                         state.selectedSyntheticSlotId
                     )
+                    // This is run on IO by default
                     euiccChannelManager.withEuiccChannel(slotId, seId) { channel ->
+                        // Be _very_ sure that the channel we got is valid
                         if (!channel.valid) throw EuiccChannelManager.EuiccChannelNotFoundException()
                     }
                 } catch (e: EuiccChannelManager.EuiccChannelNotFoundException) {
@@ -266,6 +272,7 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
             .replace(R.id.step_fragment_container, nextFrag)
             .commit()
 
+        // Sync screen on state
         if (nextFrag.keepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
@@ -305,13 +312,8 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
 
         abstract val hasNext: Boolean
         abstract val hasPrev: Boolean
-        open fun beforeNext() {}
         abstract fun createNextFragment(): DownloadWizardStepFragment?
         abstract fun createPrevFragment(): DownloadWizardStepFragment?
-
-        protected fun refreshButtons() {
-            (requireActivity() as DownloadWizardActivity).refreshButtons()
-        }
 
         protected fun gotoNextFragment(next: DownloadWizardStepFragment? = null) {
             val realNext = next ?: createNextFragment()
@@ -337,5 +339,11 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
                 }
             }
         }
+
+        protected fun refreshButtons() {
+            (requireActivity() as DownloadWizardActivity).refreshButtons()
+        }
+
+        open fun beforeNext() {}
     }
 }
