@@ -95,7 +95,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.OpenEUICC" />
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
