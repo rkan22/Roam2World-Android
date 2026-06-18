@@ -44,10 +44,12 @@ class DashboardActivity : ComponentActivity() {
                         when (action) {
                             "orders" -> openPurchaseHistoryActivity()
                             "wallet" -> openWalletActivity()
-                            "orange" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
+                            "orange", "recharge" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
                             "vodafone" -> startActivity(Intent(this, VodafoneRenewalActivity::class.java))
                             "crm" -> openMyDealersActivity()
                             "reports" -> startActivity(Intent(this, ReportsActivity::class.java))
+                            "check_gb" -> startActivity(Intent(this, MobileEsimsActivity::class.java))
+                            "openeuicc" -> startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
                         }
                     }
                 )
