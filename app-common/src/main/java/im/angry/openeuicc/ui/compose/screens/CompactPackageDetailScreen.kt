@@ -53,9 +53,9 @@ fun CompactPackageDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 104.dp),
+                    .padding(start = 20.dp, top = 14.dp, end = 20.dp, bottom = 142.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.ArrowBack, null, tint = DetailText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
@@ -65,28 +65,32 @@ fun CompactPackageDetailScreen(
                     Spacer(Modifier.size(30.dp))
                 }
 
-                Text(packageName, color = DetailText, fontSize = 28.sp, lineHeight = 32.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text(description.ifBlank { "Stay connected with fast and reliable data." }, color = DetailMuted, fontSize = 16.sp, lineHeight = 22.sp, textAlign = TextAlign.Center)
+                Text(packageName, color = DetailText, fontSize = 26.sp, lineHeight = 30.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(description.ifBlank { "Stay connected with fast and reliable data." }, color = DetailMuted, fontSize = 15.sp, lineHeight = 21.sp, textAlign = TextAlign.Center)
 
                 DetailInfoCard(Icons.Default.Dataset, "Data", data.ifBlank { "10GB" })
                 DetailInfoCard(Icons.Default.CalendarMonth, "Validity", validity.ifBlank { "30 Days" })
-                DetailInfoCard(Icons.Default.Sell, "Price", price, valueColor = DetailBlue, valueSize = 34)
+                DetailInfoCard(Icons.Default.Sell, "Price", price, valueColor = DetailBlue, valueSize = 32)
                 CoverageCard(coverage)
                 TrustStrip()
             }
 
-            Button(
-                onClick = onBuy,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp)
-                    .height(58.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DetailBlue),
-                shape = RoundedCornerShape(14.dp)
+            Surface(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                color = DetailBg.copy(alpha = 0.96f)
             ) {
-                Icon(Icons.Default.ShoppingCart, null, tint = Color.White, modifier = Modifier.size(24.dp))
-                Text("Purchase Package", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
+                Button(
+                    onClick = onBuy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 18.dp)
+                        .height(58.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = DetailBlue),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(Icons.Default.ShoppingCart, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                    Text("Purchase Package", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 12.dp))
+                }
             }
         }
     }
@@ -96,20 +100,20 @@ fun CompactPackageDetailScreen(
 private fun ProviderLogo(network: String) {
     val isVodafone = network.contains("vodafone", true)
     val color = if (isVodafone) Color(0xFFE60000) else DetailOrange
-    Box(Modifier.size(58.dp).clip(RoundedCornerShape(10.dp)).background(color), contentAlignment = Alignment.Center) {
-        Text(if (isVodafone) "voda" else "orange", color = Color.White, fontSize = if (isVodafone) 12.sp else 14.sp, fontWeight = FontWeight.ExtraBold)
+    Box(Modifier.size(54.dp).clip(RoundedCornerShape(10.dp)).background(color), contentAlignment = Alignment.Center) {
+        Text(if (isVodafone) "voda" else "orange", color = Color.White, fontSize = if (isVodafone) 12.sp else 13.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
 
 @Composable
-private fun DetailInfoCard(icon: ImageVector, label: String, value: String, valueColor: Color = DetailText, valueSize: Int = 28) {
+private fun DetailInfoCard(icon: ImageVector, label: String, value: String, valueColor: Color = DetailText, valueSize: Int = 27) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, DetailBorder), elevation = CardDefaults.cardElevation(2.dp)) {
-        Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(58.dp).clip(RoundedCornerShape(999.dp)).background(DetailBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
-                Icon(icon, null, tint = DetailBlue, modifier = Modifier.size(30.dp))
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(54.dp).clip(RoundedCornerShape(999.dp)).background(DetailBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = DetailBlue, modifier = Modifier.size(28.dp))
             }
-            Column(Modifier.padding(start = 18.dp)) {
-                Text(label, color = DetailMuted, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Column(Modifier.padding(start = 16.dp)) {
+                Text(label, color = DetailMuted, fontSize = 15.sp, fontWeight = FontWeight.Medium)
                 Text(value, color = valueColor, fontSize = valueSize.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -119,17 +123,17 @@ private fun DetailInfoCard(icon: ImageVector, label: String, value: String, valu
 @Composable
 private fun CoverageCard(coverage: String) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, DetailBorder), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(42.dp).clip(RoundedCornerShape(999.dp)).background(DetailBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Language, null, tint = DetailBlue, modifier = Modifier.size(24.dp))
+                Box(Modifier.size(40.dp).clip(RoundedCornerShape(999.dp)).background(DetailBlue.copy(alpha = .10f)), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Language, null, tint = DetailBlue, modifier = Modifier.size(23.dp))
                 }
                 Column(Modifier.padding(start = 12.dp)) {
-                    Text("Coverage", color = DetailMuted, fontSize = 14.sp)
-                    Text(coverage.ifBlank { "150+ Countries" }, color = DetailText, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("Coverage", color = DetailMuted, fontSize = 13.sp)
+                    Text(coverage.ifBlank { "150+ Countries" }, color = DetailText, fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
-            Text("🇺🇸  🇬🇧  🇫🇷  🇩🇪  🇪🇸  🇮🇹  🇳🇱  🇨🇭  🇸🇪  🇵🇹  🇧🇪  🇦🇹  🇩🇰  🇳🇴  🇹🇷  +130", fontSize = 24.sp, lineHeight = 34.sp)
+            Text("🇺🇸  🇬🇧  🇫🇷  🇩🇪  🇪🇸  🇮🇹  🇳🇱  🇨🇭  🇸🇪  🇵🇹  🇧🇪  🇦🇹  🇩🇰  🇳🇴  🇹🇷  +130", fontSize = 23.sp, lineHeight = 32.sp)
         }
     }
 }
@@ -139,7 +143,7 @@ private fun TrustStrip() {
     Surface(Modifier.fillMaxWidth(), color = Color(0xFFF1F5FB), shape = RoundedCornerShape(14.dp)) {
         Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
             Icon(Icons.Default.Security, null, tint = DetailBlue, modifier = Modifier.size(16.dp))
-            Text("Secure payment • Instant activation • 24/7 support", color = DetailMuted, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp))
+            Text("Secure payment • Instant activation • 24/7 support", color = DetailMuted, fontSize = 12.sp, modifier = Modifier.padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
