@@ -186,7 +186,7 @@ private fun PurchaseConfirmationScreen(
 ) {
     Surface(Modifier.fillMaxSize(), color = SuccessBg) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 18.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -215,14 +215,14 @@ private fun PurchaseConfirmationScreen(
 
 @Composable
 private fun SuccessHero() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(top = 26.dp, bottom = 12.dp)) {
-        Box(Modifier.size(120.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreenLight), contentAlignment = Alignment.Center) {
-            Box(Modifier.size(92.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreen), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(68.dp))
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 6.dp)) {
+        Box(Modifier.size(96.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreenLight), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(76.dp).clip(RoundedCornerShape(999.dp)).background(SuccessGreen), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.CheckCircle, null, tint = Color.White, modifier = Modifier.size(56.dp))
             }
         }
-        Text("Purchase Successful", color = SuccessText, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
-        Text("Your eSIM has been purchased successfully\nand is ready to install.", color = SuccessMuted, fontSize = 18.sp, lineHeight = 25.sp, textAlign = TextAlign.Center)
+        Text("Purchase Successful", color = SuccessText, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center)
+        Text("Your eSIM has been purchased successfully\nand is ready to install.", color = SuccessMuted, fontSize = 17.sp, lineHeight = 23.sp, textAlign = TextAlign.Center)
     }
 }
 
@@ -243,7 +243,7 @@ private fun EsimDetailsCard(packageName: String, iccid: String, esimId: String, 
 private fun ActivationDetailsCard(lpaCode: String, smdp: String, matchingId: String, qrCode: String, qrUrl: String, orderNumber: String) {
     val empty = lpaCode.isBlank() && smdp.isBlank() && matchingId.isBlank() && qrCode.isBlank() && qrUrl.isBlank() && orderNumber.isBlank()
     if (empty) return
-    SuccessCard("Installation Details", Icons.Default.QrCode2) {
+    SuccessCard("Activation Details", Icons.Default.QrCode2) {
         if (orderNumber.isNotBlank()) ActivationInfoBlock("Order Number", orderNumber)
         if (matchingId.isNotBlank()) ActivationInfoBlock("Matching ID", matchingId)
         if (lpaCode.isNotBlank()) ActivationInfoBlock("Activation Code", lpaCode)
