@@ -415,10 +415,32 @@ private fun DetailsCard(esim: MobileEsim, onCopy: (String, String?) -> Unit) {
 private fun ActivationCard(esim: MobileEsim, onCopy: (String, String?) -> Unit) {
     SectionCard("Activation Details", Icons.Default.QrCode2) {
         val payload = esim.qrPayload().orEmpty()
-        DetailRow("QR / LPA", if (payload.isBlank()) "Pending" else payload, copyable = payload.isNotBlank(), maxLines = 3, onCopy = { onCopy("QR / LPA", payload) })
-        DetailRow("SM-DP+", esim.smdpAddress.orEmpty(), copyable = !esim.smdpAddress.isNullOrBlank(), maxLines = 2, onCopy = { onCopy("SM-DP+", esim.smdpAddress) })
-        DetailRow("Matching ID", esim.matchingId.orEmpty(), copyable = !esim.matchingId.isNullOrBlank(), maxLines = 2, onCopy = { onCopy("Matching ID", esim.matchingId) })
-        DetailRow("Activation Code", esim.activationCode.orEmpty(), copyable = !esim.activationCode.isNullOrBlank(), maxLines = 2, onCopy = { onCopy("Activation Code", esim.activationCode) })
+        val rows = listOf(
+            ActivationRowData("QR / LPA", if (payload.isBlank()) "Pending" else payload, payload.isNotBlank(), 3) { onCopy("QR / LPA", payload) },
+            ActivationRowData("SM-DP+", esim.smdpAddress.orEmpty(), !esim.smdpAddress.isNullOrBlank(), 2) { onCopy("SM-DP+", esim.smdpAddress) },
+            ActivationRowData("Matching ID", esim.matchingId.orEmpty(), !esim.matchingId.isNullOrBlank(), 2) { onCopy("Matching ID", esim.matchingId) }
+        )
+        rows.forEachIndexed { index, row ->
+            ActivationLine(row)
+            if (index < rows.lastIndex) HorizontalDivider(color = EsimBorder, thickness = 1.dp)
+        }
+    }
+}
+
+private data class ActivationRowData(
+    val label: String,
+    val value: String,
+    val copyable: Boolean,
+    val maxLines: Int,
+    val onCopy: () -> Unit
+)
+
+@Composable
+private fun ActivationLine(row: ActivationRowData) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(row.label, color = EsimMuted, fontSize = 15.sp, modifier = Modifier.weight(.34f))
+        Text(row.value.ifBlank { "—" }, color = EsimText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = row.maxLines, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.weight(.56f))
+        if (row.copyable) Icon(Icons.Default.ContentCopy, null, tint = EsimBlue, modifier = Modifier.padding(start = 8.dp).size(21.dp).clickable(onClick = row.onCopy))
     }
 }
 
