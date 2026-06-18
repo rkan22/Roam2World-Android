@@ -22,11 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 private val DetailBlue = Color(0xFF1263F1)
 private val DetailText = Color(0xFF111827)
@@ -123,7 +125,7 @@ private fun DetailInfoCard(icon: ImageVector, label: String, value: String, valu
 @Composable
 private fun CoverageCard(coverage: String) {
     val normalizedCoverage = coverage.trim().ifBlank { "Coverage details not provided" }
-    val countries = coverageTokens(normalizedCoverage)
+    val countries = coverageCountries(normalizedCoverage)
     val summary = coverageSummary(normalizedCoverage, countries)
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, DetailBorder), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -137,7 +139,7 @@ private fun CoverageCard(coverage: String) {
                 }
             }
             if (countries.isNotEmpty()) {
-                Text(countries.take(18).joinToString("  "), color = DetailText, fontSize = 14.sp, lineHeight = 22.sp)
+                CountryFlagGrid(countries.take(18))
                 if (countries.size > 18) {
                     Text("+${countries.size - 18} more", color = DetailBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
@@ -148,7 +150,32 @@ private fun CoverageCard(coverage: String) {
     }
 }
 
-private fun coverageSummary(raw: String, countries: List<String>): String {
+@Composable
+private fun CountryFlagGrid(countries: List<CoverageCountry>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        countries.chunked(6).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                row.forEach { country -> OnlineFlag(country) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OnlineFlag(country: CoverageCountry) {
+    Surface(shape = RoundedCornerShape(8.dp), color = Color.White, border = BorderStroke(1.dp, DetailBorder), shadowElevation = 1.dp) {
+        AsyncImage(
+            model = "https://flagcdn.com/w80/${country.code.lowercase()}.png",
+            contentDescription = country.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(width = 38.dp, height = 28.dp)
+        )
+    }
+}
+
+private data class CoverageCountry(val code: String, val name: String)
+
+private fun coverageSummary(raw: String, countries: List<CoverageCountry>): String {
     if (countries.size >= 2) return "${countries.size} Countries"
     if (raw.contains("150", true) || raw.contains("global", true) || raw.contains("world", true)) return raw
     if (raw.contains("europe", true)) return "Europe Coverage"
@@ -156,52 +183,59 @@ private fun coverageSummary(raw: String, countries: List<String>): String {
     return raw.take(40)
 }
 
-private fun coverageTokens(raw: String): List<String> {
-    val compactCodes = raw.split(',', ';', '|', '/', '\n')
+private fun coverageCountries(raw: String): List<CoverageCountry> {
+    val rawTokens = raw.split(',', ';', '|', '/', '\n')
         .map { it.trim() }
         .filter { it.length in 2..40 }
-    return compactCodes
-        .map { token -> coverageName(token) }
-        .distinct()
-        .take(40)
-}
-
-private fun coverageName(token: String): String {
-    val clean = token.trim().uppercase()
-    return when (clean) {
-        "TR", "TUR" -> "Turkey"
-        "US", "USA" -> "United States"
-        "GB", "UK", "GBR" -> "United Kingdom"
-        "FR", "FRA" -> "France"
-        "DE", "DEU" -> "Germany"
-        "ES", "ESP" -> "Spain"
-        "IT", "ITA" -> "Italy"
-        "NL", "NLD" -> "Netherlands"
-        "CH", "CHE" -> "Switzerland"
-        "SE", "SWE" -> "Sweden"
-        "PT", "PRT" -> "Portugal"
-        "BE", "BEL" -> "Belgium"
-        "AT", "AUT" -> "Austria"
-        "DK", "DNK" -> "Denmark"
-        "NO", "NOR" -> "Norway"
-        "IE", "IRL" -> "Ireland"
-        "GR", "GRC" -> "Greece"
-        "PL", "POL" -> "Poland"
-        "RO", "ROU" -> "Romania"
-        "BG", "BGR" -> "Bulgaria"
-        "HR", "HRV" -> "Croatia"
-        "RS", "SRB" -> "Serbia"
-        "AL", "ALB" -> "Albania"
-        "ME", "MNE" -> "Montenegro"
-        "MK", "MKD" -> "North Macedonia"
-        "BA", "BIH" -> "Bosnia and Herzegovina"
-        "SI", "SVN" -> "Slovenia"
-        "SK", "SVK" -> "Slovakia"
-        "CZ", "CZE" -> "Czechia"
-        "HU", "HUN" -> "Hungary"
-        else -> token.trim().replace('_', ' ').replace('-', ' ')
+    val mapped = rawTokens.mapNotNull { token -> coverageCountry(token) }.distinctBy { it.code }
+    return when {
+        mapped.isNotEmpty() -> mapped.take(60)
+        raw.contains("turkey", true) || raw.contains("türkiye", true) || raw.equals("TR", true) -> listOf(CoverageCountry("TR", "Turkey"))
+        raw.contains("europe", true) -> europeCountries()
+        raw.contains("global", true) || raw.contains("world", true) -> globalPreviewCountries()
+        else -> emptyList()
     }
 }
+
+private fun coverageCountry(token: String): CoverageCountry? {
+    val clean = token.trim().uppercase()
+    return when (clean) {
+        "TR", "TUR", "TURKEY", "TÜRKIYE", "TÜRKİYE" -> CoverageCountry("TR", "Turkey")
+        "US", "USA", "UNITED STATES" -> CoverageCountry("US", "United States")
+        "GB", "UK", "GBR", "UNITED KINGDOM" -> CoverageCountry("GB", "United Kingdom")
+        "FR", "FRA", "FRANCE" -> CoverageCountry("FR", "France")
+        "DE", "DEU", "GERMANY" -> CoverageCountry("DE", "Germany")
+        "ES", "ESP", "SPAIN" -> CoverageCountry("ES", "Spain")
+        "IT", "ITA", "ITALY" -> CoverageCountry("IT", "Italy")
+        "NL", "NLD", "NETHERLANDS" -> CoverageCountry("NL", "Netherlands")
+        "CH", "CHE", "SWITZERLAND" -> CoverageCountry("CH", "Switzerland")
+        "SE", "SWE", "SWEDEN" -> CoverageCountry("SE", "Sweden")
+        "PT", "PRT", "PORTUGAL" -> CoverageCountry("PT", "Portugal")
+        "BE", "BEL", "BELGIUM" -> CoverageCountry("BE", "Belgium")
+        "AT", "AUT", "AUSTRIA" -> CoverageCountry("AT", "Austria")
+        "DK", "DNK", "DENMARK" -> CoverageCountry("DK", "Denmark")
+        "NO", "NOR", "NORWAY" -> CoverageCountry("NO", "Norway")
+        "IE", "IRL", "IRELAND" -> CoverageCountry("IE", "Ireland")
+        "GR", "GRC", "GREECE" -> CoverageCountry("GR", "Greece")
+        "PL", "POL", "POLAND" -> CoverageCountry("PL", "Poland")
+        "RO", "ROU", "ROMANIA" -> CoverageCountry("RO", "Romania")
+        "BG", "BGR", "BULGARIA" -> CoverageCountry("BG", "Bulgaria")
+        "HR", "HRV", "CROATIA" -> CoverageCountry("HR", "Croatia")
+        "RS", "SRB", "SERBIA" -> CoverageCountry("RS", "Serbia")
+        "AL", "ALB", "ALBANIA" -> CoverageCountry("AL", "Albania")
+        "ME", "MNE", "MONTENEGRO" -> CoverageCountry("ME", "Montenegro")
+        "MK", "MKD", "NORTH MACEDONIA" -> CoverageCountry("MK", "North Macedonia")
+        "BA", "BIH", "BOSNIA AND HERZEGOVINA" -> CoverageCountry("BA", "Bosnia and Herzegovina")
+        "SI", "SVN", "SLOVENIA" -> CoverageCountry("SI", "Slovenia")
+        "SK", "SVK", "SLOVAKIA" -> CoverageCountry("SK", "Slovakia")
+        "CZ", "CZE", "CZECHIA", "CZECH REPUBLIC" -> CoverageCountry("CZ", "Czechia")
+        "HU", "HUN", "HUNGARY" -> CoverageCountry("HU", "Hungary")
+        else -> null
+    }
+}
+
+private fun europeCountries(): List<CoverageCountry> = listOf("GB", "FR", "DE", "ES", "IT", "NL", "CH", "SE", "PT", "BE", "AT", "DK", "NO", "IE", "GR", "PL", "CZ", "HU").mapNotNull { coverageCountry(it) }
+private fun globalPreviewCountries(): List<CoverageCountry> = listOf("US", "GB", "FR", "DE", "ES", "IT", "NL", "CH", "SE", "PT", "BE", "AT", "DK", "NO", "TR", "GR", "PL", "IE").mapNotNull { coverageCountry(it) }
 
 @Composable
 private fun TrustStrip() {
