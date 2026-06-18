@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.common.R
 import im.angry.openeuicc.core.EuiccChannel
 import im.angry.openeuicc.core.EuiccChannelManager
+import im.angry.openeuicc.ui.BaseEuiccAccessActivity
 import im.angry.openeuicc.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -306,6 +307,7 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
 
         abstract val hasNext: Boolean
         abstract val hasPrev: Boolean
+        open fun beforeNext() {}
         abstract fun createNextFragment(): DownloadWizardStepFragment?
         abstract fun createPrevFragment(): DownloadWizardStepFragment?
 
