@@ -65,6 +65,7 @@ import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.MobileEsim
+import im.angry.openeuicc.core.EuiccChannelManager
 import im.angry.openeuicc.ui.wizard.DownloadWizardActivity
 import im.angry.openeuicc.util.LPAString
 import kotlinx.coroutines.Dispatchers
