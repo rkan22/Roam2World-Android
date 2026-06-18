@@ -78,7 +78,6 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
         setContentView(R.layout.activity_download_wizard)
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Make back == prev
                 onPrevPressed()
             }
         })
@@ -103,13 +102,8 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
         nextButton = requireViewById(R.id.download_wizard_next)
         prevButton = requireViewById(R.id.download_wizard_back)
 
-        nextButton.setOnClickListener {
-            onNextPressed()
-        }
-
-        prevButton.setOnClickListener {
-            onPrevPressed()
-        }
+        nextButton.setOnClickListener { onNextPressed() }
+        prevButton.setOnClickListener { onPrevPressed() }
 
         val navigation = requireViewById<View>(R.id.download_wizard_navigation)
         val origHeight = navigation.layoutParams.height
@@ -132,9 +126,6 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
     }
 
     private fun handleDeepLink() {
-        // If we get an LPA string from deep-link intents, extract from there.
-        // Note that `onRestoreInstanceState` could override this with user input,
-        // but that _is_ the desired behavior.
         val uri = intent.data ?: return
         if (uri.scheme.contentEquals("lpa", ignoreCase = true)) {
             val parsed = LPAString.parse(uri.schemeSpecificPart)
@@ -221,18 +212,19 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
                     val (slotId, seId) = DownloadWizardSlotSelectFragment.decodeSyntheticSlotId(
                         state.selectedSyntheticSlotId
                     )
-                    // This is run on IO by default
                     euiccChannelManager.withEuiccChannel(slotId, seId) { channel ->
-                        // Be _very_ sure that the channel we got is valid
                         if (!channel.valid) throw EuiccChannelManager.EuiccChannelNotFoundException()
                     }
                 } catch (e: EuiccChannelManager.EuiccChannelNotFoundException) {
+                    progressBar.visibility = View.GONE
+                    nextButton.isEnabled = true
                     Toast.makeText(
                         this@DownloadWizardActivity,
                         R.string.download_wizard_slot_removed,
                         Toast.LENGTH_LONG
                     ).show()
-                    finish()
+                    showFragment(DownloadWizardSlotSelectFragment())
+                    return@launch
                 }
             }
 
@@ -272,7 +264,6 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
             .replace(R.id.step_fragment_container, nextFrag)
             .commit()
 
-        // Sync screen on state
         if (nextFrag.keepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
@@ -284,16 +275,8 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
 
     private fun refreshButtons() {
         currentFragment?.let {
-            nextButton.visibility = if (it.hasNext) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
-            prevButton.visibility = if (it.hasPrev) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            nextButton.visibility = if (it.hasNext) View.VISIBLE else View.GONE
+            prevButton.visibility = if (it.hasPrev) View.VISIBLE else View.GONE
         }
     }
 
