@@ -39,7 +39,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +64,6 @@ private val SuccessText = Color(0xFF111827)
 private val SuccessMuted = Color(0xFF6B7280)
 private val SuccessBorder = Color(0xFFE5E7EB)
 private val SuccessBg = Color(0xFFF8FAFF)
-private val SuccessGreen = Color(0xFF16A34A)
 
 class PurchaseConfirmationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -225,17 +223,17 @@ private fun PurchaseConfirmationScreen(
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = onOpenProfiles, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), colors = OutlinedButtonDefaults.outlinedButtonColors(contentColor = SuccessBlue), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
-                    Text("Profiles", fontWeight = FontWeight.Bold)
+                OutlinedButton(onClick = onOpenProfiles, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
+                    Text("Profiles", color = SuccessBlue, fontWeight = FontWeight.Bold)
                 }
-                OutlinedButton(onClick = onOpenEsims, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), colors = OutlinedButtonDefaults.outlinedButtonColors(contentColor = SuccessBlue), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
-                    Text("My eSIMs", fontWeight = FontWeight.Bold)
+                OutlinedButton(onClick = onOpenEsims, modifier = Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBlue.copy(alpha = .35f))) {
+                    Text("My eSIMs", color = SuccessBlue, fontWeight = FontWeight.Bold)
                 }
             }
 
-            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = OutlinedButtonDefaults.outlinedButtonColors(contentColor = SuccessText), border = BorderStroke(1.dp, SuccessBorder)) {
+            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, SuccessBorder)) {
                 Icon(Icons.Default.Home, null, tint = SuccessText, modifier = Modifier.size(21.dp))
-                Text("Back to Dashboard", fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
+                Text("Back to Dashboard", color = SuccessText, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
             }
         }
     }
