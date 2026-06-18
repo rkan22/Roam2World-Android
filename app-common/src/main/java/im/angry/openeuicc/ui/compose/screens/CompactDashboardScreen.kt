@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -93,7 +92,6 @@ fun CompactDashboardScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { CompactHeader(userName) }
-                item { CompactRoleTabs() }
                 item { CompactWallet(money(data?.currentBalance, "$2,450.50"), onWalletClick) { onActionClick("wallet") } }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -150,27 +148,6 @@ private fun CompactHeader(userName: String) {
                 Icon(Icons.Default.Notifications, null, tint = B2BText, modifier = Modifier.size(24.dp))
                 Box(Modifier.align(Alignment.TopEnd).size(8.dp).clip(RoundedCornerShape(999.dp)).background(Color(0xFFEF4444)))
             }
-        }
-    }
-}
-
-@Composable
-private fun CompactRoleTabs() {
-    Surface(Modifier.fillMaxWidth(), color = Color.White, shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, B2BBorder)) {
-        Row(Modifier.padding(3.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            CompactRole("Admin", true, Modifier.weight(1f))
-            CompactRole("Reseller", false, Modifier.weight(1f))
-            CompactRole("Dealer", false, Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun CompactRole(label: String, selected: Boolean, modifier: Modifier) {
-    Surface(modifier.height(36.dp), color = Color.White, shape = RoundedCornerShape(13.dp), border = if (selected) BorderStroke(1.dp, B2BBlue) else null) {
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Person, null, tint = if (selected) B2BBlue else B2BMuted, modifier = Modifier.size(15.dp))
-            Text(label, Modifier.padding(start = 7.dp), color = if (selected) B2BBlue else B2BMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
