@@ -251,8 +251,6 @@ class DownloadWizardActivity : BaseEuiccAccessActivity() {
         if (state.currentStepFragmentClassName != null) {
             val clazz = Class.forName(state.currentStepFragmentClassName!!)
             showFragment(clazz.getDeclaredConstructor().newInstance() as DownloadWizardStepFragment)
-        } else if (state.skipMethodSelect && state.smdp.isNotBlank()) {
-            showFragment(DownloadWizardDetailsFragment())
         } else {
             showFragment(DownloadWizardSlotSelectFragment())
         }
