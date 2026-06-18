@@ -5,28 +5,21 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -51,6 +44,18 @@ import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.common.R
+import im.angry.openeuicc.ui.compose.components.R2WCard
+import im.angry.openeuicc.ui.compose.components.R2WPrimaryButton
+import im.angry.openeuicc.ui.compose.components.R2WProgressRow
+import im.angry.openeuicc.ui.compose.components.R2WSecondaryButton
+import im.angry.openeuicc.ui.compose.components.R2WStatusBadge
+import im.angry.openeuicc.ui.compose.theme.Background
+import im.angry.openeuicc.ui.compose.theme.Border
+import im.angry.openeuicc.ui.compose.theme.Danger
+import im.angry.openeuicc.ui.compose.theme.Primary
+import im.angry.openeuicc.ui.compose.theme.PrimaryLight
+import im.angry.openeuicc.ui.compose.theme.TextPrimary
+import im.angry.openeuicc.ui.compose.theme.TextSecondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -83,9 +88,7 @@ class MobileEsimsActivity : ComponentActivity() {
                 initialFilter = initialFilter,
                 loading = loading,
                 error = errorMessage,
-                onQueryChange = {
-                    query = it
-                },
+                onQueryChange = { query = it },
                 onFilterChange = {
                     selectedFilter = it
                     initialFilter = null
@@ -95,19 +98,11 @@ class MobileEsimsActivity : ComponentActivity() {
                     startActivity(MobileEsimDetailActivity.createIntent(this, esim))
                 },
                 onRenew = { esim -> openRenewal(esim) },
-                onOpenDashboard = { openDashboardActivity() },
-                onOpenPackages = { openPackagesActivity() },
-                onOpenWallet = { openWalletActivity() },
-                onOpenMore = { openMoreActivity() },
                 onOpenNative = { openNativeEsimActivity() }
             )
         }
 
         loadEsims()
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     private fun loadEsims() {
@@ -122,14 +117,9 @@ class MobileEsimsActivity : ComponentActivity() {
             }
 
             val result = runCatching { authApi.esims(session) }
-
             result
-                .onSuccess {
-                    allEsims = it.esims
-                }
-                .onFailure {
-                    errorMessage = it.message ?: getString(R.string.mobile_esims_load_failed)
-                }
+                .onSuccess { allEsims = it.esims }
+                .onFailure { errorMessage = it.message ?: getString(R.string.mobile_esims_load_failed) }
 
             loading = false
         }
@@ -192,38 +182,6 @@ class MobileEsimsActivity : ComponentActivity() {
         }
     }
 
-    private fun openDashboardActivity() {
-        startActivity(
-            Intent(this, DashboardActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openWalletActivity() {
-        startActivity(
-            Intent(this, WalletActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openPackagesActivity() {
-        startActivity(
-            Intent(this, PackagesActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
-    private fun openMoreActivity() {
-        startActivity(
-            Intent(this, MoreActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
-        )
-    }
-
     private fun openNativeEsimActivity() {
         val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
         if (target.isNullOrBlank()) {
@@ -264,135 +222,97 @@ private fun MobileEsimsScreen(
     onRefresh: () -> Unit,
     onOpenDetail: (MobileEsim) -> Unit,
     onRenew: (MobileEsim) -> Unit,
-    onOpenDashboard: () -> Unit,
-    onOpenPackages: () -> Unit,
-    onOpenWallet: () -> Unit,
-    onOpenMore: () -> Unit,
     onOpenNative: () -> Unit
 ) {
-    val orange = Color(0xFFFF6A00)
-    val bg = Color(0xFFF7F7FA)
+    val totalRemainingLabel = allEsims.mapNotNull { it.dataRemaining?.takeIf { value -> value.isNotBlank() } }.firstOrNull()
 
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+        Surface(modifier = Modifier.fillMaxSize(), color = Background) {
             Column(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                HeroEsimsCard(
-                    total = allEsims.size,
-                    shown = filteredEsims.size,
-                    loading = loading,
-                    orange = orange,
-                    onRefresh = onRefresh,
-                    onOpenNative = onOpenNative
-                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) "Check GB" else "My eSIMs",
+                        color = TextPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Monitor purchased eSIMs, remaining data, ICCID and OpenEUICC install status.",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
 
-                if (!error.isNullOrBlank()) {
-                    ErrorCard(error = error, onRetry = onRefresh)
-                }
-
-                SearchAndFilterCard(
-                    query = query,
-                    selectedFilter = selectedFilter,
-                    initialFilter = initialFilter,
-                    onQueryChange = onQueryChange,
-                    onFilterChange = onFilterChange
-                )
-
-                if (loading && allEsims.isEmpty()) {
-                    InfoCard(title = "Yükleniyor") {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp))
-                            Text("eSIM listesi alınıyor...")
+                    R2WCard {
+                        Text(
+                            text = "Total eSIMs",
+                            color = TextSecondary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "${filteredEsims.size} / ${allEsims.size}",
+                            color = Primary,
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = if (loading) "List is refreshing..." else "Total remaining: ${totalRemainingLabel ?: "check individual eSIMs"}",
+                            color = TextSecondary
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            R2WSecondaryButton("Refresh", onRefresh, Modifier.weight(1f))
+                            R2WPrimaryButton("Device eSIM", onOpenNative, Modifier.weight(1f))
                         }
                     }
-                }
 
-                if (!loading && filteredEsims.isEmpty()) {
-                    EmptyCard("eSIM bulunamadı.")
-                } else {
-                    filteredEsims.forEach { esim ->
-                        EsimListCard(
-                            esim = esim,
-                            orange = orange,
-                            onOpenDetail = { onOpenDetail(esim) },
-                            onRenew = { onRenew(esim) }
-                        )
+                    error?.takeIf { it.isNotBlank() }?.let {
+                        R2WCard {
+                            Text("eSIM list could not be loaded", color = Danger, fontWeight = FontWeight.Bold)
+                            Text(it, color = TextSecondary)
+                            R2WPrimaryButton("Retry", onRefresh)
+                        }
                     }
+
+                    SearchAndFilterCard(
+                        query = query,
+                        selectedFilter = selectedFilter,
+                        initialFilter = initialFilter,
+                        onQueryChange = onQueryChange,
+                        onFilterChange = onFilterChange
+                    )
+
+                    if (loading && allEsims.isEmpty()) {
+                        R2WCard {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(modifier = Modifier.height(20.dp), color = Primary)
+                                Text("Loading eSIM list...", color = TextSecondary)
+                            }
+                        }
+                    }
+
+                    if (!loading && filteredEsims.isEmpty()) {
+                        R2WCard {
+                            Text("No eSIM found.", color = TextSecondary)
+                        }
+                    } else {
+                        filteredEsims.forEach { esim ->
+                            EsimListCard(
+                                esim = esim,
+                                onOpenDetail = { onOpenDetail(esim) },
+                                onRenew = { onRenew(esim) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
-    
-
-                R2wBottomNav(
-                    selected = R2wBottomTab.Esims
-                )
-            }
-        }
-}
-}
-
-@Composable
-private fun HeroEsimsCard(
-    total: Int,
-    shown: Int,
-    loading: Boolean,
-    orange: Color,
-    onRefresh: () -> Unit,
-    onOpenNative: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
-    ) {
-        Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "eSIM’lerim",
-                color = orange,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = "$shown / $total eSIM",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Text(
-                text = if (loading) "Liste güncelleniyor..." else "Satın aldığın eSIM profillerini yönet.",
-                color = Color.White.copy(alpha = 0.74f),
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onRefresh,
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
-                    shape = RoundedCornerShape(18.dp)
-                ) {
-                    Text("Yenile")
-                }
-
-                OutlinedButton(
-                    onClick = onOpenNative,
-                    shape = RoundedCornerShape(18.dp)
-                ) {
-                    Text("Cihaz eSIM")
-                }
+                R2wBottomNav(selected = R2wBottomTab.Esims)
             }
         }
     }
@@ -406,12 +326,13 @@ private fun SearchAndFilterCard(
     onQueryChange: (String) -> Unit,
     onFilterChange: (EsimFilter) -> Unit
 ) {
-    InfoCard(title = "Filtrele") {
+    R2WCard {
+        Text("Filter", color = TextPrimary, fontWeight = FontWeight.Bold)
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("ICCID, paket, sağlayıcı veya durum ara") },
+            label = { Text("Search ICCID, package, provider or status") },
             singleLine = true
         )
 
@@ -430,11 +351,7 @@ private fun SearchAndFilterCard(
             }
 
             if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) {
-                FilterButton(
-                    label = "Yakında Bitecek",
-                    selected = true,
-                    onClick = {}
-                )
+                FilterButton(label = "Expiring Soon", selected = true, onClick = {})
             }
         }
     }
@@ -446,182 +363,77 @@ private fun FilterButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val bg = if (selected) Color(0xFFFF6A00) else Color.White
-    val fg = if (selected) Color.White else Color(0xFF17181C)
+    val bg = if (selected) Primary else Color.White
+    val fg = if (selected) Color.White else TextPrimary
 
     OutlinedButton(
         onClick = onClick,
         shape = RoundedCornerShape(999.dp),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = bg)
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = bg),
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (selected) Primary else Border)
     ) {
-        Text(label, color = fg)
+        Text(label, color = fg, fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold)
     }
 }
 
 @Composable
 private fun EsimListCard(
     esim: MobileEsim,
-    orange: Color,
     onOpenDetail: () -> Unit,
     onRenew: () -> Unit
 ) {
     val status = realStatus(esim)
     val title = esim.title()
     val iccid = esim.iccid.orEmpty().ifBlank { "Pending ICCID" }
+    val remaining = esim.dataRemaining?.takeIf { it.isNotBlank() }
     val meta = listOfNotNull(
         visibleProvider(esim.provider)?.takeIf { it.isNotBlank() },
         esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: ${formatEsimDate(it)}" },
-        esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" }
+        remaining?.let { "Remaining: $it" }
     ).joinToString("  •  ")
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onOpenDetail() },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    R2WCard(
+        modifier = Modifier.clickable { onOpenDetail() }
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = iccid,
-                        color = Color(0xFF686B73),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                StatusPill(status.label)
-            }
-
-            if (meta.isNotBlank()) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = meta,
-                    color = Color(0xFF686B73),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = title,
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = iccid,
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            R2WStatusBadge(status.label, status.raw)
+        }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onOpenDetail,
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Detay")
-                }
+        if (meta.isNotBlank()) {
+            Text(text = meta, color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+        }
 
-                if (canRenew(esim, status)) {
-                    OutlinedButton(
-                        onClick = onRenew,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Renew")
-                    }
-                }
+        remaining?.let {
+            R2WProgressRow("Remaining data", it, parseRemainingProgress(it))
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            R2WPrimaryButton("Detail", onOpenDetail, Modifier.weight(1f))
+            if (canRenew(esim, status)) {
+                R2WSecondaryButton("Renew", onRenew, Modifier.weight(1f))
             }
         }
-    }
-}
-
-@Composable
-private fun InfoCard(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = title,
-                color = Color(0xFF17181C),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            HorizontalDivider()
-            content()
-        }
-    }
-}
-
-@Composable
-private fun StatusPill(label: String) {
-    val normalized = label.lowercase()
-    val colors = when {
-        normalized.contains("active") || normalized.contains("ready") || normalized.contains("provision") ->
-            Color(0xFFDCFCE7) to Color(0xFF166534)
-        normalized.contains("expired") || normalized.contains("used") || normalized.contains("terminated") ->
-            Color(0xFFFEE2E2) to Color(0xFFB91C1C)
-        else -> Color(0xFFFEF9C3) to Color(0xFF854D0E)
-    }
-
-    Text(
-        text = label,
-        color = colors.second,
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .background(colors.first, RoundedCornerShape(999.dp))
-            .padding(horizontal = 12.dp, vertical = 7.dp)
-    )
-}
-
-@Composable
-private fun ErrorCard(error: String, onRetry: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEAEA))
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text("eSIM listesi yüklenemedi", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold)
-            Text(error, color = Color(0xFF7F1D1D))
-            OutlinedButton(onClick = onRetry) {
-                Text("Tekrar Dene")
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyCard(message: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Text(
-            text = message,
-            modifier = Modifier.padding(18.dp),
-            color = Color(0xFF686B73)
-        )
     }
 }
 
@@ -631,10 +443,10 @@ private data class EsimsDisplayStatus(
 )
 
 private enum class EsimFilter(val label: String) {
-    ACTIVE("Aktif"),
-    PENDING("Bekleyen"),
-    EXPIRED("Süresi Dolan"),
-    ALL("Tümü");
+    ACTIVE("Active"),
+    PENDING("Pending"),
+    EXPIRED("Expired"),
+    ALL("All");
 
     fun matches(status: EsimsDisplayStatus): Boolean =
         when (this) {
@@ -691,4 +503,13 @@ private fun canRenew(esim: MobileEsim, displayStatus: EsimsDisplayStatus = realS
     val provider = esim.provider.orEmpty().lowercase()
     if (displayStatus.raw == "expired") return false
     return provider.contains("tgt") || provider.contains("airhub") || provider.contains("vodafone")
+}
+
+private fun parseRemainingProgress(value: String): Float {
+    val numbers = Regex("""\d+(?:\.\d+)?""").findAll(value).mapNotNull { it.value.toFloatOrNull() }.toList()
+    return when {
+        numbers.size >= 2 && numbers[1] > 0f -> (numbers[0] / numbers[1]).coerceIn(0f, 1f)
+        numbers.size == 1 -> (numbers[0] / 100f).coerceIn(0f, 1f)
+        else -> 0.5f
+    }
 }
