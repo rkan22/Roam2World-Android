@@ -90,6 +90,8 @@ class MobileEsimsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.hide()
+        supportActionBarSafeHide()
         configureSystemBars()
         initialFilter = intent.getStringExtra(MobileEsimFilters.FILTER_EXTRA_KEY)?.trim()
 
@@ -114,6 +116,14 @@ class MobileEsimsActivity : ComponentActivity() {
         }
 
         loadEsims()
+    }
+
+    private fun supportActionBarSafeHide() {
+        runCatching {
+            val method = javaClass.superclass?.getMethod("getSupportActionBar")
+            val actionBar = method?.invoke(this)
+            actionBar?.javaClass?.getMethod("hide")?.invoke(actionBar)
+        }
     }
 
     private fun configureSystemBars() {
