@@ -56,7 +56,8 @@
         <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
-            android:label="OpenEUICC" />
+            android:label="OpenEUICC"
+            android:theme="@style/Theme.OpenEUICC.AppCompat" />
 
         <activity
             android:name="im.angry.openeuicc.ui.ReportsActivity"
@@ -111,7 +112,8 @@
             android:name="im.angry.openeuicc.service.EuiccChannelManagerService"
             android:exported="false"
             android:foregroundServiceType="shortService" />
-             <activity
+
+        <activity
             android:name="im.angry.openeuicc.ui.TgtCheckGbActivity"
             android:exported="false" />
 
@@ -119,28 +121,36 @@
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
 
-             <activity
+        <activity
             android:name="im.angry.openeuicc.ui.ShoppingCartActivity"
             android:exported="false" />
 
         <activity
-        android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
-        android:exported="false" />
-    <activity
-        android:name="im.angry.openeuicc.ui.R2wStoreActivity"
-        android:exported="false" />
-    <activity
-        android:name="im.angry.openeuicc.ui.R2wInstallHelpActivity"
-        android:exported="false" />
-    <activity
-        android:name="im.angry.openeuicc.ui.R2wActivationCodeActivity"
-        android:exported="false" />
-    <activity
-        android:name="im.angry.openeuicc.ui.R2wPackageDetailActivity"
-        android:exported="false" />
-        <activity android:name="im.angry.openeuicc.ui.TransactionsActivity" android:exported="false" />
+            android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wStoreActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wInstallHelpActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wActivationCodeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wPackageDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.TransactionsActivity"
+            android:exported="false" />
+
         <activity
             android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
             android:exported="false" />
-</application>
+    </application>
 </manifest>
