@@ -3,6 +3,7 @@
 A fully free and open-source Local Profile Assistant implementation for Android devices.
 
 Roam2World B2B UI work is tracked on `feature/r2w-mockup-implementation`.
+Wallet and reports polish is applied in small focused commits.
 
 __Google is threatening to lock down the Android platform in 2026. OpenEUICC and EasyEUICC, as Free Software projects, will never accept Google's proposed third-party developer verification flow. Join us in Keeping Android Open at <https://keepandroidopen.org/>.__
 
