@@ -71,6 +71,7 @@ private val WalletMuted = Color(0xFF6B7280)
 private val WalletBorder = Color(0xFFE1E6EF)
 private val WalletGreen = Color(0xFF12813A)
 private val WalletRed = Color(0xFFB42336)
+private val WalletOrange = Color(0xFFFF8A00)
 
 class WalletActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -158,6 +159,12 @@ private fun WalletScreen(
                     }
 
                     WalletBalanceCard(balance = walletData?.currentBalance ?: "0", onRequestBalance = onRequestBalance)
+                    WalletKpiRow(
+                        pending = requests.countStatus("pending"),
+                        approved = requests.countStatus("approved", "approve", "completed", "success"),
+                        rejected = requests.countStatus("rejected", "reject", "declined", "failed", "cancelled"),
+                        total = requests.size
+                    )
 
                     error?.let { ErrorCard(it) }
 
@@ -182,6 +189,28 @@ private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
                 Text("Add Funds", color = WalletBlue, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
+    }
+}
+
+@Composable
+private fun WalletKpiRow(pending: Int, approved: Int, rejected: Int, total: Int) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            WalletKpiItem(value = pending.toString(), label = "Pending", accent = WalletOrange, modifier = Modifier.weight(1f))
+            WalletKpiItem(value = approved.toString(), label = "Approved", accent = WalletGreen, modifier = Modifier.weight(1f))
+            WalletKpiItem(value = rejected.toString(), label = "Rejected", accent = WalletRed, modifier = Modifier.weight(1f))
+            WalletKpiItem(value = total.toString(), label = "Total", accent = WalletBlue, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun WalletKpiItem(value: String, label: String, accent: Color, modifier: Modifier = Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.size(34.dp).clip(CircleShape).background(accent.copy(alpha = .12f)), contentAlignment = Alignment.Center) {
+            Text(value, color = accent, fontSize = 14.sp, fontWeight = FontWeight.Black, maxLines = 1)
+        }
+        Text(label, color = WalletMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -262,6 +291,13 @@ private fun ErrorCard(message: String) {
 @Composable
 private fun EmptyText(text: String) {
     Text(text, color = WalletMuted, fontSize = 14.sp, modifier = Modifier.padding(vertical = 8.dp))
+}
+
+private fun List<MobileWalletRequest>.countStatus(vararg keywords: String): Int {
+    return count { request ->
+        val status = request.status.lowercase()
+        keywords.any { keyword -> status.contains(keyword) }
+    }
 }
 
 private fun MobileTransaction.isDebitLike(): Boolean {
