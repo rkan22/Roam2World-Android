@@ -169,6 +169,7 @@ private fun WalletScreen(
                     error?.let { ErrorCard(it) }
 
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.weight(1f)) {
+                        item { WalletRequestFormShell(onSubmit = onRequestBalance) }
                         item { TransactionListCard(transactions) }
                         item { BalanceHistoryCard(requests) }
                     }
@@ -192,6 +193,29 @@ private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
                 Button(onClick = onRequestBalance, modifier = Modifier.width(124.dp).height(38.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
                     Text("+ Add Funds", color = WalletBlue, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletRequestFormShell(onSubmit: () -> Unit) {
+    SectionCard("Create Request") {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Amount", color = WalletMuted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(14.dp)).background(Color.White).padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("$", color = WalletText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                Text("0.00", color = WalletMuted, fontSize = 15.sp, modifier = Modifier.padding(start = 14.dp))
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("$50", "$100", "$250", "$500").forEach { amount ->
+                    Box(Modifier.weight(1f).height(34.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFFEAF1FF)), contentAlignment = Alignment.Center) {
+                        Text(amount, color = WalletBlue, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+                    }
+                }
+            }
+            Button(onClick = onSubmit, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = WalletBlue)) {
+                Text("Submit Top-up Request", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
     }
