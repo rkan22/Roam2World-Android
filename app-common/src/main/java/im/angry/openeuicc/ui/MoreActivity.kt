@@ -69,6 +69,7 @@ class MoreActivity : ComponentActivity() {
                 onTgtCheckGb = { startActivity(Intent(this, TgtCheckGbActivity::class.java)) },
                 onVodafoneRenewal = { startActivity(Intent(this, VodafoneRenewalActivity::class.java)) },
                 onOrders = { startActivity(Intent(this, PurchaseHistoryActivity::class.java)) },
+                onEsimHistory = { startActivity(Intent(this, MobileEsimHistoryActivity::class.java)) },
                 onTransactions = { startActivity(Intent(this, TransactionsActivity::class.java)) },
                 onReports = { startActivity(Intent(this, ReportsActivity::class.java)) },
                 onSupport = { startActivity(Intent(this, SupportActivity::class.java)) },
@@ -134,6 +135,7 @@ private fun MoreScreen(
     onTgtCheckGb: () -> Unit,
     onVodafoneRenewal: () -> Unit,
     onOrders: () -> Unit,
+    onEsimHistory: () -> Unit,
     onTransactions: () -> Unit,
     onReports: () -> Unit,
     onSupport: () -> Unit,
@@ -174,6 +176,7 @@ private fun MoreScreen(
 
                     MoreCard(title = "Business") {
                         MoreRow("Orders", "Purchase history and order details", "🛒", onOrders)
+                        MoreRow("eSIM History", "Purchased eSIM lifecycle and profile records", "📜", onEsimHistory)
                         MoreRow("Transactions", "Search and filter all order transactions", "💳", onTransactions)
                         MoreRow("Reports", "Business reports", "📊", onReports)
                         val context = LocalContext.current
@@ -333,4 +336,3 @@ private fun MoreRow(
         }
     }
 }
-
