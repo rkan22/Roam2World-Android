@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -24,15 +27,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SimCard
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,14 +72,19 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val HistoryOrange = Color(0xFFFF7900)
-private val HistoryText = Color(0xFF17181C)
-private val HistoryMuted = Color(0xFF6B7280)
-private val HistoryBg = Color(0xFFF7F9FC)
-private val HistoryBorder = Color(0xFFE5E7EB)
-private val HistoryGreen = Color(0xFF16A34A)
-private val HistoryRed = Color(0xFFDC2626)
-private val HistoryYellow = Color(0xFFF59E0B)
+private val HistoryBlue = Color(0xFF0F4FD7)
+private val HistoryText = Color(0xFF20242C)
+private val HistoryMuted = Color(0xFF68707C)
+private val HistoryBg = Color(0xFFF8FAFD)
+private val HistoryBorder = Color(0xFFE1E6EF)
+private val HistoryGreen = Color(0xFF176C3A)
+private val HistoryGreenBg = Color(0xFFE9F7EF)
+private val HistoryRed = Color(0xFFB42336)
+private val HistoryRedBg = Color(0xFFFFEEF2)
+private val HistoryYellow = Color(0xFF0F4FD7)
+private val HistoryYellowBg = Color(0xFFEFF5FF)
+private val HistoryGray = Color(0xFF6B7280)
+private val HistoryGrayBg = Color(0xFFF0F2F5)
 
 class MobileEsimHistoryActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -90,17 +101,17 @@ class MobileEsimHistoryActivity : ComponentActivity() {
         actionBar?.hide()
         configureSystemBars()
         setContent {
-            MobileEsimHistoryScreen(
+            EsimHistoryMockupScreen(
                 esims = filteredEsims(),
-                allEsims = esims,
                 selectedFilter = selectedFilter,
                 query = query,
                 loading = loading,
                 error = error,
                 onBack = { finish() },
-                onRefresh = { loadEsims() },
                 onFilterChange = { selectedFilter = it },
                 onQueryChange = { query = it },
+                onReset = { selectedFilter = HistoryFilter.ALL; query = "" },
+                onRefresh = { loadEsims() },
                 onOpenDetail = { startActivity(MobileEsimHistoryDetailActivity.createIntent(this, it)) }
             )
         }
@@ -108,7 +119,7 @@ class MobileEsimHistoryActivity : ComponentActivity() {
     }
 
     private fun configureSystemBars() {
-        window.statusBarColor = AndroidColor.rgb(247, 249, 252)
+        window.statusBarColor = AndroidColor.rgb(248, 250, 253)
         window.navigationBarColor = AndroidColor.BLACK
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = true
@@ -138,6 +149,8 @@ class MobileEsimHistoryActivity : ComponentActivity() {
             .filter { selectedFilter.matches(it.historyStatus()) }
             .filter { esim ->
                 q.isBlank() || listOf(
+                    esim.customerName(),
+                    esim.customerPhone,
                     esim.iccid,
                     esim.packageName,
                     esim.provider,
@@ -176,72 +189,72 @@ private enum class HistoryFilter(val label: String) {
 }
 
 internal enum class HistoryStatus(val label: String) {
-    ACTIVE("Active"), READY("Ready"), PENDING("Pending"), EXPIRED("Expired"), DISABLED("Disabled")
+    ACTIVE("Active"), READY("Activated"), PENDING("Pending"), EXPIRED("Expired"), DISABLED("Cancelled")
 }
 
 @Composable
-private fun MobileEsimHistoryScreen(
+private fun EsimHistoryMockupScreen(
     esims: List<MobileEsim>,
-    allEsims: List<MobileEsim>,
     selectedFilter: HistoryFilter,
     query: String,
     loading: Boolean,
     error: String?,
     onBack: () -> Unit,
-    onRefresh: () -> Unit,
     onFilterChange: (HistoryFilter) -> Unit,
     onQueryChange: (String) -> Unit,
+    onReset: () -> Unit,
+    onRefresh: () -> Unit,
     onOpenDetail: (MobileEsim) -> Unit
 ) {
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = HistoryBg) {
-            Column(Modifier.fillMaxSize().padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(Modifier.fillMaxSize().padding(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.ArrowBack, null, tint = HistoryText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
-                    Text("eSIM History", color = HistoryText, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 16.dp).weight(1f))
-                    if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp, color = HistoryOrange)
-                    Icon(Icons.Default.Refresh, null, tint = HistoryOrange, modifier = Modifier.padding(start = 12.dp).size(28.dp).clickable(onClick = onRefresh))
+                    Icon(Icons.Default.ArrowBack, null, tint = HistoryText, modifier = Modifier.size(32.dp).clickable(onClick = onBack))
+                    Text("eSIM History", color = HistoryText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 28.dp).weight(1f))
+                    if (loading) Text("Loading", color = HistoryBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
 
-                HistorySummaryCard(allEsims)
-
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    leadingIcon = { Icon(Icons.Default.Search, null) },
-                    label = { Text("Search ICCID, package, provider") },
-                    shape = RoundedCornerShape(18.dp)
-                )
-
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HistoryFilter.values().forEach { filter ->
-                        val selected = selectedFilter == filter
-                        if (selected) {
-                            Button(onClick = { onFilterChange(filter) }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(containerColor = HistoryOrange)) {
-                                Text(filter.label, fontWeight = FontWeight.Bold)
-                            }
-                        } else {
-                            OutlinedButton(onClick = { onFilterChange(filter) }, shape = RoundedCornerShape(50)) {
-                                Text(filter.label, color = HistoryText)
-                            }
-                        }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = HistoryText, modifier = Modifier.size(34.dp)) },
+                        placeholder = { Text("Search by customer, number, ICCID...", color = HistoryMuted) },
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    OutlinedButton(onClick = onRefresh, shape = RoundedCornerShape(10.dp), modifier = Modifier.height(58.dp), contentPadding = ButtonDefaults.ContentPadding) {
+                        Icon(Icons.Default.FilterList, null, tint = HistoryText)
                     }
+                }
+
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterBox(Icons.Default.CalendarMonth, "Date range")
+                    FilterBox(Icons.Default.SignalCellularAlt, "Provider")
+                    FilterBox(Icons.Default.SimCard, selectedFilter.label) {
+                        val next = when (selectedFilter) {
+                            HistoryFilter.ALL -> HistoryFilter.ACTIVE
+                            HistoryFilter.ACTIVE -> HistoryFilter.PENDING
+                            HistoryFilter.PENDING -> HistoryFilter.EXPIRED
+                            HistoryFilter.EXPIRED -> HistoryFilter.ALL
+                        }
+                        onFilterChange(next)
+                    }
+                    Text("Reset", color = HistoryBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 12.dp).clickable(onClick = onReset))
                 }
 
                 if (!error.isNullOrBlank()) {
-                    HistoryInfoCard("Unable to load history", error)
+                    InfoCard("Unable to load history", error)
                 }
 
                 if (!loading && esims.isEmpty()) {
-                    HistoryInfoCard("No eSIM history found", "Purchases and installed profiles will appear here.")
+                    InfoCard("No eSIM history", "No matching purchase records found.")
                 }
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
-                    items(esims) { esim ->
-                        HistoryEsimCard(esim, onOpenDetail)
-                    }
+                    items(esims) { esim -> HistoryMockupCard(esim, onOpenDetail) }
                 }
             }
         }
@@ -249,84 +262,100 @@ private fun MobileEsimHistoryScreen(
 }
 
 @Composable
-private fun HistorySummaryCard(esims: List<MobileEsim>) {
-    val active = esims.count { it.historyStatus() == HistoryStatus.ACTIVE }
-    val pending = esims.count { it.historyStatus() == HistoryStatus.PENDING }
-    val expired = esims.count { it.historyStatus() == HistoryStatus.EXPIRED }
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(Color(0xFF17181C))) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(52.dp).clip(CircleShape).background(HistoryOrange), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.ReceiptLong, null, tint = Color.White)
-                }
-                Column(Modifier.padding(start = 14.dp)) {
-                    Text("Profile lifecycle", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Purchases, activation status and renewal history", color = Color.White.copy(alpha = .72f), fontSize = 13.sp)
-                }
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                HistoryMetric("Total", esims.size.toString(), Color.White, Modifier.weight(1f))
-                HistoryMetric("Active", active.toString(), HistoryGreen, Modifier.weight(1f))
-                HistoryMetric("Pending", pending.toString(), HistoryYellow, Modifier.weight(1f))
-                HistoryMetric("Expired", expired.toString(), HistoryRed, Modifier.weight(1f))
-            }
-        }
+private fun FilterBox(icon: ImageVector, label: String, onClick: (() -> Unit)? = null) {
+    OutlinedButton(onClick = { onClick?.invoke() }, shape = RoundedCornerShape(10.dp), modifier = Modifier.height(48.dp)) {
+        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(label, color = HistoryMuted, fontWeight = FontWeight.Medium)
+        Text("⌄", color = HistoryMuted, modifier = Modifier.padding(start = 8.dp))
     }
 }
 
 @Composable
-private fun HistoryMetric(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
-    Card(modifier, shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White.copy(alpha = .10f))) {
-        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, color = color, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(label, color = Color.White.copy(alpha = .75f), fontSize = 11.sp)
-        }
-    }
-}
-
-@Composable
-private fun HistoryEsimCard(esim: MobileEsim, onOpenDetail: (MobileEsim) -> Unit) {
+private fun HistoryMockupCard(esim: MobileEsim, onOpenDetail: (MobileEsim) -> Unit) {
     val status = esim.historyStatus()
     Card(
-        Modifier.fillMaxWidth().clickable { onOpenDetail(esim) },
-        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(Color.White),
         border = BorderStroke(1.dp, HistoryBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(48.dp).clip(RoundedCornerShape(16.dp)).background(HistoryOrange.copy(alpha = .12f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.SimCard, null, tint = HistoryOrange)
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
+            CustomerAvatar(esim)
+            Column(Modifier.padding(start = 14.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                    Column(Modifier.weight(1f)) {
+                        Text(esim.customerName() ?: "Customer", color = HistoryText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(esim.customerPhone ?: esim.orderNumber?.let { "Order #$it" } ?: "No phone number", color = HistoryMuted, fontSize = 14.sp)
+                    }
+                    StatusPill(status.label, status)
+                    Icon(Icons.Default.MoreVert, null, tint = HistoryMuted, modifier = Modifier.padding(start = 8.dp).size(24.dp))
                 }
-                Column(Modifier.padding(start = 12.dp).weight(1f)) {
-                    Text(esim.packageName ?: "Roam2World eSIM", color = HistoryText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(listOfNotNull(esim.provider, esim.shortIccid()).joinToString(" • "), color = HistoryMuted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+                CardLine(Icons.Default.Business, "Provider", esim.provider ?: "--")
+                CardLine(Icons.Default.Inventory2, "Package", esim.packageName ?: "--")
+                CardLine(Icons.Default.SimCard, "ICCID", esim.iccid ?: "--")
+                CardLine(Icons.Default.CalendarMonth, "Purchase date", esim.createdAt.prettyDate())
+
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    OutlinedButton(onClick = { onOpenDetail(esim) }, shape = RoundedCornerShape(7.dp), border = BorderStroke(1.dp, HistoryBlue)) {
+                        Text("View Detail", color = HistoryBlue, fontWeight = FontWeight.Bold)
+                    }
                 }
-                StatusChip(status.label, status.historyColor())
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Order ${esim.orderNumber?.let { "#$it" } ?: "--"}", color = HistoryMuted, fontSize = 12.sp)
-                Text(esim.createdAt.prettyDate(), color = HistoryMuted, fontSize = 12.sp)
             }
         }
     }
 }
 
 @Composable
-private fun HistoryInfoCard(title: String, subtitle: String) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, HistoryBorder)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun CustomerAvatar(esim: MobileEsim) {
+    val initials = (esim.customerName() ?: esim.provider ?: esim.packageName ?: "R2W")
+        .split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString("") { it.first().uppercase() }
+        .ifBlank { "R2" }
+    Box(Modifier.size(54.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) {
+        Text(initials.take(2), color = HistoryBlue, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+    }
+}
+
+@Composable
+private fun CardLine(icon: ImageVector, label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(18.dp))
+        Text(label, color = HistoryMuted, fontSize = 14.sp, modifier = Modifier.padding(start = 14.dp).width(140.dp))
+        Text(value, color = HistoryText, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun StatusPill(label: String, status: HistoryStatus) {
+    val bg = when (status) {
+        HistoryStatus.ACTIVE, HistoryStatus.READY -> HistoryGreenBg
+        HistoryStatus.PENDING -> HistoryYellowBg
+        HistoryStatus.EXPIRED -> HistoryRedBg
+        HistoryStatus.DISABLED -> HistoryGrayBg
+    }
+    val fg = when (status) {
+        HistoryStatus.ACTIVE, HistoryStatus.READY -> HistoryGreen
+        HistoryStatus.PENDING -> HistoryYellow
+        HistoryStatus.EXPIRED -> HistoryRed
+        HistoryStatus.DISABLED -> HistoryGray
+    }
+    Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 12.dp, vertical = 7.dp)) {
+        Text(label, color = fg, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun InfoCard(title: String, subtitle: String) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, HistoryBorder)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, color = HistoryText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
             Text(subtitle, color = HistoryMuted, fontSize = 13.sp)
         }
-    }
-}
-
-@Composable
-private fun StatusChip(label: String, color: Color) {
-    Box(Modifier.clip(RoundedCornerShape(50)).background(color.copy(alpha = .12f)).padding(horizontal = 11.dp, vertical = 6.dp)) {
-        Text(label, color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -334,7 +363,7 @@ internal fun MobileEsim.historyStatus(): HistoryStatus {
     val label = statusLabel()?.lowercase().orEmpty()
     return when {
         label.contains("active") -> HistoryStatus.ACTIVE
-        label.contains("ready") -> HistoryStatus.READY
+        label.contains("ready") || label.contains("activated") -> HistoryStatus.READY
         label.contains("pending") || label.contains("processing") -> HistoryStatus.PENDING
         label.contains("expired") || label.contains("depleted") || label.contains("terminated") -> HistoryStatus.EXPIRED
         else -> HistoryStatus.DISABLED
@@ -345,7 +374,7 @@ internal fun HistoryStatus.historyColor(): Color = when (this) {
     HistoryStatus.ACTIVE, HistoryStatus.READY -> HistoryGreen
     HistoryStatus.PENDING -> HistoryYellow
     HistoryStatus.EXPIRED -> HistoryRed
-    HistoryStatus.DISABLED -> HistoryMuted
+    HistoryStatus.DISABLED -> HistoryGray
 }
 
 internal fun MobileEsim.shortIccid(): String? {
@@ -358,6 +387,6 @@ internal fun String?.prettyDate(): String {
     val raw = this?.trim().orEmpty()
     if (raw.isBlank()) return "--"
     return runCatching {
-        OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US))
+        OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("MMM d, yyyy hh:mm a", Locale.US))
     }.getOrDefault(raw.take(16))
 }
