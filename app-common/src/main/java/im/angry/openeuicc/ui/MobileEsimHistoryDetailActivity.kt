@@ -28,10 +28,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SdCard
 import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,8 +54,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,14 +66,14 @@ import androidx.core.view.WindowInsetsControllerCompat
 import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.MobileEsimLastRenewal
 
-private val DetailOrange = Color(0xFFFF7900)
-private val DetailText = Color(0xFF17181C)
-private val DetailMuted = Color(0xFF6B7280)
-private val DetailBg = Color(0xFFF7F9FC)
-private val DetailBorder = Color(0xFFE5E7EB)
-private val DetailGreen = Color(0xFF16A34A)
-private val DetailRed = Color(0xFFDC2626)
-private val DetailYellow = Color(0xFFF59E0B)
+private val DetailBlue = Color(0xFF0F4FD7)
+private val DetailDark = Color(0xFF050B3D)
+private val DetailText = Color(0xFF20242C)
+private val DetailMuted = Color(0xFF68707C)
+private val DetailBg = Color(0xFFF8FAFD)
+private val DetailBorder = Color(0xFFE1E6EF)
+private val DetailGreen = Color(0xFF12813A)
+private val DetailGreenBg = Color(0xFFE9F7EF)
 
 class MobileEsimHistoryDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,17 +82,19 @@ class MobileEsimHistoryDetailActivity : ComponentActivity() {
         configureSystemBars()
         val esim = readIntentEsim()
         setContent {
-            MobileEsimHistoryDetailScreen(
+            PurchaseHistoryMockupDetail(
                 esim = esim,
                 onBack = { finish() },
                 onCopy = { label, value -> copyToClipboard(label, value) },
-                onOpenEsimDetail = { startActivity(MobileEsimDetailActivity.createIntent(this, it)) }
+                onOpenEsimDetail = { startActivity(MobileEsimDetailActivity.createIntent(this, it)) },
+                onOpenOpenEuicc = { startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java)) },
+                onRenew = { startActivity(Intent(this, VodafoneRenewalActivity::class.java)) }
             )
         }
     }
 
     private fun configureSystemBars() {
-        window.statusBarColor = AndroidColor.rgb(247, 249, 252)
+        window.statusBarColor = AndroidColor.rgb(248, 250, 253)
         window.navigationBarColor = AndroidColor.BLACK
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = true
@@ -210,123 +222,132 @@ class MobileEsimHistoryDetailActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MobileEsimHistoryDetailScreen(
+private fun PurchaseHistoryMockupDetail(
     esim: MobileEsim,
     onBack: () -> Unit,
     onCopy: (String, String?) -> Unit,
-    onOpenEsimDetail: (MobileEsim) -> Unit
+    onOpenEsimDetail: (MobileEsim) -> Unit,
+    onOpenOpenEuicc: () -> Unit,
+    onRenew: () -> Unit
 ) {
-    val status = esim.historyStatus()
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = DetailBg) {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, top = 16.dp, end = 20.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.ArrowBack, null, tint = DetailText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
-                    Text("History Detail", color = DetailText, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 16.dp).weight(1f))
+                    Icon(Icons.Default.ArrowBack, null, tint = DetailBlue, modifier = Modifier.size(32.dp).clickable(onClick = onBack))
+                    Text("Purchase History", color = DetailDark, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(32.dp))
                 }
 
-                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(Color(0xFF17181C))) {
-                    Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(58.dp).clip(CircleShape).background(DetailOrange), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.ReceiptLong, null, tint = Color.White, modifier = Modifier.size(30.dp))
-                            }
-                            Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                                Text(esim.orderNumber?.let { "Order #$it" } ?: "eSIM record", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(esim.createdAt.prettyDate(), color = Color.White.copy(alpha = .72f), fontSize = 13.sp)
-                            }
-                        }
-                        StatusBadge(status.label, status.historyColor())
-                    }
+                DetailCard("Customer Information", Icons.Default.AccountCircle) {
+                    DetailIconRow(Icons.Default.Person, esim.customerName() ?: "Customer")
+                    DetailDivider()
+                    DetailIconRow(Icons.Default.Phone, esim.customerPhone ?: "--")
+                    DetailDivider()
+                    DetailIconRow(Icons.Default.Email, esim.customerEmail ?: "--")
                 }
 
-                DetailSection("Profile") {
-                    DetailRow("Package", esim.packageName ?: "Roam2World eSIM")
-                    DetailRow("Provider", esim.provider ?: "--")
-                    DetailRow("ICCID", esim.iccid ?: "--", copyable = true) { onCopy("ICCID", esim.iccid) }
-                    DetailRow("Status", esim.statusLabel() ?: status.label)
+                DetailCard("eSIM Details", Icons.Default.SimCard) {
+                    DetailValueRow("ICCID", esim.iccid ?: "--", copyable = true) { onCopy("ICCID", esim.iccid) }
+                    DetailDivider()
+                    DetailValueRow("Provider", esim.provider ?: "--")
+                    DetailDivider()
+                    DetailValueRow("Package", esim.packageName ?: "--")
+                    DetailDivider()
+                    DetailValueRow("Data", esim.dataRemaining ?: esim.dataUsed ?: "--")
+                    DetailDivider()
+                    DetailValueRow("Validity", validityFromDates(esim))
                 }
 
-                DetailSection("Lifecycle") {
-                    DetailRow("Purchased", esim.createdAt.prettyDate())
-                    DetailRow("Expires", esim.expiresAt.prettyDate())
-                    DetailRow("Data remaining", esim.dataRemaining ?: "--")
-                    DetailRow("Data used", esim.dataUsed ?: "--")
+                DetailCard("Purchase Information", Icons.Default.CalendarMonth) {
+                    DetailValueRow("Purchase Date", esim.createdAt.prettyDate())
+                    DetailDivider()
+                    DetailValueRow("Expiry Date", esim.expiresAt.prettyDate())
+                    DetailDivider()
+                    DetailValueRow("Remaining Data", esim.dataRemaining ?: "--", valueColor = DetailBlue)
+                    DetailDivider()
+                    DetailValueRow("Renewable", if (esim.lastRenewal != null) "Yes" else "Yes", chip = true)
+                    DetailDivider()
+                    DetailValueRow("Installation Status", esim.statusLabel() ?: esim.historyStatus().label, chip = true)
                 }
 
-                DetailSection("References") {
-                    DetailRow("Order number", esim.orderNumber?.let { "#$it" } ?: "--", copyable = true) { onCopy("Order", esim.orderNumber) }
-                    DetailRow("Order ID", esim.orderId ?: "--")
-                    DetailRow("Install code", esim.installCode()?.take(36)?.plus(if ((esim.installCode()?.length ?: 0) > 36) "..." else "") ?: "--", copyable = true) { onCopy("Install code", esim.installCode()) }
-                }
-
-                DetailTimeline(esim)
-
-                Button(
-                    onClick = { onOpenEsimDetail(esim) },
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DetailOrange)
-                ) {
-                    Icon(Icons.Default.OpenInNew, null, tint = Color.White)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Open eSIM Detail", fontWeight = FontWeight.ExtraBold)
-                }
+                PrimaryAction("View eSIM", Icons.Default.SdCard) { onOpenEsimDetail(esim) }
+                SecondaryAction("Open OpenEUICC", Icons.Default.OpenInNew, outlined = true, onOpenOpenEuicc)
+                SecondaryAction("Renew", Icons.Default.Refresh, outlined = false, onRenew)
             }
         }
     }
 }
 
 @Composable
-private fun DetailSection(title: String, content: @Composable () -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, DetailBorder), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(title, color = DetailText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            HorizontalDivider(color = DetailBorder)
+private fun DetailCard(title: String, icon: ImageVector, content: @Composable () -> Unit) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, DetailBorder), elevation = CardDefaults.cardElevation(2.dp)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFEFF5FF)), contentAlignment = Alignment.Center) {
+                    Icon(icon, null, tint = DetailBlue, modifier = Modifier.size(28.dp))
+                }
+                Text(title, color = DetailDark, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 14.dp))
+            }
             content()
         }
     }
 }
 
 @Composable
-private fun DetailRow(label: String, value: String, copyable: Boolean = false, onCopy: (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(label, color = DetailMuted, fontSize = 12.sp)
-            Text(value, color = DetailText, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+private fun DetailIconRow(icon: ImageVector, value: String) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = DetailBlue, modifier = Modifier.size(28.dp))
+        Text(value, color = DetailText, fontSize = 18.sp, modifier = Modifier.padding(start = 18.dp))
+    }
+}
+
+@Composable
+private fun DetailValueRow(label: String, value: String, valueColor: Color = DetailText, copyable: Boolean = false, chip: Boolean = false, onCopy: (() -> Unit)? = null) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, color = DetailMuted, fontSize = 17.sp, modifier = Modifier.weight(1f))
+        if (chip) {
+            Box(Modifier.clip(RoundedCornerShape(8.dp)).background(DetailGreenBg).padding(horizontal = 9.dp, vertical = 3.dp)) {
+                Text(value, color = DetailGreen, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        } else {
+            Text(value, color = valueColor, fontSize = 18.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1.2f), textAlign = TextAlign.End)
         }
         if (copyable) {
-            Icon(Icons.Default.ContentCopy, null, tint = DetailOrange, modifier = Modifier.size(24.dp).clickable { onCopy?.invoke() })
+            Icon(Icons.Default.ContentCopy, null, tint = DetailBlue, modifier = Modifier.padding(start = 8.dp).size(22.dp).clickable { onCopy?.invoke() })
         }
     }
 }
 
 @Composable
-private fun DetailTimeline(esim: MobileEsim) {
-    DetailSection("Status timeline") {
-        TimelineRow("Purchased", esim.createdAt.prettyDate(), true)
-        TimelineRow("Profile status", esim.statusLabel() ?: esim.historyStatus().label, true)
-        TimelineRow("Renewal", esim.lastRenewal?.message ?: esim.lastRenewal?.productName ?: "No renewal record", esim.lastRenewal != null)
-        TimelineRow("Expiry", esim.expiresAt.prettyDate(), !esim.expiresAt.isNullOrBlank())
-    }
+private fun DetailDivider() {
+    HorizontalDivider(color = DetailBorder, thickness = 1.dp)
 }
 
 @Composable
-private fun TimelineRow(title: String, subtitle: String, complete: Boolean) {
-    Row(verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(22.dp).clip(CircleShape).background(if (complete) DetailGreen else DetailBorder), contentAlignment = Alignment.Center) {
-            if (complete) Box(Modifier.size(8.dp).clip(CircleShape).background(Color.White))
-        }
-        Column(Modifier.padding(start = 12.dp)) {
-            Text(title, color = DetailText, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = DetailMuted, fontSize = 13.sp)
+private fun PrimaryAction(title: String, icon: ImageVector, onClick: () -> Unit) {
+    Button(onClick = onClick, modifier = Modifier.fillMaxWidth().height(64.dp), shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.buttonColors(containerColor = DetailBlue)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, null, tint = Color.White, modifier = Modifier.size(28.dp))
+            Text(title, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+            Text("›", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-private fun StatusBadge(label: String, color: Color) {
-    Box(Modifier.clip(RoundedCornerShape(50)).background(color.copy(alpha = .18f)).padding(horizontal = 12.dp, vertical = 7.dp)) {
-        Text(label, color = color, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+private fun SecondaryAction(title: String, icon: ImageVector, outlined: Boolean, onClick: () -> Unit) {
+    val colors = if (outlined) ButtonDefaults.outlinedButtonColors(containerColor = Color.White) else ButtonDefaults.buttonColors(containerColor = Color(0xFFEFF5FF))
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(10.dp), border = BorderStroke(1.dp, DetailBlue), colors = colors) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, null, tint = DetailBlue, modifier = Modifier.size(28.dp))
+            Text(title, color = DetailBlue, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+            Text("›", color = DetailBlue, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+        }
     }
+}
+
+private fun validityFromDates(esim: MobileEsim): String = when {
+    !esim.expiresAt.isNullOrBlank() -> esim.expiresAt.prettyDate()
+    else -> "--"
 }
