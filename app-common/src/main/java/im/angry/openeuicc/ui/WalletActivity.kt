@@ -138,9 +138,9 @@ private fun WalletScreen(
                 WalletQuickRequest(
                     amount = amount,
                     selectedAmount = selectedAmount,
-                    onAmountChange = {
-                        amount = it
-                        selectedAmount = it.toIntOrNull()
+                    onAmountChange = { value ->
+                        amount = value
+                        selectedAmount = value.toIntOrNull()
                     },
                     onSubmit = onRequestBalance
                 )
@@ -188,6 +188,14 @@ private fun WalletQuickRequest(
                     }
                 }
             }
+
+            OutlinedTextField(
+                value = amount,
+                onValueChange = { onAmountChange(it) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Enter amount") },
+                singleLine = true
+            )
 
             Button(
                 onClick = onSubmit,
