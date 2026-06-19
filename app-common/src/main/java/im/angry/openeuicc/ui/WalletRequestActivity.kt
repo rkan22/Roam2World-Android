@@ -27,6 +27,7 @@ class WalletRequestActivity : ComponentActivity() {
     private var amount by mutableStateOf("")
     private var currency by mutableStateOf("USD")
     private var note by mutableStateOf("")
+
     private var loading by mutableStateOf(false)
     private var errorMessage by mutableStateOf<String?>(null)
     private var successMessage by mutableStateOf<String?>(null)
@@ -76,12 +77,6 @@ class WalletRequestActivity : ComponentActivity() {
                     R2wMockTextField(value = note, onValueChange = { note = it }, label = "Note", singleLine = false, minLines = 3)
                 }
 
-                R2wMockCard("Approval flow") {
-                    R2wMockStep("1", "Create", "You submit the amount, currency and optional note.")
-                    R2wMockStep("2", "Review", "Admin checks the request and payment status.")
-                    R2wMockStep("3", "Wallet updated", "Approved amount is added to your wallet balance.")
-                }
-
                 errorMessage?.let { R2wMockCard("Request failed") { Text(it, color = R2wMockColors.Danger, fontWeight = FontWeight.Bold) } }
                 successMessage?.let { R2wMockCard("Request created") { Text(it, color = R2wMockColors.Success, fontWeight = FontWeight.Bold) } }
 
@@ -95,14 +90,17 @@ class WalletRequestActivity : ComponentActivity() {
 
     private fun submitRequest() {
         clearMessages()
+
         val cleanAmount = amount.trim()
         val cleanCurrency = currency.trim().uppercase()
         val cleanNote = note.trim()
 
-        if (cleanAmount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
-            amountError = "Amount is required"
+        val parsedAmount = cleanAmount.toBigDecimalOrNull()
+        if (parsedAmount == null || parsedAmount <= BigDecimal.ZERO) {
+            amountError = "Valid amount required"
             return
         }
+
         if (cleanCurrency.length != 3 || !cleanCurrency.all { it.isLetter() }) {
             currencyError = "Currency must be 3 letters"
             return
@@ -110,22 +108,27 @@ class WalletRequestActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             loading = true
-            val session = activeSessionOrReturnToLogin()
-            if (session == null) {
-                loading = false
-                return@launch
-            }
+            try {
+                val session = activeSessionOrReturnToLogin() ?: return@launch
 
-            val result = runCatching { authApi.createWalletRequest(session, cleanAmount, cleanCurrency, cleanNote) }
-            loading = false
-            result
-                .onSuccess {
-                    successMessage = "Wallet request created: ${it.amount} ${it.currency}"
-                    amount = ""
-                    note = ""
-                    currency = cleanCurrency
-                }
-                .onFailure { errorMessage = it.message ?: "Wallet request failed" }
+                val response = authApi.createWalletRequest(
+                    session,
+                    cleanAmount,
+                    cleanCurrency,
+                    cleanNote
+                )
+
+                successMessage = "Request created: ${response.amount} ${response.currency}"
+                amount = ""
+                note = ""
+                currency = "USD"
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                errorMessage = e.message ?: "Wallet request failed"
+            } finally {
+                loading = false
+            }
         }
     }
 
