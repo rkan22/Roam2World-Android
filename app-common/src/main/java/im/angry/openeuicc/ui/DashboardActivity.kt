@@ -35,6 +35,7 @@ class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         configureSystemBars()
+        R2wUsbPermissionHelper.requestAttachedUsbReaders(this, showToast = false)
 
         setContent {
             val data by dashboardDataFlow.collectAsState()
