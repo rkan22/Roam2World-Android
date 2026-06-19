@@ -20,34 +20,14 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -137,15 +117,14 @@ private fun WalletScreen(
     onMore: () -> Unit
 ) {
     val transactions = walletData?.transactions.orEmpty()
+
     var amount by remember { mutableStateOf("") }
+    var selectedAmount by remember { mutableStateOf<Int?>(null) }
 
     MaterialTheme {
         Surface(Modifier.fillMaxSize()) {
             Column(
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 WalletHero(
@@ -158,7 +137,11 @@ private fun WalletScreen(
 
                 WalletQuickRequest(
                     amount = amount,
-                    onAmountChange = { amount = it },
+                    selectedAmount = selectedAmount,
+                    onAmountChange = {
+                        amount = it
+                        selectedAmount = it.toIntOrNull()
+                    },
                     onSubmit = onRequestBalance
                 )
             }
@@ -169,6 +152,7 @@ private fun WalletScreen(
 @Composable
 private fun WalletQuickRequest(
     amount: String,
+    selectedAmount: Int?,
     onAmountChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
@@ -182,16 +166,25 @@ private fun WalletQuickRequest(
             Text("Quick Request", fontWeight = FontWeight.Bold)
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(50, 100, 250, 500).forEach {
+                listOf(50, 100, 250, 500).forEach { value ->
+                    val isSelected = selectedAmount == value
+
                     Box(
                         Modifier
                             .weight(1f)
                             .height(36.dp)
-                            .background(Color(0xFFF2F4F8), RoundedCornerShape(10.dp))
-                            .clickable { onAmountChange(it.toString()) },
+                            .background(
+                                if (isSelected) WalletBlue else Color(0xFFF2F4F8),
+                                RoundedCornerShape(10.dp)
+                            )
+                            .clickable { onAmountChange(value.toString()) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("$it", color = WalletBlue)
+                        Text(
+                            "$value",
+                            color = if (isSelected) Color.White else WalletBlue,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
