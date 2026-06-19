@@ -27,18 +27,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Business
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -95,6 +92,10 @@ private val ReportsRedBg = Color(0xFFFFEEF2)
 private val ReportsYellow = Color(0xFFB7791F)
 private val ReportsYellowBg = Color(0xFFFFF8E6)
 
+private enum class ReportRange(val label: String) {
+    TODAY("Today"), SEVEN_DAYS("7 days"), THIRTY_DAYS("30 days"), ALL("All")
+}
+
 class ReportsActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
@@ -106,10 +107,6 @@ class ReportsActivity : ComponentActivity() {
     private var loadedActiveEsims by mutableStateOf<String?>(null)
     private var loading by mutableStateOf(false)
     private var errorMessage by mutableStateOf<String?>(null)
-
-    private enum class ReportRange(val label: String) {
-        TODAY("Today"), SEVEN_DAYS("7 days"), THIRTY_DAYS("30 days"), ALL("All")
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -247,7 +244,7 @@ private data class ReportSummary(
 )
 
 @Composable
-private fun ReportsScreen(summary: ReportSummary, range: ReportsActivity.ReportRange, loading: Boolean, error: String?, onBack: () -> Unit, onRefresh: () -> Unit, onRange: (ReportsActivity.ReportRange) -> Unit, onExport: () -> Unit) {
+private fun ReportsScreen(summary: ReportSummary, range: ReportRange, loading: Boolean, error: String?, onBack: () -> Unit, onRefresh: () -> Unit, onRange: (ReportRange) -> Unit, onExport: () -> Unit) {
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = ReportsBg) {
             Box(Modifier.fillMaxSize()) {
@@ -262,7 +259,7 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportsActivity.ReportR
                     ReportsHero(summary.status, onExport)
 
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ReportsActivity.ReportRange.values().forEach { item -> RangeChip(item.label, range == item) { onRange(item) } }
+                        ReportRange.values().forEach { item -> RangeChip(item.label, range == item) { onRange(item) } }
                     }
 
                     error?.let { ErrorCard(it) }
@@ -271,7 +268,7 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportsActivity.ReportR
                         item {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 MetricCard("Revenue", summary.revenue, Icons.Default.TrendingUp, Modifier.weight(1f))
-                                MetricCard("Sales", summary.sales, Icons.Default.ReceiptLong, Modifier.weight(1f))
+                                MetricCard("Sales", summary.sales, Icons.Default.Assessment, Modifier.weight(1f))
                             }
                         }
                         item {
@@ -280,7 +277,7 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportsActivity.ReportR
                                 MetricCard("Active eSIMs", summary.activeEsims, Icons.Default.SimCard, Modifier.weight(1f))
                             }
                         }
-                        item { MetricWideCard("Wallet Balance", summary.wallet, "Current reseller/dealer wallet balance", Icons.Default.Wallet) }
+                        item { MetricWideCard("Wallet Balance", summary.wallet, "Current reseller/dealer wallet balance", Icons.Default.AccountBalanceWallet) }
                         item { OrderHealthCard(summary.pending, summary.failed, summary.dealerCount) }
                         item { ProviderUsageCard(summary.providers) }
                         item { RecentOrdersCard(summary.recentOrders) }
