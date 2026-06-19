@@ -182,15 +182,15 @@ private fun WalletScreen(
 @Composable
 private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(WalletBlue), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             Text("Available Balance", color = Color.White.copy(alpha = .92f), fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            Text(r2wMoney(balance), color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("≈ ${r2wMoney(balance)} USD", color = Color.White.copy(alpha = .82f), fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(r2wMoney(balance), color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("≈ ${r2wMoney(balance)} USD", color = Color.White.copy(alpha = .82f), fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("View Transactions >", color = Color.White.copy(alpha = .92f), fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text("View Transactions >", color = Color.White.copy(alpha = .92f), fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 Spacer(Modifier.weight(1f))
-                Button(onClick = onRequestBalance, modifier = Modifier.width(132.dp).height(42.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
-                    Text("+ Add Funds", color = WalletBlue, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Button(onClick = onRequestBalance, modifier = Modifier.width(124.dp).height(38.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
+                    Text("+ Add Funds", color = WalletBlue, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
                 }
             }
         }
