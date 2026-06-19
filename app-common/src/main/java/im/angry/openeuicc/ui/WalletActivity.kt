@@ -152,7 +152,7 @@ private fun WalletScreen(
                 Column(Modifier.fillMaxSize().padding(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.ArrowBack, null, tint = WalletText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
-                        Text("Wallet", color = WalletText, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+                        Text("Wallet Request", color = WalletText, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
                         if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = WalletBlue, strokeWidth = 2.dp)
                         Icon(Icons.Default.Refresh, null, tint = WalletBlue, modifier = Modifier.padding(start = 12.dp).size(28.dp).clickable(onClick = onRefresh))
                     }
@@ -176,10 +176,10 @@ private fun WalletScreen(
 private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(WalletBlue), elevation = CardDefaults.cardElevation(2.dp)) {
         Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Text("Wallet Balance", color = Color.White.copy(alpha = .92f), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text("Available Balance", color = Color.White.copy(alpha = .92f), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Text(r2wMoney(balance), color = Color.White, fontSize = 40.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Button(onClick = onRequestBalance, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
-                Text("Request Balance", color = WalletBlue, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                Text("Add Funds", color = WalletBlue, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
     }
@@ -187,7 +187,7 @@ private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
 
 @Composable
 private fun TransactionListCard(transactions: List<MobileTransaction>) {
-    SectionCard("Transaction List") {
+    SectionCard("Recent Transactions") {
         if (transactions.isEmpty()) {
             EmptyText("No transactions yet")
         } else {
@@ -201,7 +201,7 @@ private fun TransactionListCard(transactions: List<MobileTransaction>) {
 
 @Composable
 private fun BalanceHistoryCard(requests: List<MobileWalletRequest>) {
-    SectionCard("Balance History") {
+    SectionCard("Recent Requests") {
         if (requests.isEmpty()) {
             EmptyText("No balance request history")
         } else {
