@@ -195,7 +195,7 @@ private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
 @Composable
 private fun WalletKpiRow(pending: Int, approved: Int, rejected: Int, total: Int) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder), elevation = CardDefaults.cardElevation(1.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             WalletKpiItem(value = pending.toString(), label = "Pending", accent = WalletOrange, modifier = Modifier.weight(1f))
             WalletKpiItem(value = approved.toString(), label = "Approved", accent = WalletGreen, modifier = Modifier.weight(1f))
             WalletKpiItem(value = rejected.toString(), label = "Rejected", accent = WalletRed, modifier = Modifier.weight(1f))
@@ -206,11 +206,11 @@ private fun WalletKpiRow(pending: Int, approved: Int, rejected: Int, total: Int)
 
 @Composable
 private fun WalletKpiItem(value: String, label: String, accent: Color, modifier: Modifier = Modifier) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.size(34.dp).clip(CircleShape).background(accent.copy(alpha = .12f)), contentAlignment = Alignment.Center) {
-            Text(value, color = accent, fontSize = 14.sp, fontWeight = FontWeight.Black, maxLines = 1)
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Box(Modifier.size(30.dp).clip(CircleShape).background(accent.copy(alpha = .12f)), contentAlignment = Alignment.Center) {
+            Text(value, color = accent, fontSize = 13.sp, fontWeight = FontWeight.Black, maxLines = 1)
         }
-        Text(label, color = WalletMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, color = WalletMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
