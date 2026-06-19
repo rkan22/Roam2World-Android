@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.MobileDashboardData
 import im.angry.openeuicc.auth.MobileDashboardOrder
+import im.angry.openeuicc.ui.R2wBottomNav
+import im.angry.openeuicc.ui.R2wBottomTab
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -95,7 +97,7 @@ fun CompactDashboardScreen(
                 item { CompactActions(onActionClick) }
                 item { Spacer(Modifier.height(72.dp)) }
             }
-            CompactBottomNav(onActionClick)
+            R2wBottomNav(selected = R2wBottomTab.Home)
         }
     }
 }

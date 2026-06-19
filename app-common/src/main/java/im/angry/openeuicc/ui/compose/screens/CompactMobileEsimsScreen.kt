@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.MobileEsim
 import im.angry.openeuicc.auth.MobileEsimFilters
 import im.angry.openeuicc.ui.PackageNameCleaner
+import im.angry.openeuicc.ui.R2wBottomNav
+import im.angry.openeuicc.ui.R2wBottomTab
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -101,7 +103,7 @@ public fun CompactMobileEsimsScreen(
                 }
                 item { Spacer(Modifier.height(74.dp)) }
             }
-            EsimsBottomNav(onOpenDashboard, onOpenPackages, onOpenMore)
+            R2wBottomNav(selected = R2wBottomTab.Esims)
         }
     }
 }
