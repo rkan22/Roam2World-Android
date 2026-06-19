@@ -99,6 +99,14 @@
             android:theme="@style/Theme.OpenEUICC" />
 
         <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimHistoryDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
             android:exported="false" />
 
