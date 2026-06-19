@@ -172,9 +172,9 @@ private fun OrdersScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var statusFilter by remember { mutableStateOf(OrderFilter.ALL) }
-    var dateFilter by remember { mutableStateOf(initialDateFilter?.uppercase()) }
+    var dateFilter by remember { mutableStateOf(initialDateFilter?.uppercase(Locale.ROOT)) }
 
-    LaunchedEffect(initialDateFilter) { dateFilter = initialDateFilter?.uppercase() }
+    LaunchedEffect(initialDateFilter) { dateFilter = initialDateFilter?.uppercase(Locale.ROOT) }
 
     val filteredOrders by remember(orders, query, statusFilter, dateFilter) {
         derivedStateOf {
@@ -317,7 +317,7 @@ private fun OrderLine(icon: ImageVector, label: String, value: String) {
 @Composable
 private fun StatusBadge(label: String?, rawStatus: String?) {
     val display = normalizedStatusLabel(label, rawStatus)
-    val normalized = listOfNotNull(rawStatus, display).joinToString(" ").lowercase()
+    val normalized = listOfNotNull(rawStatus, display).joinToString(" ").lowercase(Locale.ROOT)
     val pair = when {
         isFailedStatus(normalized) -> OrdersRedBg to OrdersRed
         isCompletedStatus(normalized) -> OrdersGreenBg to OrdersGreen
@@ -398,14 +398,14 @@ private fun providerDisplayName(provider: String?): String { val p = provider.or
 private fun MobileOrder.displayPackageName(): String { val clean = packageName.replace("【ESIM】", "", true).replace("[ESIM]", "", true).replace("ESIM", "eSIM", true).replace("  ", " ").trim(' ', '-', '|'); return clean.ifBlank { "Package" } }
 private fun MobileOrder.displayCustomerName(): String = customerName() ?: esim?.customerName() ?: customerEmail?.substringBefore('@')?.replace('.', ' ')?.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } ?: orderNumber?.let { "Order #$it" } ?: "B2B Customer"
 private fun MobileOrder.displayCustomerSubtitle(): String = customerPhone?.takeIf { it.isNotBlank() } ?: customerEmail?.takeIf { it.isNotBlank() } ?: esim?.customerPhone?.takeIf { it.isNotBlank() } ?: esim?.customerEmail?.takeIf { it.isNotBlank() } ?: esim?.iccid?.shortIccid() ?: "No customer contact"
-private fun MobileOrder.initials(): String = displayCustomerName().split(" ", "#").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase() }.take(2).ifBlank { "O" }
+private fun MobileOrder.initials(): String = displayCustomerName().split(" ", "#").filter { it.isNotBlank() }.take(2).joinToString("") { it.first().uppercase(Locale.ROOT) }.take(2).ifBlank { "O" }
 private fun MobileOrder.isCompleted(): Boolean = isCompletedStatus(status.orEmpty())
 private fun String.shortIccid(): String = if (length > 12) "${take(6)}...${takeLast(4)}" else this
-private fun normalizedStatusLabel(label: String?, rawStatus: String?): String { val display = label?.takeIf { it.isNotBlank() } ?: rawStatus.orEmpty(); val normalized = listOfNotNull(rawStatus, display).joinToString(" ").lowercase(); return when { isFailedStatus(normalized) -> "Cancelled"; isCompletedStatus(normalized) && normalized.contains("confirm") -> "Active"; isCompletedStatus(normalized) -> "Completed"; else -> "Pending" } }
+private fun normalizedStatusLabel(label: String?, rawStatus: String?): String { val display = label?.takeIf { it.isNotBlank() } ?: rawStatus.orEmpty(); val normalized = listOfNotNull(rawStatus, display).joinToString(" ").lowercase(Locale.ROOT); return when { isFailedStatus(normalized) -> "Cancelled"; isCompletedStatus(normalized) && normalized.contains("confirm") -> "Active"; isCompletedStatus(normalized) -> "Completed"; else -> "Pending" } }
 private fun isCompletedStatus(status: String): Boolean = status.contains("complete") || status.contains("completed") || status.contains("confirmed") || status.contains("confirm") || status.contains("success") || status.contains("succeeded") || status.contains("installed") || status.contains("active") || status.contains("paid")
 private fun isFailedStatus(status: String): Boolean = status.contains("fail") || status.contains("failed") || status.contains("cancel") || status.contains("cancelled") || status.contains("error") || status.contains("rejected") || status.contains("refund")
 
 private enum class OrderFilter(val label: String) {
     ALL("All"), PENDING("Pending"), COMPLETED("Completed"), FAILED("Cancelled");
-    fun matches(statusValue: String?): Boolean { val status = statusValue.orEmpty().lowercase(); return when (this) { ALL -> true; PENDING -> status.contains("pending") || status.contains("processing") || status.contains("waiting"); COMPLETED -> isCompletedStatus(status); FAILED -> isFailedStatus(status) } }
+    fun matches(statusValue: String?): Boolean { val status = statusValue.orEmpty().lowercase(Locale.ROOT); return when (this) { ALL -> true; PENDING -> status.contains("pending") || status.contains("processing") || status.contains("waiting"); COMPLETED -> isCompletedStatus(status); FAILED -> isFailedStatus(status) } }
 }
