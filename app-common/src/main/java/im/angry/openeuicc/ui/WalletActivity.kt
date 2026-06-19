@@ -19,14 +19,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,6 +51,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -146,16 +153,21 @@ private fun WalletScreen(
     onRefresh: () -> Unit,
     onRequestBalance: () -> Unit
 ) {
-    val transactions = walletData?.transactions.orEmpty()
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = WalletBg) {
             Box(Modifier.fillMaxSize()) {
-                Column(Modifier.fillMaxSize().padding(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.ArrowBack, null, tint = WalletText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
-                        Text("Wallet Request", color = WalletText, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
-                        if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = WalletBlue, strokeWidth = 2.dp)
-                        Icon(Icons.Default.Refresh, null, tint = WalletBlue, modifier = Modifier.padding(start = 12.dp).size(28.dp).clickable(onClick = onRefresh))
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 106.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    WalletTopBar(loading = loading, onBack = onBack, onRefresh = onRefresh)
+
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("Wallet Request", color = WalletText, fontSize = 29.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("Request funds to top up your wallet balance.", color = WalletMuted, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                     }
 
                     WalletBalanceCard(balance = walletData?.currentBalance ?: "0", onRequestBalance = onRequestBalance)
@@ -167,12 +179,8 @@ private fun WalletScreen(
                     )
 
                     error?.let { ErrorCard(it) }
-
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.weight(1f)) {
-                        item { WalletRequestFormShell(onSubmit = onRequestBalance) }
-                        item { TransactionListCard(transactions) }
-                        item { BalanceHistoryCard(requests) }
-                    }
+                    WalletRequestFormShell(onSubmit = onRequestBalance)
+                    BalanceHistoryCard(requests = requests, onViewAll = onRequestBalance)
                 }
                 R2wBottomNav(selected = R2wBottomTab.Wallet, modifier = Modifier.align(Alignment.BottomCenter))
             }
@@ -181,18 +189,48 @@ private fun WalletScreen(
 }
 
 @Composable
+private fun WalletTopBar(loading: Boolean, onBack: () -> Unit, onRefresh: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Default.ArrowBack, null, tint = WalletText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
+        Text(
+            buildAnnotatedString {
+                append("Roam")
+                withStyle(SpanStyle(color = Color(0xFF18B7A7))) { append("2") }
+                append("World")
+            },
+            color = WalletText,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Black,
+            modifier = Modifier.padding(start = 18.dp)
+        )
+        Box(Modifier.padding(start = 8.dp).clip(RoundedCornerShape(6.dp)).background(WalletBlue).padding(horizontal = 7.dp, vertical = 3.dp)) {
+            Text("B2B", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Black)
+        }
+        Spacer(Modifier.weight(1f))
+        if (loading) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = WalletBlue, strokeWidth = 2.dp)
+        Icon(Icons.Default.Refresh, null, tint = WalletText, modifier = Modifier.padding(start = 12.dp).size(26.dp).clickable(onClick = onRefresh))
+    }
+}
+
+@Composable
 private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(WalletBlue), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Text("Available Balance", color = Color.White.copy(alpha = .92f), fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            Text(r2wMoney(balance), color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("≈ ${r2wMoney(balance)} USD", color = Color.White.copy(alpha = .82f), fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(WalletBlue), elevation = CardDefaults.cardElevation(4.dp)) {
+        Column(Modifier.padding(horizontal = 18.dp, vertical = 17.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Available Balance", color = Color.White.copy(alpha = .92f), fontSize = 15.sp, fontWeight = FontWeight.Medium)
+                Icon(Icons.Default.Visibility, null, tint = Color.White, modifier = Modifier.padding(start = 8.dp).size(18.dp))
+            }
+            Text(r2wMoney(balance), color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("View Transactions >", color = Color.White.copy(alpha = .92f), fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                Spacer(Modifier.weight(1f))
-                Button(onClick = onRequestBalance, modifier = Modifier.width(124.dp).height(38.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
-                    Text("+ Add Funds", color = WalletBlue, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Text("≈ ${r2wMoney(balance)} USD", color = Color.White.copy(alpha = .88f), fontSize = 16.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                Button(onClick = onRequestBalance, modifier = Modifier.width(150.dp).height(48.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color.White)) {
+                    Icon(Icons.Default.AddCircle, null, tint = WalletBlue, modifier = Modifier.size(18.dp))
+                    Text("Add Funds", color = WalletBlue, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, modifier = Modifier.padding(start = 7.dp))
                 }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                Text("View Transactions", color = Color.White.copy(alpha = .94f), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Icon(Icons.Default.ArrowForwardIos, null, tint = Color.White, modifier = Modifier.padding(start = 8.dp).size(16.dp))
             }
         }
     }
@@ -200,23 +238,48 @@ private fun WalletBalanceCard(balance: String, onRequestBalance: () -> Unit) {
 
 @Composable
 private fun WalletRequestFormShell(onSubmit: () -> Unit) {
-    SectionCard("Create Request") {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Amount", color = WalletMuted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            Row(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(14.dp)).background(Color.White).padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("$", color = WalletText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-                Text("0.00", color = WalletMuted, fontSize = 15.sp, modifier = Modifier.padding(start = 14.dp))
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("$50", "$100", "$250", "$500").forEach { amount ->
-                    Box(Modifier.weight(1f).height(34.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFFEAF1FF)), contentAlignment = Alignment.Center) {
-                        Text(amount, color = WalletBlue, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Create Request", color = WalletText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Amount", color = WalletMuted, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Row(Modifier.fillMaxWidth().height(50.dp).clip(RoundedCornerShape(12.dp)).background(Color.White).padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("€", color = WalletText, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text("0.00", color = WalletMuted, fontSize = 16.sp, modifier = Modifier.padding(start = 22.dp))
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("€50", "€100", "€250", "€500").forEach { amount ->
+                        Box(Modifier.weight(1f).height(32.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFFEAF1FF)), contentAlignment = Alignment.Center) {
+                            Text(amount, color = WalletBlue, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
+                        }
                     }
                 }
+                WalletSelectRow(label = "Currency", iconText = "€", value = "EUR - Euro", iconColor = WalletBlue)
+                WalletSelectRow(label = "Payment Method", iconText = "▦", value = "Bank Transfer", iconColor = WalletBlue)
+                Text("Note (Optional)", color = WalletMuted, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Column(Modifier.fillMaxWidth().height(78.dp).clip(RoundedCornerShape(12.dp)).background(Color.White).padding(12.dp)) {
+                    Text("Add note for this top-up request...", color = WalletMuted.copy(alpha = .72f), fontSize = 14.sp)
+                    Spacer(Modifier.weight(1f))
+                    Text("0/120", color = WalletMuted.copy(alpha = .72f), fontSize = 12.sp, modifier = Modifier.align(Alignment.End))
+                }
+                Button(onClick = onSubmit, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = WalletBlue)) {
+                    Text("Submit Top-up Request", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                }
             }
-            Button(onClick = onSubmit, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = WalletBlue)) {
-                Text("Submit Top-up Request", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+@Composable
+private fun WalletSelectRow(label: String, iconText: String, value: String, iconColor: Color) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(label, color = WalletMuted, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+        Row(Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(12.dp)).background(Color.White).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(28.dp).clip(CircleShape).background(iconColor), contentAlignment = Alignment.Center) {
+                Text(iconText, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Black)
             }
+            Text(value, color = WalletText, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 12.dp).weight(1f))
+            Icon(Icons.Default.ExpandMore, null, tint = WalletMuted, modifier = Modifier.size(22.dp))
         }
     }
 }
@@ -258,14 +321,22 @@ private fun TransactionListCard(transactions: List<MobileTransaction>) {
 }
 
 @Composable
-private fun BalanceHistoryCard(requests: List<MobileWalletRequest>) {
-    SectionCard("Recent Requests") {
+private fun BalanceHistoryCard(requests: List<MobileWalletRequest>, onViewAll: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("Recent Requests", color = WalletText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
+            Text("View All", color = WalletBlue, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.clickable(onClick = onViewAll))
+        }
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+            Column(Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) {
         if (requests.isEmpty()) {
             EmptyText("No balance request history")
         } else {
             requests.take(6).forEachIndexed { index, request ->
                 BalanceRequestRow(request)
                 if (index != requests.take(6).lastIndex) HorizontalDivider(color = WalletBorder)
+            }
+        }
             }
         }
     }
