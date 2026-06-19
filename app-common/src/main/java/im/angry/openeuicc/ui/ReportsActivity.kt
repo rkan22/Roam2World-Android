@@ -9,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,19 +21,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -79,18 +72,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val ReportsBlue = Color(0xFF0F4FD7)
-private val ReportsDark = Color(0xFF06103A)
+private val ReportsBlue = Color(0xFF0F6BFF)
 private val ReportsBg = Color(0xFFF8FAFD)
 private val ReportsText = Color(0xFF20242C)
 private val ReportsMuted = Color(0xFF68707C)
 private val ReportsBorder = Color(0xFFE1E6EF)
 private val ReportsGreen = Color(0xFF12813A)
-private val ReportsGreenBg = Color(0xFFE9F7EF)
 private val ReportsRed = Color(0xFFB42336)
-private val ReportsRedBg = Color(0xFFFFEEF2)
-private val ReportsYellow = Color(0xFFB7791F)
-private val ReportsYellowBg = Color(0xFFFFF8E6)
 
 private enum class ReportRange(val label: String) {
     TODAY("Today"), SEVEN_DAYS("7 days"), THIRTY_DAYS("30 days"), ALL("All")
@@ -139,7 +127,6 @@ class ReportsActivity : ComponentActivity() {
                 loading = false
                 return@launch
             }
-
             val dashboardRequest = async { runCatching { authApi.dashboard(session) } }
             val ordersRequest = async { runCatching { authApi.orders(session) } }
             val walletRequest = async { runCatching { authApi.wallet(session) } }
@@ -178,11 +165,7 @@ class ReportsActivity : ComponentActivity() {
     }
 
     private fun exportReportNotice() {
-        if (filteredOrders().isEmpty()) {
-            Toast.makeText(this, "No report data to export", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Report data ready", Toast.LENGTH_SHORT).show()
-        }
+        Toast.makeText(this, if (filteredOrders().isEmpty()) "No report data to export" else "Report data ready", Toast.LENGTH_SHORT).show()
     }
 
     private fun buildReportSummary(): ReportSummary {
@@ -190,22 +173,23 @@ class ReportsActivity : ComponentActivity() {
         val revenue = orders.mapNotNull { amount(it.price) }.fold(BigDecimal.ZERO, BigDecimal::add)
         val profit = revenue.multiply(BigDecimal("0.22"))
         val completed = orders.count { it.isCompletedOrder() }.takeIf { it > 0 } ?: orders.size
-        val pending = orders.count { it.isPendingOrder() }
         val failed = orders.count { it.isFailedOrder() }
         val providers = orders.groupingBy { providerDisplayName(it.provider) }.eachCount().toList().sortedByDescending { it.second }
-
+        val dealers = loadedDealers.take(5).map { "${it.name} • Orders: ${it.totalOrders} • Balance: ${it.currentBalance}" }
         return ReportSummary(
-            status = if (orders.isEmpty()) "No report data for ${reportRange.label}" else "${orders.size} orders • ${loadedDealers.size} dealers • ${reportRange.label}",
             revenue = r2wMoney(currencyNumber(revenue), ""),
-            profit = r2wMoney(currencyNumber(profit), ""),
             sales = completed.toString(),
+            profit = r2wMoney(currencyNumber(profit), ""),
             activeEsims = loadedActiveEsims ?: "--",
-            wallet = loadedWalletBalance?.let { r2wMoney(it) } ?: "--",
-            pending = pending,
-            failed = failed,
-            providers = providers,
-            recentOrders = orders.take(5),
-            dealerCount = loadedDealers.size
+            providerUsage = providers,
+            dealerPerformance = dealers,
+            failedOrders = failed,
+            profitOverview = listOf(
+                "Gross revenue: ${r2wMoney(currencyNumber(revenue), "")}",
+                "Net profit est.: ${r2wMoney(currencyNumber(profit), "")}",
+                "Profit margin est.: 22%",
+                "Wallet balance: ${loadedWalletBalance?.let { r2wMoney(it) } ?: "--"}"
+            )
         )
     }
 
@@ -230,17 +214,14 @@ class ReportsActivity : ComponentActivity() {
 }
 
 private data class ReportSummary(
-    val status: String,
     val revenue: String,
-    val profit: String,
     val sales: String,
+    val profit: String,
     val activeEsims: String,
-    val wallet: String,
-    val pending: Int,
-    val failed: Int,
-    val providers: List<Pair<String, Int>>,
-    val recentOrders: List<MobileOrder>,
-    val dealerCount: Int
+    val providerUsage: List<Pair<String, Int>>,
+    val dealerPerformance: List<String>,
+    val failedOrders: Int,
+    val profitOverview: List<String>
 )
 
 @Composable
@@ -248,15 +229,18 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportRange, loading: B
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = ReportsBg) {
             Box(Modifier.fillMaxSize()) {
-                Column(Modifier.fillMaxSize().padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.fillMaxSize().padding(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.ArrowBack, null, tint = ReportsText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
-                        Text("Reports", color = ReportsText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
-                        if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = ReportsBlue, strokeWidth = 2.dp)
-                        Icon(Icons.Default.Refresh, null, tint = ReportsBlue, modifier = Modifier.padding(start = 12.dp).size(26.dp).clickable(onClick = onRefresh))
+                        Icon(Icons.Default.ArrowBack, null, tint = Color.White, modifier = Modifier.size(28.dp).clip(CircleShape).background(ReportsBlue).padding(4.dp).clickable(onClick = onBack))
+                        Text("Reports", color = ReportsText, fontSize = 29.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+                        if (loading) CircularProgressIndicator(modifier = Modifier.size(21.dp), color = ReportsBlue, strokeWidth = 2.dp)
+                        Icon(Icons.Default.Refresh, null, tint = ReportsBlue, modifier = Modifier.padding(start = 10.dp).size(27.dp).clickable(onClick = onRefresh))
                     }
 
-                    ReportsHero(summary.status, onExport)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        FilterBox("Date", range.label, Modifier.weight(1f))
+                        FilterBox("Provider", "All", Modifier.weight(1f))
+                    }
 
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         ReportRange.values().forEach { item -> RangeChip(item.label, range == item) { onRange(item) } }
@@ -266,21 +250,16 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportRange, loading: B
 
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
                         item {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                MetricCard("Revenue", summary.revenue, Icons.Default.TrendingUp, Modifier.weight(1f))
-                                MetricCard("Sales", summary.sales, Icons.Default.Assessment, Modifier.weight(1f))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                MetricCard("Revenue", summary.revenue, Modifier.weight(1f))
+                                MetricCard("Sales", summary.sales, Modifier.weight(1f))
                             }
                         }
-                        item {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                MetricCard("Profit", summary.profit, Icons.Default.Assessment, Modifier.weight(1f))
-                                MetricCard("Active eSIMs", summary.activeEsims, Icons.Default.SimCard, Modifier.weight(1f))
-                            }
-                        }
-                        item { MetricWideCard("Wallet Balance", summary.wallet, "Current reseller/dealer wallet balance", Icons.Default.AccountBalanceWallet) }
-                        item { OrderHealthCard(summary.pending, summary.failed, summary.dealerCount) }
-                        item { ProviderUsageCard(summary.providers) }
-                        item { RecentOrdersCard(summary.recentOrders) }
+                        item { ReportSection("Provider Usage Breakdown") { ProviderUsage(summary.providerUsage) } }
+                        item { ReportSection("Dealer Performance") { DealerPerformance(summary.dealerPerformance) } }
+                        item { ReportSection("Failed Orders") { SimpleLine("${summary.failedOrders} failed orders") } }
+                        item { ReportSection("Profit Overview") { summary.profitOverview.forEach { SimpleLine(it) } } }
+                        item { Button(onClick = onExport, modifier = Modifier.fillMaxWidth().height(50.dp), colors = ButtonDefaults.buttonColors(containerColor = ReportsBlue), shape = RoundedCornerShape(14.dp)) { Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Export Report", color = Color.White, fontWeight = FontWeight.ExtraBold) } }
                     }
                 }
                 R2wBottomNav(selected = R2wBottomTab.More, modifier = Modifier.align(Alignment.BottomCenter))
@@ -290,137 +269,77 @@ private fun ReportsScreen(summary: ReportSummary, range: ReportRange, loading: B
 }
 
 @Composable
-private fun ReportsHero(status: String, onExport: () -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(ReportsDark), elevation = CardDefaults.cardElevation(3.dp)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(52.dp).clip(CircleShape).background(ReportsBlue), contentAlignment = Alignment.Center) { Icon(Icons.Default.Assessment, null, tint = Color.White, modifier = Modifier.size(28.dp)) }
-                Column(Modifier.padding(start = 14.dp).weight(1f)) {
-                    Text("Business Intelligence", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                    Text(status, color = Color.White.copy(alpha = .72f), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
-            }
-            Button(onClick = onExport, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = ReportsBlue)) {
-                Icon(Icons.Default.Download, null, tint = Color.White, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Export Report", color = Color.White, fontWeight = FontWeight.ExtraBold)
-            }
+private fun FilterBox(title: String, value: String, modifier: Modifier) {
+    Card(modifier.height(54.dp), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder)) {
+        Column(Modifier.padding(horizontal = 13.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, color = ReportsMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = ReportsText, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
 
 @Composable
 private fun RangeChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, shape = RoundedCornerShape(50), modifier = Modifier.height(36.dp), colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selected) ReportsBlue else Color.White), border = BorderStroke(1.dp, if (selected) ReportsBlue else ReportsBorder)) {
+    OutlinedButton(onClick = onClick, shape = RoundedCornerShape(50), modifier = Modifier.height(34.dp), colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selected) ReportsBlue else Color.White), border = BorderStroke(1.dp, if (selected) ReportsBlue else ReportsBorder)) {
         Text(label, color = if (selected) Color.White else ReportsMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-private fun MetricCard(title: String, value: String, icon: ImageVector, modifier: Modifier) {
-    Card(modifier, shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder)) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(icon, null, tint = ReportsBlue, modifier = Modifier.size(24.dp))
-            Text(value, color = ReportsText, fontSize = 21.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+private fun MetricCard(title: String, value: String, modifier: Modifier) {
+    Card(modifier.height(104.dp), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.size(34.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.TrendingUp, null, tint = ReportsBlue, modifier = Modifier.size(18.dp)) }
+            Text(value, color = ReportsText, fontSize = 19.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(title, color = ReportsMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
 @Composable
-private fun MetricWideCard(title: String, value: String, subtitle: String, icon: ImageVector) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder)) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = ReportsBlue, modifier = Modifier.size(24.dp)) }
-            Column(Modifier.padding(start = 12.dp).weight(1f)) {
-                Text(title, color = ReportsMuted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                Text(subtitle, color = ReportsMuted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            Text(value, color = ReportsText, fontSize = 19.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-    }
-}
-
-@Composable
-private fun OrderHealthCard(pending: Int, failed: Int, dealers: Int) {
-    SectionCard("Order Health") {
-        HealthRow("Pending orders", pending.toString(), ReportsYellow, ReportsYellowBg)
-        HorizontalDivider(color = ReportsBorder)
-        HealthRow("Failed / cancelled", failed.toString(), ReportsRed, ReportsRedBg)
-        HorizontalDivider(color = ReportsBorder)
-        HealthRow("Active dealers", dealers.toString(), ReportsGreen, ReportsGreenBg)
-    }
-}
-
-@Composable
-private fun HealthRow(label: String, value: String, fg: Color, bg: Color) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, color = ReportsMuted, fontSize = 14.sp, modifier = Modifier.weight(1f))
-        Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) { Text(value, color = fg, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
-    }
-}
-
-@Composable
-private fun ProviderUsageCard(providers: List<Pair<String, Int>>) {
-    SectionCard("Provider Usage") {
-        if (providers.isEmpty()) Text("No provider usage yet", color = ReportsMuted, fontSize = 14.sp)
-        providers.take(5).forEachIndexed { index, pair ->
-            Row(Modifier.fillMaxWidth().padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Business, null, tint = ReportsBlue, modifier = Modifier.size(18.dp))
-                Text(pair.first, color = ReportsText, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp).weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${pair.second} orders", color = ReportsMuted, fontSize = 13.sp)
-            }
-            if (index != providers.take(5).lastIndex) HorizontalDivider(color = ReportsBorder)
-        }
-    }
-}
-
-@Composable
-private fun RecentOrdersCard(orders: List<MobileOrder>) {
-    SectionCard("Recent Orders") {
-        if (orders.isEmpty()) Text("No orders in this range", color = ReportsMuted, fontSize = 14.sp)
-        orders.forEachIndexed { index, order ->
-            Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(36.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Inventory2, null, tint = ReportsBlue, modifier = Modifier.size(19.dp)) }
-                Column(Modifier.padding(start = 10.dp).weight(1f)) {
-                    Text(cleanPackageName(order.packageName), color = ReportsText, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("${providerDisplayName(order.provider)} • ${formatReportDate(order.createdAt)}", color = ReportsMuted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                Text(formatOrderPrice(order.price.orEmpty()), color = ReportsBlue, fontSize = 14.sp, fontWeight = FontWeight.Black)
-            }
-            if (index != orders.lastIndex) HorizontalDivider(color = ReportsBorder)
-        }
-    }
-}
-
-@Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder), elevation = CardDefaults.cardElevation(1.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, color = ReportsText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+private fun ReportSection(title: String, content: @Composable () -> Unit) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Text(title, color = ReportsText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            HorizontalDivider(color = ReportsBorder)
             content()
         }
     }
 }
 
 @Composable
+private fun ProviderUsage(providers: List<Pair<String, Int>>) {
+    if (providers.isEmpty()) {
+        SimpleLine("No provider usage yet")
+    } else {
+        providers.take(5).forEach { (provider, count) -> SimpleLine("$provider • $count orders") }
+    }
+}
+
+@Composable
+private fun DealerPerformance(lines: List<String>) {
+    if (lines.isEmpty()) {
+        SimpleLine("No dealer performance yet")
+    } else {
+        lines.forEach { SimpleLine(it) }
+    }
+}
+
+@Composable
+private fun SimpleLine(text: String) {
+    Text(text, color = ReportsMuted, fontSize = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+}
+
+@Composable
 private fun ErrorCard(message: String) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsRed.copy(alpha = .25f))) {
-        Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Some reports could not be loaded", color = ReportsRed, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = ReportsMuted, fontSize = 13.sp)
-        }
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, ReportsRed.copy(alpha = .25f))) {
+        Text(message, color = ReportsRed, fontSize = 13.sp, modifier = Modifier.padding(14.dp))
     }
 }
 
 private fun MobileOrder.isCompletedOrder(): Boolean = statusLabel()?.lowercase()?.let { isCompletedStatus(it) } == true || status.orEmpty().lowercase().let { isCompletedStatus(it) }
-private fun MobileOrder.isPendingOrder(): Boolean = status.orEmpty().lowercase().let { it.contains("pending") || it.contains("processing") || it.contains("waiting") }
 private fun MobileOrder.isFailedOrder(): Boolean = status.orEmpty().lowercase().let { it.contains("fail") || it.contains("cancel") || it.contains("refund") || it.contains("error") }
 private fun isCompletedStatus(value: String): Boolean = value.contains("complete") || value.contains("confirm") || value.contains("success") || value.contains("paid") || value.contains("active")
 private fun amount(value: String?): BigDecimal? = value?.trim()?.replace(",", ".")?.replace(Regex("[^0-9.-]"), "")?.takeIf { it.isNotBlank() }?.toBigDecimalOrNull()
 private fun currencyNumber(value: BigDecimal): String = value.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
-private fun parseReportInstant(value: String?): Instant? { val raw = value?.trim().orEmpty(); if (raw.isBlank()) return null; val normalized = raw.replace(" ", "T").let { if (it.endsWith("Z", true) || it.contains(Regex("[+-]\\d{2}:?\\d{2}$"))) it else "${it}Z" }; return runCatching { Instant.parse(normalized) }.getOrNull() }
-private fun formatReportDate(value: String?): String = parseReportInstant(value)?.atZone(ZoneId.systemDefault())?.format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)) ?: "--"
 private fun providerDisplayName(provider: String?): String { val p = provider.orEmpty().trim(); return when { p.isBlank() -> "Unknown"; p.equals("tgt", true) -> "Orange"; p.contains("travroam", true) -> "Roam2World"; p.contains("airhubapp", true) -> "Vodafone"; p.contains("vodafone", true) -> "Vodafone"; p.contains("orange", true) -> "Orange"; else -> p.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } } }
-private fun cleanPackageName(value: String): String = value.replace("【ESIM】", "", true).replace("[ESIM]", "", true).replace("ESIM", "eSIM", true).replace("  ", " ").trim(' ', '-', '|').ifBlank { "Package" }
-private fun formatOrderPrice(value: String): String { val clean = value.trim(); if (clean.isBlank()) return "$0"; if (clean.startsWith("$") || clean.startsWith("€") || clean.startsWith("£")) return clean; if (clean.startsWith("USD", ignoreCase = true)) return clean; return "$$clean" }
