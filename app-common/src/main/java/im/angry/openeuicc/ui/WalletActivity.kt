@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import java.math.BigDecimal
+import java.util.Locale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -123,7 +124,7 @@ class WalletActivity : ComponentActivity() {
                 formError = formError,
                 amountError = amountError,
                 onAmountChange = { amount = it; amountError = null; formError = null; formMessage = null },
-                onCurrencyChange = { currency = it.uppercase().take(3); formError = null; formMessage = null },
+                onCurrencyChange = { currency = it.uppercase(Locale.ROOT).take(3); formError = null; formMessage = null },
                 onNoteChange = { note = it.take(120); formError = null; formMessage = null },
                 onQuickAmount = { amount = it; amountError = null; formError = null; formMessage = null },
                 onSubmitRequest = { submitWalletRequest() },
@@ -139,7 +140,7 @@ class WalletActivity : ComponentActivity() {
         formMessage = null
 
         val cleanAmount = amount.trim().replace(',', '.')
-        val cleanCurrency = currency.trim().uppercase().ifBlank { "EUR" }
+        val cleanCurrency = currency.trim().uppercase(Locale.ROOT).ifBlank { "EUR" }
         val cleanNote = note.trim()
 
         if (cleanAmount.toBigDecimalOrNull()?.let { it > BigDecimal.ZERO } != true) {
@@ -536,13 +537,13 @@ private fun EmptyText(text: String) {
 
 private fun List<MobileWalletRequest>.countStatus(vararg keywords: String): Int {
     return count { request ->
-        val status = request.status.lowercase()
+        val status = request.status.lowercase(Locale.ROOT)
         keywords.any { keyword -> status.contains(keyword) }
     }
 }
 
 private fun MobileTransaction.isDebitLike(): Boolean {
-    val combined = "${amount} ${title} ${status.orEmpty()}".lowercase()
+    val combined = "${amount} ${title} ${status.orEmpty()}".lowercase(Locale.ROOT)
     return amount.trim().startsWith("-") || combined.contains("debit") || combined.contains("purchase") || combined.contains("charge") || combined.contains("deduct")
 }
 
