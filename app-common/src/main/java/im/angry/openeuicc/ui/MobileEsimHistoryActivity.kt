@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -208,32 +207,32 @@ private fun EsimHistoryMockupScreen(
 ) {
     MaterialTheme {
         Surface(Modifier.fillMaxSize(), color = HistoryBg) {
-            Column(Modifier.fillMaxSize().padding(start = 18.dp, top = 18.dp, end = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(Modifier.fillMaxSize().padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.ArrowBack, null, tint = HistoryText, modifier = Modifier.size(32.dp).clickable(onClick = onBack))
-                    Text("eSIM History", color = HistoryText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 28.dp).weight(1f))
-                    if (loading) Text("Loading", color = HistoryBlue, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.ArrowBack, null, tint = HistoryText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
+                    Text("eSIM History", color = HistoryText, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+                    if (loading) Text("Loading", color = HistoryBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
 
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = query,
                         onValueChange = onQueryChange,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).height(58.dp),
                         singleLine = true,
-                        leadingIcon = { Icon(Icons.Default.Search, null, tint = HistoryText, modifier = Modifier.size(34.dp)) },
-                        placeholder = { Text("Search by customer, number, ICCID...", color = HistoryMuted) },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = HistoryText, modifier = Modifier.size(26.dp)) },
+                        placeholder = { Text("Search customer, ICCID...", color = HistoryMuted, fontSize = 14.sp) },
                         shape = RoundedCornerShape(10.dp)
                     )
-                    OutlinedButton(onClick = onRefresh, shape = RoundedCornerShape(10.dp), modifier = Modifier.height(58.dp), contentPadding = ButtonDefaults.ContentPadding) {
-                        Icon(Icons.Default.FilterList, null, tint = HistoryText)
+                    OutlinedButton(onClick = onRefresh, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(width = 58.dp, height = 58.dp), contentPadding = ButtonDefaults.ContentPadding) {
+                        Icon(Icons.Default.FilterList, null, tint = HistoryText, modifier = Modifier.size(22.dp))
                     }
                 }
 
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterBox(Icons.Default.CalendarMonth, "Date range")
-                    FilterBox(Icons.Default.SignalCellularAlt, "Provider")
-                    FilterBox(Icons.Default.SimCard, selectedFilter.label) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    FilterBox(Icons.Default.CalendarMonth, "Date", Modifier.weight(1f))
+                    FilterBox(Icons.Default.SignalCellularAlt, "Provider", Modifier.weight(1.25f))
+                    FilterBox(Icons.Default.SimCard, selectedFilter.label, Modifier.weight(1f)) {
                         val next = when (selectedFilter) {
                             HistoryFilter.ALL -> HistoryFilter.ACTIVE
                             HistoryFilter.ACTIVE -> HistoryFilter.PENDING
@@ -242,7 +241,7 @@ private fun EsimHistoryMockupScreen(
                         }
                         onFilterChange(next)
                     }
-                    Text("Reset", color = HistoryBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 12.dp).clickable(onClick = onReset))
+                    Text("Reset", color = HistoryBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp).clickable(onClick = onReset))
                 }
 
                 if (!error.isNullOrBlank()) {
@@ -253,7 +252,7 @@ private fun EsimHistoryMockupScreen(
                     InfoCard("No eSIM history", "No matching purchase records found.")
                 }
 
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
                     items(esims) { esim -> HistoryMockupCard(esim, onOpenDetail) }
                 }
             }
@@ -262,12 +261,12 @@ private fun EsimHistoryMockupScreen(
 }
 
 @Composable
-private fun FilterBox(icon: ImageVector, label: String, onClick: (() -> Unit)? = null) {
-    OutlinedButton(onClick = { onClick?.invoke() }, shape = RoundedCornerShape(10.dp), modifier = Modifier.height(48.dp)) {
-        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(label, color = HistoryMuted, fontWeight = FontWeight.Medium)
-        Text("⌄", color = HistoryMuted, modifier = Modifier.padding(start = 8.dp))
+private fun FilterBox(icon: ImageVector, label: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    OutlinedButton(onClick = { onClick?.invoke() }, shape = RoundedCornerShape(10.dp), modifier = modifier.height(42.dp), contentPadding = ButtonDefaults.ContentPadding) {
+        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(17.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(label, color = HistoryMuted, fontWeight = FontWeight.Medium, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text("⌄", color = HistoryMuted, fontSize = 12.sp, modifier = Modifier.padding(start = 2.dp))
     }
 }
 
@@ -281,16 +280,16 @@ private fun HistoryMockupCard(esim: MobileEsim, onOpenDetail: (MobileEsim) -> Un
         border = BorderStroke(1.dp, HistoryBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.Top) {
             CustomerAvatar(esim)
-            Column(Modifier.padding(start = 14.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.padding(start = 12.dp).weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                     Column(Modifier.weight(1f)) {
-                        Text(esim.customerName() ?: "Customer", color = HistoryText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(esim.customerPhone ?: esim.orderNumber?.let { "Order #$it" } ?: "No phone number", color = HistoryMuted, fontSize = 14.sp)
+                        Text(esim.customerName() ?: "Customer", color = HistoryText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(esim.customerPhone ?: esim.orderNumber?.let { "Order #$it" } ?: "No phone number", color = HistoryMuted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     StatusPill(status.label, status)
-                    Icon(Icons.Default.MoreVert, null, tint = HistoryMuted, modifier = Modifier.padding(start = 8.dp).size(24.dp))
+                    Icon(Icons.Default.MoreVert, null, tint = HistoryMuted, modifier = Modifier.padding(start = 4.dp).size(20.dp))
                 }
 
                 CardLine(Icons.Default.Business, "Provider", esim.provider ?: "--")
@@ -299,8 +298,8 @@ private fun HistoryMockupCard(esim: MobileEsim, onOpenDetail: (MobileEsim) -> Un
                 CardLine(Icons.Default.CalendarMonth, "Purchase date", esim.createdAt.prettyDate())
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    OutlinedButton(onClick = { onOpenDetail(esim) }, shape = RoundedCornerShape(7.dp), border = BorderStroke(1.dp, HistoryBlue)) {
-                        Text("View Detail", color = HistoryBlue, fontWeight = FontWeight.Bold)
+                    OutlinedButton(onClick = { onOpenDetail(esim) }, shape = RoundedCornerShape(7.dp), border = BorderStroke(1.dp, HistoryBlue), modifier = Modifier.height(42.dp)) {
+                        Text("View Detail", color = HistoryBlue, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                 }
             }
@@ -316,17 +315,17 @@ private fun CustomerAvatar(esim: MobileEsim) {
         .take(2)
         .joinToString("") { it.first().uppercase() }
         .ifBlank { "R2" }
-    Box(Modifier.size(54.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) {
-        Text(initials.take(2), color = HistoryBlue, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+    Box(Modifier.size(46.dp).clip(CircleShape).background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) {
+        Text(initials.take(2), color = HistoryBlue, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
     }
 }
 
 @Composable
 private fun CardLine(icon: ImageVector, label: String, value: String) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(18.dp))
-        Text(label, color = HistoryMuted, fontSize = 14.sp, modifier = Modifier.padding(start = 14.dp).width(140.dp))
-        Text(value, color = HistoryText, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Icon(icon, null, tint = HistoryMuted, modifier = Modifier.size(16.dp))
+        Text(label, color = HistoryMuted, fontSize = 13.sp, modifier = Modifier.padding(start = 10.dp).width(96.dp))
+        Text(value, color = HistoryText, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
     }
 }
 
@@ -344,8 +343,8 @@ private fun StatusPill(label: String, status: HistoryStatus) {
         HistoryStatus.EXPIRED -> HistoryRed
         HistoryStatus.DISABLED -> HistoryGray
     }
-    Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 12.dp, vertical = 7.dp)) {
-        Text(label, color = fg, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+    Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) {
+        Text(label, color = fg, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
     }
 }
 
@@ -387,6 +386,6 @@ internal fun String?.prettyDate(): String {
     val raw = this?.trim().orEmpty()
     if (raw.isBlank()) return "--"
     return runCatching {
-        OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("MMM d, yyyy hh:mm a", Locale.US))
-    }.getOrDefault(raw.take(16))
+        OffsetDateTime.parse(raw).format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US))
+    }.getOrDefault(raw.take(12))
 }
