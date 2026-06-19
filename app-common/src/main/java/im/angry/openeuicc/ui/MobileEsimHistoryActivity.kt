@@ -138,9 +138,9 @@ class MobileEsimHistoryActivity : ComponentActivity() {
     }
 
     private fun filteredEsims(): List<MobileEsim> {
-        val q = query.trim().lowercase()
+        val q = query.trim().lowercase(Locale.ROOT)
         return esims.filter { selectedFilter.matches(it.historyStatus()) }.filter { esim ->
-            q.isBlank() || listOf(esim.displayCustomerName(), esim.displayCustomerSubtitle(), esim.iccid, esim.displayPackageName(), esim.displayProviderName(), esim.orderNumber, esim.statusLabel()).any { it.orEmpty().lowercase().contains(q) }
+            q.isBlank() || listOf(esim.displayCustomerName(), esim.displayCustomerSubtitle(), esim.iccid, esim.displayPackageName(), esim.displayProviderName(), esim.orderNumber, esim.statusLabel()).any { it.orEmpty().lowercase(Locale.ROOT).contains(q) }
         }.sortedByDescending { it.createdAt.orEmpty() }
     }
 
@@ -184,7 +184,7 @@ private fun EsimHistoryMockupScreen(esims: List<MobileEsim>, selectedFilter: His
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(value = query, onValueChange = onQueryChange, modifier = Modifier.weight(1f).height(58.dp), singleLine = true, leadingIcon = { Icon(Icons.Default.Search, null, tint = HistoryText, modifier = Modifier.size(26.dp)) }, placeholder = { Text("Search customer, ICCID...", color = HistoryMuted, fontSize = 14.sp) }, shape = RoundedCornerShape(10.dp))
-                    OutlinedButton(onClick = onRefresh, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(width = 58.dp, height = 58.dp), contentPadding = ButtonDefaults.ContentPadding) { Icon(Icons.Default.FilterList, null, tint = HistoryText, modifier = Modifier.size(22.dp)) }
+                    OutlinedButton(onClick = onReset, shape = RoundedCornerShape(10.dp), modifier = Modifier.size(width = 58.dp, height = 58.dp), contentPadding = ButtonDefaults.ContentPadding) { Icon(Icons.Default.FilterList, null, tint = HistoryText, modifier = Modifier.size(22.dp)) }
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterBox(Icons.Default.CalendarMonth, "Date", Modifier.weight(1f))

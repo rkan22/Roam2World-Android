@@ -77,7 +77,7 @@ fun CompactDashboardScreen(
                 modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item { CompactHeader(userName) }
+                item { CompactHeader(userName, onNotifications = { onActionClick("notifications") }) }
                 item { CompactWallet(money(data?.currentBalance, "$2,450.50"), onWalletClick) { onActionClick("wallet") } }
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -101,7 +101,7 @@ fun CompactDashboardScreen(
 }
 
 @Composable
-private fun CompactHeader(userName: String) {
+private fun CompactHeader(userName: String, onNotifications: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -129,7 +129,7 @@ private fun CompactHeader(userName: String) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-        IconButton(onClick = {}, modifier = Modifier.size(38.dp)) {
+        IconButton(onClick = onNotifications, modifier = Modifier.size(38.dp)) {
             Box {
                 Icon(Icons.Default.Notifications, null, tint = B2BText, modifier = Modifier.size(24.dp))
                 Box(Modifier.align(Alignment.TopEnd).size(8.dp).clip(RoundedCornerShape(999.dp)).background(Color(0xFFEF4444)))

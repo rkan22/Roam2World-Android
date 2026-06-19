@@ -55,6 +55,7 @@ class DashboardActivity : ComponentActivity() {
                             "reports" -> startActivity(Intent(this, ReportsActivity::class.java))
                             "check_gb", "esims" -> startActivity(Intent(this, MobileEsimsActivity::class.java))
                             "openeuicc" -> startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
+                            "notifications" -> startActivity(Intent(this, MobileNotificationsActivity::class.java))
                             "more" -> startActivity(Intent(this, MoreActivity::class.java))
                         }
                     }

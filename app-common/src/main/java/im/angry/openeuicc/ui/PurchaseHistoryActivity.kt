@@ -75,7 +75,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -180,7 +182,7 @@ private fun OrdersScreen(
                 .filter { statusFilter.matches(it.status) }
                 .filter { matchesDateFilter(it, dateFilter) }
                 .filter { order ->
-                    val q = query.trim().lowercase()
+                    val q = query.trim().lowercase(Locale.ROOT)
                     q.isBlank() || order.searchBlob().contains(q)
                 }
         }
@@ -194,7 +196,19 @@ private fun OrdersScreen(
                         Icon(Icons.Default.ArrowBack, null, tint = OrdersText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
                         Text("Orders", color = OrdersText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
                         if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = OrdersBlue, strokeWidth = 2.dp)
-                        Icon(Icons.Default.FilterList, null, tint = OrdersBlue, modifier = Modifier.padding(start = 12.dp).size(26.dp).clickable(onClick = onRefresh))
+                        Icon(
+                            Icons.Default.FilterList,
+                            null,
+                            tint = OrdersBlue,
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .size(26.dp)
+                                .clickable {
+                                    statusFilter = OrderFilter.ALL
+                                    dateFilter = null
+                                    query = ""
+                                }
+                        )
                     }
 
                     OrderSummaryCard(total = orders.size, shown = filteredOrders.size, completed = orders.count { it.isCompleted() })
@@ -334,10 +348,10 @@ private fun ErrorCard(error: String, onRefresh: () -> Unit) {
     }
 }
 
-private fun MobileOrder.searchBlob(): String = listOfNotNull(id, orderNumber, displayNumber(), packageName, displayPackageName(), price, status, statusLabel(), provider, displayProviderName(), createdAt, customerName(), customerPhone, customerEmail, esim?.customerName(), esim?.customerPhone, esim?.customerEmail, esim?.iccid).joinToString(" ").lowercase()
+private fun MobileOrder.searchBlob(): String = listOfNotNull(id, orderNumber, displayNumber(), packageName, displayPackageName(), price, status, statusLabel(), provider, displayProviderName(), createdAt, customerName(), customerPhone, customerEmail, esim?.customerName(), esim?.customerPhone, esim?.customerEmail, esim?.iccid).joinToString(" ").lowercase(Locale.ROOT)
 
 private fun matchesDateFilter(order: MobileOrder, dateFilter: String?): Boolean {
-    val filterValue = dateFilter?.uppercase() ?: return true
+    val filterValue = dateFilter?.uppercase(Locale.ROOT) ?: return true
     val created = parseOrderDate(order.createdAt) ?: return false
     val today = LocalDate.now()
     return when (filterValue) {
@@ -347,8 +361,37 @@ private fun matchesDateFilter(order: MobileOrder, dateFilter: String?): Boolean 
     }
 }
 
-private fun parseOrderDate(value: String?): OffsetDateTime? = value?.takeIf { it.isNotBlank() }?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() }
-private fun formatOrderDate(value: String?): String { val raw = value?.takeIf { it.isNotBlank() } ?: return "--"; val parsed = runCatching { OffsetDateTime.parse(raw) }.getOrNull() ?: return raw.take(12); return parsed.format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)) }
+private fun parseOrderDate(value: String?): OffsetDateTime? {
+    val raw = value?.trim()?.takeIf { it.isNotBlank() } ?: return null
+    runCatching { return OffsetDateTime.parse(raw) }
+    runCatching { return LocalDateTime.parse(raw).atOffset(ZoneOffset.UTC) }
+    runCatching { return LocalDate.parse(raw).atStartOfDay().atOffset(ZoneOffset.UTC) }
+
+    val numeric = raw.toLongOrNull()
+    if (numeric != null) {
+        val epochMillis = if (raw.length <= 10) numeric * 1000 else numeric
+        runCatching { return java.time.Instant.ofEpochMilli(epochMillis).atOffset(ZoneOffset.UTC) }
+    }
+
+    val dateTimePatterns = listOf(
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd HH:mm",
+        "yyyy/MM/dd HH:mm:ss",
+        "yyyy/MM/dd HH:mm"
+    )
+    dateTimePatterns.forEach { pattern ->
+        runCatching { return LocalDateTime.parse(raw, DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)).atOffset(ZoneOffset.UTC) }
+    }
+
+    val datePatterns = listOf("yyyy-MM-dd", "yyyy/MM/dd", "MMM d, yyyy", "MMMM d, yyyy")
+    datePatterns.forEach { pattern ->
+        runCatching { return LocalDate.parse(raw, DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)).atStartOfDay().atOffset(ZoneOffset.UTC) }
+    }
+
+    return null
+}
+
+private fun formatOrderDate(value: String?): String { val raw = value?.takeIf { it.isNotBlank() } ?: return "--"; val parsed = parseOrderDate(raw) ?: return raw.take(12); return parsed.format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)) }
 private fun formatOrderPrice(value: String): String { val clean = value.trim(); if (clean.isBlank()) return "$0"; if (clean.startsWith("$") || clean.startsWith("€") || clean.startsWith("£")) return clean; if (clean.startsWith("USD", ignoreCase = true)) return clean; return "$$clean" }
 private fun MobileOrder.displayProviderName(): String = providerDisplayName(provider)
 private fun providerDisplayName(provider: String?): String { val p = provider.orEmpty().trim(); return when { p.isBlank() -> "--"; p.equals("tgt", true) -> "Orange"; p.contains("travroam", true) -> "Roam2World"; p.contains("airhubapp", true) -> "Vodafone"; p.contains("vodafone", true) -> "Vodafone"; p.contains("orange", true) -> "Orange"; else -> p.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } } }
