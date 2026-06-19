@@ -1,9 +1,62 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -20,38 +73,19 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+
+private val WalletBlue = Color(0xFF0F4FD7)
+private val WalletDark = Color(0xFF06103A)
+private val WalletBg = Color(0xFFF8FAFD)
+private val WalletText = Color(0xFF20242C)
+private val WalletMuted = Color(0xFF68707C)
+private val WalletBorder = Color(0xFFE1E6EF)
+private val WalletGreen = Color(0xFF12813A)
+private val WalletGreenBg = Color(0xFFE9F7EF)
+private val WalletRed = Color(0xFFB42336)
+private val WalletRedBg = Color(0xFFFFEEF2)
+private val WalletYellow = Color(0xFFB7791F)
+private val WalletYellowBg = Color(0xFFFFF8E6)
 
 class WalletActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -65,6 +99,10 @@ class WalletActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.hide()
+        window.statusBarColor = AndroidColor.rgb(248, 250, 253)
+        window.navigationBarColor = AndroidColor.BLACK
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
 
         setContent {
             WalletScreen(
@@ -78,14 +116,9 @@ class WalletActivity : ComponentActivity() {
                 onRequestHistory = { startActivity(Intent(this, WalletRequestHistoryActivity::class.java)) },
                 onTransactions = { startActivity(Intent(this, TransactionsActivity::class.java)) },
                 onPurchaseHistory = { startActivity(Intent(this, PurchaseHistoryActivity::class.java)) },
-                onLogout = { logout() },
-                onDashboard = { startActivity(Intent(this, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-                onPackages = { startActivity(Intent(this, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-                onEsims = { startActivity(Intent(this, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) },
-                onMore = { startActivity(Intent(this, MoreActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)) }
+                onBack = { finish() }
             )
         }
-
         loadWallet()
     }
 
@@ -94,77 +127,35 @@ class WalletActivity : ComponentActivity() {
             loading = true
             errorMessage = null
             requestError = null
-
             val session = activeSessionOrReturnToLogin()
             if (session == null) {
                 loading = false
                 return@launch
             }
-
             val walletResult = runCatching { authApi.wallet(session) }
             val requestResult = runCatching { authApi.walletRequests(session) }
-
             loading = false
-
-            walletResult
-                .onSuccess { walletData = it }
-                .onFailure { errorMessage = it.message ?: "Wallet could not be loaded" }
-
-            requestResult
-                .onSuccess { recentRequests = it.take(3) }
-                .onFailure {
-                    recentRequests = emptyList()
-                    requestError = it.message ?: "Wallet request history failed"
-                }
+            walletResult.onSuccess { walletData = it }.onFailure { errorMessage = it.message ?: "Wallet could not be loaded" }
+            requestResult.onSuccess { recentRequests = it.take(4) }.onFailure {
+                recentRequests = emptyList()
+                requestError = it.message ?: "Wallet request history failed"
+            }
         }
     }
 
     private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val savedSession = withContext(Dispatchers.IO) {
-            tokenStore.getSession()
-        } ?: return redirectToLogin()
-
+        val savedSession = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return redirectToLogin()
         if (!JwtUtils.isExpired(savedSession.accessToken)) return savedSession
-
-        val refreshed = runCatching {
-            authApi.refresh(savedSession)
-        }.getOrNull() ?: return redirectToLogin()
-
-        withContext(Dispatchers.IO) {
-            tokenStore.save(refreshed)
-        }
+        val refreshed = runCatching { authApi.refresh(savedSession) }.getOrNull() ?: return redirectToLogin()
+        withContext(Dispatchers.IO) { tokenStore.save(refreshed) }
         return refreshed
-    }
-
-    private fun logout() {
-        lifecycleScope.launch {
-            val session = withContext(Dispatchers.IO) {
-                tokenStore.getSession().also {
-                    tokenStore.clear()
-                }
-            }
-            session?.let {
-                runCatching {
-                    authApi.logout(it)
-                }
-            }
-            openLoginActivity()
-        }
     }
 
     private fun redirectToLogin(): AuthSession? {
         tokenStore.clear()
-        openLoginActivity()
-        return null
-    }
-
-    private fun openLoginActivity() {
-        startActivity(
-            Intent(this, LoginActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-        )
+        startActivity(Intent(this, LoginActivity::class.java).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK) })
         finish()
+        return null
     }
 }
 
@@ -180,213 +171,71 @@ private fun WalletScreen(
     onRequestHistory: () -> Unit,
     onTransactions: () -> Unit,
     onPurchaseHistory: () -> Unit,
-    onLogout: () -> Unit,
-    onDashboard: () -> Unit,
-    onPackages: () -> Unit,
-    onEsims: () -> Unit,
-    onMore: () -> Unit
+    onBack: () -> Unit
 ) {
-    val bg = Color(0xFFF7F7FA)
-    val balanceText = walletData?.currentBalance
     val transactions = walletData?.transactions.orEmpty()
-    val lowBalance = balanceText
-        ?.replace(Regex("[^0-9.,-]"), "")
-        ?.replace(",", ".")
-        ?.toDoubleOrNull()
-        ?.let { it < 20.0 } == true
-
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
-            Column(modifier = Modifier.fillMaxSize()) {
+        Surface(Modifier.fillMaxSize(), color = WalletBg) {
+            Column(Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = 100.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    WalletHero(
-                        balance = walletData?.currentBalance?.let { r2wMoney(it) } ?: "--",
-                        loading = loading,
-                        onRefresh = onRefresh,
-                        onRequestBalance = onRequestBalance,
-                        onRequestHistory = onRequestHistory
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = onTransactions,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text("Transactions")
-                        }
-                        OutlinedButton(
-                            onClick = onPurchaseHistory,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text("Orders")
-                        }
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.ArrowBack, null, tint = WalletText, modifier = Modifier.size(30.dp).clickable(onClick = onBack))
+                        Text("Wallet", color = WalletText, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(start = 18.dp).weight(1f))
+                        if (loading) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = WalletBlue, strokeWidth = 2.dp)
+                        Icon(Icons.Default.Refresh, null, tint = WalletBlue, modifier = Modifier.padding(start = 12.dp).size(26.dp).clickable(onClick = onRefresh))
                     }
 
-                    errorMessage?.let {
-                        WalletCard(title = "Error") {
-                            Text(it, color = Color(0xFFDC2626), fontWeight = FontWeight.SemiBold)
-                        }
+                    BalanceHero(walletData?.currentBalance, transactions, onRequestBalance, onRequestHistory)
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        WalletQuickButton("Transactions", Icons.Default.SwapVert, Modifier.weight(1f), onTransactions)
+                        WalletQuickButton("Orders", Icons.Default.ShoppingCart, Modifier.weight(1f), onPurchaseHistory)
                     }
 
-                    if (loading) {
-                        WalletCard(title = "Loading") {
-                            CircularProgressIndicator()
-                        }
-                    }
+                    errorMessage?.let { InfoCard("Wallet error", it, WalletRed) }
+                    requestError?.let { InfoCard("Request warning", it, WalletYellow) }
 
-                    if (lowBalance) {
-                        WalletCard(title = "Low balance") {
-                            Text(
-                                text = "Your wallet balance is low. Request balance or contact support before new purchases.",
-                                color = Color(0xFFD97706),
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    WalletCard(title = "Quick stats") {
-                        val total = transactions.size
-                        val completed = transactions.count {
-                            val status = it.status.orEmpty().lowercase()
-                            status.contains("complete") || status.contains("success") || status.contains("approved")
-                        }
-                        val last = transactions.firstOrNull()
-                        val lastActivity = listOfNotNull(
-                            last?.title?.takeIf { it.isNotBlank() },
-                            last?.subtitle?.takeIf { it.isNotBlank() }?.let { formatWalletText(it) }
-                        ).joinToString(" • ").ifBlank { "No activity yet" }
-
-                        Text(
-                            text = "Recent transactions: $total\nCompleted: $completed\nLast activity: $lastActivity",
-                            color = Color(0xFF6B7280),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    WalletCard(title = "Recent balance requests") {
-                        requestError?.let {
-                            Text(it, color = Color(0xFFDC2626), fontWeight = FontWeight.SemiBold)
-                        }
-
-                        if (recentRequests.isEmpty() && requestError == null) {
-                            Text(
-                                text = "No wallet requests yet.",
-                                color = Color(0xFF6B7280)
-                            )
-                        } else {
-                            recentRequests.forEach { request ->
-                                WalletRequestPreview(request)
-                                HorizontalDivider()
-                            }
-                        }
-                    }
-
-                    WalletCard(title = "Recent transactions") {
-                        if (transactions.isEmpty()) {
-                            Text(
-                                text = "No wallet transactions yet.",
-                                color = Color(0xFF6B7280)
-                            )
-                        } else {
-                            transactions.take(8).forEach { transaction ->
-                                WalletTransactionPreview(transaction)
-                                HorizontalDivider()
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    WalletStats(transactions)
+                    WalletRequests(recentRequests)
+                    WalletTransactions(transactions)
                 }
 
-                R2wBottomNav(
-                    selected = R2wBottomTab.Wallet
-                )
+                R2wBottomNav(selected = R2wBottomTab.Wallet)
             }
         }
     }
 }
 
 @Composable
-private fun WalletHero(
-    balance: String,
-    loading: Boolean,
-    onRefresh: () -> Unit,
-    onRequestBalance: () -> Unit,
-    onRequestHistory: () -> Unit
-) {
-    val orange = Color(0xFFFF7900)
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
-    ) {
-        Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "Wallet",
-                        color = orange,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = balance,
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = "Available balance",
-                        color = Color.White.copy(alpha = 0.72f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+private fun BalanceHero(balance: String?, transactions: List<MobileTransaction>, onRequestBalance: () -> Unit, onRequestHistory: () -> Unit) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(WalletDark), elevation = CardDefaults.cardElevation(4.dp)) {
+        Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text("Available Balance", color = Color.White.copy(alpha = .74f), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Text(r2wMoney(balance ?: "0"), color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("Ready for new package purchases", color = Color.White.copy(alpha = .68f), fontSize = 13.sp)
                 }
-
-                Text(
-                    text = if (loading) "Loading" else "Refresh",
-                    color = orange,
-                    modifier = Modifier.clickable(enabled = !loading, onClick = onRefresh),
-                    fontWeight = FontWeight.Black
-                )
+                Box(Modifier.size(58.dp).clip(CircleShape).background(WalletBlue), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.AccountBalanceWallet, null, tint = Color.White, modifier = Modifier.size(30.dp))
+                }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Button(
-                    onClick = onRequestBalance,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Request", fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(onClick = onRequestBalance, modifier = Modifier.weight(1f).height(50.dp), colors = ButtonDefaults.buttonColors(containerColor = WalletBlue), shape = RoundedCornerShape(14.dp)) {
+                    Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Top-up", fontWeight = FontWeight.ExtraBold)
                 }
-
-                OutlinedButton(
-                    onClick = onRequestHistory,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("History")
+                OutlinedButton(onClick = onRequestHistory, modifier = Modifier.weight(1f).height(50.dp), shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, Color.White.copy(alpha = .5f))) {
+                    Icon(Icons.Default.History, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Requests", color = Color.White, fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
@@ -394,170 +243,165 @@ private fun WalletHero(
 }
 
 @Composable
-private fun WalletRequestPreview(request: MobileWalletRequest) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = "${request.amount} ${request.currency}",
-                color = Color(0xFF17181C),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = formatWalletDate(request.createdAt).ifBlank { "No date" },
-                color = Color(0xFF6B7280),
-                style = MaterialTheme.typography.bodySmall
-            )
-            if (!request.note.isNullOrBlank()) {
-                Text(
-                    text = request.note,
-                    color = Color(0xFF6B7280),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-
-        Text(
-            text = request.statusLabel(),
-            color = statusColor(request.status),
-            fontWeight = FontWeight.Black,
-            style = MaterialTheme.typography.labelLarge
-        )
+private fun WalletQuickButton(title: String, icon: ImageVector, modifier: Modifier, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, modifier = modifier.height(52.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, WalletBorder)) {
+        Icon(icon, null, tint = WalletBlue, modifier = Modifier.size(21.dp))
+        Spacer(Modifier.width(7.dp))
+        Text(title, color = WalletText, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }
 
 @Composable
-private fun WalletTransactionPreview(transaction: MobileTransaction) {
-    val amountRaw = transaction.amount.trim()
-    val titleRaw = transaction.title.trim()
-    val statusRaw = transaction.status.orEmpty().trim()
-    val combined = "$amountRaw $titleRaw $statusRaw".lowercase(Locale.ENGLISH)
-
-    val isDebit =
-        amountRaw.startsWith("-") ||
-            combined.contains("debit") ||
-            combined.contains("purchase") ||
-            combined.contains("charge") ||
-            combined.contains("deduct") ||
-            combined.contains("vendor")
-
-    val amountDisplay = when {
-        amountRaw.isBlank() -> ""
-        amountRaw.startsWith("+") || amountRaw.startsWith("-") -> amountRaw
-        isDebit -> "- $amountRaw"
-        else -> "+ $amountRaw"
-    }
-
-    val statusKey = statusRaw.lowercase(Locale.ENGLISH)
-    val cleanStatus = statusRaw
-        .replace("_", " ")
-        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
-        .ifBlank {
-            if (
-                statusKey.contains("fail") ||
-                statusKey.contains("cancel") ||
-                statusKey.contains("reject")
-            ) {
-                "Failed"
-            } else {
-                "Completed"
-            }
+private fun WalletStats(transactions: List<MobileTransaction>) {
+    val completed = transactions.count { it.status.orEmpty().lowercase().let { s -> s.contains("complete") || s.contains("success") || s.contains("approved") } }
+    val purchases = transactions.count { it.isDebitLike() }
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder)) {
+        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StatBox("Tx", transactions.size.toString(), Modifier.weight(1f))
+            StatBox("Paid", purchases.toString(), Modifier.weight(1f))
+            StatBox("Done", completed.toString(), Modifier.weight(1f))
         }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
-    ) {
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = if (isDebit) "Debit" else "Credit",
-                color = Color(0xFF17181C),
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = formatWalletText(transaction.title).ifBlank { formatWalletText(transaction.subtitle) },
-                color = Color(0xFF6B7280),
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = cleanStatus,
-                color = statusColor(statusRaw),
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        Text(
-            text = r2wMoney(amountDisplay, ""),
-            color = if (isDebit) Color(0xFFDC2626) else Color(0xFF15803D),
-            fontWeight = FontWeight.Black
-        )
     }
 }
 
 @Composable
-private fun WalletCard(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = title,
-                color = Color(0xFF17181C),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            HorizontalDivider()
+private fun StatBox(label: String, value: String, modifier: Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(value, color = WalletText, fontSize = 20.sp, fontWeight = FontWeight.Black)
+        Text(label, color = WalletMuted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun WalletRequests(requests: List<MobileWalletRequest>) {
+    SectionCard("Recent balance requests") {
+        if (requests.isEmpty()) {
+            Text("No wallet requests yet.", color = WalletMuted, fontSize = 14.sp)
+        } else {
+            requests.forEachIndexed { index, request ->
+                RequestRow(request)
+                if (index != requests.lastIndex) HorizontalDivider(color = WalletBorder)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletTransactions(transactions: List<MobileTransaction>) {
+    SectionCard("Transaction history") {
+        if (transactions.isEmpty()) {
+            Text("No wallet transactions yet.", color = WalletMuted, fontSize = 14.sp)
+        } else {
+            transactions.take(8).forEachIndexed { index, tx ->
+                TransactionRow(tx)
+                if (index != transactions.take(8).lastIndex) HorizontalDivider(color = WalletBorder)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RequestRow(request: MobileWalletRequest) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+        CircleIcon(Icons.Default.Add, WalletBlue)
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
+            Text("${request.amount} ${request.currency}", color = WalletText, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+            Text(formatWalletDate(request.createdAt).ifBlank { "No date" }, color = WalletMuted, fontSize = 12.sp)
+            request.note?.takeIf { it.isNotBlank() }?.let { Text(it, color = WalletMuted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
+        StatusChip(request.statusLabel(), request.status)
+    }
+}
+
+@Composable
+private fun TransactionRow(transaction: MobileTransaction) {
+    val debit = transaction.isDebitLike()
+    val amount = transaction.walletAmountDisplay(debit)
+    Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+        CircleIcon(if (debit) Icons.Default.ShoppingCart else Icons.Default.Add, if (debit) WalletRed else WalletGreen)
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
+            Text(if (debit) "Purchase" else "Top-up", color = WalletText, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+            Text(formatWalletText(transaction.title).ifBlank { formatWalletText(transaction.subtitle) }, color = WalletMuted, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(transaction.cleanStatus(), color = statusColor(transaction.status), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        }
+        Text(r2wMoney(amount, ""), color = if (debit) WalletRed else WalletGreen, fontSize = 15.sp, fontWeight = FontWeight.Black)
+    }
+}
+
+@Composable
+private fun CircleIcon(icon: ImageVector, color: Color) {
+    Box(Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = .13f)), contentAlignment = Alignment.Center) {
+        Icon(icon, null, tint = color, modifier = Modifier.size(21.dp))
+    }
+}
+
+@Composable
+private fun StatusChip(label: String, status: String?) {
+    val color = statusColor(status)
+    val bg = when (color) {
+        WalletRed -> WalletRedBg
+        WalletYellow -> WalletYellowBg
+        else -> WalletGreenBg
+    }
+    Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 9.dp, vertical = 5.dp)) {
+        Text(label, color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+    }
+}
+
+@Composable
+private fun SectionCard(title: String, content: @Composable () -> Unit) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, WalletBorder), elevation = CardDefaults.cardElevation(1.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Text(title, color = WalletText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
             content()
         }
     }
 }
 
+@Composable
+private fun InfoCard(title: String, message: String, color: Color) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(Color.White), border = BorderStroke(1.dp, color.copy(alpha = .25f))) {
+        Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, color = color, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = WalletMuted, fontSize = 13.sp)
+        }
+    }
+}
+
+private fun MobileTransaction.isDebitLike(): Boolean {
+    val combined = "${amount} ${title} ${status.orEmpty()}".lowercase(Locale.ENGLISH)
+    return amount.trim().startsWith("-") || combined.contains("debit") || combined.contains("purchase") || combined.contains("charge") || combined.contains("deduct") || combined.contains("vendor")
+}
+
+private fun MobileTransaction.walletAmountDisplay(debit: Boolean): String {
+    val raw = amount.trim()
+    return when {
+        raw.isBlank() -> ""
+        raw.startsWith("+") || raw.startsWith("-") -> raw
+        debit -> "- $raw"
+        else -> "+ $raw"
+    }
+}
+
+private fun MobileTransaction.cleanStatus(): String {
+    val raw = status.orEmpty().trim()
+    return raw.replace("_", " ").replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }.ifBlank { "Completed" }
+}
+
 private fun formatWalletDate(value: String?): String {
     val raw = value?.trim().orEmpty()
     if (raw.isBlank()) return ""
-
-    val normalized = raw
-        .replace(" ", "T")
-        .replace(Regex("""(\.\d{3})\d+"""), "$1")
-        .let {
-            if (it.endsWith("Z", ignoreCase = true) || it.contains(Regex("""[+-]\d{2}:?\d{2}$"""))) {
-                it
-            } else {
-                "${it}Z"
-            }
-        }
-
-    return runCatching {
-        val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)
-        Instant.parse(normalized).atZone(ZoneId.systemDefault()).format(formatter)
-    }.getOrElse { raw }
+    val normalized = raw.replace(" ", "T").let { if (it.endsWith("Z", true) || it.contains(Regex("[+-]\\d{2}:?\\d{2}$"))) it else "${it}Z" }
+    return runCatching { Instant.parse(normalized).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ENGLISH)) }.getOrElse { raw }
 }
 
-private fun formatWalletText(value: String?): String {
-    val raw = value.orEmpty()
-    val isoPattern = Regex("""\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?""")
-    return isoPattern.replace(raw) { matchResult -> formatWalletDate(matchResult.value) }
-}
+private fun formatWalletText(value: String?): String = value.orEmpty().replace(Regex("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:?\\d{2})?")) { formatWalletDate(it.value) }
 
 private fun statusColor(statusValue: String?): Color {
     val status = statusValue.orEmpty().lowercase(Locale.ENGLISH)
     return when {
-        status.contains("failed") || status.contains("failure") || status.contains("cancel") || status.contains("reject") || status.contains("error") -> Color(0xFFDC2626)
-        status.contains("pending") || status.contains("review") || status.contains("processing") || status.contains("waiting") -> Color(0xFFD97706)
-        else -> Color(0xFF15803D)
+        status.contains("fail") || status.contains("cancel") || status.contains("reject") || status.contains("error") -> WalletRed
+        status.contains("pending") || status.contains("review") || status.contains("processing") || status.contains("waiting") -> WalletYellow
+        else -> WalletGreen
     }
 }
