@@ -128,7 +128,7 @@ private fun WalletScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 WalletHero(
-                    balance = walletData?.currentBalance ?: "--",
+                    balance = (walletData?.currentBalance?.let { "$$it" } ?: "--"),
                     loading = loading,
                     onRefresh = onRefresh,
                     onRequestBalance = onRequestBalance,
