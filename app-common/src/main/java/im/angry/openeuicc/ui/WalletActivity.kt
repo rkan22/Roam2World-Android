@@ -51,12 +51,17 @@ class WalletActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+
+            var showBalance by remember { mutableStateOf(true) }
+
             WalletScreen(
                 loading = loading,
                 walletData = walletData,
                 recentRequests = recentRequests,
                 errorMessage = errorMessage,
                 requestError = requestError,
+                showBalance = showBalance,
+                onToggleBalance = { showBalance = !showBalance },
                 onRefresh = { loadWallet() },
                 onRequestBalance = { startActivity(Intent(this, WalletRequestActivity::class.java)) },
                 onRequestHistory = { startActivity(Intent(this, WalletRequestHistoryActivity::class.java)) },
@@ -105,6 +110,8 @@ private fun WalletScreen(
     recentRequests: List<MobileWalletRequest>,
     errorMessage: String?,
     requestError: String?,
+    showBalance: Boolean,
+    onToggleBalance: () -> Unit,
     onRefresh: () -> Unit,
     onRequestBalance: () -> Unit,
     onRequestHistory: () -> Unit,
@@ -123,12 +130,18 @@ private fun WalletScreen(
 
     MaterialTheme {
         Surface(Modifier.fillMaxSize()) {
+
             Column(
-                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp)
+                    .clickable { onToggleBalance() },
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
                 WalletHero(
-                    balance = (walletData?.currentBalance?.let { "$$it" } ?: "--"),
+                    balance = walletData?.currentBalance?.let { if (showBalance) "$$it" else "••••••" } ?: "--",
                     loading = loading,
                     onRefresh = onRefresh,
                     onRequestBalance = onRequestBalance,
