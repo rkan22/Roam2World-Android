@@ -76,7 +76,9 @@ fun DashboardScreen(
         containerColor = R2WBackground,
         floatingActionButton = {
             Surface(
-                modifier = Modifier.size(58.dp),
+                modifier = Modifier
+                    .size(58.dp)
+                    .clickable { onActionClick("store") },
                 color = R2WBlue,
                 shape = RoundedCornerShape(999.dp),
                 shadowElevation = 12.dp
@@ -145,7 +147,8 @@ fun DashboardScreen(
                                 value = data?.expiredEsimCount ?: "12",
                                 caption = "● Next 7 days",
                                 captionColor = R2WOrange,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                onClick = { onActionClick("expiring_soon") }
                             )
                         }
                     }
@@ -349,10 +352,13 @@ private fun DashboardMetricCard(
     value: String,
     caption: String,
     modifier: Modifier = Modifier,
-    captionColor: Color = R2WGreen
+    captionColor: Color = R2WGreen,
+    onClick: () -> Unit = {}
 ) {
     Card(
-        modifier = modifier.height(112.dp),
+        modifier = modifier
+            .height(112.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, R2WBorder),

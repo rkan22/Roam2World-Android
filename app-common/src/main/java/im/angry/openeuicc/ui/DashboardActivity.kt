@@ -50,6 +50,7 @@ class DashboardActivity : ComponentActivity() {
                             "crm", "customers", "dealers" -> openMyDealersActivity()
                             "reports" -> startActivity(Intent(this, ReportsActivity::class.java))
                             "check_gb", "esims" -> startActivity(Intent(this, MobileEsimsActivity::class.java))
+                            "expiring_soon" -> openExpiredSoonEsims()
                             "openeuicc" -> startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
                             "more" -> startActivity(Intent(this, MoreActivity::class.java))
                         }

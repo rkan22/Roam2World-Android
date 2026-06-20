@@ -141,11 +141,11 @@ class CustomerInfoActivity : ComponentActivity() {
             startActivity(
                 PurchaseReviewActivity.createIntent(
                     context = this@CustomerInfoActivity,
-                    packageIntent = intent,
-                    customerFirstName = firstName.trim(),
-                    customerLastName = lastName.trim(),
-                    customerPhone = phone.trim(),
-                    currentBalance = currentBalance
+                    intent = intent,
+                    first = firstName.trim(),
+                    last = lastName.trim(),
+                    phone = phone.trim(),
+                    balance = currentBalance
                 )
             )
         }
