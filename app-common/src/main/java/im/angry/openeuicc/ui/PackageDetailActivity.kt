@@ -185,6 +185,11 @@ class PackageDetailActivity : ComponentActivity() {
                 putExtra(EXTRA_COVERAGE, mobilePackage.coverage)
                 putExtra(EXTRA_DESCRIPTION, mobilePackage.description)
             }
+
+        fun createIntent(context: Context, packageId: String?): Intent =
+            Intent(context, PackageDetailActivity::class.java).apply {
+                putExtra(EXTRA_ID, packageId)
+            }
     }
 }
 
