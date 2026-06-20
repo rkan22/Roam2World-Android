@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="@string/dashboard_title" />
+
+    <item
+        android:id="@+id/nav_packages"
+        android:icon="@drawable/ic_packages"
+        android:title="@string/r2w_store" />
+
+    <item
+        android:id="@+id/nav_wallet"
+        android:icon="@drawable/ic_wallet"
+        android:title="@string/wallet_title" />
+
+    <item
+        android:id="@+id/nav_esims"
+        android:icon="@drawable/ic_task_sim_card_download"
+        android:title="@string/dashboard_nav_esims" />
+
+    <item
+        android:id="@+id/nav_more"
+        android:icon="@drawable/ic_more_horiz"
+        android:title="@string/r2w_more" />
+</menu>

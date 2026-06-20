@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:paddingHorizontal="28dp"
+    android:paddingVertical="32dp">
+
+    <TextView
+        android:id="@+id/download_result_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceHeadlineMedium"
+        android:textColor="@color/r2w_premium_text" />
+
+    <TextView
+        android:id="@+id/download_result_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textAppearance="?attr/textAppearanceBodyLarge"
+        android:textColor="@color/r2w_premium_muted" />
+
+    <TextView
+        android:id="@+id/download_result_suggestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="@color/r2w_premium_muted"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/download_result_primary"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/r2w_premium_primary_button"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
+        app:cornerRadius="@dimen/r2w_button_radius" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/download_result_diagnostics"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/r2w_premium_surface"
+        android:text="@string/download_wizard_view_diagnostics"
+        android:textColor="@color/r2w_premium_primary"
+        android:visibility="gone"
+        app:cornerRadius="@dimen/r2w_button_radius"
+        app:strokeColor="@color/r2w_premium_border"
+        app:strokeWidth="1dp" />
+</LinearLayout>

@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_euicc">No removable eSIM card accessible by this app is detected on this device. Insert a compatible card or a USB reader.</string>
+    <string name="no_profile">No profiles (yet) on this eSIM.</string>
+
+    <string name="notification_help">Help</string>
+
+    <string name="login_logo_content_description">Roam2World eSIM</string>
+    <string name="login_title">Roam2World B2B</string>
+    <string name="login_subtitle">Sign in with your reseller or dealer account.</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_action">Sign in</string>
+    <string name="login_email_required">Email is required.</string>
+    <string name="login_password_required">Password is required.</string>
+    <string name="login_checking_session">Checking saved session...</string>
+    <string name="login_signing_in">Signing in...</string>
+    <string name="login_session_expired">Your session expired. Please sign in again.</string>
+    <string name="login_missing_target">Login target is not configured.</string>
+    <string name="logout">Logout</string>
+
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_brand">Roam2World B2B</string>
+    <string name="dashboard_nav_esims">eSIMs</string>
+    <string name="dashboard_refresh">Refresh</string>
+    <string name="dashboard_greeting">Welcome</string>
+    <string name="dashboard_current_balance">Current balance</string>
+    <string name="dashboard_active_esims">Active eSIMs</string>
+    <string name="dashboard_orders_summary">Recent orders</string>
+    <string name="dashboard_dealer_summary">Dealer network</string>
+    <string name="dashboard_dealer_summary_value">Manage dealers</string>
+    <string name="dashboard_quick_actions">Quick actions</string>
+    <string name="dashboard_browse_packages">Browse packages</string>
+    <string name="dashboard_request_balance">Request balance</string>
+    <string name="dashboard_view_history">Purchase history</string>
+    <string name="dashboard_manage_dealers">Manage dealers</string>
+    <string name="dashboard_recent_orders">Recent orders</string>
+    <string name="dashboard_loading">Loading dashboard...</string>
+    <string name="dashboard_empty_orders">No recent orders yet.</string>
+    <string name="dashboard_load_failed">Could not load dashboard.</string>
+    <string name="dashboard_missing_esim_target">eSIM target is not configured.</string>
+    <string name="dealers_title">My dealers</string>
+    <string name="dealers_summary_format">%s dealers</string>
+    <string name="dealers_empty">No dealers yet.</string>
+    <string name="dealers_load_failed">Could not load dealers.</string>
+    <string name="dealers_reseller_only">Dealer management is available for reseller accounts.</string>
+    <string name="dealer_detail_title">Dealer detail</string>
+    <string name="dealer_detail_missing">Dealer detail is unavailable.</string>
+    <string name="dealer_detail_load_failed">Could not load dealer detail.</string>
+    <string name="dealer_balance_format">Balance: %s</string>
+    <string name="dealer_orders_format">Orders: %s</string>
+    <string name="dealer_revenue_format">Revenue: %s</string>
+    <string name="dealer_detail_stats_format">Orders: %1$s\nRevenue: %2$s\nAllocated: %3$s\nSpent: %4$s</string>
+    <string name="dealer_allocate_balance">Allocate balance</string>
+
+    <string name="dealer_refund_card_chip">Correction tool</string>
+    <string name="dealer_refund_card_title">Refund dealer balance</string>
+    <string name="dealer_refund_card_subtitle">Correct mistaken allocations by moving funds safely from this dealer back to your reseller wallet.</string>
+    <string name="dealer_refund_balance">Refund money</string>
+    <string name="dealer_refund_title">Refund money</string>
+    <string name="dealer_refund_message">Return money from %s back to your reseller wallet.</string>
+    <string name="dealer_refund_amount">Refund amount</string>
+    <string name="dealer_refund_reason">Reason</string>
+    <string name="dealer_refund_default_reason">Wrong allocation correction</string>
+    <string name="dealer_refund_submit">Refund money</string>
+    <string name="dealer_refund_failed">Could not refund dealer balance.</string>
+    <string name="dealer_refund_success">Refunded %1$s %2$s. Dealer balance is now %3$s.</string>
+    <string name="dealer_suspend">Suspend dealer</string>
+    <string name="dealer_activate">Activate dealer</string>
+    <string name="dealer_status_update_failed">Could not update dealer status.</string>
+    <string name="dealer_recent_orders">Recent orders</string>
+    <string name="dealer_recent_orders_empty">No recent dealer orders yet.</string>
+    <string name="dealer_allocate_title">Allocate balance</string>
+    <string name="dealer_allocate_amount">Amount</string>
+    <string name="dealer_allocate_submit">Allocate balance</string>
+    <string name="dealer_allocate_amount_required">Enter an amount greater than 0.</string>
+    <string name="dealer_allocate_failed">Could not allocate dealer balance.</string>
+    <string name="dealer_allocate_success">Allocated %1$s %2$s. Dealer balance is now %3$s.</string>
+
+    <string name="dealer_add">Add dealer</string>
+    <string name="dealer_add_title">Add dealer</string>
+    <string name="dealer_add_subtitle">Create a new dealer account under your reseller workspace.</string>
+    <string name="dealer_add_first_name">First name</string>
+    <string name="dealer_add_last_name">Last name</string>
+    <string name="dealer_add_email">Email</string>
+    <string name="dealer_add_phone">Phone</string>
+    <string name="dealer_add_country_code">Country code</string>
+    <string name="dealer_add_password">Temporary password</string>
+    <string name="dealer_add_initial_balance">Initial balance</string>
+    <string name="dealer_add_submit">Create dealer</string>
+    <string name="dealer_add_created">Dealer created successfully.</string>
+    <string name="dealer_add_failed">Could not create dealer.</string>
+    <string name="dealer_add_name_required">Enter first name and last name.</string>
+    <string name="dealer_add_email_required">Enter a valid email.</string>
+    <string name="dealer_add_password_required">Enter a temporary password.</string>
+
+    <string name="purchase_history_title">Purchase history</string>
+    <string name="purchase_history_empty">No purchases yet.</string>
+    <string name="purchase_history_load_failed">Could not load purchase history.</string>
+    <string name="order_detail_title">Order detail</string>
+    <string name="order_detail_summary">Order summary</string>
+    <string name="order_detail_missing">Order detail is unavailable.</string>
+    <string name="order_detail_load_failed">Could not load order detail.</string>
+    <string name="order_detail_package_fallback">Package</string>
+    <string name="order_detail_number_format">Order number: %s</string>
+    <string name="order_detail_package_format">Package: %s</string>
+    <string name="order_detail_provider_format">Provider: %s</string>
+    <string name="order_detail_price_format">Price: %s</string>
+    <string name="order_detail_status_format">Status: %s</string>
+    <string name="order_detail_created_format">Created: %s</string>
+    <string name="order_detail_esim_id_format">eSIM ID: %s</string>
+    <string name="order_detail_view_esim">View eSIM</string>
+    <string name="order_detail_esim_unavailable">This order does not have an eSIM assigned yet.</string>
+    <string name="order_detail_customer_info">Customer information</string>
+    <string name="order_detail_customer_name_format">Customer: %s</string>
+    <string name="order_detail_customer_phone_format">Phone: %s</string>
+    <string name="order_detail_customer_email_format">Email: %s</string>
+    <string name="order_detail_iccid_format">ICCID: %s</string>
+    <string name="order_detail_copy_iccid">Copy ICCID</string>
+    <string name="order_detail_last_renewal">Last renewal</string>
+    <string name="order_detail_renewal_status_format">Status: %s</string>
+    <string name="order_detail_renewal_code_format">Code: %s</string>
+    <string name="order_detail_renewal_order_format">Renewal order: %s</string>
+    <string name="order_detail_renewal_package_format">Package: %s</string>
+    <string name="order_detail_renewal_order_status_format">Order status: %s</string>
+    <string name="order_detail_renewal_profile_status_format">Profile status: %s</string>
+    <string name="order_detail_renewal_activated_end_format">Activated end: %s</string>
+    <string name="order_detail_renewal_expiry_format">Renew expiry: %s</string>
+    <string name="order_detail_renewal_latest_activation_format">Latest activation: %s</string>
+
+    <string name="reports_filter_today">Today</string>
+    <string name="reports_filter_7_days">7 days</string>
+    <string name="reports_filter_30_days">30 days</string>
+    <string name="reports_filter_all">All</string>
+    <string name="reports_export_csv">Export PDF</string>
+    <string name="reports_export_title">Export PDF report</string>
+    <string name="reports_export_subject">Roam2World report - %s</string>
+    <string name="reports_export_empty">No report data to export as PDF for this period.</string>
+    <string name="reports_empty_status">No report data for %s yet.</string>
+    <string name="reports_loaded_status">Live report data loaded • %1$d orders • %2$d dealers • %3$s</string>
+    <string name="reports_empty_sales_overview">No sales in this period yet. New orders will appear here automatically.</string>
+    <string name="reports_empty_provider_usage">No provider usage in this period yet.</string>
+    <string name="reports_empty_failed_orders">No failed orders detected in this period.</string>
+    <string name="reports_empty_dealer_performance">Dealer performance data unavailable.</string>
+    <string name="wallet_title">Wallet</string>
+    <string name="wallet_current_balance">Current balance</string>
+    <string name="wallet_recent_requests">Recent requests</string>
+    <string name="wallet_transactions">Transaction history</string>
+    <string name="wallet_recent_transactions">Recent transactions</string>
+    <string name="wallet_empty_transactions">No wallet transactions yet.</string>
+    <string name="wallet_load_failed">Could not load wallet.</string>
+    <string name="wallet_pull_refresh">Pull to refresh wallet</string>
+    <string name="wallet_request_balance">Request balance</string>
+    <string name="wallet_request_history">Request history</string>
+    <string name="wallet_request_title">Request balance</string>
+    <string name="wallet_request_amount">Amount</string>
+    <string name="wallet_request_currency">Currency</string>
+    <string name="wallet_request_note">Note</string>
+    <string name="wallet_request_submit">Submit request</string>
+    <string name="wallet_request_amount_required">Enter an amount greater than 0.</string>
+    <string name="wallet_request_currency_required">Enter a 3-letter currency code.</string>
+    <string name="wallet_request_failed">Could not create balance request.</string>
+    <string name="wallet_request_created">Balance request submitted for %1$s %2$s.</string>
+    <string name="wallet_request_history_title">Balance requests</string>
+    <string name="wallet_request_history_empty">No balance requests yet.</string>
+    <string name="wallet_request_history_failed">Could not load balance requests.</string>
+    <string name="wallet_request_amount_currency">%1$s %2$s</string>
+    <string name="wallet_request_reviewed_at">Reviewed: %s</string>
+    <string name="packages_title">Packages</string>
+    <string name="packages_featured">Featured packages</string>
+    <string name="packages_catalog">Package catalog</string>
+    <string name="packages_search_hint">Search packages</string>
+    <string name="packages_empty">No packages found.</string>
+    <string name="packages_load_failed">Could not load packages.</string>
+    <string name="packages_global_country">Global</string>
+    <string name="package_detail_title">Package details</string>
+    <string name="package_detail_provider_logo">Orange logo</string>
+    <string name="package_detail_overview">Overview</string>
+    <string name="package_detail_visibility_format">Visible to: %s</string>
+    <string name="package_detail_data_format">Data: %s</string>
+    <string name="package_detail_validity_format">Validity: %s</string>
+    <string name="package_detail_network_format">Network: %s</string>
+    <string name="package_detail_coverage_format">Coverage: %s</string>
+    <string name="package_detail_description_format">%s</string>
+    <string name="package_detail_data_label">Data</string>
+    <string name="package_detail_validity_label">Validity</string>
+    <string name="package_detail_included_title">What’s included</string>
+    <string name="package_detail_included_body">Instant eSIM delivery\nQR code installation\niPhone and Android support\nWorks without a physical SIM</string>
+    <string name="package_detail_description_title">Plan description</string>
+    <string name="package_detail_safe_checkout">Secure wallet purchase • Instant delivery</string>
+    <string name="package_detail_price_label">Price</string>
+    <string name="package_detail_coverage_label">Coverage</string>
+    <string name="package_detail_flag_grid">150+ supported countries</string>
+    <string name="package_purchase_action">Purchase Package</string>
+    <string name="package_purchase_wallet_failed">Could not check wallet balance.</string>
+    <string name="package_purchase_price_unavailable">Package price is unavailable.</string>
+    <string name="package_purchase_insufficient_balance">Insufficient wallet balance.</string>
+    <string name="package_purchase_failed">Could not complete purchase.</string>
+    <string name="purchase_confirmation_title">Purchase confirmation</string>
+    <string name="purchase_confirmation_heading">Purchase confirmed</string>
+    <string name="purchase_order_number_format">Order: %s</string>
+    <string name="purchase_status_format">Status: %s</string>
+    <string name="purchase_price_format">Paid: %s</string>
+    <string name="purchase_balance_after_format">Balance after purchase: %s</string>
+    <string name="purchase_activation_title">Activation details</string>
+    <string name="purchase_activation_code_format">Activation code: %s</string>
+    <string name="purchase_smdp_format">SM-DP+: %s</string>
+    <string name="purchase_matching_id_format">Matching ID: %s</string>
+    <string name="purchase_qr_code_format">QR content: %s</string>
+    <string name="purchase_qr_url_format">QR URL: %s</string>
+    <string name="purchase_iccid_format">ICCID: %s</string>
+    <string name="purchase_esim_id_format">eSIM ID: %s</string>
+    <string name="purchase_install_esim">Install eSIM</string>
+    <string name="purchase_install_unavailable">Installation data is not available yet. Please contact support.</string>
+    <string name="mobile_esims_title">eSIMs</string>
+    <string name="mobile_esims_empty">No Roam2World eSIMs yet.</string>
+    <string name="mobile_esims_load_failed">Could not load eSIMs.</string>
+    <string name="mobile_esims_open_device_manager">Device eSIM manager</string>
+    <string name="mobile_esim_detail_title">eSIM detail</string>
+    <string name="mobile_esim_profile">Profile</string>
+    <string name="mobile_esim_activation_details">Activation details</string>
+    <string name="mobile_esim_detail_missing">eSIM detail is unavailable.</string>
+    <string name="mobile_esim_iccid_format">ICCID: %s</string>
+    <string name="mobile_esim_provider_format">Provider: %s</string>
+    <string name="mobile_esim_package_format">Package: %s</string>
+    <string name="mobile_esim_status_format">Status: %s</string>
+    <string name="mobile_esim_activation_format">Activation code: %s</string>
+    <string name="mobile_esim_smdp_format">SM-DP+: %s</string>
+    <string name="mobile_esim_matching_id_format">Matching ID: %s</string>
+    <string name="mobile_esim_expires_format">Expiry date: %s</string>
+    <string name="mobile_esim_data_remaining_format">Data remaining: %s</string>
+    <string name="mobile_esim_data_used_format">Data used: %s</string>
+    <string name="mobile_esim_created_format">Created: %s</string>
+    <string name="mobile_esim_order_format">Order: %s</string>
+    <string name="mobile_esim_qr_title">QR code</string>
+    <string name="mobile_esim_qr_unavailable">QR code is not available for this eSIM.</string>
+    <string name="mobile_esim_qr_close">Close QR viewer</string>
+    <string name="mobile_esim_copy_iccid">Copy ICCID</string>
+    <string name="mobile_esim_copy_activation">Copy activation code</string>
+    <string name="mobile_esim_copy_smdp">Copy SM-DP+</string>
+    <string name="mobile_esim_show_qr">Show QR</string>
+    <string name="mobile_esim_share_qr">Share eSIM Install</string>
+    <string name="mobile_esim_send_customer">Send to customer</string>
+    <string name="mobile_esim_share_qr_payload_label">QR activation payload:</string>
+    <string name="mobile_esim_iccid_label">ICCID</string>
+    <string name="mobile_esim_activation_label">Activation code</string>
+    <string name="mobile_esim_smdp_label">SM-DP+</string>
+    <string name="mobile_esim_activation_copied">Activation code copied.</string>
+    <string name="mobile_esim_smdp_copied">SM-DP+ copied.</string>
+    <string name="mobile_esim_install_unavailable">Installation data is not available yet. Please contact support.</string>
+    <string name="mobile_esim_install_title">Install eSIM</string>
+    <string name="mobile_esim_install_heading">Prepare installation</string>
+    <string name="mobile_esim_install_compatibility_check">Compatibility check</string>
+    <string name="mobile_esim_install_device_check">Device eSIM support check</string>
+    <string name="mobile_esim_install_download_profile">Download profile</string>
+    <string name="mobile_esim_install_step_waiting">Waiting</string>
+    <string name="mobile_esim_install_step_running">Checking...</string>
+    <string name="mobile_esim_install_step_passed">Ready</string>
+    <string name="mobile_esim_install_step_blocked">Blocked</string>
+    <string name="mobile_esim_install_ready">Ready to download with OpenEUICC.</string>
+    <string name="mobile_esim_install_launching">Opening OpenEUICC download profile flow...</string>
+    <string name="mobile_esim_install_invalid_code">This eSIM activation code could not be parsed.</string>
+    <string name="mobile_esim_install_device_check_failed">Could not check this device for eSIM installation support.</string>
+    <string name="mobile_esim_install_device_unsupported">No app-accessible eSIM slot was found on this device.</string>
+    <string name="mobile_esim_install_continue">Continue</string>
+    <string name="mobile_esim_install_retry">Retry check</string>
+    <string name="mobile_esim_value_unavailable">Unavailable</string>
+
+    <string name="profile_reload_slots">Reload Slots</string>
+    <string name="profile_no_enabled_profile">Unknown</string>
+
+    <string name="channel_name_format">Logical Slot %d</string>
+    <string name="channel_name_format_se">Logical Slot %1$d, SE %2$d</string>
+    <string name="channel_type_usb" translatable="false">USB</string>
+    <string name="channel_name_format_usb">USB Reader</string>
+    <string name="channel_name_format_usb_se">USB Reader, SE %d</string>
+    <string name="channel_type_omapi" translatable="false">OpenMobile API (OMAPI)</string>
+
+    <!-- Profile -->
+    <string name="profile_state_enabled">Enabled</string>
+    <string name="profile_state_disabled">Disabled</string>
+    <string name="profile_provider">Provider:</string>
+    <string name="profile_class">Class:</string>
+    <string name="profile_class_testing">Testing</string>
+    <string name="profile_class_provisioning">Provisioning</string>
+    <string name="profile_class_operational">Operational</string>
+    <string name="profile_iccid" translatable="false">ICCID:</string>
+    <string name="profile_sequence_number_format" translatable="false">#%d</string>
+
+    <string name="profile_enable">Enable</string>
+    <string name="profile_disable">Disable</string>
+    <string name="profile_delete">Delete</string>
+    <string name="profile_rename">Rename</string>
+
+    <string name="profile_switch_timeout">Timed out waiting for the eSIM chip to switch profiles. This may be a bug in your phone\'s modem firmware. Try toggling airplane mode, restarting the application, or rebooting the phone.</string>
+    <string name="profile_switch_did_not_refresh">The operation was successful, but your phone\'s modem refused to refresh. You might need to toggle airplane mode or reboot in order to use the new profile.</string>
+
+    <string name="toast_profile_enable_failed">Cannot switch to new eSIM profile.</string>
+    <string name="toast_profile_enable_cross_class">Please disable the currently enabled profile manually in order to switch to this profile.</string>
+    <string name="toast_profile_delete_confirm_text_mismatched">Confirmation string mismatch</string>
+    <string name="toast_euicc_memory_reset_confirm_text_mismatched">Confirmation string mismatch</string>
+    <string name="toast_euicc_memory_reset_finitshed">This chip has been erased</string>
+    <string name="toast_iccid_copied">ICCID copied to clipboard</string>
+    <string name="toast_sn_copied">Serial number copied to clipboard</string>
+    <string name="toast_eid_copied">EID copied to clipboard</string>
+    <string name="toast_atr_copied">ATR copied to clipboard</string>
+
+    <string name="usb_permission">Grant USB permission</string>
+    <string name="usb_permission_needed">Permission is needed to access the USB smart card reader.</string>
+    <string name="usb_failed">Cannot connect to eSIM via a USB smart card reader.</string>
+
+    <string name="task_notification">Long-running Tasks</string>
+    <string name="task_profile_download">Downloading eSIM profile</string>
+    <string name="task_profile_download_failure">Failed to download eSIM profile</string>
+    <string name="task_profile_rename">Renaming eSIM profile</string>
+    <string name="task_profile_rename_failure">Failed to rename eSIM profile</string>
+    <string name="task_profile_delete">Deleting eSIM profile</string>
+    <string name="task_profile_delete_failure">Failed to delete eSIM profile</string>
+    <string name="task_profile_switch">Switching eSIM profile</string>
+    <string name="task_profile_switch_failure">Failed to switch eSIM profile</string>
+    <string name="task_euicc_memory_reset">Erasing eSIM chip</string>
+    <string name="task_euicc_memory_reset_failure">Failed to erase eSIM chip</string>
+
+    <string name="profile_download">New eSIM</string>
+    <string name="profile_download_server">Server (RSP / SM-DP+)</string>
+    <string name="profile_download_code">Activation Code</string>
+    <string name="profile_download_confirmation_code">Confirmation Code (Optional)</string>
+    <string name="profile_download_confirmation_code_required">Confirmation Code (Required)</string>
+    <string name="profile_download_imei">IMEI (Optional)</string>
+
+    <string name="profile_download_no_lpa_string">No LPA code found in clipboard</string>
+    <string name="profile_download_incorrect_lpa_string">Unable to parse</string>
+    <string name="profile_download_incorrect_lpa_string_message">Could not parse QR code or clipboard content as a LPA code.</string>
+
+    <string name="download_wizard">Download Wizard</string>
+    <string name="download_wizard_back">Back</string>
+    <string name="download_wizard_next">Next</string>
+    <string name="download_wizard_slot_removed">Selected SIM has been removed</string>
+    <string name="download_wizard_slot_select">Select or confirm the eSIM you would like to download to:</string>
+    <string name="download_wizard_slot_type">Type:</string>
+    <string name="download_wizard_slot_type_removable">Removable</string>
+    <string name="download_wizard_slot_type_internal">Internal</string>
+    <string name="download_wizard_slot_type_internal_port">Internal, port %d</string>
+    <string name="download_wizard_slot_eid" translatable="false">eID:</string>
+    <string name="download_wizard_slot_active_profile">Active Profile:</string>
+    <string name="download_wizard_slot_free_space">Free Space:</string>
+    <string name="download_wizard_method_select">How would you like to download the eSIM profile?</string>
+    <string name="download_wizard_method_qr_code">Scan a QR code with camera</string>
+    <string name="download_wizard_method_gallery">Load a QR code from gallery</string>
+    <string name="download_wizard_method_clipboard">Load from Clipboard</string>
+    <string name="download_wizard_method_manual">Enter manually</string>
+    <string name="download_wizard_details">Input or confirm details for downloading your eSIM:</string>
+    <string name="download_wizard_progress">Downloading your eSIM…</string>
+    <string name="download_wizard_progress_step_preparing">Preparing</string>
+    <string name="download_wizard_progress_step_connecting">Establishing connection to server</string>
+    <string name="download_wizard_progress_step_authenticating">Authenticating your device with server</string>
+    <string name="download_wizard_progress_step_downloading">Downloading eSIM profile</string>
+    <string name="download_wizard_progress_step_finalizing">Loading eSIM profile into storage</string>
+    <string name="download_wizard_success_title">eSIM installed</string>
+    <string name="download_wizard_success_message">Your eSIM profile has been downloaded successfully.</string>
+    <string name="download_wizard_failure_title">Installation failed</string>
+    <string name="download_wizard_failure_message">The eSIM profile could not be installed.</string>
+    <string name="download_wizard_done">Done</string>
+    <string name="download_wizard_close">Close</string>
+    <string name="download_wizard_view_diagnostics">View diagnostics</string>
+    <string name="download_wizard_diagnostics">Error diagnostics</string>
+    <string name="download_wizard_diagnostics_error_code">Error code: %s</string>
+    <string name="download_wizard_diagnostics_last_http_status">Last HTTP status (from server): %d</string>
+    <string name="download_wizard_diagnostics_last_http_response">Last HTTP response (from server):</string>
+    <string name="download_wizard_diagnostics_last_http_exception">Last HTTP exception:</string>
+    <string name="download_wizard_diagnostics_last_apdu_response">Last APDU response (from SIM): %s</string>
+    <string name="download_wizard_diagnostics_last_apdu_response_success">Last APDU response (from SIM) is successful</string>
+    <string name="download_wizard_diagnostics_last_apdu_response_fail">Last APDU response (from SIM) is a failure</string>
+    <string name="download_wizard_diagnostics_last_apdu_exception">Last APDU exception:</string>
+    <string name="download_wizard_diagnostics_save">Save</string>
+    <string name="download_wizard_diagnostics_file_template">Diagnostics at %s</string>
+    <string name="download_wizard_error_iccid_already">This eSIM profile is already present on your eSIM chip.</string>
+    <string name="download_wizard_error_insufficient_memory">Your eSIM chip does not have sufficient memory left to download the profile.</string>
+    <string name="download_wizard_error_unsupported_profile">This eSIM profile is unsupported by your eSIM chip.</string>
+    <string name="download_wizard_error_card_internal_error">An error occurred in your eSIM chip.</string>
+    <string name="download_wizard_error_eid_not_supported">The EID of your device or eSIM chip is unsupported by your carrier.</string>
+    <string name="download_wizard_error_eid_mismatch">This eSIM profile has been downloaded on another device.</string>
+    <string name="download_wizard_error_profile_unreleased">This eSIM profile has been revoked.</string>
+    <string name="download_wizard_error_profile_unavailable">This eSIM profile is no longer available.</string>
+    <string name="download_wizard_error_matching_id_refused">The activation code is invalid.</string>
+    <string name="download_wizard_error_profile_retries_exceeded">The maximum number of download attempts for the eSIM profile has been exceeded.</string>
+    <string name="download_wizard_error_confirmation_code_missing">Confirmation code is required to download this profile.</string>
+    <string name="download_wizard_error_confirmation_code_refused">The confirmation code you entered is invalid.</string>
+    <string name="download_wizard_error_profile_expired">This eSIM profile has expired.</string>
+    <string name="download_wizard_error_confirmation_code_retries_exceeded">The maximum number of download attempts for the confirmation code has been exceeded.</string>
+    <string name="download_wizard_error_unknown_hostname">Unknown SM-DP+ address</string>
+    <string name="download_wizard_error_network_unreachable">Network is unreachable</string>
+    <string name="download_wizard_error_tls_certificate">TLS certificate error, this eSIM profile is not supported</string>
+    <string name="download_wizard_error_suggest_profile_installed">You are trying to reinstall an already downloaded eSIM profile</string>
+    <string name="download_wizard_error_suggest_insufficient_memory">Please delete some unused eSIM profiles and try again</string>
+    <string name="download_wizard_error_suggest_contact_carrier">Please contact your carrier for assistance.</string>
+    <string name="download_wizard_error_suggest_contact_reissue">Please contact your carrier to reissue this eSIM profile.</string>
+    <string name="download_wizard_error_suggest_network_unreachable">Please try again after connecting to a different network (e.g. switching between Wi-Fi and data).</string>
+
+    <string name="logs_saved_message">Logs have been saved to the selected path. Would you like to share the log through another app?</string>
+
+    <string name="profile_rename_new_name">New nickname</string>
+    <string name="profile_rename_encoding_error">Failed to encode nickname as UTF-8</string>
+    <string name="profile_rename_too_long">Nickname is longer than 64 characters</string>
+    <string name="profile_rename_failure">Unknown failure when renaming profile</string>
+
+    <string name="profile_delete_confirm">Are you sure you want to delete the profile %s? This operation is irreversible.\n\nDepending on your carrier\'s requirements, you may need to contact your carrier or visit their store to recover your deleted eSIM.</string>
+    <string name="profile_delete_confirm_input">Type \'%s\' here to confirm deletion</string>
+
+    <string name="profile_notifications">Notifications</string>
+    <string name="profile_notifications_detailed_format">Notifications (%s)</string>
+    <string name="profile_notifications_show">Manage Notifications</string>
+    <string name="profile_notifications_help">eSIM profiles can send notifications to the carrier when they are downloaded, deleted, enabled, or disabled. The queue of these notifications to be sent is listed here.\n\nIn Settings, you can specify whether to send each type of notification automatically. Note that even if a notification has been sent, it will not be deleted automatically from the record, unless the queue runs out of space.\n\nHere, you can manually send or delete each pending notification.</string>
+    <string name="profile_notification_operation_download">Downloaded</string>
+    <string name="profile_notification_operation_delete">Deleted</string>
+    <string name="profile_notification_operation_enable">Enabled</string>
+    <string name="profile_notification_operation_disable">Disabled</string>
+    <string name="profile_notification_name_format" translatable="false">&lt;b&gt;%1$s&lt;/b&gt; %2$s (%3$s)</string>
+    <string name="profile_notification_sequence_number_format" translatable="false">#%d</string>
+    <string name="profile_notification_process">Process</string>
+    <string name="profile_notification_delete">Delete</string>
+
+    <string name="euicc_info">eSIM Info</string>
+    <string name="euicc_info_activity_title">eSIM Info (%s)</string>
+    <string name="euicc_info_access_mode">Access Mode</string>
+    <string name="euicc_info_removable">Removable</string>
+    <string name="euicc_info_sku">Product Name</string>
+    <string name="euicc_info_sn">Product Serial Number</string>
+    <string name="euicc_info_fw_ver">Product Firmware Version</string>
+    <string name="euicc_info_eid" translatable="false">EID</string>
+    <string name="euicc_info_isdr_aid" translatable="false">ISD-R AID</string>
+    <string name="euicc_info_sgp22_version">SGP.22 Version</string>
+    <string name="euicc_info_sas_accreditation_number">SAS Accreditation Number</string>
+    <string name="euicc_info_free_nvram">Free NVRAM (eSIM profile storage)</string>
+    <string name="euicc_info_free_nvram_hint">(for reference only)</string>
+    <string name="euicc_info_ci_type">Certificate Issuer (CI)</string>
+    <string name="euicc_info_ci_gsma_live">GSMA Live CI</string>
+    <string name="euicc_info_ci_gsma_test">GSMA Test CI</string>
+    <string name="euicc_info_ci_unknown">Unknown eSIM CI</string>
+    <string name="euicc_info_atr" translatable="false">Answer To Reset (ATR)</string>
+
+    <string name="euicc_memory_reset">Erase eSIM</string>
+    <string name="euicc_memory_reset_title">Erase eSIM</string>
+    <string name="euicc_memory_reset_message">Please confirm to delete all profiles on this chip and understand that this operation is irreversible.\n\nEID: %1$s\n\n%2$s</string>
+    <string name="euicc_memory_reset_hint_text">Type \'%s\' here to confirm</string>
+    <string name="euicc_memory_reset_confirm_text">I CONFIRM TO ERASE THE CHIP WHOSE EID ENDS WITH %s AND UNDERSTAND THAT THIS IS IRREVERSIBLE</string>
+    <string name="euicc_memory_reset_invoke_button">Erase</string>
+
+    <!-- eSIM Info -->
+    <string name="euicc_info_yes">Yes</string>
+    <string name="euicc_info_no">No</string>
+    <string name="euicc_info_unknown">Unknown</string>
+    <string name="euicc_info_unavailable">Information Unavailable</string>
+
+    <string name="logs_save">Save</string>
+    <string name="logs_filename_template">Logs at %s</string>
+
+    <string name="developer_options_steps">You are %d steps away from being a developer.</string>
+    <string name="developer_options_enabled">You are now a developer!</string>
+
+    <string name="isdr_aid_list">ISD-R AID List</string>
+    <string name="isdr_aid_list_saved">Saved custom ISD-R AID list.</string>
+    <string name="isdr_aid_list_restore_defaults">Reset</string>
+
+    <string name="pref_settings">Settings</string>
+    <string name="pref_notifications">Notifications</string>
+    <string name="pref_notifications_desc">eSIM profile operations send notifications to the carrier. Fine-tune this behavior as needed here.</string>
+    <string name="pref_notifications_download">Downloads</string>
+    <string name="pref_notifications_download_desc">Send notifications for <i>downloading</i> profiles</string>
+    <string name="pref_notifications_delete">Deletion</string>
+    <string name="pref_notifications_delete_desc">Send notifications for <i>deleting</i> profiles</string>
+    <string name="pref_notifications_switch">Switching</string>
+    <string name="pref_notifications_switch_desc">Send notifications for <i>switching</i> profiles\nNote that this type of notification is unreliable.</string>
+    <string name="pref_advanced">Advanced</string>
+    <string name="pref_advanced_disable_safeguard_removable_esim">Allow Disabling / Deleting Active Profile</string>
+    <string name="pref_advanced_disable_safeguard_removable_esim_desc">By default, this app prevents you from disabling the active profile on a removable eSIM inserted in the device, because doing so may <i>sometimes</i> render it inaccessible.\nCheck this box to <i>remove</i> this safeguard.</string>
+    <string name="pref_advanced_verbose_logging">Verbose Logging</string>
+    <string name="pref_advanced_verbose_logging_desc">Enable verbose logs, which may contain sensitive information. Only share your logs with someone you trust after turning this on.</string>
+    <string name="pref_advanced_force_tpdu_mode">Force TPDU Mode for USB Readers</string>
+    <string name="pref_advanced_force_tpdu_mode_desc">Force TPDU mode for all USB CCID readers. Only enable if you have a USB reader that only works under TPDU.</string>
+    <string name="pref_advanced_language">Language</string>
+    <string name="pref_advanced_language_desc">Select app language</string>
+    <string name="pref_advanced_logs">Logs</string>
+    <string name="pref_advanced_logs_desc">View recent debug logs of the application</string>
+    <string name="pref_developer">Developer Options</string>
+    <string name="pref_developer_refresh_after_switch">Send refresh command to modem</string>
+    <string name="pref_developer_refresh_after_switch_desc">Whether to send a refresh command to the modem after switching profiles. Try disabling this if you see crashes.</string>
+    <string name="pref_developer_unfiltered_profile_list">Show unfiltered profile list</string>
+    <string name="pref_developer_unfiltered_profile_list_desc">Include non-production profiles in the list</string>
+    <string name="pref_developer_ignore_tls_certificate">Ignore SM-DP+ TLS certificate</string>
+    <string name="pref_developer_ignore_tls_certificate_desc">Accept any TLS certificate used by the RSP server</string>
+    <string name="pref_developer_es10x_mss" translatable="false">ES10x MSS</string>
+    <string name="pref_developer_es10x_mss_desc">Global ES10x MSS</string>
+    <string-array name="pref_developer_es10x_entry_keys">
+        <item>High Efficiency</item>
+        <item>Most Compatible</item>
+    </string-array>
+    <string-array name="pref_developer_es10x_entry_values" translatable="false">
+        <item>255</item>
+        <item>63</item>
+    </string-array>
+    <string name="pref_developer_isdr_aid_list">Customize ISD-R AID list</string>
+    <string name="pref_developer_isdr_aid_list_desc">Some brands of removable eSIMs may use their own non-standard ISD-R AID, rendering them inaccessible to third-party apps. We can attempt to use non-standard AIDs added in this list, but there is no guarantee that they will work.</string>
+    <string name="pref_info">Info</string>
+    <string name="pref_info_app_version">App Version</string>
+    <string name="pref_info_website">Official Website</string>
+    <string name="pref_info_source_code">Source Code</string>
+    <string name="pref_info_source_code_url" translatable="false">https://gitea.angry.im/PeterCxy/OpenEUICC</string>
+    <string name="dashboard_dynamic_kpis">Dynamic KPIs</string>
+</resources>

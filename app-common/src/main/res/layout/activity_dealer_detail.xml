@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/r2w_premium_bg">
+
+    <include layout="@layout/toolbar_activity" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/dealer_detail_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <LinearLayout
+            android:id="@+id/dealer_detail_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/r2w_screen_padding"
+            android:paddingTop="22dp"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dashboard_brand"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/r2w_premium_primary" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/dealer_detail_title"
+                android:textAppearance="?attr/textAppearanceDisplaySmall"
+                android:textColor="@color/r2w_premium_text" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/dealer_detail_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/dealer_detail_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/r2w_premium_danger"
+                android:visibility="gone" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/r2w_card_padding">
+
+                    <TextView
+                        android:id="@+id/dealer_detail_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="2"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_premium_text" />
+
+                    <TextView
+                        android:id="@+id/dealer_detail_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <TextView
+                        android:id="@+id/dealer_detail_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/wallet_request_status_badge"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:textAppearance="?attr/textAppearanceLabelSmall" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="@color/r2w_premium_primary_soft"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/r2w_card_padding">
+
+                    <TextView
+                        android:id="@+id/dealer_detail_balance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                        android:textColor="@color/r2w_premium_primary_dark" />
+
+                    <TextView
+                        android:id="@+id/dealer_detail_stats"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_primary_dark" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="@color/r2w_premium_surface"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="@dimen/r2w_card_radius"
+                app:strokeColor="@color/r2w_premium_border"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/r2w_card_padding">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dealer_detail_allocate"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/r2w_premium_primary_button"
+                        android:text="@string/dealer_allocate_balance"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:icon="@drawable/ic_wallet"
+                        app:iconTint="@android:color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dealer_detail_suspend"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/dealer_suspend"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:icon="@drawable/ic_x_black" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dealer_detail_activate"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/dealer_activate"
+                        app:cornerRadius="@dimen/r2w_button_radius"
+                        app:icon="@drawable/ic_check_black" 
+                        android:backgroundTint="@color/r2w_premium_surface"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:strokeColor="@color/r2w_premium_border"
+                        app:strokeWidth="1dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/dealer_detail_refund_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/r2w_refund_card_bg"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:background="@drawable/r2w_status_danger_bg"
+                        android:gravity="center"
+                        android:minWidth="132dp"
+                        android:paddingHorizontal="14dp"
+                        android:text="@string/dealer_refund_card_chip"
+                        android:textAppearance="?attr/textAppearanceLabelMedium"
+                        android:textColor="@color/r2w_premium_danger"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/dealer_refund_card_title"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
+                        android:textColor="@color/r2w_premium_text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:lineSpacingExtra="2dp"
+                        android:text="@string/dealer_refund_card_subtitle"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="@color/r2w_premium_muted" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dealer_detail_refund"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="18dp"
+                        android:background="@drawable/r2w_refund_button_bg"
+                        android:text="@string/dealer_refund_balance"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_wallet"
+                        app:iconTint="@android:color/white" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/dealer_recent_orders"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/r2w_premium_text" />
+
+            <LinearLayout
+                android:id="@+id/dealer_detail_orders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

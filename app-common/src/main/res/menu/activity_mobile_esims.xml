@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/reload"
+        android:icon="@drawable/ic_refresh_black"
+        android:title="@string/dashboard_refresh"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/open_device_esim_manager"
+        android:title="@string/mobile_esims_open_device_manager"
+        app:showAsAction="never" />
+</menu>

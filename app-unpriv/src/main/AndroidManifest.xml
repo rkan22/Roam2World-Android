@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name="im.angry.openeuicc.UnprivilegedOpenEuiccApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locale_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.App.Starting"
+        tools:targetApi="tiramisu">
+        <meta-data
+            android:name="im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
+            android:value="im.angry.openeuicc.ui.DashboardActivity" />
+
+        <meta-data
+            android:name="im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
+            android:value="im.angry.openeuicc.ui.UnprivilegedMainActivity" />
+
+        <!-- https://web.dev/get-installed-related-apps/?hl=en -->
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.LoginActivity"
+            android:exported="true">
+                </activity>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
+            android:exported="true"
+            tools:replace="android:exported">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MyDealersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DealerDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.AllocateBalanceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackagesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackageDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.CustomerInfoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PurchaseConfirmationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PurchaseHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileOrderDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimQrActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.UnprivilegedMainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.QuickCompatibilityActivity"
+            android:exported="false"
+            android:label="@string/quick_compatibility" />
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+    
+        <activity
+            android:name="im.angry.openeuicc.ui.AddDealerActivity"
+            android:exported="false" />
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/r2w_file_paths" />
+        </provider>
+
+            <activity
+            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
+            android:exported="false" />
+</application>
+
+    <queries>
+        <package android:name="com.android.stk" />
+        <package android:name="com.android.stk1" />
+        <package android:name="com.android.stk2" />
+    </queries>
+</manifest>

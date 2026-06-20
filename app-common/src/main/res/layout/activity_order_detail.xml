@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/r2w_premium_bg">
+
+    <include layout="@layout/toolbar_activity" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/order_detail_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <LinearLayout
+            android:id="@+id/order_detail_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="18dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="28dp">
+
+            <TextView
+                android:id="@+id/order_detail_heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Purchase History"
+                android:textColor="@color/r2w_text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/order_detail_hero_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/r2w_order_detail_hero"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <FrameLayout
+                    android:layout_width="86dp"
+                    android:layout_height="86dp"
+                    android:background="@drawable/r2w_order_detail_image_bg">
+
+                    <ImageView
+                        android:id="@+id/order_detail_hero_image"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_order_detail_esim_image" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/order_detail_hero_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:text="eSIM Package"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="19sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/order_detail_hero_subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="Provider"
+                        android:textColor="@color/r2w_text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/order_detail_hero_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center"
+                        android:minWidth="104dp"
+                        android:paddingHorizontal="14dp"
+                        android:text="STATUS"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/order_detail_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/order_detail_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textColor="@color/r2w_premium_danger"
+                android:visibility="gone" />
+
+            <!-- Customer Information -->
+            <LinearLayout
+                android:id="@+id/order_detail_customer_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/r2w_order_detail_card"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/r2w_order_detail_icon_box">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_order_detail_user" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Customer Information"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/order_detail_customer_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:drawableStart="@drawable/ic_order_detail_user"
+                    android:drawablePadding="16dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="17sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="42dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/r2w_premium_border" />
+
+                <TextView
+                    android:id="@+id/order_detail_customer_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:drawableStart="@drawable/ic_order_detail_phone"
+                    android:drawablePadding="16dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="17sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="42dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/r2w_premium_border" />
+
+                <TextView
+                    android:id="@+id/order_detail_customer_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:drawableStart="@drawable/ic_order_detail_mail"
+                    android:drawablePadding="16dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <!-- eSIM Details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/r2w_order_detail_card"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/r2w_order_detail_icon_box">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_order_detail_chip" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="eSIM Details"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/order_detail_iccid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/order_detail_provider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/order_detail_package"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/order_detail_esim_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/r2w_text_secondary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- Purchase Information -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/r2w_order_detail_card"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:background="@drawable/r2w_order_detail_icon_box">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_order_detail_bag" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:text="Purchase Information"
+                        android:textColor="@color/r2w_text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/order_detail_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/order_detail_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/order_detail_created"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:drawableStart="@drawable/ic_order_detail_calendar"
+                    android:drawablePadding="14dp"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/order_detail_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center"
+                    android:minWidth="110dp"
+                    android:paddingHorizontal="14dp"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Timeline hidden but IDs preserved for Kotlin -->
+            <LinearLayout
+                android:id="@+id/order_detail_timeline_card"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone">
+
+                <TextView android:id="@+id/order_timeline_created" android:layout_width="1dp" android:layout_height="1dp" />
+                <TextView android:id="@+id/order_timeline_payment" android:layout_width="1dp" android:layout_height="1dp" />
+                <TextView android:id="@+id/order_timeline_provider" android:layout_width="1dp" android:layout_height="1dp" />
+                <TextView android:id="@+id/order_timeline_esim" android:layout_width="1dp" android:layout_height="1dp" />
+                <TextView android:id="@+id/order_timeline_qr" android:layout_width="1dp" android:layout_height="1dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/order_detail_renewal_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/r2w_order_detail_card"
+                android:orientation="vertical"
+                android:padding="18dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/order_detail_last_renewal"
+                    android:textColor="@color/r2w_text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/order_detail_renewal_details"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/r2w_text_secondary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/order_detail_view_esim"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/r2w_premium_primary_button"
+                android:text="@string/order_detail_view_esim"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_order_detail_chip"
+                app:iconGravity="textStart"
+                app:iconTint="@android:color/white" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/order_detail_copy_iccid"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/r2w_order_detail_outline_button"
+                android:text="@string/order_detail_copy_iccid"
+                android:textAllCaps="false"
+                android:textColor="@color/r2w_premium_primary"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:backgroundTint="@null"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_order_detail_chip"
+                app:iconGravity="textStart"
+                app:iconTint="@color/r2w_premium_primary" />
+
+            <TextView
+                android:id="@+id/order_detail_esim_unavailable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="@string/order_detail_esim_unavailable"
+                android:textColor="@color/r2w_text_secondary"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/reload"
+        android:icon="@drawable/ic_refresh_black"
+        android:title="@string/dashboard_refresh"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/purchase_history"
+        android:title="@string/purchase_history_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/my_dealers"
+        android:title="@string/dealers_title"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/logout"
+        android:title="@string/logout"
+        app:showAsAction="never" />
+</menu>

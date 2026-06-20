@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" fill="#f8fafb"/>
+  <rect y="0" width="390" height="64" fill="#ffffff"/>
+  <path d="M28 32h18M34 24l-8 8 8 8" fill="none" stroke="#172026" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="62" y="38" font-family="Inter, Roboto, Arial, sans-serif" font-size="18" font-weight="600" fill="#172026">Install eSIM</text>
+
+  <text x="20" y="110" font-family="Inter, Roboto, Arial, sans-serif" font-size="24" font-weight="650" fill="#172026">Ready to install</text>
+  <text x="20" y="140" font-family="Inter, Roboto, Arial, sans-serif" font-size="14" fill="#5d6972">Roam2World checks your device before opening OpenEUICC.</text>
+
+  <rect x="20" y="178" width="350" height="260" rx="8" fill="#eef3f6" stroke="#d7e0e6"/>
+  <circle cx="48" cy="220" r="13" fill="#dff4e8"/><path d="M42 220l5 5 10-11" fill="none" stroke="#137a3d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="72" y="216" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#172026">Compatibility Check</text>
+  <text x="72" y="238" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" fill="#5d6972">Activation code is valid.</text>
+  <line x1="48" y1="238" x2="48" y2="282" stroke="#c8d3da" stroke-width="2"/>
+
+  <circle cx="48" cy="296" r="13" fill="#dff4e8"/><path d="M42 296l5 5 10-11" fill="none" stroke="#137a3d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="72" y="292" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#172026">Device eSIM Support Check</text>
+  <text x="72" y="314" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" fill="#5d6972">An OpenEUICC-accessible eSIM port is available.</text>
+  <line x1="48" y1="314" x2="48" y2="358" stroke="#c8d3da" stroke-width="2"/>
+
+  <circle cx="48" cy="372" r="13" fill="#e8f0fe"/><circle cx="48" cy="372" r="5" fill="#0b57d0"/>
+  <text x="72" y="368" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#172026">Download Profile</text>
+  <text x="72" y="390" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" fill="#5d6972">Continue to the OpenEUICC download wizard.</text>
+
+  <text x="20" y="488" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" font-weight="700" fill="#172026">SM-DP+</text>
+  <text x="20" y="516" font-family="Inter, Roboto, Arial, sans-serif" font-size="16" fill="#25323a">smdp.esim.example</text>
+  <text x="20" y="558" font-family="Inter, Roboto, Arial, sans-serif" font-size="13" font-weight="700" fill="#172026">Matching ID</text>
+  <text x="20" y="586" font-family="Inter, Roboto, Arial, sans-serif" font-size="16" fill="#25323a">MATCH-84A1-EU</text>
+
+  <rect x="20" y="648" width="350" height="56" rx="28" fill="#0b57d0"/>
+  <text x="112" y="682" font-family="Inter, Roboto, Arial, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Continue Installation</text>
+</svg>

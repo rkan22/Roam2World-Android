@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="im.angry.openeuicc"
+    tools:ignore="ProtectedPermissions">
+
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="true"
+        tools:ignore="UnnecessaryRequiredFeature" />
+
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
+    <uses-permission android:name="android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION" />
+
+    <application
+        android:name=".PrivilegedOpenEuiccApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:localeConfig="@xml/locale_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.App.Starting"
+        tools:targetApi="tiramisu">
+        <meta-data
+            android:name="im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
+            android:value="im.angry.openeuicc.ui.DashboardActivity" />
+
+        <meta-data
+            android:name="im.angry.openeuicc.DASHBOARD_ESIM_ACTIVITY"
+            android:value="im.angry.openeuicc.ui.PrivilegedMainActivity" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletRequestHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MyDealersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.DealerDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.AllocateBalanceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackagesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PackageDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.CustomerInfoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PurchaseConfirmationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.PurchaseHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileOrderDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimQrActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.PrivilegedMainActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".service.OpenEuiccService"
+            android:exported="true"
+            android:permission="android.permission.BIND_EUICC_SERVICE">
+            <intent-filter android:priority="100">
+                <action android:name="android.service.euicc.EuiccService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".ui.LuiActivity"
+            android:exported="true"
+            android:permission="android.permission.BIND_EUICC_SERVICE">
+            <intent-filter android:priority="100">
+                <action android:name="android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS" />
+                <action android:name="android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.service.euicc.category.EUICC_UI" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+    
+        <activity
+            android:name="im.angry.openeuicc.ui.AddDealerActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

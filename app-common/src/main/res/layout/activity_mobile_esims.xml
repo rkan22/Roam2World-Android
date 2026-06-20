@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/r2w_premium_bg">
+
+    <include layout="@layout/toolbar_activity" />
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/mobile_esims_refresh"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/mobile_esims_bottom_nav"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/mobile_esims_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/mobile_esims_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/r2w_screen_padding"
+                android:paddingTop="20dp"
+                android:paddingBottom="28dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="My eSIMs"
+                    android:textAppearance="?attr/textAppearanceHeadlineLarge"
+                    android:textColor="@color/r2w_premium_text"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Search, filter and manage purchased eSIM profiles."
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_premium_muted" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/mobile_esims_search_layout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:hint="Search ICCID, provider or package"
+                    app:boxBackgroundColor="@color/r2w_premium_surface"
+                    app:boxCornerRadiusBottomEnd="18dp"
+                    app:boxCornerRadiusBottomStart="18dp"
+                    app:boxCornerRadiusTopEnd="18dp"
+                    app:boxCornerRadiusTopStart="18dp"
+                    app:boxStrokeColor="@color/r2w_premium_border"
+                    app:endIconMode="clear_text"
+                    app:hintTextColor="@color/r2w_premium_muted"
+                    app:startIconDrawable="@drawable/ic_packages">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/mobile_esims_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/mobile_esims_tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="All"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:chipBackgroundColor="#F8FAFF"
+                        app:chipCornerRadius="14dp"
+                        app:chipStrokeColor="#BFD4FF"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_active"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Active"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:chipBackgroundColor="#F8FAFF"
+                        app:chipCornerRadius="14dp"
+                        app:chipStrokeColor="#BFD4FF"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_pending"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:chipBackgroundColor="#F8FAFF"
+                        app:chipCornerRadius="14dp"
+                        app:chipStrokeColor="#BFD4FF"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/mobile_esims_tab_expired"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Expired"
+                        android:textColor="@color/r2w_premium_primary"
+                        app:chipBackgroundColor="#F8FAFF"
+                        app:chipCornerRadius="14dp"
+                        app:chipStrokeColor="#BFD4FF"
+                        app:chipStrokeWidth="1dp" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <TextView
+                    android:id="@+id/mobile_esims_error"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_premium_danger"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/mobile_esims_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/r2w_esim_empty_card"
+                    android:gravity="center"
+                    android:padding="22dp"
+                    android:text="No matching eSIMs found. Try clearing search or choosing another status tab."
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/r2w_premium_muted"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/mobile_esims_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/mobile_esims_bottom_nav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/r2w_premium_surface"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/activity_dashboard_bottom" />
+</androidx.constraintlayout.widget.ConstraintLayout>

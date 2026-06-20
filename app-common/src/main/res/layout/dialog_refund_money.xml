@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/r2w_dialog_surface_bg"
+    android:padding="22dp">
+
+    <TextView
+        android:id="@+id/refund_dialog_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:background="@drawable/r2w_status_danger_bg"
+        android:gravity="center"
+        android:minWidth="120dp"
+        android:paddingHorizontal="14dp"
+        android:text="@string/dealer_refund_card_chip"
+        android:textAppearance="?attr/textAppearanceLabelMedium"
+        android:textColor="@color/r2w_premium_danger"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/refund_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="@string/dealer_refund_title"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="@color/r2w_premium_text"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/refund_dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="2dp"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="@color/r2w_premium_muted" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/refund_amount_layout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:hint="@string/dealer_refund_amount"
+        app:boxBackgroundColor="@color/r2w_premium_surface"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="@color/r2w_premium_border"
+        app:hintTextColor="@color/r2w_premium_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/refund_amount_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:singleLine="true"
+            android:textColor="@color/r2w_premium_text"
+            android:textColorHint="@color/r2w_premium_muted" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/refund_reason_layout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/dealer_refund_reason"
+        app:boxBackgroundColor="@color/r2w_premium_surface"
+        app:boxCornerRadiusBottomEnd="16dp"
+        app:boxCornerRadiusBottomStart="16dp"
+        app:boxCornerRadiusTopEnd="16dp"
+        app:boxCornerRadiusTopStart="16dp"
+        app:boxStrokeColor="@color/r2w_premium_border"
+        app:hintTextColor="@color/r2w_premium_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/refund_reason_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences"
+            android:singleLine="true"
+            android:textColor="@color/r2w_premium_text"
+            android:textColorHint="@color/r2w_premium_muted" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/refund_cancel"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:text="@android:string/cancel"
+            android:textColor="@color/r2w_premium_muted" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/refund_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/r2w_refund_button_bg"
+            android:minWidth="140dp"
+            android:text="@string/dealer_refund_submit"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            app:cornerRadius="16dp" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="roam_primary">#0B5CFF</color>
+    <color name="roam_on_primary">#FFFFFF</color>
+    <color name="roam_primary_container">#0B5CFF</color>
+    <color name="roam_on_primary_container">#FFFFFF</color>
+    <color name="roam_secondary">#526071</color>
+    <color name="roam_on_secondary">#FFFFFF</color>
+    <color name="roam_secondary_container">#E8EEF8</color>
+    <color name="roam_on_secondary_container">#172233</color>
+    <color name="roam_tertiary">#128E5A</color>
+    <color name="roam_on_tertiary">#FFFFFF</color>
+    <color name="roam_tertiary_container">#DDF8E9</color>
+    <color name="roam_on_tertiary_container">#06351F</color>
+    <color name="roam_error">#BA1A1A</color>
+    <color name="roam_on_error">#FFFFFF</color>
+    <color name="roam_error_container">#FFDAD6</color>
+    <color name="roam_on_error_container">#410002</color>
+    <color name="roam_surface">#F7F9FE</color>
+    <color name="roam_on_surface">#111827</color>
+    <color name="roam_surface_variant">#FFFFFF</color>
+    <color name="roam_on_surface_variant">#526071</color>
+    <color name="roam_outline">#697587</color>
+    <color name="roam_outline_variant">#DDE5F0</color>
+
+    <color name="r2w_report_card">#FFFFFF</color>
+    <color name="r2w_report_text">#0F172A</color>
+    <color name="r2w_report_muted">#64748B</color>
+    <color name="r2w_report_border">#E2E8F0</color>
+    <color name="r2w_report_success">#16A34A</color>
+    <color name="r2w_report_danger">#EF4444</color>
+    <color name="r2w_clean_bg">#F7F9FC</color>
+    <color name="r2w_clean_surface">#FFFFFF</color>
+    <color name="r2w_clean_surface_soft">#F3F6FB</color>
+    <color name="r2w_clean_text">#081A3A</color>
+    <color name="r2w_clean_muted">#6B7280</color>
+    <color name="r2w_clean_primary">#145CFF</color>
+    <color name="r2w_clean_primary_soft">#EAF1FF</color>
+    <color name="r2w_clean_orange">#FF7A1A</color>
+    <color name="r2w_clean_border">#E5EAF2</color>
+    <color name="r2w_clean_success">#10B981</color>
+    <color name="r2w_clean_warning">#F59E0B</color>
+    <color name="r2w_clean_error">#EF4444</color>
+</resources>
