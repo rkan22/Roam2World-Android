@@ -33,6 +33,12 @@ class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        window.statusBarColor = android.graphics.Color.rgb(244, 246, 250)
+        window.navigationBarColor = android.graphics.Color.WHITE
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
+
         setContent {
             val data by dashboardDataFlow.collectAsState()
             R2WTheme {

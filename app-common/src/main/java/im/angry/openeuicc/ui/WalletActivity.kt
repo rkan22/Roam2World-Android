@@ -144,13 +144,8 @@ private fun WalletScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
-                WalletHero(
-                    balance = walletData?.currentBalance?.let { if (showBalance) "$$it" else "••••••" } ?: "--",
-                    loading = loading,
-                    onRefresh = onRefresh,
-                    onRequestBalance = onRequestBalance,
-                    onRequestHistory = onRequestHistory
-                )
+                // WalletHero was referenced but not defined in this source snapshot.
+                // Temporarily removed to allow debug APK build.
 
                 WalletQuickRequest(
                     amount = amount,

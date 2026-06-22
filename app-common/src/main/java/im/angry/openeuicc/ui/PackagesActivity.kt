@@ -13,24 +13,44 @@ import im.angry.openeuicc.auth.MobilePackage
 import im.angry.openeuicc.auth.MobilePackageCatalog
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
+import im.angry.openeuicc.common.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCode2
+import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,10 +59,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,8 +76,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 
 private enum class StoreSection(val title: String) {
     ORANGE_EUROPE("Orange Europe"),
@@ -99,6 +128,12 @@ class PackagesActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.statusBarColor = android.graphics.Color.rgb(244, 246, 250)
+        window.navigationBarColor = android.graphics.Color.WHITE
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
 
         setContent {
             PackagesScreen(
@@ -243,6 +278,7 @@ class PackagesActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PackagesScreen(
     loading: Boolean,
@@ -270,8 +306,13 @@ private fun PackagesScreen(
     onMore: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val orange = Color(0xFFFF7900)
-    val bg = Color(0xFFF7F7FA)
+    val bg = Color(0xFFF4F6FA)
+    val blue = Color(0xFF1263F1)
+    val text = Color(0xFF0B1533)
+    val muted = Color(0xFF64708A)
+    val border = Color(0xFFE6EAF0)
+    var selectedType by remember { mutableStateOf(FILTER_ALL) }
+    var showFilterSheet by remember { mutableStateOf(false) }
 
     val allPackages = remember(catalog) {
         (catalog.featuredPackages + catalog.packages).distinctBy {
@@ -304,6 +345,7 @@ private fun PackagesScreen(
         selectedData,
         selectedValidity,
         selectedSort,
+        selectedType,
         userRole
     ) {
         derivedStateOf {
@@ -312,132 +354,130 @@ private fun PackagesScreen(
                 .filter { it.matchesQuery(query) }
                 .filter { it.matchesData(selectedData) }
                 .filter { it.matchesValidity(selectedValidity) }
+                .filter { it.matchesPackageType(selectedType) }
                 .let { sortPackages(it, selectedSort, userRole) }
         }
     }
 
+    val heroPackage = filteredPackages.firstOrNull()
+
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 118.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(32.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(22.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(
-                                        text = "Roam2World",
-                                        color = orange,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Packages",
-                                        color = Color.White,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                    Text(
-                                        text = "${filteredPackages.size} shown • ${allPackages.size} total",
-                                        color = Color.White.copy(alpha = 0.72f),
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(
-                                        text = if (loading) "Loading" else "Refresh",
-                                        color = orange,
-                                        modifier = Modifier.clickable(enabled = !loading, onClick = onRefresh),
-                                        fontWeight = FontWeight.Black
-                                    )
-                                    Text(
-                                        text = "Cart $cartCount",
-                                        color = Color.White,
-                                        modifier = Modifier
-                                            .padding(top = 10.dp)
-                                            .clickable(onClick = onOpenCart),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-
-                            Button(
-                                onClick = onOpenCart,
-                                colors = ButtonDefaults.buttonColors(containerColor = orange),
-                                shape = RoundedCornerShape(18.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Open Cart ($cartCount)", fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = onQueryChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Search country, provider, GB, validity") },
-                        singleLine = true
+                    StoreHeader(
+                        cartCount = cartCount,
+                        onOpenCart = onOpenCart,
+                        onRefresh = onRefresh,
+                        loading = loading
                     )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            text = "Store",
+                            color = text,
+                            fontSize = 34.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = "Browse and buy eSIM data plans for your business.",
+                            color = muted,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        STORE_SECTIONS.forEach { section ->
-                            AssistChip(
-                                onClick = { onSectionChange(section) },
-                                label = {
-                                    Text(
-                                        section.title,
-                                        fontWeight = if (section == selectedSection) FontWeight.Black else FontWeight.SemiBold
-                                    )
-                                }
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, border),
+                            shadowElevation = 1.dp
+                        ) {
+                            OutlinedTextField(
+                                value = query,
+                                onValueChange = onQueryChange,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(58.dp),
+                                placeholder = { Text("Search by country or region...", color = muted) },
+                                singleLine = true
                             )
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .size(58.dp)
+                                .clickable {
+                                    showFilterSheet = true
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, border),
+                            shadowElevation = 1.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text("⇅", color = text, fontSize = 24.sp, fontWeight = FontWeight.Black)
+                            }
                         }
                     }
 
-                    FilterScroller(
-                        title = "Data",
-                        options = dataOptions,
-                        selected = selectedData,
-                        onSelected = onDataChange
-                    )
-
-                    FilterScroller(
-                        title = "Validity",
-                        options = validityOptions,
-                        selected = selectedValidity,
-                        onSelected = onValidityChange
-                    )
-
-                    FilterScroller(
-                        title = "Sort",
-                        options = StoreSort.entries.map { it.title },
-                        selected = selectedSort.title,
-                        onSelected = { selected ->
-                            StoreSort.entries.firstOrNull { it.title == selected }?.let(onSortChange)
+                    StoreHeroCard(
+                        mobilePackage = heroPackage,
+                        onBannerSelected = { target ->
+                            val section = when (target) {
+                                "Europe" -> StoreSection.ORANGE_EUROPE
+                                "Balkan" -> StoreSection.ORANGE_BALKANS_SIM
+                                "Turkey" -> StoreSection.TURKEY
+                                else -> StoreSection.ORANGE_EUROPE
+                            }
+                            onSectionChange(section)
+                            onDataChange(FILTER_ALL)
+                            onValidityChange(FILTER_ALL)
+                        },
+                        onBuyNow = {
+                            heroPackage?.let(onAddToCart) ?: onOpenCart()
                         }
                     )
+
+                    StoreDots()
+
+                    StoreCategoryTabs(
+                        selected = selectedSection,
+                        onSelected = {
+                            onSectionChange(it)
+                            onDataChange(FILTER_ALL)
+                            onValidityChange(FILTER_ALL)
+                        }
+                    )
+
+                    if (selectedData != FILTER_ALL || selectedValidity != FILTER_ALL) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (selectedData != FILTER_ALL) {
+                                MiniFilterChip(selectedData, true) { onDataChange(FILTER_ALL) }
+                            }
+                            if (selectedValidity != FILTER_ALL) {
+                                MiniFilterChip(selectedValidity, true) { onValidityChange(FILTER_ALL) }
+                            }
+                        }
+                    }
 
                     errorMessage?.let {
                         PackagesInfoCard(title = "Notice") {
@@ -447,7 +487,7 @@ private fun PackagesScreen(
 
                     if (loading) {
                         PackagesInfoCard(title = "Loading") {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(color = blue)
                         }
                     }
 
@@ -455,12 +495,13 @@ private fun PackagesScreen(
                         PackagesInfoCard(title = "No packages found") {
                             Text(
                                 "Try another category, search term, or clear filters.",
-                                color = Color(0xFF6B7280)
+                                color = muted
                             )
                             OutlinedButton(
                                 onClick = {
                                     onDataChange(FILTER_ALL)
                                     onValidityChange(FILTER_ALL)
+                                    onQueryChange("")
                                 },
                                 shape = RoundedCornerShape(16.dp)
                             ) {
@@ -469,42 +510,191 @@ private fun PackagesScreen(
                         }
                     }
 
-                    Text(
-                        text = selectedSection.title,
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black
-                    )
-
-                    filteredPackages.forEach { mobilePackage ->
-                        PackageCard(
-                            mobilePackage = mobilePackage,
-                            userRole = userRole,
-                            badge = packageBadge(mobilePackage, filteredPackages, userRole),
-                            onOpen = { onOpenPackage(mobilePackage) },
-                            onAddToCart = { onAddToCart(mobilePackage) }
-                        )
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        filteredPackages.take(12).forEachIndexed { index, mobilePackage ->
+                            PackageCard(
+                                mobilePackage = mobilePackage,
+                                userRole = userRole,
+                                badge = null,
+                                onOpen = { onOpenPackage(mobilePackage) },
+                                onAddToCart = { onAddToCart(mobilePackage) }
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                    StoreBenefitsRow()
+
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                R2wBottomNav(
-                    selected = R2wBottomTab.Packages
-                )
+                R2wBottomNav(selected = R2wBottomTab.Packages)
+
+                if (showFilterSheet) {
+                    ModalBottomSheet(
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        onDismissRequest = { showFilterSheet = false },
+                        containerColor = Color.White,
+                        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+                    ) {
+                        StoreFilterSheetContent(
+                            selectedData = selectedData,
+                            selectedValidity = selectedValidity,
+                            selectedType = selectedType,
+                            onDataChange = onDataChange,
+                            onValidityChange = onValidityChange,
+                            onTypeChange = { selectedType = it },
+                            onClose = { showFilterSheet = false }
+                        )
+                    }
+                }
             }
+
+
         }
     }
 }
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
 @Composable
-private fun FilterScroller(
+private fun StoreFilterSheetContent(
+    selectedData: String,
+    selectedValidity: String,
+    selectedType: String,
+    onDataChange: (String) -> Unit,
+    onValidityChange: (String) -> Unit,
+    onTypeChange: (String) -> Unit,
+    onClose: () -> Unit
+) {
+    val gbOptions = listOf(
+        FILTER_ALL,
+        "5 GB",
+        "10 GB",
+        "20 GB",
+        "30 GB",
+        "50 GB",
+        "60 GB",
+        "100 GB",
+        "135 GB",
+        "200 GB",
+        "300 GB",
+        "400 GB",
+        "500 GB"
+    )
+
+    val dayOptions = listOf(
+        FILTER_ALL,
+        "30 Days",
+        "60 Days",
+        "90 Days"
+    )
+
+    val typeOptions = listOf(
+        FILTER_ALL,
+        "eSIM",
+        "SIM Card"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 560.dp, max = 760.dp)
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .width(44.dp)
+                .height(5.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(Color(0xFFD7DEEA))
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Filter Packages",
+                    color = Color(0xFF0B1533),
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = "Choose data, validity and SIM type",
+                    color = Color(0xFF64708A),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Text(
+                text = "Done",
+                color = Color(0xFF1263F1),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable { onClose() }
+            )
+        }
+
+        StoreFilterSection(
+            title = "GB",
+            options = gbOptions,
+            selected = selectedData,
+            onSelected = onDataChange
+        )
+
+        StoreFilterSection(
+            title = "Days",
+            options = dayOptions,
+            selected = selectedValidity,
+            onSelected = onValidityChange
+        )
+
+        StoreFilterSection(
+            title = "Type",
+            options = typeOptions,
+            selected = selectedType,
+            onSelected = onTypeChange
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+
+
+
+
+@Composable
+private fun StoreFilterRow(
     title: String,
     options: List<String>,
     selected: String,
     onSelected: (String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, color = Color(0xFF6B7280), fontWeight = FontWeight.Bold)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = title,
+            color = Color(0xFF0B1533),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Black
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -512,17 +702,303 @@ private fun FilterScroller(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             options.forEach { option ->
-                AssistChip(
-                    onClick = { onSelected(option) },
-                    label = {
-                        Text(
-                            option,
-                            fontWeight = if (option == selected) FontWeight.Black else FontWeight.SemiBold
+                Surface(
+                    modifier = Modifier.clickable { onSelected(option) },
+                    shape = RoundedCornerShape(999.dp),
+                    color = if (option == selected) Color(0xFFEAF3FF) else Color(0xFFF8FAFC),
+                    border = BorderStroke(
+                        1.dp,
+                        if (option == selected) Color(0xFF1263F1) else Color(0xFFE6EAF0)
+                    )
+                ) {
+                    Text(
+                        text = option,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        color = if (option == selected) Color(0xFF1263F1) else Color(0xFF64708A),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StoreFilterSection(
+    title: String,
+    options: List<String>,
+    selected: String,
+    onSelected: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = title,
+            color = Color(0xFF0B1533),
+            fontSize = 15.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            options.forEach { option ->
+                val active = option == selected
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(if (active) Color(0xFF1263F1) else Color(0xFFF2F5FA))
+                        .border(
+                            1.dp,
+                            if (active) Color(0xFF1263F1) else Color(0xFFE1E7F0),
+                            RoundedCornerShape(999.dp)
                         )
+                        .clickable { onSelected(option) }
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = option,
+                        color = if (active) Color.White else Color(0xFF34405A),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
+private fun MobilePackage.matchesPackageType(type: String): Boolean {
+    if (type == FILTER_ALL) return true
+
+    val haystack = listOf(
+        cleanPackageTitle(),
+        cleanCardSummary(),
+        cleanCardSpecs(),
+        cardValidityOnly()
+    ).joinToString(" ").lowercase(Locale.getDefault())
+
+    return when (type) {
+        "SIM Card" -> haystack.contains("sim card") || haystack.contains("simcard")
+        "eSIM" -> haystack.contains("esim") || (!haystack.contains("sim card") && !haystack.contains("simcard"))
+        else -> true
+    }
+}
+
+
+@Composable
+private fun StoreHeader(
+    cartCount: Int,
+    onOpenCart: () -> Unit,
+    onRefresh: () -> Unit,
+    loading: Boolean
+) {
+    val text = Color(0xFF0B1533)
+    val blue = Color(0xFF1263F1)
+    val border = Color(0xFFE6EAF0)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(onClick = onOpenCart),
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, border),
+            shadowElevation = 1.dp
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Image(
+                    painter = painterResource(id = R.drawable.r2w_ic_cart),
+                    contentDescription = "Cart",
+                    modifier = Modifier.size(23.dp)
+                )
+
+                if (cartCount > 0) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(17.dp),
+                        shape = RoundedCornerShape(50),
+                        color = Color(0xFFE11D48)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = cartCount.coerceAtMost(9).toString(),
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoreHeroCard(
+    mobilePackage: MobilePackage?,
+    onBannerSelected: (String) -> Unit,
+    onBuyNow: () -> Unit
+) {
+    var bannerIndex by remember { mutableStateOf(0) }
+
+    val banners = listOf(
+        im.angry.openeuicc.common.R.drawable.store_banner to "Europe",
+        im.angry.openeuicc.common.R.drawable.store_banner_2 to "Balkan",
+        im.angry.openeuicc.common.R.drawable.store_banner_3 to "Turkey"
+    )
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(3000)
+            bannerIndex = (bannerIndex + 1) % banners.size
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(178.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFE6EAF0), RoundedCornerShape(26.dp))
+            .clickable {
+                onBannerSelected(banners[bannerIndex].second)
+            }
+    ) {
+        Image(
+            painter = painterResource(id = banners[bannerIndex].first),
+            contentDescription = "Store Banner",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            banners.forEachIndexed { index, _ ->
+                Box(
+                    modifier = Modifier
+                        .width(if (index == bannerIndex) 18.dp else 7.dp)
+                        .height(7.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(
+                            if (index == bannerIndex) Color(0xFF1263F1)
+                            else Color.White.copy(alpha = 0.78f)
+                        )
                 )
             }
         }
+    }
+}
+
+
+
+
+
+@Composable
+private fun StoreDots() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        repeat(4) { index ->
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(if (index == 0) 10.dp else 8.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(if (index == 0) Color(0xFF1263F1) else Color(0xFFD5DCE8))
+            )
+        }
+    }
+}
+
+@Composable
+private fun StoreCategoryTabs(
+    selected: StoreSection,
+    onSelected: (StoreSection) -> Unit
+) {
+    val tabs = listOf(
+        "Europe" to StoreSection.ORANGE_EUROPE,
+        "World" to StoreSection.ORANGE_WORLD,
+        "Balkans" to StoreSection.ORANGE_BALKANS_SIM,
+        "Turkey" to StoreSection.TURKEY,
+        "Vodafone" to StoreSection.VODAFONE
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        tabs.forEach { (label, section) ->
+            val isSelected = section == selected
+
+            Column(
+                modifier = Modifier
+                    .clickable { onSelected(section) }
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = label,
+                    color = if (isSelected) Color(0xFF1263F1) else Color(0xFF6B7280),
+                    fontSize = 14.sp,
+                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .width(58.dp)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (isSelected) Color(0xFF1263F1) else Color.Transparent)
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun MiniFilterChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(999.dp),
+        color = if (selected) Color(0xFFEAF3FF) else Color.White,
+        border = BorderStroke(1.dp, if (selected) Color(0xFFBFD6FF) else Color(0xFFE6EAF0))
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            color = if (selected) Color(0xFF1263F1) else Color(0xFF64708A),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -534,85 +1010,182 @@ private fun PackageCard(
     onOpen: () -> Unit,
     onAddToCart: () -> Unit
 ) {
+    val blue = Color(0xFF1263F1)
+    val text = Color(0xFF0B1533)
+    val muted = Color(0xFF52607A)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onOpen),
-        shape = RoundedCornerShape(26.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = Color.Transparent
             ) {
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Box(contentAlignment = Alignment.Center) {
+                    PackageFlagImage(mobilePackage = mobilePackage)
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = mobilePackage.cleanPackageTitle(),
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Black
+                        color = text,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
-                    Text(
-                        text = mobilePackage.cleanCardSummary(),
-                        color = Color(0xFF6B7280),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = mobilePackage.cleanCardSpecs().ifBlank { mobilePackage.cardValidityOnly().ifBlank { "Instant eSIM delivery" } },
-                        color = Color(0xFF6B7280),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
 
-                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    badge?.let {
-                        Text(
-                            text = it,
-                            color = Color(0xFFFF7900),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Black
-                        )
+                    badge?.takeIf { it.isNotBlank() }?.let {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = Color(0xFFE7FFF4)
+                        ) {
+                            Text(
+                                text = it,
+                                color = Color(0xFF08A365),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                maxLines = 1
+                            )
+                        }
                     }
-                    Text(
-                        text = r2wMoney(mobilePackage.priceFor(userRole)),
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black
-                    )
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = mobilePackage.cleanCardSummary().ifBlank {
+                        mobilePackage.cleanCardSpecs().ifBlank { "Instant eSIM delivery" }
+                    },
+                    color = muted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
-            HorizontalDivider()
+            Spacer(modifier = Modifier.width(10.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.width(86.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
             ) {
-                OutlinedButton(
-                    onClick = onOpen,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Details")
-                }
-
-                Button(
-                    onClick = onAddToCart,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF7900)),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Add", fontWeight = FontWeight.Bold)
-                }
+                Text(
+                    text = r2wMoney(mobilePackage.priceFor(userRole)),
+                    color = blue,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "›",
+                    color = Color(0xFF263550),
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Light
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun StoreBenefitsRow() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BenefitItem("Secure", "100% secure", Modifier.weight(1f), Icons.Default.Security)
+            BenefitItem("Support", "24/7 help", Modifier.weight(1f), Icons.Default.SupportAgent)
+            BenefitItem("Delivery", "QR seconds", Modifier.weight(1f), Icons.Default.QrCode2)
+        }
+    }
+}
+
+@Composable
+private fun BenefitItem(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector
+) {
+    Surface(
+        modifier = modifier.height(104.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFFF8FAFC),
+        border = BorderStroke(1.dp, Color(0xFFE8EEF6))
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(Color(0xFFEAF2FF)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = Color(0xFF1263F1),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                title,
+                color = Color(0xFF0B1533),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                subtitle,
+                color = Color(0xFF64708A),
+                fontSize = 9.sp,
+                maxLines = 1
+            )
         }
     }
 }
@@ -626,18 +1199,133 @@ private fun PackagesInfoCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(title, color = Color(0xFF17181C), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            HorizontalDivider()
+            Text(title, color = Color(0xFF0B1533), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            HorizontalDivider(color = Color(0xFFE6EAF0))
             content()
         }
     }
 }
+
+
+
+@Composable
+private fun PackageFlagImage(mobilePackage: MobilePackage) {
+    val title = mobilePackage.cleanPackageTitle().lowercase(Locale.getDefault())
+    val summary = mobilePackage.cleanCardSummary().lowercase(Locale.getDefault())
+    val specs = mobilePackage.cleanCardSpecs().lowercase(Locale.getDefault())
+    val haystack = "$title $summary $specs"
+
+    if (haystack.contains("balkan")) {
+        Image(
+            painter = painterResource(id = im.angry.openeuicc.common.R.drawable.r2w_balkan_flag),
+            contentDescription = null,
+            modifier = Modifier
+                .size(42.dp)
+                .clip(RoundedCornerShape(999.dp)),
+            contentScale = ContentScale.Crop
+        )
+        return
+    }
+
+    val url = mobilePackage.onlineCountryFlagUrl()
+
+    if (url == null) {
+        Image(
+            painter = painterResource(id = im.angry.openeuicc.common.R.drawable.r2w_europe_globe),
+            contentDescription = null,
+            modifier = Modifier.size(42.dp),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        AsyncImage(
+            model = url,
+            contentDescription = null,
+            modifier = Modifier
+                .size(42.dp)
+                .clip(RoundedCornerShape(999.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+
+private fun MobilePackage.onlineCountryFlagUrl(): String {
+    val text = listOf(
+        cleanPackageTitle(),
+        cleanCardSummary(),
+        cleanCardSpecs(),
+        cardValidityOnly()
+    ).joinToString(" ").lowercase(Locale.getDefault())
+
+    val code = when {
+        text.contains("orange europe") -> "eu"
+        text.contains("europe") -> "eu"
+        text.contains("eu ") || text.contains(" eu") -> "eu"
+
+        text.contains("turkey") || text.contains("türkiye") -> "tr"
+        text.contains("usa") || text.contains("united states") || text.contains("america") -> "us"
+        text.contains("japan") -> "jp"
+        text.contains("uae") || text.contains("emirates") -> "ae"
+        text.contains("germany") -> "de"
+        text.contains("france") -> "fr"
+        text.contains("italy") -> "it"
+        text.contains("spain") -> "es"
+        text.contains("netherlands") -> "nl"
+        text.contains("belgium") -> "be"
+        text.contains("austria") -> "at"
+        text.contains("switzerland") -> "ch"
+        text.contains("united kingdom") || text.contains("uk") || text.contains("england") -> "gb"
+        text.contains("canada") -> "ca"
+        text.contains("australia") -> "au"
+        text.contains("brazil") -> "br"
+        text.contains("morocco") -> "ma"
+        text.contains("egypt") -> "eg"
+        text.contains("tunisia") -> "tn"
+        text.contains("qatar") -> "qa"
+        text.contains("saudi") -> "sa"
+
+        text.contains("world") || text.contains("global") -> "un"
+        else -> "eu"
+    }
+
+    return "https://flagcdn.com/w160/$code.png"
+}
+
+
+private fun packageEmoji(mobilePackage: MobilePackage): String {
+    val title = mobilePackage.cleanPackageTitle().lowercase(Locale.getDefault())
+    return when {
+        title.contains("usa") || title.contains("united states") -> "🇺🇸"
+        title.contains("turkey") || title.contains("türkiye") -> "🇹🇷"
+        title.contains("japan") -> "🇯🇵"
+        title.contains("uae") || title.contains("emirates") -> "🇦🇪"
+        title.contains("europe") -> "🌐"
+        title.contains("world") || title.contains("global") -> "🌍"
+        title.contains("balkan") -> "🧭"
+        else -> "🌐"
+    }
+}
+
+private fun packageIconBackground(mobilePackage: MobilePackage): Color {
+    val title = mobilePackage.cleanPackageTitle().lowercase(Locale.getDefault())
+    return when {
+        title.contains("turkey") || title.contains("türkiye") -> Color(0xFFFFEEF1)
+        title.contains("usa") || title.contains("united states") -> Color(0xFFEAF3FF)
+        title.contains("japan") -> Color(0xFFF1F3F7)
+        title.contains("uae") || title.contains("emirates") -> Color(0xFFEFFFF6)
+        else -> Color(0xFFEFFFF6)
+    }
+}
+
+
+
 
 private fun sortPackages(
     packages: List<MobilePackage>,

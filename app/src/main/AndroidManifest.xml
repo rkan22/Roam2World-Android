@@ -17,13 +17,24 @@
     <application
         android:name=".PrivilegedOpenEuiccApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_logo"
         android:label="@string/app_name"
         android:localeConfig="@xml/locale_config"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         tools:targetApi="tiramisu">
+        <activity
+            android:name="im.angry.openeuicc.ui.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Roam2World.Splash">
+        
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <meta-data
             android:name="im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
             android:value="im.angry.openeuicc.ui.DashboardActivity" />
@@ -35,14 +46,11 @@
         <activity
             android:name="im.angry.openeuicc.ui.LoginActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity
             android:name="im.angry.openeuicc.ui.DashboardActivity"
+            android:theme="@style/Theme.Roam2World.Dashboard"
             android:exported="false" />
 
         <activity
@@ -71,15 +79,18 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.PackagesActivity"
+            android:theme="@style/Theme.Roam2World.Dashboard"
             android:exported="false" />
 
         <activity
             android:name="im.angry.openeuicc.ui.PackageDetailActivity"
+            android:theme="@style/Theme.Roam2World.Detail"
             android:exported="false" />
 
         <activity
             android:name="im.angry.openeuicc.ui.CustomerInfoActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Roam2World.CustomerInfo" />
 
         <activity
             android:name="im.angry.openeuicc.ui.PurchaseConfirmationActivity"
@@ -99,7 +110,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Roam2World.MobileEsims" />
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"

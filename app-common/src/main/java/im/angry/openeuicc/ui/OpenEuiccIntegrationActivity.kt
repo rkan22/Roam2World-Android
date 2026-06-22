@@ -773,12 +773,11 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun openNativeOpenEuicc() {
-        val target = targetActivityName(DashboardActivity.META_ESIM_ACTIVITY)
-        if (target.isNullOrBlank()) {
-            Toast.makeText(this, "OpenEUICC target unavailable", Toast.LENGTH_LONG).show()
-            return
-        }
-        startActivity(Intent().setClassName(this, target))
+        Toast.makeText(
+            this,
+            "Native OpenEUICC screen disabled in Roam2World build.",
+            Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun targetActivityName(key: String): String? =

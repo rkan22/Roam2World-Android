@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.7.0")
     api(project(":libs:lpac-jni"))
     api(project(":app-deps"))
 

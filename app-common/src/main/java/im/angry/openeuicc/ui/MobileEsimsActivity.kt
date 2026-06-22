@@ -6,9 +6,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -18,8 +21,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,16 +37,33 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -63,7 +85,7 @@ class MobileEsimsActivity : ComponentActivity() {
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private var allEsims by mutableStateOf<List<MobileEsim>>(emptyList())
-    private var selectedFilter by mutableStateOf(EsimFilter.ALL)
+    private var selectedFilter by mutableStateOf(EsimFilter.ACTIVE)
     private var initialFilter: String? = null
     private var query by mutableStateOf("")
     private var loading by mutableStateOf(false)
@@ -71,6 +93,12 @@ class MobileEsimsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.statusBarColor = android.graphics.Color.rgb(244, 246, 250)
+        window.navigationBarColor = android.graphics.Color.WHITE
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
 
         initialFilter = intent.getStringExtra(MobileEsimFilters.FILTER_EXTRA_KEY)?.trim()
 
@@ -270,74 +298,285 @@ private fun MobileEsimsScreen(
     onOpenMore: () -> Unit,
     onOpenNative: () -> Unit
 ) {
-    val orange = Color(0xFFFF6A00)
-    val bg = Color(0xFFF7F7FA)
+    val blue = Color(0xFF1263F1)
+    val bg = Color(0xFFF4F6FA)
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
             Column(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                HeroEsimsCard(
-                    total = allEsims.size,
-                    shown = filteredEsims.size,
-                    loading = loading,
-                    orange = orange,
-                    onRefresh = onRefresh,
-                    onOpenNative = onOpenNative
-                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 118.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    B2bEsimsHeader(
+                        loading = loading,
+                        onRefresh = onRefresh
+                    )
 
-                if (!error.isNullOrBlank()) {
-                    ErrorCard(error = error, onRetry = onRefresh)
-                }
+                    B2bSearchAndTabs(
+                        query = query,
+                        selectedFilter = selectedFilter,
+                        initialFilter = initialFilter,
+                        onQueryChange = onQueryChange,
+                        onFilterChange = onFilterChange
+                    )
 
-                SearchAndFilterCard(
-                    query = query,
-                    selectedFilter = selectedFilter,
-                    initialFilter = initialFilter,
-                    onQueryChange = onQueryChange,
-                    onFilterChange = onFilterChange
-                )
+                    B2bStatsCard(allEsims = allEsims)
 
-                if (loading && allEsims.isEmpty()) {
-                    InfoCard(title = "Yükleniyor") {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp))
-                            Text("eSIM listesi alınıyor...")
+                    if (!error.isNullOrBlank()) {
+                        ErrorCard(error = error, onRetry = onRefresh)
+                    }
+
+                    if (loading && allEsims.isEmpty()) {
+                        InfoCard(title = "Loading") {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                CircularProgressIndicator(modifier = Modifier.height(20.dp))
+                                Text("Fetching eSIM profiles...")
+                            }
                         }
                     }
-                }
 
-                if (!loading && filteredEsims.isEmpty()) {
-                    EmptyCard("eSIM bulunamadı.")
-                } else {
-                    filteredEsims.forEach { esim ->
-                        EsimListCard(
-                            esim = esim,
-                            orange = orange,
-                            onOpenDetail = { onOpenDetail(esim) },
-                            onRenew = { onRenew(esim) }
-                        )
+                    if (!loading && filteredEsims.isEmpty()) {
+                        EmptyCard("No eSIM profiles found.")
+                    } else {
+                        filteredEsims.forEach { esim ->
+                            EsimListCard(
+                                esim = esim,
+                                blue = blue,
+                                onOpenDetail = { onOpenDetail(esim) },
+                                onRenew = { onRenew(esim) }
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
-Spacer(modifier = Modifier.height(12.dp))
+                R2wBottomNav(selected = R2wBottomTab.Esims)
             }
         }
-    
+    }
+}
 
-                R2wBottomNav(
-                    selected = R2wBottomTab.Esims
+@Composable
+private fun B2bEsimsHeader(
+    loading: Boolean,
+    onRefresh: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "My eSIMs",
+                color = Color(0xFF0B1533),
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Black
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (loading) "Refreshing eSIM inventory..." else "Monitor active, pending, and expired eSIMs.",
+                color = Color(0xFF64708A),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Surface(
+            modifier = Modifier
+                .size(44.dp)
+                .clickable(onClick = onRefresh),
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
+            shadowElevation = 1.dp
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    tint = Color(0xFF1263F1),
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
+    }
 }
+
+@Composable
+private fun B2bSearchAndTabs(
+    query: String,
+    selectedFilter: EsimFilter,
+    initialFilter: String?,
+    onQueryChange: (String) -> Unit,
+    onFilterChange: (EsimFilter) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, Color(0xFFE1E7F0)),
+            shadowElevation = 1.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp)
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = Color(0xFF64708A),
+                    modifier = Modifier.size(21.dp)
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Box(modifier = Modifier.weight(1f)) {
+                    if (query.isBlank()) {
+                        Text(
+                            text = "Search by number, customer or ICCID...",
+                            color = Color(0xFF9CA3AF),
+                            fontSize = 14.sp,
+                            maxLines = 1
+                        )
+                    }
+                    BasicTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = Color(0xFF0B1533),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(EsimFilter.ACTIVE, EsimFilter.PENDING, EsimFilter.EXPIRED).forEach { filter ->
+                B2bTabButton(
+                    label = filter.label,
+                    selected = initialFilter != MobileEsimFilters.FILTER_EXPIRED_SOON && selectedFilter == filter,
+                    onClick = { onFilterChange(filter) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun B2bTabButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val bg = if (selected) Color(0xFF1263F1) else Color.White
+    val fg = if (selected) Color.White else Color(0xFF0B1533)
+    val border = if (selected) Color(0xFF1263F1) else Color(0xFFE1E7F0)
+
+    Surface(
+        modifier = modifier
+            .height(48.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = bg,
+        border = BorderStroke(1.dp, border),
+        shadowElevation = if (selected) 2.dp else 0.dp
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = label,
+                color = fg,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun B2bStatsCard(
+    allEsims: List<MobileEsim>
+) {
+    val active = allEsims.count {
+        val raw = realStatus(it).raw
+        raw == "active" || raw == "ready"
+    }
+    val pending = allEsims.count { realStatus(it).raw == "pending" }
+    val expired = allEsims.count { realStatus(it).raw == "expired" }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            B2bStatItem(Icons.Default.CheckCircle, Color(0xFFE5F9EF), Color(0xFF10B981), active.toString(), "Active", Modifier.weight(1f))
+            B2bStatItem(Icons.Default.Schedule, Color(0xFFFFF3DC), Color(0xFFFF8A00), pending.toString(), "Pending", Modifier.weight(1f))
+            B2bStatItem(Icons.Default.Cancel, Color(0xFFFFE8EC), Color(0xFFFF3B4F), expired.toString(), "Expired", Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun B2bStatItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    bg: Color,
+    fg: Color,
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(bg),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = fg,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Column {
+            Text(value, color = Color(0xFF0B1533), fontSize = 18.sp, fontWeight = FontWeight.Black)
+            Text(label, color = Color(0xFF64708A), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+        }
+    }
 }
 
 @Composable
@@ -345,22 +584,22 @@ private fun HeroEsimsCard(
     total: Int,
     shown: Int,
     loading: Boolean,
-    orange: Color,
+    blue: Color,
     onRefresh: () -> Unit,
     onOpenNative: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1263F1))
     ) {
         Column(
             modifier = Modifier.padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "eSIM’lerim",
-                color = orange,
+                text = "eSIMs",
+                color = Color.White.copy(alpha = 0.88f),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -373,7 +612,7 @@ private fun HeroEsimsCard(
             )
 
             Text(
-                text = if (loading) "Liste güncelleniyor..." else "Satın aldığın eSIM profillerini yönet.",
+                text = if (loading) "Refreshing your eSIM profiles..." else "Manage active and pending eSIM profiles.",
                 color = Color.White.copy(alpha = 0.74f),
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -381,17 +620,17 @@ private fun HeroEsimsCard(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = onRefresh,
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                     shape = RoundedCornerShape(18.dp)
                 ) {
-                    Text("Yenile")
+                    Text("Refresh", color = blue, fontWeight = FontWeight.Bold)
                 }
 
                 OutlinedButton(
                     onClick = onOpenNative,
                     shape = RoundedCornerShape(18.dp)
                 ) {
-                    Text("Cihaz eSIM")
+                    Text("Device eSIM", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -406,35 +645,82 @@ private fun SearchAndFilterCard(
     onQueryChange: (String) -> Unit,
     onFilterChange: (EsimFilter) -> Unit
 ) {
-    InfoCard(title = "Filtrele") {
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("ICCID, paket, sağlayıcı veya durum ara") },
-            singleLine = true
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0)),
+        shadowElevation = 1.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            EsimFilter.entries.forEach { filter ->
-                FilterButton(
-                    label = filter.label,
-                    selected = initialFilter != MobileEsimFilters.FILTER_EXPIRED_SOON && selectedFilter == filter,
-                    onClick = { onFilterChange(filter) }
-                )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                color = Color(0xFFF8FAFC),
+                border = BorderStroke(1.dp, Color(0xFFE1E7F0))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = Color(0xFF64708A),
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (query.isBlank()) {
+                            Text(
+                                text = "Search ICCID, package, provider or status",
+                                color = Color(0xFF9CA3AF),
+                                fontSize = 14.sp,
+                                maxLines = 1
+                            )
+                        }
+                        BasicTextField(
+                            value = query,
+                            onValueChange = onQueryChange,
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = Color(0xFF0B1533),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
-            if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) {
-                FilterButton(
-                    label = "Yakında Bitecek",
-                    selected = true,
-                    onClick = {}
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                EsimFilter.entries.forEach { filter ->
+                    FilterButton(
+                        label = filter.label,
+                        selected = initialFilter != MobileEsimFilters.FILTER_EXPIRED_SOON && selectedFilter == filter,
+                        onClick = { onFilterChange(filter) }
+                    )
+                }
+
+                if (initialFilter == MobileEsimFilters.FILTER_EXPIRED_SOON) {
+                    FilterButton(
+                        label = "Expiring Soon",
+                        selected = true,
+                        onClick = {}
+                    )
+                }
             }
         }
     }
@@ -446,100 +732,227 @@ private fun FilterButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val bg = if (selected) Color(0xFFFF6A00) else Color.White
-    val fg = if (selected) Color.White else Color(0xFF17181C)
+    val bg = if (selected) Color(0xFF1263F1) else Color.White
+    val fg = if (selected) Color.White else Color(0xFF0B1533)
+    val border = if (selected) Color(0xFF1263F1) else Color(0xFFE1E7F0)
 
-    OutlinedButton(
-        onClick = onClick,
+    Surface(
+        modifier = Modifier
+            .height(38.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(999.dp),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = bg)
+        color = bg,
+        border = BorderStroke(1.dp, border)
     ) {
-        Text(label, color = fg)
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                color = fg,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
     }
 }
 
 @Composable
 private fun EsimListCard(
     esim: MobileEsim,
-    orange: Color,
+    blue: Color,
     onOpenDetail: () -> Unit,
     onRenew: () -> Unit
 ) {
     val status = realStatus(esim)
-    val title = esim.title()
+    val packageTitle = cleanEsimTitle(esim.title())
+    val customerName = esim.customerName()?.takeIf { it.isNotBlank() }
+    val mainTitle = customerName ?: packageTitle
+    val packageLine = if (customerName != null) packageTitle else null
+    val badgeRes = esimBadgeResFor(packageTitle)
     val iccid = esim.iccid.orEmpty().ifBlank { "Pending ICCID" }
-    val meta = listOfNotNull(
-        visibleProvider(esim.provider)?.takeIf { it.isNotBlank() },
-        esim.expiresAt?.takeIf { it.isNotBlank() }?.let { "Expires: ${formatEsimDate(it)}" },
-        esim.dataRemaining?.takeIf { it.isNotBlank() }?.let { "Remaining: $it" }
-    ).joinToString("  •  ")
+    val provider = visibleProvider(esim.provider).orEmpty().ifBlank { "Provider" }
+    val expires = esim.expiresAt?.takeIf { it.isNotBlank() }?.let { formatEsimDate(it) }
+    val remaining = esim.dataRemaining?.takeIf { it.isNotBlank() }
+    val region = regionLabelFor(packageTitle)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onOpenDetail() },
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, Color(0xFFE6EAF0))
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 13.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFFEAF2FF)),
+                contentAlignment = Alignment.Center
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = iccid,
-                        color = Color(0xFF686B73),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                StatusPill(status.label)
-            }
-
-            if (meta.isNotBlank()) {
-                Text(
-                    text = meta,
-                    color = Color(0xFF686B73),
-                    style = MaterialTheme.typography.bodyMedium
+                Image(
+                    painter = painterResource(id = badgeRes),
+                    contentDescription = region,
+                    modifier = Modifier.size(44.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onOpenDetail,
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
-                    shape = RoundedCornerShape(16.dp)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Text("Detay")
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mainTitle,
+                            color = Color(0xFF0B1533),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        if (packageLine != null) {
+                            Text(
+                                text = packageLine,
+                                color = blue,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+                    StatusPill(status.label)
                 }
 
-                if (canRenew(esim, status)) {
-                    OutlinedButton(
-                        onClick = onRenew,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Renew")
+                Text(
+                    text = "ICCID: $iccid",
+                    color = Color(0xFF64708A),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = region,
+                            color = Color(0xFF64708A),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = customerName ?: "No customer assigned",
+                            color = Color(0xFF64708A),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                    }
+
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = remaining?.let { "$it left" } ?: "",
+                            color = Color(0xFF0B1533),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = expires?.let { "Valid until $it" } ?: "Validity pending",
+                            color = Color(0xFF64708A),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Details",
+                tint = Color(0xFF64708A),
+                modifier = Modifier.size(23.dp)
+            )
         }
     }
 }
+
+@Composable
+private fun EsimMiniInfo(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(end = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(Color(0xFFEAF2FF)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color(0xFF1263F1),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Column {
+            Text(
+                text = label,
+                color = Color(0xFF64708A),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
+            Text(
+                text = value,
+                color = Color(0xFF0B1533),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun InfoCard(
@@ -582,11 +995,11 @@ private fun StatusPill(label: String) {
     Text(
         text = label,
         color = colors.second,
-        style = MaterialTheme.typography.labelMedium,
+        fontSize = 11.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .background(colors.first, RoundedCornerShape(999.dp))
-            .padding(horizontal = 12.dp, vertical = 7.dp)
+            .padding(horizontal = 9.dp, vertical = 5.dp)
     )
 }
 
@@ -601,10 +1014,10 @@ private fun ErrorCard(error: String, onRetry: () -> Unit) {
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("eSIM listesi yüklenemedi", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold)
+            Text("Could not load eSIM profiles", color = Color(0xFFB91C1C), fontWeight = FontWeight.Bold)
             Text(error, color = Color(0xFF7F1D1D))
             OutlinedButton(onClick = onRetry) {
-                Text("Tekrar Dene")
+                Text("Retry")
             }
         }
     }
@@ -631,10 +1044,10 @@ private data class EsimsDisplayStatus(
 )
 
 private enum class EsimFilter(val label: String) {
-    ACTIVE("Aktif"),
-    PENDING("Bekleyen"),
-    EXPIRED("Süresi Dolan"),
-    ALL("Tümü");
+    ALL("All"),
+    ACTIVE("Active"),
+    PENDING("Pending"),
+    EXPIRED("Expired");
 
     fun matches(status: EsimsDisplayStatus): Boolean =
         when (this) {
@@ -644,6 +1057,77 @@ private enum class EsimFilter(val label: String) {
             ALL -> true
         }
 }
+
+
+private fun cleanEsimTitle(raw: String): String =
+    raw
+        .replace(Regex("(?i)[\\[【\u3010\uFF3B]\\s*(e\\s*sim|simcard)\\s*[\\]】\u3011\uFF3D]"), "")
+        .replace(Regex("(?i)^e\\s*sim\\s*[-–—:]?\\s*"), "")
+        .replace(Regex("(?i)^simcard\\s*[-–—:]?\\s*"), "")
+        .replace("—", " - ")
+        .replace("–", " - ")
+        .replace("（", "(")
+        .replace("）", ")")
+        .replace(Regex("\\s+"), " ")
+        .trim()
+        .ifBlank { "eSIM Package" }
+
+private fun esimBadgeFor(title: String): String =
+    when {
+        title.contains("europe", ignoreCase = true) ||
+            title.contains("orange", ignoreCase = true) -> "🇪🇺"
+        title.contains("turkey", ignoreCase = true) ||
+            title.contains("türkiye", ignoreCase = true) -> "🇹🇷"
+        title.contains("world", ignoreCase = true) ||
+            title.contains("global", ignoreCase = true) ||
+            title.contains("balkan", ignoreCase = true) -> "🌍"
+        else -> "📶"
+    }
+
+
+
+private fun esimBadgeResFor(title: String): Int =
+    when {
+        title.contains("europe", ignoreCase = true) ||
+            title.contains("orange", ignoreCase = true) ||
+            title.contains("eu ", ignoreCase = true) -> R.drawable.r2w_badge_europe
+
+        title.contains("turkey", ignoreCase = true) ||
+            title.contains("türkiye", ignoreCase = true) -> R.drawable.r2w_badge_turkey
+
+        title.contains("world", ignoreCase = true) ||
+            title.contains("global", ignoreCase = true) ||
+            title.contains("balkan", ignoreCase = true) -> R.drawable.r2w_badge_world
+
+        else -> R.drawable.r2w_badge_world
+    }
+
+
+
+private fun regionLabelFor(title: String): String =
+    when {
+        title.contains("spain", ignoreCase = true) -> "Spain"
+        title.contains("uk", ignoreCase = true) || title.contains("united kingdom", ignoreCase = true) -> "United Kingdom"
+        title.contains("germany", ignoreCase = true) -> "Germany"
+        title.contains("italy", ignoreCase = true) -> "Italy"
+        title.contains("turkey", ignoreCase = true) || title.contains("türkiye", ignoreCase = true) -> "Turkey"
+        title.contains("europe", ignoreCase = true) || title.contains("orange", ignoreCase = true) -> "Europe"
+        title.contains("balkan", ignoreCase = true) -> "Balkans"
+        title.contains("world", ignoreCase = true) || title.contains("global", ignoreCase = true) -> "Global"
+        else -> "Global"
+    }
+
+private fun badgeEmojiFor(title: String): String =
+    when {
+        title.contains("spain", ignoreCase = true) -> "🇪🇸"
+        title.contains("uk", ignoreCase = true) || title.contains("united kingdom", ignoreCase = true) -> "🇬🇧"
+        title.contains("germany", ignoreCase = true) -> "🇩🇪"
+        title.contains("italy", ignoreCase = true) -> "🇮🇹"
+        title.contains("turkey", ignoreCase = true) || title.contains("türkiye", ignoreCase = true) -> "🇹🇷"
+        title.contains("europe", ignoreCase = true) || title.contains("orange", ignoreCase = true) -> "🇪🇺"
+        else -> "🌍"
+    }
+
 
 private fun visibleProvider(provider: String?): String? =
     provider?.replace("TGT", "Orange", ignoreCase = true)

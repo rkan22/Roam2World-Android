@@ -36,6 +36,8 @@
 
         <item name="android:fontFamily">@font/r2w_google_sans</item>
         <item name="fontFamily">@font/r2w_google_sans</item>
+            <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="ToolbarTheme" parent="Widget.Material3.Toolbar">
@@ -87,6 +89,69 @@
         <item name="windowSplashScreenBackground">@color/roam_primary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.OpenEUICC</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.Dashboard" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:statusBarColor">#F4F6FA</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.Splash" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">#07142F</item>
+        <item name="android:navigationBarColor">#07142F</item>
+        <item name="android:statusBarColor">#07142F</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.Detail" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowBackground">#F5F8FC</item>
+        <item name="android:statusBarColor">#F5F8FC</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.CustomerInfo" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowBackground">#F4F8FD</item>
+        <item name="android:statusBarColor">#F4F8FD</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.PurchaseReview" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowBackground">#F4F8FD</item>
+        <item name="android:statusBarColor">#F4F8FD</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+
+    <style name="Theme.Roam2World.MobileEsims" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#1263F1</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:statusBarColor">#F4F6FA</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
 </resources>
