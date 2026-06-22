@@ -51,7 +51,8 @@
         <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
-            android:label="OpenEUICC" />
+            android:label="OpenEUICC"
+            android:theme="@style/Theme.R2W.AppCompat" />
 
         <activity
             android:name="im.angry.openeuicc.ui.ReportsActivity"
