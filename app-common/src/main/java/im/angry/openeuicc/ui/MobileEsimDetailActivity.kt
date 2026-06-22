@@ -297,7 +297,11 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 EXTRA_QR_URL,
                 EXTRA_EXPIRES_AT,
                 EXTRA_DATA_REMAINING,
-                EXTRA_DATA_USED
+                EXTRA_DATA_USED,
+                EXTRA_CUSTOMER_FIRST_NAME,
+                EXTRA_CUSTOMER_LAST_NAME,
+                EXTRA_CUSTOMER_PHONE,
+                EXTRA_CUSTOMER_EMAIL
             ).none { !intent.getStringExtra(it).isNullOrBlank() }
         ) {
             null
@@ -320,6 +324,10 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 expiresAt = intent.getStringExtra(EXTRA_EXPIRES_AT),
                 dataRemaining = intent.getStringExtra(EXTRA_DATA_REMAINING),
                 dataUsed = intent.getStringExtra(EXTRA_DATA_USED),
+                customerFirstName = intent.getStringExtra(EXTRA_CUSTOMER_FIRST_NAME),
+                customerLastName = intent.getStringExtra(EXTRA_CUSTOMER_LAST_NAME),
+                customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE),
+                customerEmail = intent.getStringExtra(EXTRA_CUSTOMER_EMAIL),
                 orderId = intent.getStringExtra(EXTRA_ORDER_ID),
                 lastRenewal = readIntentLastRenewal()
             )
@@ -376,6 +384,10 @@ class MobileEsimDetailActivity : ComponentActivity() {
         private const val EXTRA_DATA_REMAINING = "mobile_esim.data_remaining"
         private const val EXTRA_DATA_USED = "mobile_esim.data_used"
         private const val EXTRA_ORDER_ID = "mobile_esim.order_id"
+        private const val EXTRA_CUSTOMER_FIRST_NAME = "mobile_esim.customer_first_name"
+        private const val EXTRA_CUSTOMER_LAST_NAME = "mobile_esim.customer_last_name"
+        private const val EXTRA_CUSTOMER_PHONE = "mobile_esim.customer_phone"
+        private const val EXTRA_CUSTOMER_EMAIL = "mobile_esim.customer_email"
         private const val EXTRA_LAST_RENEWAL_PROFILE_STATUS = "mobile_esim.last_renewal.profile_status"
         private const val EXTRA_LAST_RENEWAL_ORDER_STATUS = "mobile_esim.last_renewal.order_status"
         private const val EXTRA_LAST_RENEWAL_LATEST_ACTIVATION_TIME = "mobile_esim.last_renewal.latest_activation_time"
@@ -414,6 +426,10 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 putExtra(EXTRA_EXPIRES_AT, esim.expiresAt)
                 putExtra(EXTRA_DATA_REMAINING, esim.dataRemaining)
                 putExtra(EXTRA_DATA_USED, esim.dataUsed)
+                putExtra(EXTRA_CUSTOMER_FIRST_NAME, esim.customerFirstName)
+                putExtra(EXTRA_CUSTOMER_LAST_NAME, esim.customerLastName)
+                putExtra(EXTRA_CUSTOMER_PHONE, esim.customerPhone)
+                putExtra(EXTRA_CUSTOMER_EMAIL, esim.customerEmail)
                 putExtra(EXTRA_ORDER_ID, esim.orderId)
                 if (esim.lastRenewal?.success != null) putExtra(EXTRA_LAST_RENEWAL_SUCCESS, esim.lastRenewal.success)
                 putExtra(EXTRA_LAST_RENEWAL_PROVIDER, esim.lastRenewal?.provider)
@@ -486,6 +502,8 @@ private fun MobileEsimDetailScreen(
 
                 EsimHeroCard(esim = esim, orange = orange)
 
+                EsimCustomerCard(esim = esim)
+
                 EsimQrCard(
                     esim = esim,
                     onShowQr = { onShowQr(esim) },
@@ -557,6 +575,29 @@ private fun EsimHeroCard(esim: MobileEsim, orange: Color) {
 
             StatusPill(displayStatus.label)
         }
+    }
+}
+
+
+@Composable
+private fun EsimCustomerCard(esim: MobileEsim) {
+    val fullName = listOfNotNull(
+        esim.customerFirstName?.takeIf { it.isNotBlank() },
+        esim.customerLastName?.takeIf { it.isNotBlank() }
+    ).joinToString(" ").trim()
+
+    val hasCustomerInfo = listOf(
+        fullName,
+        esim.customerPhone.orEmpty(),
+        esim.customerEmail.orEmpty()
+    ).any { it.isNotBlank() }
+
+    if (!hasCustomerInfo) return
+
+    InfoCard(title = "Müşteri Bilgileri") {
+        DetailRow("Ad Soyad", fullName.ifBlank { "—" })
+        DetailRow("Telefon", esim.customerPhone.orEmpty().ifBlank { "—" })
+        DetailRow("Email", esim.customerEmail.orEmpty().ifBlank { "—" })
     }
 }
 
