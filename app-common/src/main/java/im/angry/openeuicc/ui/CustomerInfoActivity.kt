@@ -43,6 +43,24 @@ import im.angry.openeuicc.common.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 class CustomerInfoActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -118,7 +136,6 @@ class CustomerInfoActivity : ComponentActivity() {
             phoneError = "Phone number is required"
             valid = false
         }
-
         return valid
     }
 
@@ -210,8 +227,10 @@ private fun CustomerInfoScreen(
     onPhoneChange: (String) -> Unit,
     onContinue: () -> Unit
 ) {
-    val orange = Color(0xFFFF7900)
-    val bg = Color(0xFFF7F7FA)
+    val blue = Color(0xFF1263F1)
+    val dark = Color(0xFF07142F)
+    val muted = Color(0xFF738099)
+    val bg = Color(0xFFF4F8FD)
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
@@ -219,154 +238,361 @@ private fun CustomerInfoScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(start = 18.dp, top = 14.dp, end = 18.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
-                    Text("Geri")
-                }
-
-                CustomerHeroCard(orange = orange)
-
-                CustomerInfoCard(title = "Seçilen Paket") {
-                    Text(
-                        text = packageName.ifBlank { "eSIM Package" },
-                        color = Color(0xFF17181C),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    if (packageMeta.isNotBlank()) {
-                        Text(
-                            text = packageMeta,
-                            color = Color(0xFF6B7280),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color(0xFFE2E9F3), RoundedCornerShape(16.dp))
+                    ) {
+                        Text("‹", color = dark, fontSize = 34.sp, fontWeight = FontWeight.Bold)
                     }
 
                     Text(
-                        text = packagePrice,
-                        color = orange,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        text = "Customer Info",
+                        color = dark,
+                        fontSize = 27.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 52.dp),
+                        textAlign = TextAlign.Center
                     )
                 }
 
-                CustomerInfoCard(title = "Müşteri Bilgileri") {
-                    OutlinedTextField(
-                        value = firstName,
-                        onValueChange = onFirstNameChange,
-                        label = { Text("First name") },
-                        isError = firstNameError != null,
-                        supportingText = { firstNameError?.let { Text(it) } },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                CustomerPackageSummaryCard(
+                    packageName = packageName.ifBlank { "eSIM Package" },
+                    packageMeta = packageMeta,
+                    packagePrice = packagePrice,
+                    blue = blue
+                )
 
-                    OutlinedTextField(
-                        value = lastName,
-                        onValueChange = onLastNameChange,
-                        label = { Text("Last name") },
-                        isError = lastNameError != null,
-                        supportingText = { lastNameError?.let { Text(it) } },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = phone,
-                        onValueChange = onPhoneChange,
-                        label = { Text("Phone number") },
-                        isError = phoneError != null,
-                        supportingText = { phoneError?.let { Text(it) } },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                CustomerFormCard(
+                    firstName = firstName,
+                    lastName = lastName,
+                    phone = phone,
+                            firstNameError = firstNameError,
+                    lastNameError = lastNameError,
+                    phoneError = phoneError,
+                        packagePrice = packagePrice,
+                    loading = loading,
+                    onContinue = onContinue,
+                    onFirstNameChange = onFirstNameChange,
+                    onLastNameChange = onLastNameChange,
+                    onPhoneChange = onPhoneChange,
+                    blue = blue,
+                    dark = dark,
+                    muted = muted
+                )
 
                 errorMessage?.takeIf { it.isNotBlank() }?.let {
                     CustomerResultCard(message = it)
                 }
-
-                Button(
-                    onClick = onContinue,
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = orange),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.height(18.dp),
-                            color = Color.White
-                        )
-                        Text(" Devam ediliyor...")
-                    } else {
-                        Text("Continue")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
 }
 
 @Composable
-private fun CustomerHeroCard(orange: Color) {
+private fun CustomerPackageSummaryCard(
+    packageName: String,
+    packageMeta: String,
+    packagePrice: String,
+    blue: Color
+) {
+    val parts = packageMeta.split("•").map { it.trim() }.filter { it.isNotBlank() }
+    val data = parts.getOrNull(0) ?: "Mobile data"
+    val validity = formatCustomerValidity(parts.getOrNull(1) ?: "30 Days")
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF17181C))
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "Customer Info",
-                color = orange,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Satın alma bilgileri",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Paket aktivasyonu için müşteri adını ve telefon bilgisini gir.",
-                color = Color.White.copy(alpha = 0.74f),
-                style = MaterialTheme.typography.bodyMedium
-            )
+        Column {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = im.angry.openeuicc.common.R.drawable.store_banner),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(width = 118.dp, height = 82.dp)
+                        .clip(RoundedCornerShape(18.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = packageName,
+                        color = Color(0xFF07142F),
+                        fontWeight = FontWeight.Black,
+                        fontSize = 19.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = listOf(data, validity).joinToString("  •  "),
+                        color = Color(0xFF5F6B82),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 15.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Roam2World",
+                        color = Color(0xFF5F6B82),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MiniSummaryItem("Data", data, blue, Modifier.weight(1f))
+                MiniSummaryItem("Validity", validity, blue, Modifier.weight(1f))
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text("Price", color = Color(0xFF738099), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(packagePrice, color = blue, fontSize = 19.sp, fontWeight = FontWeight.Black)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun CustomerInfoCard(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
+private fun MiniSummaryItem(label: String, value: String, blue: Color, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFEAF2FF)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(if (label == "Data") "⇅" else "▣", color = blue, fontWeight = FontWeight.Black)
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Column {
+            Text(label, color = Color(0xFF738099), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(value, color = Color(0xFF07142F), fontSize = 14.sp, fontWeight = FontWeight.Black)
+        }
+    }
+}
+
+@Composable
+private fun CustomerFormCard(
+    firstName: String,
+    lastName: String,
+    phone: String,
+    firstNameError: String?,
+    lastNameError: String?,
+    phoneError: String?,
+    packagePrice: String,
+    loading: Boolean,
+    onContinue: () -> Unit,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    blue: Color,
+    dark: Color,
+    muted: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
-            Text(
-                text = title,
-                color = Color(0xFF17181C),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFEAF2FF)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = im.angry.openeuicc.common.R.drawable.r2w_ic_customer),
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text("Personal Information", color = dark, fontSize = 19.sp, fontWeight = FontWeight.Black)
+                    Text("Please provide accurate details for your eSIM.", color = muted, fontSize = 13.sp)
+                }
+            }
+
+            CustomerInputField(
+                value = firstName,
+                onValueChange = onFirstNameChange,
+                label = "First Name",
+                placeholder = "e.g. John",
+                iconRes = im.angry.openeuicc.common.R.drawable.r2w_ic_customer,
+                error = firstNameError
             )
-            HorizontalDivider()
-            content()
+
+            CustomerInputField(
+                value = lastName,
+                onValueChange = onLastNameChange,
+                label = "Last Name",
+                placeholder = "e.g. Smith",
+                iconRes = im.angry.openeuicc.common.R.drawable.r2w_ic_customer,
+                error = lastNameError
+            )
+
+            CustomerInputField(
+                value = phone,
+                onValueChange = onPhoneChange,
+                label = "Phone Number",
+                placeholder = "e.g. +1 555 123 4567",
+                iconRes = im.angry.openeuicc.common.R.drawable.r2w_ic_phone,
+                error = phoneError
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.width(132.dp)) {
+                    Text("Total", color = muted, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(
+                        text = packagePrice.ifBlank { "USD 0.00" },
+                        color = blue,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 22.sp
+                    )
+                }
+
+                Button(
+                    onClick = onContinue,
+                    enabled = !loading,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = blue),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    if (loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Processing")
+                    } else {
+                        Text("Continue", fontWeight = FontWeight.Black, fontSize = 18.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CustomerInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    iconRes: Int,
+    error: String?
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = { Text(placeholder) },
+        leadingIcon = {
+            Image(
+                painter = painterResource(id = iconRes),
+                contentDescription = label,
+                modifier = Modifier.size(28.dp),
+                contentScale = ContentScale.Fit
+            )
+        },
+        isError = error != null,
+        supportingText = { error?.let { Text(it, fontSize = 12.sp) } },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().height(58.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Color(0xFF1263F1),
+            unfocusedBorderColor = Color(0xFFDCE4F0),
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White
+        )
+    )
+}
+
+@Composable
+private fun CustomerCheckRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    title: String,
+    subtitle: String?,
+    blue: Color,
+    error: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, onValueChange = onCheckedChange)
+            .padding(vertical = 1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Column {
+            Text(
+                title,
+                color = if (error) Color(0xFFB42318) else Color(0xFF07142F),
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+            subtitle?.takeIf { it.isNotBlank() }?.let {
+                Text(
+                    it,
+                    color = if (error) Color(0xFFB42318) else Color(0xFF738099),
+                    fontSize = 13.sp
+                )
+            }
         }
     }
 }
@@ -380,9 +606,15 @@ private fun CustomerResultCard(message: String) {
     ) {
         Text(
             text = message,
-            color = Color(0xFFC2410C),
-            modifier = Modifier.padding(18.dp),
-            fontWeight = FontWeight.SemiBold
+            modifier = Modifier.padding(16.dp),
+            color = Color(0xFF9A3412),
+            style = MaterialTheme.typography.bodyMedium
         )
     }
+}
+
+private fun formatCustomerValidity(raw: String): String {
+    val value = raw.trim().replace(Regex("\\s+"), " ")
+    val match = Regex("^(\\d+)\\s*(day|days|d)$", RegexOption.IGNORE_CASE).find(value)
+    return if (match != null) "${match.groupValues[1]} Days" else value
 }

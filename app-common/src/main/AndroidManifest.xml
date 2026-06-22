@@ -45,7 +45,8 @@
         <activity
             android:name="im.angry.openeuicc.ui.PurchaseReviewActivity"
             android:exported="false"
-            android:label="Confirm Purchase" />
+            android:label="Confirm Purchase"
+            android:theme="@style/Theme.Roam2World.PurchaseReview" />
 
         <activity
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
@@ -118,10 +119,12 @@
             android:exported="false" />
 
         <activity
-        android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
-        android:exported="false" />
+            android:name="im.angry.openeuicc.ui.R2wComposeHomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Roam2World.Dashboard" />
     <activity
         android:name="im.angry.openeuicc.ui.R2wStoreActivity"
+            android:theme="@style/Theme.Roam2World.Dashboard"
         android:exported="false" />
     <activity
         android:name="im.angry.openeuicc.ui.R2wInstallHelpActivity"
