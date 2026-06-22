@@ -24,6 +24,7 @@ data class MobilePackage(
     val visibleToReseller: Boolean,
     val visibleToDealer: Boolean,
     val featured: Boolean,
+    val renewalSupported: Boolean? = null,
     val countries: List<String> = emptyList(),
     val countryCodes: List<String> = emptyList()
 ) {

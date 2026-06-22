@@ -1075,6 +1075,28 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 esimJson.optString("remaining_data"),
                 esimJson.optString("remainingData")
             ),
+            customerFirstName = firstNotBlank(
+                esimJson.optString("customer_first_name"),
+                esimJson.optString("customerFirstName"),
+                esimJson.optString("first_name"),
+                esimJson.optString("firstName")
+            ),
+            customerLastName = firstNotBlank(
+                esimJson.optString("customer_last_name"),
+                esimJson.optString("customerLastName"),
+                esimJson.optString("last_name"),
+                esimJson.optString("lastName")
+            ),
+            customerPhone = firstNotBlank(
+                esimJson.optString("customer_phone"),
+                esimJson.optString("customerPhone"),
+                esimJson.optString("phone")
+            ),
+            customerEmail = firstNotBlank(
+                esimJson.optString("customer_email"),
+                esimJson.optString("customerEmail"),
+                esimJson.optString("email")
+            ),
             lastRenewal = parseMobileEsimLastRenewal(esimJson.optJSONObject("last_renewal") ?: esimJson.optJSONObject("lastRenewal")),
             dataUsed = firstNotBlank(
                 esimJson.optString("data_used"),
@@ -1356,7 +1378,25 @@ class Roam2WorldAuthApi(baseUrl: String) {
             ),
             visibleToReseller = visibleForRole(packageJson, "reseller"),
             visibleToDealer = visibleForRole(packageJson, "dealer"),
-            featured = optionalBoolean(packageJson, "is_featured", "isFeatured", "featured") ?: fallbackFeatured
+            featured = optionalBoolean(packageJson, "is_featured", "isFeatured", "featured") ?: fallbackFeatured,
+            renewalSupported = optionalBoolean(
+                packageJson,
+                "renewable",
+                "is_renewable",
+                "isRenewable",
+                "supports_renewal",
+                "supportsRenewal",
+                "renewal_supported",
+                "renewalSupported",
+                "can_renew",
+                "canRenew",
+                "topup_available",
+                "top_up_available",
+                "topUpAvailable",
+                "rechargeable",
+                "can_recharge",
+                "canRecharge"
+            )
         )
     }
 
