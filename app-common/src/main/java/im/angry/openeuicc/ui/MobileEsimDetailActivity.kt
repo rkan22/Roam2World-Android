@@ -411,7 +411,7 @@ class MobileEsimDetailActivity : ComponentActivity() {
         ).any { (left, right) -> !left.isNullOrBlank() && left == right }
 
     private fun loadLiveUsage(esim: MobileEsim) {
-        val cleanIccid = esim.iccid.orEmpty().trim().ifBlank { "8997250230000486814F" }.ifBlank { "8997250230000486814F" }
+        val cleanIccid = esim.iccid.orEmpty().trim()
         if (cleanIccid.length < 6 || usageLoading) return
 
         lifecycleScope.launch {
@@ -420,7 +420,6 @@ class MobileEsimDetailActivity : ComponentActivity() {
 
             usageLoading = true
             usageError = null
-            Toast.makeText(this@MobileEsimDetailActivity, "Checking live usage...", Toast.LENGTH_SHORT).show()
 
             val result = runCatching {
                 withContext(Dispatchers.IO) { postR2wUsage(session, cleanIccid) }
@@ -431,11 +430,9 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 .onSuccess {
                     liveUsage = parseR2wUsage(it, cleanIccid)
                     usageError = null
-                    Toast.makeText(this@MobileEsimDetailActivity, "Live usage updated: " + (liveUsage?.remainingText ?: ""), Toast.LENGTH_LONG).show()
                 }
                 .onFailure {
                     usageError = it.message ?: "Usage check failed"
-                    Toast.makeText(this@MobileEsimDetailActivity, "Usage failed: " + usageError, Toast.LENGTH_LONG).show()
                 }
         }
     }
