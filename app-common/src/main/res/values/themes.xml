@@ -155,7 +155,7 @@
     </style>
 
 
-    <style name="Theme.R2W.AppCompat" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.R2W.AppCompat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
