@@ -1030,6 +1030,30 @@ class Roam2WorldAuthApi(baseUrl: String) {
                 esimJson.optString("smDpPlusAddress")
             ),
             matchingId = matchingId,
+            msisdn = firstNotBlank(
+                esimJson.optString("msisdn"),
+                esimJson.optString("MSISDN"),
+                esimJson.optString("phone_no"),
+                esimJson.optString("phoneNo"),
+                esimJson.optString("phone_number"),
+                esimJson.optString("phoneNumber"),
+                activation?.optString("msisdn"),
+                activation?.optString("MSISDN"),
+                activation?.optString("phone_no"),
+                activation?.optString("phoneNo"),
+                activation?.optString("phone_number"),
+                activation?.optString("phoneNumber")
+            ),
+            activationDate = firstNotBlank(
+                esimJson.optString("activation_date"),
+                esimJson.optString("activationDate"),
+                esimJson.optString("activated_at"),
+                esimJson.optString("activatedAt"),
+                activation?.optString("activation_date"),
+                activation?.optString("activationDate"),
+                activation?.optString("activated_at"),
+                activation?.optString("activatedAt")
+            ),
             confirmationCodeRequired = optionalBoolean(
                 activation ?: esimJson,
                 "confirmation_code_required",

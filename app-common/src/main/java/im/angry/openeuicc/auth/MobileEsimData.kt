@@ -43,7 +43,9 @@ data class MobileEsim(
     val customerFirstName: String? = null,
     val customerLastName: String? = null,
     val customerPhone: String? = null,
-    val customerEmail: String? = null
+    val customerEmail: String? = null,
+    val msisdn: String? = null,
+    val activationDate: String? = null
 ) {
     fun title(): String =
         packageName

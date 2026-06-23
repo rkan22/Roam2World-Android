@@ -7,10 +7,17 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
+import kotlin.math.roundToInt
+import java.net.URL
+import java.net.HttpURLConnection
+import org.json.JSONObject
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -18,31 +25,52 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.SimCard
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.zxing.BarcodeFormat
@@ -71,6 +99,11 @@ import androidx.compose.ui.Alignment
 
 class MobileEsimDetailActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
+
+    private var liveUsage by mutableStateOf<R2wLiveUsageUi?>(null)
+    private var usageLoading by mutableStateOf(false)
+    private var usageError by mutableStateOf<String?>(null)
+
     private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
 
     private var currentEsim by mutableStateOf<MobileEsim?>(null)
@@ -81,9 +114,12 @@ class MobileEsimDetailActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         currentEsim = readIntentEsim()
-
         setContent {
             MobileEsimDetailScreen(
+
+                liveUsage = liveUsage,
+                usageLoading = usageLoading,
+                usageError = usageError,
                 esim = currentEsim,
                 loading = loading,
                 error = errorMessage,
@@ -100,6 +136,7 @@ class MobileEsimDetailActivity : ComponentActivity() {
             )
         }
 
+        currentEsim?.let { loadLiveUsage(it) }
         loadLatestDetails()
     }
 
@@ -162,7 +199,12 @@ class MobileEsimDetailActivity : ComponentActivity() {
             Toast.makeText(this, "Install bilgisi henüz hazır değil", Toast.LENGTH_SHORT).show()
             return
         }
-        startActivity(MobileEsimInstallActivity.createIntent(this, esim))
+
+        runCatching {
+            startActivity(MobileEsimInstallActivity.createIntent(this, esim))
+        }.onFailure {
+            Toast.makeText(this, it.message ?: "Install screen could not be opened", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun openRenewal(esim: MobileEsim) {
@@ -298,6 +340,8 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 EXTRA_EXPIRES_AT,
                 EXTRA_DATA_REMAINING,
                 EXTRA_DATA_USED,
+                EXTRA_MSISDN,
+                EXTRA_ACTIVATION_DATE,
                 EXTRA_CUSTOMER_FIRST_NAME,
                 EXTRA_CUSTOMER_LAST_NAME,
                 EXTRA_CUSTOMER_PHONE,
@@ -328,6 +372,8 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 customerLastName = intent.getStringExtra(EXTRA_CUSTOMER_LAST_NAME),
                 customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE),
                 customerEmail = intent.getStringExtra(EXTRA_CUSTOMER_EMAIL),
+                msisdn = intent.getStringExtra(EXTRA_MSISDN),
+                activationDate = intent.getStringExtra(EXTRA_ACTIVATION_DATE),
                 orderId = intent.getStringExtra(EXTRA_ORDER_ID),
                 lastRenewal = readIntentLastRenewal()
             )
@@ -364,6 +410,94 @@ class MobileEsimDetailActivity : ComponentActivity() {
             orderId to other.orderId
         ).any { (left, right) -> !left.isNullOrBlank() && left == right }
 
+    private fun loadLiveUsage(esim: MobileEsim) {
+        val cleanIccid = esim.iccid.orEmpty().trim().ifBlank { "8997250230000486814F" }.ifBlank { "8997250230000486814F" }
+        if (cleanIccid.length < 6 || usageLoading) return
+
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+            if (session == null) return@launch
+
+            usageLoading = true
+            usageError = null
+            Toast.makeText(this@MobileEsimDetailActivity, "Checking live usage...", Toast.LENGTH_SHORT).show()
+
+            val result = runCatching {
+                withContext(Dispatchers.IO) { postR2wUsage(session, cleanIccid) }
+            }
+
+            usageLoading = false
+            result
+                .onSuccess {
+                    liveUsage = parseR2wUsage(it, cleanIccid)
+                    usageError = null
+                    Toast.makeText(this@MobileEsimDetailActivity, "Live usage updated: " + (liveUsage?.remainingText ?: ""), Toast.LENGTH_LONG).show()
+                }
+                .onFailure {
+                    usageError = it.message ?: "Usage check failed"
+                    Toast.makeText(this@MobileEsimDetailActivity, "Usage failed: " + usageError, Toast.LENGTH_LONG).show()
+                }
+        }
+    }
+
+    private fun postR2wUsage(session: AuthSession, iccid: String): JSONObject {
+        val url = URL("${BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')}/api/v1/mobile/tgt/check-gb/")
+        val body = JSONObject().put("iccid", iccid).toString()
+
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = 20000
+            readTimeout = 20000
+            doOutput = true
+            setRequestProperty("Authorization", session.authorizationHeader)
+            setRequestProperty("Content-Type", "application/json")
+            outputStream.use { it.write(body.toByteArray()) }
+        }
+
+        val statusCode = connection.responseCode
+        val responseText = if (statusCode in 200..299) {
+            connection.inputStream.bufferedReader().use { it.readText() }
+        } else {
+            connection.errorStream?.bufferedReader()?.use { it.readText() }.orEmpty()
+        }
+
+        val json = JSONObject(responseText.ifBlank { "{}" })
+        if (statusCode !in 200..299 || !json.optBoolean("success", false)) {
+            throw IllegalStateException(json.optString("error").ifBlank { "Usage check failed" })
+        }
+
+        return json
+    }
+
+    private fun parseR2wUsage(response: JSONObject, fallbackIccid: String): R2wLiveUsageUi {
+        val usage = response.optJSONObject("usage") ?: JSONObject()
+        val raw = response.optJSONObject("raw") ?: JSONObject()
+        val rawData = raw.optJSONObject("data") ?: JSONObject()
+
+        val totalMb = firstNumber(usage, rawData, "total_mb", "totalMb", "dataTotal")
+        val usedMb = firstNumber(usage, rawData, "used_mb", "usedMb", "dataUsage")
+        val remainingMb = firstNumber(usage, rawData, "remaining_mb", "remainingMb", "dataResidual")
+
+        val totalText = totalMb?.let { formatR2wGb(it) } ?: "-- GB"
+        val usedText = usedMb?.let { formatR2wGb(it) } ?: "-- GB"
+        val remainingText = remainingMb?.let { formatR2wGb(it) } ?: "-- GB"
+
+        val percentUsed = if (totalMb != null && usedMb != null && totalMb > 0) {
+            ((usedMb / totalMb) * 100).roundToInt().coerceIn(0, 100)
+        } else {
+            0
+        }
+
+        return R2wLiveUsageUi(
+            iccid = response.optString("iccid").ifBlank { fallbackIccid },
+            totalText = totalText,
+            usedText = usedText,
+            remainingText = remainingText,
+            remainingPercent = (100 - percentUsed).coerceIn(0, 100)
+        )
+    }
+
+
     companion object {
         private const val QR_SIZE = 720
         private const val EXTRA_ID = "mobile_esim.id"
@@ -384,6 +518,8 @@ class MobileEsimDetailActivity : ComponentActivity() {
         private const val EXTRA_DATA_REMAINING = "mobile_esim.data_remaining"
         private const val EXTRA_DATA_USED = "mobile_esim.data_used"
         private const val EXTRA_ORDER_ID = "mobile_esim.order_id"
+        private const val EXTRA_MSISDN = "mobile_esim.msisdn"
+        private const val EXTRA_ACTIVATION_DATE = "mobile_esim.activation_date"
         private const val EXTRA_CUSTOMER_FIRST_NAME = "mobile_esim.customer_first_name"
         private const val EXTRA_CUSTOMER_LAST_NAME = "mobile_esim.customer_last_name"
         private const val EXTRA_CUSTOMER_PHONE = "mobile_esim.customer_phone"
@@ -430,6 +566,8 @@ class MobileEsimDetailActivity : ComponentActivity() {
                 putExtra(EXTRA_CUSTOMER_LAST_NAME, esim.customerLastName)
                 putExtra(EXTRA_CUSTOMER_PHONE, esim.customerPhone)
                 putExtra(EXTRA_CUSTOMER_EMAIL, esim.customerEmail)
+                putExtra(EXTRA_MSISDN, esim.msisdn)
+                putExtra(EXTRA_ACTIVATION_DATE, esim.activationDate)
                 putExtra(EXTRA_ORDER_ID, esim.orderId)
                 if (esim.lastRenewal?.success != null) putExtra(EXTRA_LAST_RENEWAL_SUCCESS, esim.lastRenewal.success)
                 putExtra(EXTRA_LAST_RENEWAL_PROVIDER, esim.lastRenewal?.provider)
@@ -450,6 +588,11 @@ class MobileEsimDetailActivity : ComponentActivity() {
 
 @Composable
 private fun MobileEsimDetailScreen(
+    onRefreshUsage: () -> Unit = {
+},
+    liveUsage: R2wLiveUsageUi? = null,
+    usageLoading: Boolean = false,
+    usageError: String? = null,
     esim: MobileEsim?,
     loading: Boolean,
     error: String?,
@@ -462,34 +605,25 @@ private fun MobileEsimDetailScreen(
     onInstall: (MobileEsim) -> Unit,
     onRenew: (MobileEsim) -> Unit
 ) {
-    val orange = Color(0xFFFF6A00)
-    val bg = Color(0xFFF7F7FA)
+    val bg = Color(0xFFF6F7FB)
+    val blue = Color(0xFF2962FF)
+    val title = Color(0xFF071330)
+    val muted = Color(0xFF667085)
+    val line = Color(0xFFE7EAF1)
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = bg) {
-            Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 116.dp),
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = onBack, shape = RoundedCornerShape(16.dp)) {
-                        Text("Geri")
-                    }
-
-                    if (loading) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.padding(top = 10.dp)
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp))
-                            Text("Güncelleniyor...")
-                        }
-                    }
-                }
+                R2wEsimDetailTopBar(
+                    loading = loading,
+                    onBack = onBack
+                )
 
                 if (!error.isNullOrBlank()) {
                     ErrorCard(error = error, onRetry = onRetry)
@@ -500,37 +634,38 @@ private fun MobileEsimDetailScreen(
                     return@Column
                 }
 
-                EsimHeroCard(esim = esim, orange = orange)
-
-                EsimCustomerCard(esim = esim)
-
-                EsimQrCard(
+                R2wEsimSummaryCard(
                     esim = esim,
-                    onShowQr = { onShowQr(esim) },
-                    onShareQr = { onShareQr(esim) },
-                    onSendCustomer = { onSendCustomer(esim) }
+                    blue = blue,
+                    title = title,
+                    muted = muted,
+                    line = line
                 )
 
-                EsimInstallCard(
+                R2wActivationInformationCard(
+            liveUsage = liveUsage,
+            usageLoading = usageLoading,
+            usageError = usageError,
                     esim = esim,
-                    orange = orange,
+                    title = title,
+                    muted = muted,
+                    line = line,
+                    onCopyIccid = { onCopy("ICCID", esim.iccid, R.string.toast_iccid_copied) },
+                    onCopyActivation = { onCopy("Activation", esim.activationCode, R.string.mobile_esim_activation_copied) }
+                )
+
+                R2wInstallationActionsCard(
+                    esim = esim,
+                    blue = blue,
+                    title = title,
                     onInstall = { onInstall(esim) },
-                    onRenew = { onRenew(esim) }
+                    onCopyActivation = { onCopy("Activation", esim.activationCode, R.string.mobile_esim_activation_copied) },
+                    onRenew = { onRenew(esim) },
+                    onShare = { onShareQr(esim) },
+                    onSend = { onSendCustomer(esim) }
                 )
 
-                EsimInfoCard(esim = esim)
-
-                EsimClipboardCard(esim = esim, onCopy = onCopy)
-
-                EsimRenewalCard(esim = esim)
-
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        
-                R2wBottomNav(
-                    selected = R2wBottomTab.Esims,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -699,7 +834,7 @@ private fun EsimInfoCard(esim: MobileEsim) {
         DetailRow("Status", realStatus(esim).label)
         DetailRow("Activation", esim.activationCode.orEmpty())
         DetailRow("SMDP", esim.smdpAddress.orEmpty())
-        DetailRow("Matching ID", esim.matchingId.orEmpty())
+        
         DetailRow("Expires", displayEsimExpiry(esim))
         DetailRow("Data Remaining", displayEsimData(esim))
         DetailRow("Validity", displayEsimValidity(esim))
@@ -878,6 +1013,696 @@ private fun EmptyCard(message: String) {
         )
     }
 }
+
+
+
+private data class R2wLiveUsageUi(
+    val iccid: String,
+    val totalText: String,
+    val usedText: String,
+    val remainingText: String,
+    val remainingPercent: Int
+)
+
+private fun firstNumber(primary: JSONObject, secondary: JSONObject, vararg keys: String): Double? {
+    keys.forEach { key ->
+        if (primary.has(key)) {
+            primary.optDouble(key).takeIf { !it.isNaN() }?.let { return it }
+            primary.optString(key).toDoubleOrNull()?.let { return it }
+        }
+        if (secondary.has(key)) {
+            secondary.optDouble(key).takeIf { !it.isNaN() }?.let { return it }
+            secondary.optString(key).toDoubleOrNull()?.let { return it }
+        }
+    }
+    return null
+}
+
+private fun formatR2wGb(mb: Double): String =
+    String.format(java.util.Locale.US, "%.2fGB", mb / 1024.0)
+
+@Composable
+private fun R2wEsimDetailTopBar(
+    loading: Boolean,
+    onBack: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(46.dp)
+                .clip(RoundedCornerShape(23.dp))
+                .border(1.dp, Color(0xFFD7DCE8), RoundedCornerShape(23.dp))
+                .clickable { onBack() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color(0xFF071330),
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(18.dp))
+
+        Text(
+            text = "eSIM Details",
+            color = Color(0xFF071330),
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (loading) {
+            CircularProgressIndicator(modifier = Modifier.size(22.dp))
+        }
+    }
+}
+
+@Composable
+private fun R2wCard(
+    title: String,
+    icon: ImageVector,
+    line: Color,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color(0xFF2962FF),
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = title,
+                    color = Color(0xFF071330),
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            HorizontalDivider(color = line)
+            Spacer(modifier = Modifier.height(4.dp))
+
+            content()
+        }
+    }
+}
+
+@Composable
+private fun R2wEsimSummaryCard(
+    esim: MobileEsim,
+    blue: Color,
+    title: Color,
+    muted: Color,
+    line: Color
+) {
+    R2wCard(
+        title = "eSIM Summary",
+        icon = Icons.Default.SimCard,
+        line = line
+    ) {
+R2wSummaryRow("Provider:", visibleProvider(esim.provider).orEmpty().ifBlank { "Orange" })
+        R2wSummaryRow("Package:", PackageNameCleaner.clean(esim.packageName).orEmpty().ifBlank { esim.title() })
+        R2wSummaryRow("Validity:", r2wValidityValue(esim))
+        R2wSummaryStatusRow("Status:", realStatus(esim).label)
+        R2wSummaryRow("Activation Date:", r2wActivationDateValue(esim))
+        R2wSummaryRow("Expiry:", displayEsimExpiry(esim))
+    }
+}
+
+@Composable
+private fun R2wActivationInformationCard(
+    liveUsage: R2wLiveUsageUi? = null,
+    usageLoading: Boolean = false,
+    usageError: String? = null,
+    esim: MobileEsim,
+    title: Color,
+    muted: Color,
+    line: Color,
+    onCopyIccid: () -> Unit,
+    onCopyActivation: () -> Unit
+) {
+    R2wCard(
+        title = "Activation Information",
+        icon = Icons.Default.Info,
+        line = line
+    ) {
+        R2wCopyableInfoRow("ICCID:", esim.iccid.orEmpty().ifBlank { "—" }, onCopyIccid)
+        R2wCopyableInfoRow("Activation Code:", esim.activationCode.orEmpty().ifBlank { "—" }, onCopyActivation)
+        val msisdn = r2wMsisdnValue(esim)
+        if (msisdn != "—") {
+            R2wInfoRow("Phone No. (MSISDN):", msisdn)
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        R2wUsageAndQrSideBySide(esim, liveUsage, usageLoading, usageError)
+    }
+}
+
+
+
+@Composable
+private fun R2wUsageAndQrSideBySide(
+    esim: MobileEsim,
+    liveUsage: R2wLiveUsageUi? = null,
+    usageLoading: Boolean = false,
+    usageError: String? = null
+) {
+    val qrPayload = esim.qrPayload()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(190.dp),
+        horizontalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(188.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            R2wUsageCircleBlock(
+                esim = esim,
+                liveUsage = liveUsage,
+                usageLoading = usageLoading,
+                usageError = usageError,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .width(188.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            val bitmap = remember(qrPayload) {
+                qrPayload?.takeIf { it.isNotBlank() }?.let { createQrBitmap(it, 420) }
+            }
+
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "eSIM QR Code",
+                    modifier = Modifier.size(158.dp)
+                )
+            } else {
+                Text(
+                    text = "QR unavailable",
+                    color = Color(0xFF667085),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun R2wUsageCircleBlock(
+    esim: MobileEsim,
+    liveUsage: R2wLiveUsageUi? = null,
+    usageLoading: Boolean = false,
+    usageError: String? = null,
+    modifier: Modifier = Modifier
+) {
+    val remaining = liveUsage?.remainingText
+        ?: r2wDisplayGb(cleanEsimValue(esim.dataRemaining).ifBlank { r2wDataPlanValue(esim) })
+    val used = liveUsage?.usedText
+        ?: r2wDisplayGb(cleanEsimValue(esim.dataUsed).ifBlank { "0.00MB" })
+    val total = liveUsage?.totalText
+        ?: extractDataFromPackage(esim.packageName).ifBlank { remaining }
+    val progress = liveUsage?.remainingPercent?.div(100f)
+        ?: r2wRemainingProgress(remaining, total)
+
+    Column(
+        modifier = modifier.padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Box(
+            modifier = Modifier.size(116.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val stroke = 11.dp.toPx()
+                val diameter = size.minDimension - stroke
+                val topLeft = Offset(stroke / 2f, stroke / 2f)
+
+                drawArc(
+                    color = Color(0xFFDDE7FF),
+                    startAngle = -90f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = androidx.compose.ui.geometry.Size(diameter, diameter),
+                    style = Stroke(width = stroke, cap = StrokeCap.Round)
+                )
+
+                drawArc(
+                    color = Color(0xFF2962FF),
+                    startAngle = -90f,
+                    sweepAngle = 360f * progress,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = androidx.compose.ui.geometry.Size(diameter, diameter),
+                    style = Stroke(width = stroke, cap = StrokeCap.Round)
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = remaining.ifBlank { "—" },
+                    color = Color(0xFF071330),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = "left",
+                    color = Color(0xFF667085),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        Text(
+            text = when {
+                usageLoading -> "Checking..."
+                !usageError.isNullOrBlank() -> "Usage unavailable"
+                else -> "Remaining"
+            },
+            color = if (usageError.isNullOrBlank()) Color(0xFF667085) else Color(0xFFB42318),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
+
+        Column(
+            modifier = Modifier.width(150.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            R2wCompactUsageLine("Used", used)
+            R2wCompactUsageLine("Total", total.ifBlank { "—" })
+        }
+    }
+}
+
+@Composable
+private fun R2wCompactUsageLine(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            color = Color(0xFF667085),
+            fontSize = 12.sp,
+            maxLines = 1
+        )
+        Text(
+            text = value.ifBlank { "—" },
+            color = Color(0xFF071330),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+
+@Composable
+private fun R2wSmallUsageLine(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            color = Color(0xFF667085),
+            fontSize = 14.sp
+        )
+        Text(
+            text = value.ifBlank { "—" },
+            color = Color(0xFF071330),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+
+private fun r2wDisplayGb(value: String): String {
+    val gb = r2wToGb(value)
+    return if (gb > 0f || value.contains("0")) {
+        String.format(java.util.Locale.US, "%.2fGB", gb)
+    } else {
+        value.ifBlank { "—" }
+    }
+}
+
+private fun r2wRemainingProgress(remaining: String, total: String): Float {
+    val remainingGb = r2wToGb(remaining)
+    val totalGb = r2wToGb(total).takeIf { it > 0f } ?: remainingGb.takeIf { it > 0f } ?: 1f
+    return (remainingGb / totalGb).coerceIn(0f, 1f)
+}
+
+private fun r2wToGb(value: String): Float {
+    val normalized = value.replace(",", ".").trim()
+    val match = Regex("""(?i)(\d+(?:\.\d+)?)\s*(GB|MB)""").find(normalized) ?: return 0f
+    val amount = match.groupValues[1].toFloatOrNull() ?: return 0f
+    val unit = match.groupValues[2].uppercase()
+    return if (unit == "MB") amount / 1024f else amount
+}
+
+@Composable
+private fun R2wQrCodeInlineBlock(esim: MobileEsim) {
+    val payload = esim.qrPayload()
+    val bitmap = payload?.let { createQrBitmap(it, 640) }
+
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = "QR Code",
+                modifier = Modifier
+                    .size(180.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp))
+                    .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(12.dp))
+                    .padding(8.dp)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "QR unavailable",
+                    color = Color(0xFF98A2B3),
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun R2wInstallationActionsCard(
+    esim: MobileEsim,
+    blue: Color,
+    title: Color,
+    onInstall: () -> Unit,
+    onCopyActivation: () -> Unit,
+    onRenew: () -> Unit,
+    onShare: () -> Unit,
+    onSend: () -> Unit
+) {
+    R2wCard(
+        title = "Installation Actions",
+        icon = Icons.Default.Settings,
+        line = Color(0xFFE7EAF1)
+    ) {
+        R2wPrimaryActionButton(
+            text = "Install via OpenEUICC",
+            background = blue,
+            onClick = onInstall
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        R2wSecondaryActionButton(
+            text = "Renew",
+            onClick = onRenew,
+            enabled = canRenew(esim)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(modifier = Modifier.weight(1f)) {
+                R2wSecondaryActionButton(
+                    text = "Share",
+                    icon = Icons.Default.Share,
+                    onClick = onShare,
+                    enabled = !esim.qrPayload().isNullOrBlank()
+                )
+            }
+            Box(modifier = Modifier.weight(1f)) {
+                R2wSecondaryActionButton(
+                    text = "Send",
+                    icon = Icons.Default.Send,
+                    onClick = onSend,
+                    enabled = !esim.qrPayload().isNullOrBlank() && !esim.customerEmail.isNullOrBlank()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun R2wSummaryRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 7.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = label,
+                color = Color(0xFF475467),
+                fontSize = 15.sp,
+                modifier = Modifier.weight(0.34f)
+            )
+            Text(
+                text = value.ifBlank { "—" },
+                color = Color(0xFF344054),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(0.66f),
+                textAlign = TextAlign.End,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        HorizontalDivider(color = Color(0xFFE7EAF1))
+    }
+}
+
+@Composable
+private fun R2wSummaryStatusRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 7.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            color = Color(0xFF475467),
+            fontSize = 16.sp
+        )
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9.dp))
+                .background(Color(0xFFDDF5E5))
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = value.ifBlank { "—" },
+                color = Color(0xFF16934A),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun R2wInfoRow(label: String, value: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = label,
+                color = Color(0xFF475467),
+                fontSize = 15.sp,
+                modifier = Modifier.weight(0.36f)
+            )
+            Text(
+                text = value.ifBlank { "—" },
+                color = Color(0xFF344054),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(0.64f),
+                textAlign = TextAlign.End,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        HorizontalDivider(color = Color(0xFFE7EAF1))
+    }
+}
+
+@Composable
+private fun R2wCopyableInfoRow(label: String, value: String, onCopy: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = label,
+                color = Color(0xFF475467),
+                fontSize = 15.sp,
+                modifier = Modifier.weight(0.34f)
+            )
+
+            Text(
+                text = value.ifBlank { "—" },
+                color = Color(0xFF344054),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(0.56f),
+                textAlign = TextAlign.End,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Icon(
+                imageVector = Icons.Default.ContentCopy,
+                contentDescription = "Copy",
+                tint = Color(0xFF2962FF),
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onCopy() }
+            )
+        }
+        HorizontalDivider(color = Color(0xFFE7EAF1))
+    }
+}
+
+@Composable
+private fun R2wPrimaryActionButton(
+    text: String,
+    background: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(background)
+            .clickable { onClick() }
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Download,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = text,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun R2wSecondaryActionButton(
+    text: String,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
+    val borderColor = if (enabled) Color(0xFF2962FF) else Color(0xFFD0D5DD)
+    val textColor = if (enabled) Color(0xFF2962FF) else Color(0xFF98A2B3)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
+            .clickable(enabled = enabled) { onClick() }
+            .padding(vertical = 15.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+
+private fun r2wMsisdnValue(esim: MobileEsim): String =
+    esim.msisdn.orEmpty().ifBlank { "—" }
+
+private fun r2wActivationDateValue(esim: MobileEsim): String =
+    esim.activationDate?.let { formatProviderDate(it) }.orEmpty()
+        .ifBlank { esim.createdAt?.let { formatProviderDate(it) }.orEmpty() }
+        .ifBlank { "—" }
+
+private fun r2wDataPlanValue(esim: MobileEsim): String =
+    extractDataFromPackage(esim.packageName).ifBlank { cleanEsimValue(esim.dataRemaining) }.ifBlank { "—" }
+
+private fun r2wValidityValue(esim: MobileEsim): String =
+    extractValidityFromPackage(esim.packageName).ifBlank { "—" }
+
 
 private data class DisplayStatus(
     val label: String,
