@@ -101,7 +101,11 @@ class DashboardActivity : ComponentActivity() {
     }
 
     private fun openWalletActivity() {
-        startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+        try {
+            startActivity(Intent(this, WalletActivity::class.java))
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, e.message ?: "Wallet could not be opened", android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun openPurchaseHistoryActivity() {

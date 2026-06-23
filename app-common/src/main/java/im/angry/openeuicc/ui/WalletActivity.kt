@@ -1,287 +1,209 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.lifecycle.lifecycleScope
-import im.angry.openeuicc.auth.AuthSession
-import im.angry.openeuicc.auth.AuthTokenStore
-import im.angry.openeuicc.auth.JwtUtils
-import im.angry.openeuicc.auth.MobileTransaction
-import im.angry.openeuicc.auth.MobileWalletData
-import im.angry.openeuicc.auth.MobileWalletRequest
-import im.angry.openeuicc.auth.Roam2WorldAuthApi
-import im.angry.openeuicc.common.BuildConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
+import android.app.Activity
 
-private val WalletBlue = Color(0xFF0F6BFF)
-private val WalletMuted = Color(0xFF6B7280)
-
-class WalletActivity : ComponentActivity() {
-    private val tokenStore by lazy { AuthTokenStore(this) }
-    private val authApi by lazy { Roam2WorldAuthApi(BuildConfig.ROAM2WORLD_API_BASE_URL) }
-
-    private var loading by mutableStateOf(false)
-    private var walletData by mutableStateOf<MobileWalletData?>(null)
-    private var recentRequests by mutableStateOf<List<MobileWalletRequest>>(emptyList())
-    private var errorMessage by mutableStateOf<String?>(null)
-    private var requestError by mutableStateOf<String?>(null)
+class WalletActivity : Activity() {
+    private val orange = Color.rgb(255, 106, 0)
+    private val navy = Color.rgb(15, 23, 42)
+    private val slate = Color.rgb(100, 116, 139)
+    private val bg = Color.rgb(247, 248, 252)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        title = "Wallet"
 
-        setContent {
-
-            var showBalance by remember { mutableStateOf(true) }
-
-            WalletScreen(
-                loading = loading,
-                walletData = walletData,
-                recentRequests = recentRequests,
-                errorMessage = errorMessage,
-                requestError = requestError,
-                showBalance = showBalance,
-                onToggleBalance = { showBalance = !showBalance },
-                onRefresh = { loadWallet() },
-                onRequestBalance = { startActivity(Intent(this, WalletRequestActivity::class.java)) },
-                onRequestHistory = { startActivity(Intent(this, WalletRequestHistoryActivity::class.java)) },
-                onTransactions = { startActivity(Intent(this, TransactionsActivity::class.java)) },
-                onPurchaseHistory = { startActivity(Intent(this, PurchaseHistoryActivity::class.java)) },
-                onLogout = { },
-                onDashboard = { },
-                onPackages = { },
-                onEsims = { },
-                onMore = { }
-            )
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(bg)
         }
 
-        loadWallet()
-    }
-
-    private fun loadWallet() {
-        lifecycleScope.launch {
-            loading = true
-            val session = activeSessionOrReturnToLogin() ?: return@launch
-
-            val walletResult = runCatching { authApi.wallet(session) }
-            val requestResult = runCatching { authApi.walletRequests(session) }
-
-            walletResult.onSuccess { walletData = it }
-                .onFailure { errorMessage = it.message }
-
-            requestResult.onSuccess { recentRequests = it.take(3) }
-                .onFailure { requestError = it.message }
-
-            loading = false
+        val scroll = ScrollView(this)
+        val column = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(36, 56, 36, 24)
         }
-    }
 
-    private suspend fun activeSessionOrReturnToLogin(): AuthSession? {
-        val saved = withContext(Dispatchers.IO) { tokenStore.getSession() } ?: return null
-        if (!JwtUtils.isExpired(saved.accessToken)) return saved
-        return null
-    }
-}
+        column.addView(text("Wallet", 34f, navy, true))
+        column.addView(text("Manage balance and top-up requests", 15f, slate, false).apply {
+            setPadding(0, 6, 0, 24)
+        })
 
-@Composable
-private fun WalletScreen(
-    loading: Boolean,
-    walletData: MobileWalletData?,
-    recentRequests: List<MobileWalletRequest>,
-    errorMessage: String?,
-    requestError: String?,
-    showBalance: Boolean,
-    onToggleBalance: () -> Unit,
-    onRefresh: () -> Unit,
-    onRequestBalance: () -> Unit,
-    onRequestHistory: () -> Unit,
-    onTransactions: () -> Unit,
-    onPurchaseHistory: () -> Unit,
-    onLogout: () -> Unit,
-    onDashboard: () -> Unit,
-    onPackages: () -> Unit,
-    onEsims: () -> Unit,
-    onMore: () -> Unit
-) {
-    val transactions = walletData?.transactions.orEmpty()
+        column.addView(balanceCard())
+        column.addView(space(18))
 
-    var amount by remember { mutableStateOf("") }
-    var selectedAmount by remember { mutableStateOf<Int?>(null) }
-
-    MaterialTheme {
-        Surface(Modifier.fillMaxSize()) {
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp)
-                    .clickable { onToggleBalance() },
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-
-                // WalletHero was referenced but not defined in this source snapshot.
-                // Temporarily removed to allow debug APK build.
-
-                WalletQuickRequest(
-                    amount = amount,
-                    selectedAmount = selectedAmount,
-                    onAmountChange = { value ->
-                        amount = value
-                        selectedAmount = value.toIntOrNull()
-                    },
-                    onSubmit = onRequestBalance
-                )
-            }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            weightSum = 2f
         }
+
+        row.addView(statCard("Pending", "€0.00", "Requests"), LinearLayout.LayoutParams(0, -2, 1f).apply {
+            marginEnd = 10
+        })
+
+        row.addView(statCard("Spent", "€0.00", "This month"), LinearLayout.LayoutParams(0, -2, 1f).apply {
+            marginStart = 10
+        })
+
+        column.addView(row)
+        column.addView(space(22))
+
+        column.addView(sectionTitle("Actions"))
+
+        column.addView(actionCard("Request Balance", "Create a new wallet top-up request", "→") {
+            startActivity(Intent(this, WalletRequestActivity::class.java))
+        })
+
+        column.addView(space(12))
+
+        column.addView(actionCard("Request History", "Track pending, completed and failed requests", "→") {
+            startActivity(Intent(this, WalletRequestHistoryActivity::class.java))
+        })
+
+        column.addView(space(12))
+
+        column.addView(actionCard("Store", "Use your wallet balance to buy eSIM packages", "→") {
+            startActivity(Intent(this, PackagesActivity::class.java))
+        })
+
+        column.addView(space(18))
+        column.addView(sectionTitle("Recent Activity"))
+        column.addView(transactionCard("Wallet ready", "No recent wallet transactions yet.", "+ €0.00"))
+
+        scroll.addView(column)
+        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        root.addView(bottomNav())
+
+        setContentView(root)
     }
-}
 
-@Composable
-private fun WalletHero(
-    balance: String,
-    loading: Boolean,
-    onRefresh: () -> Unit,
-    onRequestBalance: () -> Unit,
-    onRequestHistory: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = WalletBlue)
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text("Total Balance", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
-                    Text(
-                        text = balance,
-                        color = Color.White,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                IconButton(onClick = onRefresh, enabled = !loading) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = Color.White
-                    )
-                }
-            }
+    private fun balanceCard(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(30, 30, 30, 30)
+            background = rounded(orange, 30f)
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = onRequestBalance,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Request", color = WalletBlue, fontWeight = FontWeight.Bold)
-                }
-                OutlinedButton(
-                    onClick = onRequestHistory,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                    border = BorderStroke(1.dp, Color.White),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("History", fontWeight = FontWeight.Bold)
-                }
-            }
+            addView(text("Available Balance", 15f, Color.WHITE, false))
+            addView(text("€0.00", 42f, Color.WHITE, true).apply {
+                setPadding(0, 8, 0, 4)
+            })
+            addView(text("Ready for travel eSIM purchases", 14f, Color.WHITE, false))
         }
-    }
-}
 
-@Composable
-private fun WalletQuickRequest(
-    amount: String,
-    selectedAmount: Int?,
-    onAmountChange: (String) -> Unit,
-    onSubmit: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    private fun statCard(title: String, value: String, note: String): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(22, 20, 22, 20)
+            background = rounded(Color.WHITE, 24f)
 
-            Text("Quick Request", fontWeight = FontWeight.Bold)
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(50, 100, 250, 500).forEach { value ->
-                    val isSelected = selectedAmount == value
-
-                    Box(
-                        Modifier
-                            .weight(1f)
-                            .height(36.dp)
-                            .background(
-                                if (isSelected) WalletBlue else Color(0xFFF2F4F8),
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable { onAmountChange(value.toString()) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "$value",
-                            color = if (isSelected) Color.White else WalletBlue,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { onAmountChange(it) },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Enter amount") },
-                singleLine = true
-            )
-
-            Button(
-                onClick = onSubmit,
-                enabled = amount.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (amount.isEmpty()) "Request" else "Request $amount")
-            }
+            addView(text(title, 13f, slate, false))
+            addView(text(value, 22f, navy, true).apply {
+                setPadding(0, 4, 0, 2)
+            })
+            addView(text(note, 12f, slate, false))
         }
-    }
+
+    private fun actionCard(title: String, body: String, arrow: String, onClick: () -> Unit): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(24, 22, 24, 22)
+            background = rounded(Color.WHITE, 24f)
+            setOnClickListener { onClick() }
+
+            val texts = LinearLayout(this@WalletActivity).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+
+            texts.addView(text(title, 18f, navy, true))
+            texts.addView(text(body, 13f, slate, false).apply {
+                setPadding(0, 4, 0, 0)
+            })
+
+            addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(text(arrow, 26f, orange, true))
+        }
+
+    private fun transactionCard(title: String, body: String, amount: String): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(24, 22, 24, 22)
+            background = rounded(Color.WHITE, 24f)
+
+            val texts = LinearLayout(this@WalletActivity).apply {
+                orientation = LinearLayout.VERTICAL
+            }
+
+            texts.addView(text(title, 17f, navy, true))
+            texts.addView(text(body, 13f, slate, false).apply {
+                setPadding(0, 4, 0, 0)
+            })
+
+            addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(text(amount, 16f, orange, true))
+        }
+
+    private fun bottomNav(): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(18, 10, 18, 14)
+            setBackgroundColor(Color.WHITE)
+
+            addView(navItem("Home", false) {
+                startActivity(Intent(this@WalletActivity, DashboardActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            })
+
+            addView(navItem("Store", false) {
+                startActivity(Intent(this@WalletActivity, PackagesActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            })
+
+            addView(navItem("Wallet", true) {})
+
+            addView(navItem("eSIMs", false) {
+                startActivity(Intent(this@WalletActivity, MobileEsimsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+            })
+        }
+
+    private fun navItem(label: String, active: Boolean, onClick: () -> Unit): TextView =
+        text(label, 13f, if (active) orange else slate, active).apply {
+            gravity = Gravity.CENTER
+            setOnClickListener { onClick() }
+            layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+        }
+
+    private fun sectionTitle(value: String): TextView =
+        text(value, 18f, navy, true).apply {
+            setPadding(0, 0, 0, 12)
+        }
+
+    private fun text(value: String, size: Float, color: Int, bold: Boolean): TextView =
+        TextView(this).apply {
+            text = value
+            textSize = size
+            setTextColor(color)
+            if (bold) typeface = Typeface.DEFAULT_BOLD
+        }
+
+    private fun rounded(color: Int, radius: Float): GradientDrawable =
+        GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = radius
+        }
+
+    private fun space(heightValue: Int): TextView =
+        TextView(this).apply {
+            text = ""
+            height = heightValue
+        }
 }
