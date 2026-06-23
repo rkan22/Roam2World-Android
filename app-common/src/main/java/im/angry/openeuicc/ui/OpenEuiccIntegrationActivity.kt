@@ -1,10 +1,19 @@
 package im.angry.openeuicc.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.hardware.usb.UsbManager
+import android.hardware.usb.UsbDevice
+import android.content.IntentFilter
+import android.content.Context
+import android.content.BroadcastReceiver
+import android.app.PendingIntent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -29,11 +38,16 @@ import im.angry.openeuicc.util.mainViewPaddingInsetHandler
 import im.angry.openeuicc.util.OpenEuiccContextMarker
 import im.angry.openeuicc.util.operational
 import im.angry.openeuicc.util.setupRootViewSystemBarInsets
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.typeblog.lpac_jni.LocalProfileInfo
 import net.typeblog.lpac_jni.ProfileClass
+
+private const val R2W_OPENEUICC_TAG = "R2WOpenEUICC"
+private const val R2W_USB_PERMISSION_ACTION = "im.angry.openeuicc.R2W_USB_PERMISSION"
 
 class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContextMarker {
     private lateinit var scroll: NestedScrollView
@@ -45,6 +59,34 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
     private lateinit var openR2wHome: MaterialButton
     private var installMethod: String = "QR Code Install"
     private var loadingProfiles: Boolean = false
+    private val usbManager: UsbManager by lazy {
+        getSystemService(Context.USB_SERVICE) as UsbManager
+    }
+    private lateinit var usbPendingIntent: PendingIntent
+    private var usbDevice: UsbDevice? = null
+
+    private val usbPermissionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action != R2W_USB_PERMISSION_ACTION) return
+
+            val granted = usbDevice?.let { usbManager.hasPermission(it) } == true
+            Toast.makeText(
+                this@OpenEuiccIntegrationActivity,
+                if (granted) "USB reader access granted" else "USB reader access denied",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            if (granted) {
+                loadLiveProfiles(showToast = true)
+            } else {
+                renderProfileState(
+                    title = "USB reader access required",
+                    subtitle = "Grant access to the USB reader before profiles can be managed."
+                )
+            }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -63,9 +105,11 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         openR2wHome = requireViewById(R.id.openeuicc_open_r2w_home)
 
         setupInsets()
+        setupUsbPermissionReceiver()
         renderStatus()
         renderLoadingState()
         setupActions()
+        Log.i(R2W_OPENEUICC_TAG, "onCreate loaded=${euiccChannelManagerLoaded.isCompleted}")
 
         if (euiccChannelManagerLoaded.isCompleted) {
             loadLiveProfiles()
@@ -77,9 +121,104 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         return true
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        runCatching { unregisterReceiver(usbPermissionReceiver) }
+    }
+
     override fun onInit() {
+        Log.i(R2W_OPENEUICC_TAG, "onInit")
         if (::profiles.isInitialized) {
             loadLiveProfiles()
+        }
+    }
+
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    private fun setupUsbPermissionReceiver() {
+        usbPendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            Intent(R2W_USB_PERMISSION_ACTION),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val filter = IntentFilter(R2W_USB_PERMISSION_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(usbPermissionReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(usbPermissionReceiver, filter)
+        }
+    }
+
+    private fun requestUsbReaderAccess() {
+        lifecycleScope.launch {
+            renderProfileState(
+                title = "Checking USB reader",
+                subtitle = "Looking for a connected USB CCID reader..."
+            )
+
+            val result = runCatching {
+                euiccChannelManagerLoaded.await()
+                withContext(Dispatchers.IO) {
+                    euiccChannelManager.tryOpenUsbEuiccChannel()
+                }
+            }
+
+            result.onSuccess { (device, canOpen) ->
+                usbDevice = device
+
+                when {
+                    device == null -> {
+                        renderProfileState(
+                            title = "No USB reader detected",
+                            subtitle = "Connect a USB CCID reader and tap Grant USB Reader Access again."
+                        )
+                        Toast.makeText(
+                            this@OpenEuiccIntegrationActivity,
+                            "No USB reader detected",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    canOpen -> {
+                        Toast.makeText(
+                            this@OpenEuiccIntegrationActivity,
+                            "USB reader ready",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        loadLiveProfiles(showToast = true)
+                    }
+
+                    usbManager.hasPermission(device) -> {
+                        Toast.makeText(
+                            this@OpenEuiccIntegrationActivity,
+                            "USB permission already granted, refreshing",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        loadLiveProfiles(showToast = true)
+                    }
+
+                    else -> {
+                        renderProfileState(
+                            title = "USB reader access required",
+                            subtitle = "Android will ask for permission to access the connected USB reader."
+                        )
+                        usbManager.requestPermission(device, usbPendingIntent)
+                    }
+                }
+            }.onFailure {
+                Log.e(R2W_OPENEUICC_TAG, "USB reader access check failed", it)
+                renderProfileState(
+                    title = "USB reader access failed",
+                    subtitle = it.message ?: "Could not request USB reader access."
+                )
+                Toast.makeText(
+                    this@OpenEuiccIntegrationActivity,
+                    "USB reader access failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -97,7 +236,8 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
     private fun setupActions() {
         installNew.setOnClickListener { showInstallEsimSheet() }
         refreshProfiles.setOnClickListener { loadLiveProfiles(showToast = true) }
-        openNative.setOnClickListener { openNativeOpenEuicc() }
+        openNative.text = "Grant USB Reader Access"
+        openNative.setOnClickListener { requestUsbReaderAccess() }
         openR2wHome.setOnClickListener {
             startActivity(Intent(this, R2wComposeHomeActivity::class.java))
         }
@@ -113,6 +253,7 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
     }
 
     private fun loadLiveProfiles(showToast: Boolean = false) {
+        Log.i(R2W_OPENEUICC_TAG, "loadLiveProfiles showToast=$showToast loading=$loadingProfiles")
         if (loadingProfiles) return
         loadingProfiles = true
         refreshProfiles.isEnabled = false
@@ -128,13 +269,14 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
                 when {
                     loadResult.profiles.isNotEmpty() -> renderProfiles(loadResult.profiles)
                     loadResult.failures.isNotEmpty() && loadResult.successfulChannels == 0 -> {
+                        loadResult.failures.forEach { Log.e(R2W_OPENEUICC_TAG, "Profile channel failure", it) }
                         renderProfileState(
-                            title = "Unable to load profiles",
-                            subtitle = "Refresh again or open native OpenEUICC."
+                            title = "eUICC access required",
+                            subtitle = loadResult.failures.firstOrNull()?.message ?: "Grant/OpenEUICC permission is missing."
                         )
                         Toast.makeText(
                             this@OpenEuiccIntegrationActivity,
-                            "Profile loading failed",
+                            "eUICC access required",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -149,13 +291,14 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
                     ).show()
                 }
             }.onFailure {
+                Log.e(R2W_OPENEUICC_TAG, "Profile loading failed", it)
                 renderProfileState(
-                    title = "Unable to load profiles",
-                    subtitle = "Refresh again or open native OpenEUICC."
+                    title = "eUICC access required",
+                    subtitle = it.message ?: "Grant/OpenEUICC permission is missing. Profiles cannot be read yet."
                 )
                 Toast.makeText(
                     this@OpenEuiccIntegrationActivity,
-                    "Profile loading failed",
+                    "eUICC access required",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -172,18 +315,26 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         var successfulChannels = 0
 
         val ports = euiccChannelManager.flowAllOpenEuiccPorts().toList()
+        Log.i(R2W_OPENEUICC_TAG, "openEuiccPorts count=${ports.size} ports=$ports")
+        if (ports.isEmpty()) {
+            throw IllegalStateException("No OpenEUICC ports available. eUICC access/grant is missing or device has no accessible eUICC.")
+        }
+
         ports.forEach { (slotId, portId) ->
             val seIds = euiccChannelManager.flowEuiccSecureElements(slotId, portId).toList()
+            Log.i(R2W_OPENEUICC_TAG, "slot=$slotId port=$portId seIds=${seIds.map { it.id }}")
             seIds.forEach { seId ->
                 runCatching {
                     euiccChannelManager.withEuiccChannel(slotId, portId, seId) { channel ->
                         successfulChannels += 1
                         euiccChannelManager.notifyEuiccProfilesChanged(channel.logicalSlotId)
+                        Log.i(R2W_OPENEUICC_TAG, "channel open slot=${channel.slotId} logical=${channel.logicalSlotId} port=${channel.portId}")
                         val channelProfiles = if (showUnfilteredProfiles) {
                             channel.lpa.profiles
                         } else {
                             channel.lpa.profiles.operational
                         }
+                        Log.i(R2W_OPENEUICC_TAG, "profiles count=${channelProfiles.size}")
                         channelProfiles.map { it.toProfileUi(channel, seId) }
                     }
                 }.onSuccess {
@@ -217,8 +368,8 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
 
     private fun renderEmptyState() {
         renderProfileState(
-            title = "No profiles found",
-            subtitle = "Connect an eUICC reader or refresh profiles."
+            title = "No accessible eSIM profiles",
+            subtitle = "eUICC access/grant is required before installed profiles can be managed."
         )
     }
 
@@ -276,12 +427,10 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         }
         view.setOnClickListener { showProfileDetails(profile) }
         view.requireViewById<View>(R.id.openeuicc_profile_switch).setOnClickListener {
-            Toast.makeText(this, "Switch profile via native OpenEUICC", Toast.LENGTH_SHORT).show()
-            openNativeOpenEuicc()
+            switchProfile(profile)
         }
         view.requireViewById<View>(R.id.openeuicc_profile_delete).setOnClickListener {
-            Toast.makeText(this, "Delete profile via native OpenEUICC", Toast.LENGTH_SHORT).show()
-            openNativeOpenEuicc()
+            deleteProfile(profile)
         }
         return view
     }
@@ -468,10 +617,9 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         infoCard.addView(info)
         root.addView(infoCard)
 
-        root.addView(actionButton("Enable Profile", false, R.drawable.r2w_ic_sim_clean) {
+        root.addView(actionButton(if (profile.isEnabled) "Profile Active" else "Enable Profile", false, R.drawable.r2w_ic_sim_clean) {
             dialog.dismiss()
-            Toast.makeText(this, "Enable profile via native OpenEUICC", Toast.LENGTH_SHORT).show()
-            openNativeOpenEuicc()
+            if (!profile.isEnabled) enableProfile(profile)
         })
 
         val secondaryActions = LinearLayout(this).apply {
@@ -486,8 +634,7 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
 
         secondaryActions.addView(actionButton("Disable", true, R.drawable.r2w_ic_shield_clean) {
             dialog.dismiss()
-            Toast.makeText(this, "Disable profile via native OpenEUICC", Toast.LENGTH_SHORT).show()
-            openNativeOpenEuicc()
+            if (profile.isEnabled) disableProfile(profile)
         }.apply {
             layoutParams = LinearLayout.LayoutParams(0, dp(46), 1f).apply {
                 rightMargin = dp(6)
@@ -496,8 +643,7 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
 
         secondaryActions.addView(actionButton("Delete", true, R.drawable.r2w_ic_trash_clean, danger = true) {
             dialog.dismiss()
-            Toast.makeText(this, "Delete profile via native OpenEUICC", Toast.LENGTH_SHORT).show()
-            openNativeOpenEuicc()
+            deleteProfile(profile)
         }.apply {
             layoutParams = LinearLayout.LayoutParams(0, dp(46), 1f).apply {
                 leftMargin = dp(6)
@@ -751,7 +897,11 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
             date = "--",
             provider = providerName.ifBlank { "--" },
             slot = channel.slotLabel(seId),
-            profileClass = profileClass.label
+            profileClass = profileClass.label,
+            slotId = channel.slotId,
+            portId = channel.portId,
+            seId = seId,
+            isEnabled = isEnabled
         )
 
     private fun EuiccChannel.slotLabel(seId: EuiccChannel.SecureElementId): String {
@@ -775,7 +925,7 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
     private fun openNativeOpenEuicc() {
         Toast.makeText(
             this,
-            "Native OpenEUICC screen disabled in Roam2World build.",
+            "eUICC access is not available in this build/device state.",
             Toast.LENGTH_LONG
         ).show()
     }
@@ -785,6 +935,79 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
             .metaData
             ?.getString(key)
 
+
+    private fun switchProfile(profile: ProfileUi) {
+        if (profile.isEnabled) {
+            disableProfile(profile)
+        } else {
+            enableProfile(profile)
+        }
+    }
+
+    private fun enableProfile(profile: ProfileUi) {
+        runProfileAction(
+            profile = profile,
+            startMessage = "Enabling profile...",
+            successMessage = "Profile enabled",
+            failureMessage = "Could not enable profile"
+        ) { channel ->
+            channel.lpa.enableProfile(profile.iccid, true)
+        }
+    }
+
+    private fun disableProfile(profile: ProfileUi) {
+        runProfileAction(
+            profile = profile,
+            startMessage = "Disabling profile...",
+            successMessage = "Profile disabled",
+            failureMessage = "Could not disable profile"
+        ) { channel ->
+            channel.lpa.disableProfile(profile.iccid, true)
+        }
+    }
+
+    private fun deleteProfile(profile: ProfileUi) {
+        runProfileAction(
+            profile = profile,
+            startMessage = "Deleting profile...",
+            successMessage = "Profile deleted",
+            failureMessage = "Could not delete profile"
+        ) { channel ->
+            channel.lpa.deleteProfile(profile.iccid)
+        }
+    }
+
+    private fun runProfileAction(
+        profile: ProfileUi,
+        startMessage: String,
+        successMessage: String,
+        failureMessage: String,
+        action: (EuiccChannel) -> Boolean
+    ) {
+        Toast.makeText(this, startMessage, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val ok = runCatching {
+                euiccChannelManagerLoaded.await()
+                euiccChannelManagerService.waitForForegroundTask()
+                euiccChannelManager.withEuiccChannel(profile.slotId, profile.portId, profile.seId) { channel ->
+                    action(channel).also {
+                        euiccChannelManager.notifyEuiccProfilesChanged(channel.logicalSlotId)
+                    }
+                }
+            }.getOrElse {
+                false
+            }
+
+            Toast.makeText(
+                this@OpenEuiccIntegrationActivity,
+                if (ok) successMessage else failureMessage,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            loadLiveProfiles()
+        }
+    }
+
     private data class ProfileUi(
         val name: String,
         val iccid: String,
@@ -792,7 +1015,11 @@ class OpenEuiccIntegrationActivity : BaseEuiccAccessActivity(), OpenEuiccContext
         val date: String,
         val provider: String,
         val slot: String,
-        val profileClass: String
+        val profileClass: String,
+        val slotId: Int,
+        val portId: Int,
+        val seId: EuiccChannel.SecureElementId,
+        val isEnabled: Boolean
     )
 
     private data class ProfileLoadResult(

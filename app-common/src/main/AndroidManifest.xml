@@ -81,7 +81,7 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.wizard.DownloadWizardActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/download_wizard">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

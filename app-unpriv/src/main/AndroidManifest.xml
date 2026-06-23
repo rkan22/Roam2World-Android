@@ -111,7 +111,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Roam2World.Detail" />
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimQrActivity"
@@ -119,7 +120,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.R2W.AppCompat" />
 
         <activity
             android:name="im.angry.openeuicc.ui.UnprivilegedMainActivity"
@@ -157,7 +159,13 @@
             <activity
             android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
             android:exported="false" />
-</application>
+
+        <activity
+            android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.R2W.AppCompat" />
+
+    </application>
 
     <queries>
         <package android:name="com.android.stk" />

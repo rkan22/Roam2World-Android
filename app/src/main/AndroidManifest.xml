@@ -115,7 +115,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimDetailActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Roam2World.Detail" />
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimQrActivity"
@@ -123,7 +124,8 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.R2W.AppCompat" />
 
         <activity
             android:name=".ui.PrivilegedMainActivity"
@@ -163,6 +165,12 @@
         <activity
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
+
+    
+        <activity
+            android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.R2W.AppCompat" />
 
     </application>
 
