@@ -132,7 +132,10 @@ class MobileEsimDetailActivity : ComponentActivity() {
                     shareQrPayload(esim, esim.customerEmail?.takeIf { email -> email.isNotBlank() })
                 },
                 onInstall = { esim -> launchInstallFlow(esim, esim.installCode()) },
-                onRenew = { esim -> openRenewal(esim) }
+                onRenew = { esim -> openRenewal(esim) },
+                onManageProfiles = {
+                    startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
+                }
             )
         }
 
@@ -600,7 +603,8 @@ private fun MobileEsimDetailScreen(
     onShareQr: (MobileEsim) -> Unit,
     onSendCustomer: (MobileEsim) -> Unit,
     onInstall: (MobileEsim) -> Unit,
-    onRenew: (MobileEsim) -> Unit
+    onRenew: (MobileEsim) -> Unit,
+    onManageProfiles: () -> Unit
 ) {
     val bg = Color(0xFFF6F7FB)
     val blue = Color(0xFF2962FF)

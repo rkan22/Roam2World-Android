@@ -3,6 +3,17 @@ package im.angry.openeuicc.ui
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.BarcodeFormat
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
+import android.graphics.Color as AndroidColor
+import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -29,6 +40,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -47,7 +59,12 @@ import kotlinx.coroutines.launch
 
 class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     private var installCode: String = ""
-    private var lpaPayload: String = ""
+    private var lpaPayload by mutableStateOf("")
+    private var esimPackageName by mutableStateOf("")
+    private var iccid by mutableStateOf("")
+    private var provider by mutableStateOf("")
+    private var customerName by mutableStateOf("")
+
 
     private var loading by mutableStateOf(false)
     private var errorMessage by mutableStateOf<String?>(null)
@@ -64,10 +81,19 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         super.onCreate(savedInstanceState)
 
         installCode = intent.getStringExtra(EXTRA_INSTALL_CODE).orEmpty()
+        esimPackageName = intent.getStringExtra(EXTRA_PACKAGE_NAME).orEmpty().ifBlank { "Roam2World eSIM" }
+        iccid = intent.getStringExtra(EXTRA_ICCID).orEmpty()
+        provider = intent.getStringExtra(EXTRA_PROVIDER).orEmpty().ifBlank { "Roam2World" }
+        customerName = intent.getStringExtra(EXTRA_CUSTOMER_NAME).orEmpty().ifBlank { "Customer" }
         setInitialState()
 
         setContent {
-            MobileEsimInstallScreen(
+            MobileEsimInstallScreenV2(
+                packageName = esimPackageName,
+                iccid = iccid,
+                provider = provider,
+                customerName = customerName,
+                lpaPayload = lpaPayload,
                 loading = loading,
                 error = errorMessage,
                 retryVisible = retryVisible,
@@ -169,13 +195,236 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
 
     companion object {
         private const val EXTRA_INSTALL_CODE = "mobile_esim_install.install_code"
+        private const val EXTRA_PACKAGE_NAME = "mobile_esim_install.package_name"
+        private const val EXTRA_ICCID = "mobile_esim_install.iccid"
+        private const val EXTRA_PROVIDER = "mobile_esim_install.provider"
+        private const val EXTRA_CUSTOMER_NAME = "mobile_esim_install.customer_name"
 
         fun createIntent(context: Context, esim: MobileEsim): Intent =
             Intent(context, MobileEsimInstallActivity::class.java).apply {
                 putExtra(EXTRA_INSTALL_CODE, esim.installCode())
+                putExtra(EXTRA_PACKAGE_NAME, esim.packageName)
+                putExtra(EXTRA_ICCID, esim.iccid)
+                putExtra(EXTRA_PROVIDER, esim.provider)
+                putExtra(EXTRA_CUSTOMER_NAME, esim.customerName())
             }
     }
 }
+
+
+@Composable
+private fun MobileEsimInstallScreenV2(
+    packageName: String,
+    iccid: String,
+    provider: String,
+    customerName: String,
+    lpaPayload: String,
+    loading: Boolean,
+    error: String?,
+    retryVisible: Boolean,
+    startEnabled: Boolean,
+    compatibilityStatus: String,
+    deviceStatus: String,
+    downloadStatus: String,
+    smdpText: String,
+    matchingIdText: String,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    onStart: () -> Unit
+) {
+    val blue = Color(0xFF175CFF)
+    val bg = Color(0xFFF7F8FC)
+    val text = Color(0xFF071330)
+    val muted = Color(0xFF667085)
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize(), color = bg) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(onClick = onBack, shape = RoundedCornerShape(14.dp)) {
+                        Text("Back")
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "Install eSIM",
+                        color = text,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F7FF)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(packageName, color = text, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                        InstallInfoLine("Customer", customerName.ifBlank { "—" })
+                        InstallInfoLine("ICCID", iccid.ifBlank { "—" })
+                        InstallInfoLine("Provider", provider.ifBlank { "—" })
+                    }
+                }
+
+                Text(
+                    text = "Installation method",
+                    color = text,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color(0xFFD8E2F3), RoundedCornerShape(18.dp)),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    InstallTab("QR Code Install", true, Modifier.weight(1f))
+                    InstallTab("Activation Code Install", false, Modifier.weight(1f))
+                    InstallTab("Manual Install", false, Modifier.weight(1f))
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        val bitmap = remember(lpaPayload) {
+                            lpaPayload.takeIf { it.isNotBlank() }?.let { createInstallQrBitmap(it, 720) }
+                        }
+
+                        if (bitmap != null) {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "eSIM QR Code",
+                                modifier = Modifier.size(300.dp)
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(260.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("QR will appear after preflight", color = muted, textAlign = TextAlign.Center)
+                            }
+                        }
+
+                        Button(
+                            onClick = onStart,
+                            enabled = startEnabled,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = blue),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("Install QR with OpenEUICC", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (error.isNullOrBlank()) Color(0xFFEFFAF1) else Color(0xFFFFF3F3)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = when {
+                                loading -> "Checking"
+                                !error.isNullOrBlank() -> "Needs attention"
+                                startEnabled -> "Ready"
+                                else -> "Waiting"
+                            },
+                            color = if (error.isNullOrBlank()) Color(0xFF179441) else Color(0xFFD92D20),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = error
+                                ?: "Activation code, device eSIM support and OpenEUICC wizard are ready.",
+                            color = muted
+                        )
+                        if (retryVisible) {
+                            OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+
+                InfoCard(title = "Preflight Details") {
+                    StepRow("Activation code", compatibilityStatus)
+                    StepRow("Device eSIM support", deviceStatus)
+                    StepRow("Download wizard", downloadStatus)
+                    if (smdpText.isNotBlank()) DetailRow("SMDP", smdpText)
+                    if (matchingIdText.isNotBlank()) DetailRow("Matching ID", matchingIdText)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InstallInfoLine(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(label + ":", color = Color(0xFF667085), modifier = Modifier.weight(0.35f))
+        Text(value, color = Color(0xFF071330), fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(0.65f))
+    }
+}
+
+@Composable
+private fun InstallTab(label: String, selected: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(if (selected) Color(0xFFEAF1FF) else Color.Transparent)
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = if (selected) Color(0xFF175CFF) else Color(0xFF3A4252),
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+private fun createInstallQrBitmap(content: String, size: Int): Bitmap? =
+    runCatching {
+        val matrix = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, size, size)
+        Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888).apply {
+            for (x in 0 until size) {
+                for (y in 0 until size) {
+                    setPixel(x, y, if (matrix[x, y]) AndroidColor.BLACK else AndroidColor.WHITE)
+                }
+            }
+        }
+    }.getOrNull()
 
 @Composable
 private fun MobileEsimInstallScreen(

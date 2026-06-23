@@ -166,6 +166,12 @@
             android:name="im.angry.openeuicc.ui.AddDealerActivity"
             android:exported="false" />
 
+    
+        <activity
+            android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.R2W.AppCompat" />
+
     </application>
 
 </manifest>
