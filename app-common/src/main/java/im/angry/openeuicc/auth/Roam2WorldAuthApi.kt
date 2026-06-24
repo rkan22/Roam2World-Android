@@ -1838,8 +1838,8 @@ class Roam2WorldAuthApi(baseUrl: String) {
     )
 
     companion object {
-        private val DEALER_WALLET_APPROVAL_REQUESTS_ENDPOINT = ApiEndpoint(label = "dealer wallet approvals", path = "mobile/dealer-wallet-requests/")
-        private val RESELLER_WALLET_APPROVAL_REQUESTS_ENDPOINT = ApiEndpoint(label = "reseller wallet approvals", path = "mobile/reseller-wallet-requests/")
+        private val DEALER_WALLET_APPROVAL_REQUESTS_ENDPOINT = ApiEndpoint(label = "dealer wallet approvals", path = "api/v1/mobile/dealer-wallet-requests/")
+        private val RESELLER_WALLET_APPROVAL_REQUESTS_ENDPOINT = ApiEndpoint(label = "reseller wallet approvals", path = "api/v1/mobile/reseller-wallet-requests/")
 
         private const val TAG = "Roam2WorldAuthApi"
         private const val DEFAULT_API_BASE_URL = "https://roam2world-panels-backend.onrender.com"
