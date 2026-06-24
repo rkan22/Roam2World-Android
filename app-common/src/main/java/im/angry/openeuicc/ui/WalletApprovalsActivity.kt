@@ -196,6 +196,8 @@ class WalletApprovalsActivity : Activity() {
             val result = runCatching { api.approveWalletApprovalRequest(session, id, "Approved from mobile") }
             Toast.makeText(this@WalletApprovalsActivity, result.fold({ "Approved" }, { it.message ?: "Approve failed" }), Toast.LENGTH_SHORT).show()
             loadRequests()
+            loadRequests()
+            loadRequests()
         }
     }
 
@@ -203,6 +205,8 @@ class WalletApprovalsActivity : Activity() {
         uiScope.launch {
             val result = runCatching { api.rejectWalletApprovalRequest(session, id, "Rejected from mobile") }
             Toast.makeText(this@WalletApprovalsActivity, result.fold({ "Rejected" }, { it.message ?: "Reject failed" }), Toast.LENGTH_SHORT).show()
+            loadRequests()
+            loadRequests()
             loadRequests()
         }
     }
