@@ -51,6 +51,7 @@ class DashboardActivity : ComponentActivity() {
                             "store", "packages" -> startActivity(Intent(this, PackagesActivity::class.java))
                             "orders", "history", "transactions" -> openPurchaseHistoryActivity()
                             "wallet" -> openWalletActivity()
+                            "wallet_approvals", "approvals" -> openWalletApprovalsActivity()
                             "orange", "recharge", "tgt" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
                             "vodafone" -> startActivity(Intent(this, VodafoneRenewalActivity::class.java))
                             "crm", "customers", "dealers" -> openMyDealersActivity()
@@ -105,6 +106,14 @@ class DashboardActivity : ComponentActivity() {
             startActivity(Intent(this, WalletActivity::class.java))
         } catch (e: Exception) {
             android.widget.Toast.makeText(this, e.message ?: "Wallet could not be opened", android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun openWalletApprovalsActivity() {
+        try {
+            startActivity(Intent(this, WalletApprovalsActivity::class.java))
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, e.message ?: "Wallet approvals could not be opened", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 

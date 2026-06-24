@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Business
@@ -661,6 +662,7 @@ private fun QuickActionsCard(onActionClick: (String) -> Unit) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 QuickActionButton(Icons.Default.AccountBalanceWallet, "Wallet", { onActionClick("wallet") }, Modifier.weight(1f))
+                QuickActionButton(Icons.Default.CheckCircle, "Approvals", { onActionClick("wallet_approvals") }, Modifier.weight(1f))
                 QuickActionButton(Icons.Default.Refresh, "Recharge", { onActionClick("recharge") }, Modifier.weight(1f))
                 QuickActionButton(Icons.Default.People, "Dealers", { onActionClick("dealers") }, Modifier.weight(1f))
             }

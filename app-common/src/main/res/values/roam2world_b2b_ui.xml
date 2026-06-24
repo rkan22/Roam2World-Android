@@ -30,4 +30,13 @@
     <string name="r2w_enter_iccid">Enter ICCID</string>
     <string name="r2w_customer_information">Customer Information</string>
     <string name="r2w_activate">Activate</string>
+
+    <style name="R2WNoActionBarTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F8FAFC</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
 </resources>
