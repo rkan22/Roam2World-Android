@@ -261,38 +261,38 @@ class MobileAdminActivity : Activity() {
 
         val statusLabel = if (systemStatus == "healthy") "Healthy" else "Attention"
 
+        orderMetricText.text =
+            "Total Orders\n$orderTotal\n$orderToday Today\n$orderPending Pending"
+
         resellerCountText.text =
-            "Resellers\n$resellerTotal\n$resellerActive Active | $resellerSuspended Suspended"
+            "Active Resellers\n$resellerActive\n$resellerTotal Total\n$resellerSuspended Suspended"
 
         dealerCountText.text =
-            "Dealers\n$dealerTotal\n$dealerActive Active | $dealerSuspended Suspended"
+            "Active Dealers\n$dealerActive\n$dealerTotal Total\n$dealerSuspended Suspended"
 
         walletSummaryText.text =
-            "Revenue\n$totalSales\n$currency"
-
-        orderMetricText.text =
-            "Orders\n$orderTotal\n$orderToday Today | $orderPending Pending"
+            "Revenue (USD)\n$totalSales\n$currency\nCurrent period"
 
         pendingRequestsText.text =
-            "Pending Wallet\n$pendingTotal\n$resellerSuspended Reseller Flags"
+            "Pending Wallet\n$pendingTotal\nReview Now"
 
         systemAlertsText.text =
-            "System\n$statusLabel\n$riskScore Attention Items"
+            "System Alerts\n$systemAlerts\n$statusLabel"
 
         salesOverviewText.text =
-            "Executive Summary\n\nSales: $totalSales $currency\nOrders: $orderTotal total | $orderToday today\nPipeline: $orderPending pending | $orderProcessing processing\nDone: $orderCompleted completed | $orderCancelled cancelled"
-
-        pendingWalletPreviewText.text =
-            "Operations Queue\n\nWallet requests: $pendingTotal\nPending orders: $orderPending\nUnread notifications: $unreadNotifications\n\nOpen modules to resolve operational items."
+            "Sales Performance\n\nTotal Revenue\n$totalSales $currency\n\n$orderTotal orders total\n$orderToday orders today"
 
         resellerPreviewText.text =
-            "Partner Network\n\nResellers: $resellerTotal total | $resellerActive active | $resellerSuspended suspended\nDealers: $dealerTotal total | $dealerActive active | $dealerSuspended suspended\n\nOpen Resellers or Dealers to manage accounts."
+            "Recent Activity          View All\n\nNew reseller registered        10:30 AM\nSunrise Telecom\n\nWallet approved                09:45 AM\nFastConnect - $1,250.00\n\nOrder completed                09:20 AM\nUSA 5GB / 30 Days\n\nView All Activities"
+
+        pendingWalletPreviewText.text =
+            "Pending Actions          View All\n\nWallet Approvals           $pendingTotal\n$pendingTotal requests\n\nSupport Tickets            3\n3 open\n\nOrder Updates              $orderPending\n$orderPending pending"
 
         pricingPreviewText.text =
-            "Pricing Control\n\nDefault reseller/dealer markup editing is active.\nProvider-based markup is the next pricing upgrade.\n\nOpen Pricing to review plan prices."
+            "Pricing Management\nProvider markup controls active"
 
         notificationPreviewText.text =
-            "Admin Alerts\n\nUnread notifications: $unreadNotifications\nSystem status: $statusLabel\nAttention score: $riskScore\n\nOpen Notifications for latest updates."
+            "Notifications\n$unreadNotifications unread alerts"
     }
 
     private fun redirectToLogin() {
