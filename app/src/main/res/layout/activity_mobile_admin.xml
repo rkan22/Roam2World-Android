@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F6F9FE">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="172dp"
+            android:background="@drawable/admin_hero_background"
+            android:orientation="vertical"
+            android:paddingLeft="26dp"
+            android:paddingTop="22dp"
+            android:paddingRight="26dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="9:41"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100%"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="118dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:gravity="center"
+                    android:text="☰"
+                    android:textColor="#FFFFFF"
+                    android:textSize="34sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="22dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/adminTitleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Admin Dashboard"
+                        android:textColor="#FFFFFF"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/adminSubtitleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Overview &amp; operations"
+                        android:textColor="#DDEBFF"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/admin_secondary_button"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="#1565F4"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:background="@drawable/admin_menu_button"
+                    android:gravity="center"
+                    android:text="AD"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#F6F9FE"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-12dp"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/orderMetricText"
+                    android:layout_width="0dp"
+                    android:layout_height="124dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_metric_card"
+                    android:drawableTop="@drawable/admin_icon_orders"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="14dp"
+                    android:text="Total Orders\n1,842\n↑ 12.6%\nvs last 30 days"
+                    android:textColor="#081A44"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/resellerCountText"
+                    android:layout_width="0dp"
+                    android:layout_height="124dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_metric_card"
+                    android:drawableTop="@drawable/admin_icon_partners"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="14dp"
+                    android:text="Active Resellers\n128\n↑ 8.3%\nvs last 30 days"
+                    android:textColor="#081A44"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/dealerCountText"
+                    android:layout_width="0dp"
+                    android:layout_height="124dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_metric_card"
+                    android:drawableTop="@drawable/admin_icon_user"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="14dp"
+                    android:text="Active Dealers\n1,486\n↑ 10.7%\nvs last 30 days"
+                    android:textColor="#081A44"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/walletSummaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="124dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_metric_card"
+                    android:drawableTop="@drawable/admin_icon_money"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="14dp"
+                    android:text="Revenue (USD)\n$254,830.50\n↑ 18.6%\nvs last 30 days"
+                    android:textColor="#081A44"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/admin_section_card"
+                android:elevation="2dp"
+                android:orientation="horizontal"
+                android:padding="18dp">
+
+                <TextView
+                    android:id="@+id/salesOverviewText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.34"
+                    android:text="Sales Performance\n\nTotal Revenue\n$254,830.50\n\n↑ 18.6%  vs last month"
+                    android:textColor="#081A44"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.66"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="120dp"
+                        android:layout_height="38dp"
+                        android:layout_gravity="end"
+                        android:background="@drawable/admin_secondary_button"
+                        android:gravity="center"
+                        android:text="This Month"
+                        android:textColor="#081A44"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:contentDescription="Sales chart"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/admin_chart_sales" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="Quick Actions"
+                android:textColor="#081A44"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="4"
+                android:layout_marginBottom="14dp">
+
+                <Button android:id="@+id/openOrdersButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_doc" android:text="Orders" />
+                <Button android:id="@+id/openResellersButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_partners" android:text="Resellers" />
+                <Button android:id="@+id/openDealersButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_user" android:text="Dealers" />
+                <Button android:id="@+id/openPricingButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_tag" android:text="Pricing" />
+                <Button android:id="@+id/openReportsButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_reports" android:text="Reports" />
+                <Button android:id="@+id/openSupportTicketsButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_support" android:text="Support Tickets" />
+                <Button android:id="@+id/openNotificationsButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_notifications" android:text="Notifications" />
+                <Button android:id="@+id/openSystemHealthButton" style="@style/AdminActionButton" android:drawableTop="@drawable/admin_icon_health" android:text="System Health" />
+            </GridLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/resellerPreviewText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="7dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_section_card"
+                    android:drawableTop="@drawable/admin_icon_doc"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="18dp"
+                    android:text="Recent Activity          View All\n\nNew reseller registered        10:30 AM\nSunrise Telecom\n\nWallet approved                09:45 AM\nFastConnect - $1,250.00\n\nOrder completed                09:20 AM\nUSA 5GB / 30 Days\n\nView All Activities"
+                    android:textColor="#081A44"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/pendingWalletPreviewText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="7dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/admin_section_card"
+                    android:drawableTop="@drawable/admin_icon_briefcase"
+                    android:drawablePadding="8dp"
+                    android:elevation="2dp"
+                    android:padding="18dp"
+                    android:text="Pending Actions          View All\n\nWallet Approvals           5\n5 requests\n\nSupport Tickets            3\n3 open\n\nOrder Updates              7\n7 pending"
+                    android:textColor="#081A44"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/pricingPreviewText"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/notificationPreviewText"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/pendingRequestsText"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/systemAlertsText"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/openApprovalsButton"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/openAuditLogsButton"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="76dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/admin_section_card"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/bottomDashboardNav"
+                    style="@style/AdminBottomNavActive"
+                    android:drawableTop="@drawable/admin_icon_health"
+                    android:text="Dashboard" />
+
+                <TextView
+                    android:id="@+id/bottomResellersNav"
+                    style="@style/AdminBottomNav"
+                    android:drawableTop="@drawable/admin_icon_briefcase"
+                    android:text="Operations" />
+
+                <TextView
+                    android:id="@+id/bottomWalletNav"
+                    style="@style/AdminBottomNav"
+                    android:drawableTop="@drawable/admin_icon_shield"
+                    android:text="Alerts" />
+
+                <TextView
+                    android:id="@+id/bottomPricingNav"
+                    style="@style/AdminBottomNav"
+                    android:drawableTop="@drawable/admin_icon_settings"
+                    android:text="Settings" />
+
+                <TextView
+                    android:id="@+id/bottomMoreNav"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/refreshButton"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

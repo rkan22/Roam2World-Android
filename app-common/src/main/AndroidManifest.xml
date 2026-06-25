@@ -140,5 +140,11 @@
         <activity
             android:name="im.angry.openeuicc.ui.MobileNotificationsActivity"
             android:exported="false" />
+
+        <activity
+            android:name="im.angry.openeuicc.ui.WalletApprovalsActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar"
+            android:label="Wallet Approvals" />
 </application>
 </manifest>

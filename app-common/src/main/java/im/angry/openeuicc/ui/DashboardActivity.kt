@@ -29,6 +29,7 @@ class DashboardActivity : ComponentActivity() {
 
     private val dashboardDataFlow = MutableStateFlow<MobileDashboardData?>(null)
     private var displayName by mutableStateOf("Admin")
+    private var userRole by mutableStateOf("admin")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,8 @@ class DashboardActivity : ComponentActivity() {
                             "store", "packages" -> startActivity(Intent(this, PackagesActivity::class.java))
                             "orders", "history", "transactions" -> openPurchaseHistoryActivity()
                             "wallet" -> openWalletActivity()
+                            "wallet_approvals", "approvals" -> openWalletApprovalsActivity()
+                            "mobile_admin", "admin" -> openMobileAdminActivity()
                             "orange", "recharge", "tgt" -> startActivity(Intent(this, TgtSimRechargeActivity::class.java))
                             "vodafone" -> startActivity(Intent(this, VodafoneRenewalActivity::class.java))
                             "crm", "customers", "dealers" -> openMyDealersActivity()
@@ -73,6 +76,7 @@ class DashboardActivity : ComponentActivity() {
         lifecycleScope.launch {
             val session = activeSessionOrReturnToLogin() ?: return@launch
             displayName = session.displayName ?: "Admin"
+            userRole = session.role?.lowercase() ?: "dealer"
 
             runCatching {
                 authApi.dashboard(session)
@@ -100,8 +104,38 @@ class DashboardActivity : ComponentActivity() {
         return refreshed
     }
 
+
+    private fun openMobileAdminActivity() {
+        try {
+            startActivity(
+                Intent().setClassName(
+                    packageName,
+                    "im.angry.openeuicc.MobileAdminActivity"
+                )
+            )
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(
+                this,
+                e.message ?: "Mobile Admin could not be opened",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     private fun openWalletActivity() {
-        startActivity(Intent(this, WalletActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+        try {
+            startActivity(Intent(this, WalletActivity::class.java))
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, e.message ?: "Wallet could not be opened", android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun openWalletApprovalsActivity() {
+        try {
+            startActivity(Intent(this, WalletApprovalsActivity::class.java))
+        } catch (e: Exception) {
+            android.widget.Toast.makeText(this, e.message ?: "Wallet approvals could not be opened", android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun openPurchaseHistoryActivity() {

@@ -1,10 +1,12 @@
 package im.angry.openeuicc.ui
 
+import android.content.Intent
 import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import im.angry.openeuicc.R
+import im.angry.openeuicc.MobileAdminActivity
 import im.angry.openeuicc.util.*
 
 class PrivilegedMainActivity : MainActivity() {
@@ -37,6 +39,11 @@ class PrivilegedMainActivity : MainActivity() {
 
         R.id.slot_mapping -> {
             showSlotMappingFragment()
+            true
+        }
+
+        R.id.mobile_admin -> {
+            startActivity(Intent(this, MobileAdminActivity::class.java))
             true
         }
 

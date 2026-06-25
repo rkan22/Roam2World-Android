@@ -55,7 +55,9 @@
 
         <activity
             android:name="im.angry.openeuicc.ui.WalletActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar"
+            android:label="" />
 
         <activity
             android:name="im.angry.openeuicc.ui.WalletRequestActivity"

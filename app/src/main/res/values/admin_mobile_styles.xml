@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AdminActionButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">96dp</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="android:background">@drawable/admin_metric_card</item>
+        <item name="android:textColor">#081A44</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="AdminBottomNav">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#52607A</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:drawablePadding">4dp</item>
+    </style>
+
+    <style name="AdminBottomNavActive">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/admin_secondary_button</item>
+        <item name="android:textColor">#1565F4</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:drawablePadding">4dp</item>
+    </style>
+</resources>

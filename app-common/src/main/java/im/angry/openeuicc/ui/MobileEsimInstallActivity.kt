@@ -76,6 +76,11 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
     private var downloadStatus by mutableStateOf("")
     private var smdpText by mutableStateOf("")
     private var matchingIdText by mutableStateOf("")
+    private var transferStatus by mutableStateOf("Waiting")
+    private var installedStatus by mutableStateOf("Not checked")
+    private var managementStatus by mutableStateOf("Locked")
+    private var permissionRequired by mutableStateOf(false)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,8 +108,13 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
                 downloadStatus = downloadStatus,
                 smdpText = smdpText,
                 matchingIdText = matchingIdText,
+                transferStatus = transferStatus,
+                installedStatus = installedStatus,
+                managementStatus = managementStatus,
+                permissionRequired = permissionRequired,
                 onBack = { finish() },
                 onRetry = { runPreflight() },
+                onGrantPermission = { launchGrantPermission() },
                 onStart = { launchDownloadWizard() }
             )
         }
@@ -124,6 +134,10 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         downloadStatus = getString(R.string.mobile_esim_install_step_waiting)
         smdpText = ""
         matchingIdText = ""
+        transferStatus = "Waiting"
+        installedStatus = "Not checked"
+        managementStatus = "Locked"
+        permissionRequired = false
     }
 
     private fun runPreflight() {
@@ -161,13 +175,25 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
             }
 
             val platformHasEuicc = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
-            if (openEuiccPorts.isEmpty() && !platformHasEuicc) {
-                showFailure(getString(R.string.mobile_esim_install_device_unsupported))
+            if (openEuiccPorts.isEmpty()) {
+                deviceStatus = if (platformHasEuicc) "Permission required" else getString(R.string.mobile_esim_install_step_blocked)
+                downloadStatus = getString(R.string.mobile_esim_install_step_blocked)
+                permissionRequired = true
+                transferStatus = if (platformHasEuicc) "Grant permission first" else "Blocked"
+                installedStatus = "Not installed"
+                managementStatus = "Locked"
+
+                val message = "eSIM permission is required before installation. Grant permission, then return here and refresh status."
+
+                showFailure(message)
                 return@launch
             }
 
             deviceStatus = getString(R.string.mobile_esim_install_step_passed)
             downloadStatus = getString(R.string.mobile_esim_install_ready)
+            transferStatus = "Ready"
+            installedStatus = "Waiting for install"
+            managementStatus = "Available after install"
             loading = false
             startEnabled = true
         }
@@ -178,19 +204,51 @@ class MobileEsimInstallActivity : BaseEuiccAccessActivity() {
         errorMessage = message
         retryVisible = true
         startEnabled = false
+        if (deviceStatus == getString(R.string.mobile_esim_install_step_running)) {
+            deviceStatus = getString(R.string.mobile_esim_install_step_blocked)
+        }
         downloadStatus = getString(R.string.mobile_esim_install_step_blocked)
+        transferStatus = "Blocked"
+        installedStatus = "Not installed"
+        managementStatus = "Locked"
+    }
+
+    private fun launchGrantPermission() {
+        transferStatus = "Opening permission screen"
+        runCatching {
+            startActivity(Intent(this, OpenEuiccIntegrationActivity::class.java))
+        }.onFailure {
+            errorMessage = it.message ?: "Could not open permission screen"
+        }
+    }
+
+    private fun normalizeActivationCode(raw: String): String {
+        val cleaned = raw.trim()
+        if (cleaned.startsWith("LPA:", ignoreCase = true)) return cleaned
+        if (cleaned.startsWith("1$")) return "LPA:$cleaned"
+        return cleaned
     }
 
     private fun launchDownloadWizard() {
         if (lpaPayload.isBlank()) return
         downloadStatus = getString(R.string.mobile_esim_install_launching)
-        startActivity(
-            DownloadWizardActivity.newIntent(this).apply {
-                action = Intent.ACTION_VIEW
-                data = lpaPayload.toUri()
-            }
-        )
-        finish()
+        transferStatus = "Transferred to OpenEUICC"
+        installedStatus = "Check after wizard"
+        managementStatus = "Refresh after install"
+
+        runCatching {
+            startActivity(
+                DownloadWizardActivity.newIntent(this).apply {
+                    action = Intent.ACTION_VIEW
+                    data = normalizeActivationCode(installCode).toUri()
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+            )
+        }.onFailure {
+            errorMessage = it.message ?: "OpenEUICC wizard could not be opened"
+            downloadStatus = getString(R.string.mobile_esim_install_step_blocked)
+            transferStatus = "Wizard failed"
+        }
     }
 
     companion object {
@@ -228,8 +286,13 @@ private fun MobileEsimInstallScreenV2(
     downloadStatus: String,
     smdpText: String,
     matchingIdText: String,
+    transferStatus: String,
+    installedStatus: String,
+    managementStatus: String,
+    permissionRequired: Boolean,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onGrantPermission: () -> Unit,
     onStart: () -> Unit
 ) {
     val blue = Color(0xFF175CFF)
@@ -369,18 +432,59 @@ private fun MobileEsimInstallScreenV2(
                                 ?: "Activation code, device eSIM support and OpenEUICC wizard are ready.",
                             color = muted
                         )
+                        if (permissionRequired) {
+                            Button(
+                                onClick = onGrantPermission,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF175CFF)),
+                                shape = RoundedCornerShape(18.dp)
+                            ) {
+                                Text("Grant eSIM Permission", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
                         if (retryVisible) {
                             OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
-                                Text("Retry")
+                                Text("Retry / Refresh Status")
                             }
                         }
                     }
                 }
 
-                InfoCard(title = "Preflight Details") {
-                    StepRow("Activation code", compatibilityStatus)
-                    StepRow("Device eSIM support", deviceStatus)
-                    StepRow("Download wizard", downloadStatus)
+                InfoCard(title = "Installation Progress") {
+                    StepRow("1. Activation code", compatibilityStatus)
+                    StepRow("2. Device eSIM slot", deviceStatus)
+                    StepRow("3. Transfer to OpenEUICC", transferStatus)
+                    StepRow("4. Profile installed", installedStatus)
+                    StepRow("5. Profile management", managementStatus)
+                }
+
+                InfoCard(title = "Profile Actions") {
+                    Text(
+                        text = "After the eSIM is installed, refresh profile status from OpenEUICC. Enable, Disable and Delete actions become available on the installed profile detail screen.",
+                        color = Color(0xFF50535C),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    OutlinedButton(
+                        onClick = onRetry,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text("Refresh Status")
+                    }
+
+                    OutlinedButton(
+                        onClick = onStart,
+                        enabled = startEnabled,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text("Open OpenEUICC Wizard")
+                    }
+                }
+
+                InfoCard(title = "Manual Installation Data") {
                     if (smdpText.isNotBlank()) DetailRow("SMDP", smdpText)
                     if (matchingIdText.isNotBlank()) DetailRow("Matching ID", matchingIdText)
                 }
@@ -437,8 +541,13 @@ private fun MobileEsimInstallScreen(
     downloadStatus: String,
     smdpText: String,
     matchingIdText: String,
+    transferStatus: String,
+    installedStatus: String,
+    managementStatus: String,
+    permissionRequired: Boolean,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onGrantPermission: () -> Unit,
     onStart: () -> Unit
 ) {
     val orange = Color(0xFFFF6A00)
