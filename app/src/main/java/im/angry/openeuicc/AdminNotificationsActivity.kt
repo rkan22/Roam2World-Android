@@ -55,7 +55,7 @@ class AdminNotificationsActivity : Activity() {
     private fun loadNotifications() {
         subtitleText.text = "Loading notifications..."
         listContainer.removeAllViews()
-        addCard("Loading notifications...\\n\\nFetching recent account and system messages.")
+        addCard("Loading Notifications\\n\\nRetrieving recent account, system, and operational alerts.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -123,7 +123,7 @@ class AdminNotificationsActivity : Activity() {
 
         if (cachedNotifications.length() == 0) {
             subtitleText.text = "0 notification(s)"
-            addCard("No notifications found.\n\nSystem and account notifications will appear here.")
+            addCard("No Notifications Found\n\nSystem and account notifications will appear here.")
             return
         }
 
@@ -148,7 +148,7 @@ class AdminNotificationsActivity : Activity() {
                     "Read: ${if (isRead) "Yes" else "No"}\n" +
                     "Created: $createdAt\n\n" +
                     message.take(140) + if (message.length > 140) "..." else "" + "\n\n" +
-                    "Tap to open details →",
+                    "Open notification details",
                 item.toString()
             )
         }
@@ -156,7 +156,7 @@ class AdminNotificationsActivity : Activity() {
         subtitleText.text = "$visibleCount / ${cachedNotifications.length()} notification(s)"
 
         if (visibleCount == 0) {
-            addCard("No notifications match the current filter.\n\nTry clearing filters or searching another title, message, or type.")
+            addCard("No Matching Notifications\n\nClear filters or search by title, message, or notification type.")
         }
     }
 
@@ -190,7 +190,7 @@ class AdminNotificationsActivity : Activity() {
 
     private fun addFilterControls() {
         addCard(
-            "Filters\n" +
+            "Search & Filters\n" +
                 "Search: ${currentSearchQuery.ifBlank { "All" }}\n" +
                 "Read: ${currentReadFilter.replaceFirstChar { it.uppercase() }}"
         )
@@ -261,23 +261,35 @@ class AdminNotificationsActivity : Activity() {
     private fun addCard(text: String, notificationJson: String? = null) {
         val card = TextView(this)
         card.text = text
-        card.textSize = 15.5f
-        card.setTextColor(0xFF07133D.toInt())
-        card.setBackgroundResource(R.drawable.admin_card_background)
-        card.elevation = 3f
-        card.setPadding(28, 24, 28, 24)
+        card.textSize = 14.5f
+        card.setTextColor(0xFF081A44.toInt())
+        card.setBackgroundResource(R.drawable.admin_section_card)
+        card.elevation = 4f
+        card.setPadding(30, 26, 30, 26)
+        card.setLineSpacing(4f, 1.05f)
+
+        val iconRes = when {
+            text.startsWith("Filters") -> R.drawable.admin_icon_settings
+            text.startsWith("Loading") -> R.drawable.admin_icon_health
+            text.startsWith("No ") -> R.drawable.admin_icon_doc
+            notificationJson != null -> R.drawable.admin_icon_notifications
+            else -> R.drawable.admin_icon_doc
+        }
+
+        card.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+        card.compoundDrawablePadding = 18
 
         val params = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        params.setMargins(0, 0, 0, 20)
+        params.setMargins(0, 0, 0, 18)
         card.layoutParams = params
 
         if (notificationJson != null) {
             card.setOnClickListener {
                 startActivity(
-                    android.content.Intent(this, AdminNotificationDetailActivity::class.java).apply {
+                    Intent(this, AdminNotificationDetailActivity::class.java).apply {
                         putExtra(AdminNotificationDetailActivity.EXTRA_NOTIFICATION_JSON, notificationJson)
                     }
                 )

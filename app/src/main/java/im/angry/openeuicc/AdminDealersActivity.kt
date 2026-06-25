@@ -56,7 +56,7 @@ class AdminDealersActivity : Activity() {
     private fun loadDealers() {
         subtitleText.text = "Loading dealer accounts..."
         listContainer.removeAllViews()
-        addCard("Loading dealers...\\n\\nFetching dealer account status.")
+        addCard("Loading Dealers\\n\\nRetrieving dealer accounts, balances, and reseller relationships.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) {
@@ -134,7 +134,7 @@ class AdminDealersActivity : Activity() {
 
         if (cachedDealers.length() == 0) {
             subtitleText.text = "0 dealer account(s)"
-            addCard("No dealers found.\n\nDealer accounts will appear here once resellers create or receive dealers.")
+            addCard("No Dealers Found\n\nDealer accounts will appear here once resellers create or receive dealers.")
             return
         }
 
@@ -172,7 +172,7 @@ class AdminDealersActivity : Activity() {
                     "Allocated: $totalAllocated\n" +
                     "Spent: $totalSpent\n" +
                     "Markup: $markup%\n\n" +
-                    "Tap to open details →",
+                    "Open dealer details",
                 dealer.toString()
             )
         }
@@ -180,7 +180,7 @@ class AdminDealersActivity : Activity() {
         subtitleText.text = "$visibleCount / ${cachedDealers.length()} dealer account(s)"
 
         if (visibleCount == 0) {
-            addCard("No dealers match the current filter.\n\nTry clearing filters or searching with another dealer or reseller email.")
+            addCard("No Matching Dealers\n\nClear filters or search by dealer name, dealer email, or reseller email.")
         }
     }
 
@@ -218,7 +218,7 @@ class AdminDealersActivity : Activity() {
 
     private fun addFilterControls() {
         addCard(
-            "Filters\n" +
+            "Search & Filters\n" +
                 "Search: ${currentSearchQuery.ifBlank { "All" }}\n" +
                 "Status: ${currentStatusFilter.replaceFirstChar { it.uppercase() }}"
         )
@@ -281,39 +281,35 @@ class AdminDealersActivity : Activity() {
     }
 
     private fun statusBadge(status: String): String {
-        val normalized = status.lowercase()
-        val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> ""
-            normalized.contains("completed") -> ""
-            normalized.contains("resolved") -> ""
-            normalized.contains("ok") -> ""
-            normalized.contains("open") -> ""
-            normalized.contains("pending") -> ""
-            normalized.contains("progress") -> ""
-            normalized.contains("inactive") -> ""
-            normalized.contains("closed") -> ""
-            normalized.contains("suspended") -> ""
-            normalized.contains("failed") -> ""
-            normalized.contains("error") -> ""
-            else -> ""
-        }
         return "Status: $status"
     }
 
     private fun addCard(text: String, dealerJson: String? = null) {
         val card = TextView(this)
         card.text = text
-        card.textSize = 15.5f
-        card.setTextColor(0xFF07133D.toInt())
-        card.setBackgroundResource(R.drawable.admin_card_background)
-        card.elevation = 3f
-        card.setPadding(28, 24, 28, 24)
+        card.textSize = 14.5f
+        card.setTextColor(0xFF081A44.toInt())
+        card.setBackgroundResource(R.drawable.admin_section_card)
+        card.elevation = 4f
+        card.setPadding(30, 26, 30, 26)
+        card.setLineSpacing(4f, 1.05f)
+
+        val iconRes = when {
+            text.startsWith("Filters") -> R.drawable.admin_icon_settings
+            text.startsWith("Loading") -> R.drawable.admin_icon_health
+            text.startsWith("No ") -> R.drawable.admin_icon_doc
+            dealerJson != null -> R.drawable.admin_icon_user
+            else -> R.drawable.admin_icon_doc
+        }
+
+        card.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+        card.compoundDrawablePadding = 18
 
         val params = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        params.setMargins(0, 0, 0, 20)
+        params.setMargins(0, 0, 0, 18)
         card.layoutParams = params
 
         if (dealerJson != null) {

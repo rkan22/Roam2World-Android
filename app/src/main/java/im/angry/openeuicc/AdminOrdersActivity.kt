@@ -56,7 +56,7 @@ class AdminOrdersActivity : Activity() {
     private fun loadOrders() {
         subtitleText.text = "Loading orders..."
         listContainer.removeAllViews()
-        addCard("Loading orders...\\n\\nFetching the latest order activity.")
+        addCard("Loading Orders\\n\\nRetrieving latest order activity and fulfillment status.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) {
@@ -134,7 +134,7 @@ class AdminOrdersActivity : Activity() {
 
         if (cachedOrders.length() == 0) {
             subtitleText.text = "0 order(s)"
-            addCard("No orders found.\n\nNew orders will appear here once customers start placing orders.")
+            addCard("No Orders Found\n\nNew customer and reseller orders will appear here as soon as they are created.")
             return
         }
 
@@ -174,7 +174,7 @@ class AdminOrdersActivity : Activity() {
                     "Reseller: ${resellerEmail.ifBlank { "-" }}\n" +
                     "Dealer: ${dealerEmail.ifBlank { "-" }}\n" +
                     "Country: ${country.ifBlank { "-" }}\n\n" +
-                    "Tap to open details →",
+                    "Open order details",
                 order.toString()
             )
         }
@@ -182,7 +182,7 @@ class AdminOrdersActivity : Activity() {
         subtitleText.text = "$visibleCount / ${cachedOrders.length()} order(s)"
 
         if (visibleCount == 0) {
-            addCard("No orders match the current filter.\n\nTry clearing filters or searching with another order number, email, customer, or product.")
+            addCard("No Matching Orders\n\nClear filters or search by order number, email, customer, product, reseller, or dealer.")
         }
     }
 
@@ -218,7 +218,7 @@ class AdminOrdersActivity : Activity() {
 
     private fun addFilterControls() {
         addCard(
-            "Filters\n" +
+            "Search & Filters\n" +
                 "Search: ${currentSearchQuery.ifBlank { "All" }}\n" +
                 "Status: ${currentStatusFilter.replaceFirstChar { it.uppercase() }}"
         )
@@ -290,39 +290,35 @@ class AdminOrdersActivity : Activity() {
     }
 
     private fun statusBadge(status: String): String {
-        val normalized = status.lowercase()
-        val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> ""
-            normalized.contains("completed") -> ""
-            normalized.contains("resolved") -> ""
-            normalized.contains("ok") -> ""
-            normalized.contains("open") -> ""
-            normalized.contains("pending") -> ""
-            normalized.contains("progress") -> ""
-            normalized.contains("inactive") -> ""
-            normalized.contains("closed") -> ""
-            normalized.contains("suspended") -> ""
-            normalized.contains("failed") -> ""
-            normalized.contains("error") -> ""
-            else -> ""
-        }
         return "Status: $status"
     }
 
     private fun addCard(text: String, orderJson: String? = null) {
         val card = TextView(this)
         card.text = text
-        card.textSize = 15.5f
-        card.setTextColor(0xFF07133D.toInt())
-        card.setBackgroundResource(R.drawable.admin_card_background)
-        card.elevation = 3f
-        card.setPadding(28, 24, 28, 24)
+        card.textSize = 14.5f
+        card.setTextColor(0xFF081A44.toInt())
+        card.setBackgroundResource(R.drawable.admin_section_card)
+        card.elevation = 4f
+        card.setPadding(30, 26, 30, 26)
+        card.setLineSpacing(4f, 1.05f)
+
+        val iconRes = when {
+            text.startsWith("Filters") -> R.drawable.admin_icon_settings
+            text.startsWith("Loading") -> R.drawable.admin_icon_health
+            text.startsWith("No ") -> R.drawable.admin_icon_doc
+            orderJson != null -> R.drawable.admin_icon_orders
+            else -> R.drawable.admin_icon_doc
+        }
+
+        card.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+        card.compoundDrawablePadding = 18
 
         val params = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        params.setMargins(0, 0, 0, 20)
+        params.setMargins(0, 0, 0, 18)
         card.layoutParams = params
 
         if (orderJson != null) {
