@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
@@ -55,7 +54,6 @@ class LoginActivity : ComponentActivity() {
     private var statusIsError by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 

@@ -1,65 +1,67 @@
 package im.angry.openeuicc.ui
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import im.angry.openeuicc.auth.AuthTokenStore
+import im.angry.openeuicc.auth.JwtUtils
+import im.angry.openeuicc.common.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SplashActivity : ComponentActivity() {
+    private val tokenStore by lazy { AuthTokenStore(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        setContent {
-            MaterialTheme {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFF1263F1)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = im.angry.openeuicc.common.R.drawable.splash_screen),
-                        contentDescription = null,
-                        modifier = Modifier.size(190.dp),
-                        contentScale = ContentScale.Fit
-                    )
-
-                    LaunchedEffect(Unit) {
-                        delay(2800)
-                        openMain()
-                    }
-                }
+        lifecycleScope.launch {
+            val session = withContext(Dispatchers.IO) {
+                tokenStore.getSession()
             }
+
+            if (session == null || JwtUtils.isExpired(session.accessToken)) {
+                withContext(Dispatchers.IO) {
+                    tokenStore.clear()
+                }
+                openAndClear(LoginActivity::class.java.name)
+                return@launch
+            }
+
+            val role = session.role.orEmpty().trim().lowercase()
+            val target = if (role in ADMIN_ROLES) {
+                MOBILE_ADMIN_ACTIVITY
+            } else {
+                loginTargetActivityName()
+            }
+
+            openAndClear(target)
         }
     }
 
-    private fun openMain() {
-        val candidates = listOf(
-            "im.angry.openeuicc.ui.R2wComposeHomeActivity",
-            "im.angry.openeuicc.ui.DashboardActivity",
-            "im.angry.openeuicc.ui.PackagesActivity"
+    private fun loginTargetActivityName(): String {
+        val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+        return appInfo.metaData?.getString(LoginActivity.META_TARGET_ACTIVITY)
+            ?: DashboardActivity::class.java.name
+    }
+
+    private fun openAndClear(targetClassName: String) {
+        startActivity(
+            Intent().setClassName(this, targetClassName).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
         )
-
-        val target = candidates.firstOrNull { className ->
-            runCatching { Class.forName(className) }.isSuccess
-        } ?: "im.angry.openeuicc.ui.PackagesActivity"
-
-        startActivity(Intent().setClassName(this, target))
         finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        overridePendingTransition(0, 0)
+    }
+
+    companion object {
+        private const val MOBILE_ADMIN_ACTIVITY = "im.angry.openeuicc.MobileAdminActivity"
+        private val ADMIN_ROLES = setOf("admin", "super_admin", "superadmin", "staff")
     }
 }
