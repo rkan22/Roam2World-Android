@@ -138,7 +138,7 @@ class AdminProviderMarkupsActivity : Activity() {
     private fun loadProviderMarkups() {
         subtitleText.text = "Loading provider markups..."
         listContainer.removeAllViews()
-        addCard("⏳ Loading provider markups...\n\nFetching provider defaults and scope rules.")
+        addCard("Loading provider markups...\n\nFetching provider defaults and scope rules.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -158,7 +158,7 @@ class AdminProviderMarkupsActivity : Activity() {
             }.onFailure { error ->
                 subtitleText.text = "Provider markups unavailable"
                 listContainer.removeAllViews()
-                addCard("⚠️ Provider markups unavailable.\n\n${error.message ?: "API error"}")
+                addCard("Provider markups unavailable.\n\n${error.message ?: "API error"}")
                 Toast.makeText(
                     this@AdminProviderMarkupsActivity,
                     error.message ?: "Provider markup API error",
@@ -305,7 +305,7 @@ class AdminProviderMarkupsActivity : Activity() {
             addSectionTitle("Provider Defaults")
 
             if (visibleProviderNames.isEmpty()) {
-                addCard("🔎 No provider defaults match the current search/filter.")
+                addCard("No provider defaults match the current search/filter.")
             } else {
                 visibleProviderNames.forEach { provider ->
                     val markup = data.optDouble(provider, 0.0)
@@ -318,7 +318,7 @@ class AdminProviderMarkupsActivity : Activity() {
             addSectionTitle("Scope Rules")
 
             if (visibleRules.isEmpty()) {
-                addCard("🔎 No scope rules match the current search/filter.")
+                addCard("No scope rules match the current search/filter.")
                 return
             }
 

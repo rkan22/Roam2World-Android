@@ -49,7 +49,7 @@ class AdminReportsActivity : Activity() {
     private fun loadReports() {
         subtitleText.text = "Loading reports..."
         listContainer.removeAllViews()
-        addCard("⏳ Loading reports...\\n\\nPreparing revenue, order, and operational summaries.")
+        addCard("Loading reports...\\n\\nPreparing revenue, order, and operational summaries.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }

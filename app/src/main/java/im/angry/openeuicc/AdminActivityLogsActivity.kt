@@ -49,7 +49,7 @@ class AdminActivityLogsActivity : Activity() {
     private fun loadActivityLogs() {
         subtitleText.text = "Loading activity logs..."
         listContainer.removeAllViews()
-        addCard("⏳ Loading activity logs...\\n\\nFetching recent admin and system activity.")
+        addCard("Loading activity logs...\\n\\nFetching recent admin and system activity.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -126,7 +126,7 @@ class AdminActivityLogsActivity : Activity() {
         }
 
         if (logs == null || logs.length() == 0) {
-            addCard("📭 No activity logs found.\n\nAdmin and system actions will appear here after activity is recorded.")
+            addCard("No activity logs found.\n\nAdmin and system actions will appear here after activity is recorded.")
             return
         }
 
@@ -156,21 +156,21 @@ class AdminActivityLogsActivity : Activity() {
     private fun statusBadge(status: String): String {
         val normalized = status.lowercase()
         val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> "🟢"
-            normalized.contains("completed") -> "🟢"
-            normalized.contains("resolved") -> "🟢"
-            normalized.contains("ok") -> "🟢"
-            normalized.contains("open") -> "🔵"
-            normalized.contains("pending") -> "🟠"
-            normalized.contains("progress") -> "🟠"
-            normalized.contains("inactive") -> "⚪"
-            normalized.contains("closed") -> "⚪"
-            normalized.contains("suspended") -> "🔴"
-            normalized.contains("failed") -> "🔴"
-            normalized.contains("error") -> "🔴"
-            else -> "🔘"
+            normalized.contains("active") && !normalized.contains("inactive") -> ""
+            normalized.contains("completed") -> ""
+            normalized.contains("resolved") -> ""
+            normalized.contains("ok") -> ""
+            normalized.contains("open") -> ""
+            normalized.contains("pending") -> ""
+            normalized.contains("progress") -> ""
+            normalized.contains("inactive") -> ""
+            normalized.contains("closed") -> ""
+            normalized.contains("suspended") -> ""
+            normalized.contains("failed") -> ""
+            normalized.contains("error") -> ""
+            else -> ""
         }
-        return "$icon Status: $status"
+        return "Status: $status"
     }
 
     private fun addCard(text: String, logJson: String? = null) {

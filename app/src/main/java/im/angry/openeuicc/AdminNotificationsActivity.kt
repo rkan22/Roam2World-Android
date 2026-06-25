@@ -55,7 +55,7 @@ class AdminNotificationsActivity : Activity() {
     private fun loadNotifications() {
         subtitleText.text = "Loading notifications..."
         listContainer.removeAllViews()
-        addCard("⏳ Loading notifications...\\n\\nFetching recent account and system messages.")
+        addCard("Loading notifications...\\n\\nFetching recent account and system messages.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
@@ -123,7 +123,7 @@ class AdminNotificationsActivity : Activity() {
 
         if (cachedNotifications.length() == 0) {
             subtitleText.text = "0 notification(s)"
-            addCard("📭 No notifications found.\n\nSystem and account notifications will appear here.")
+            addCard("No notifications found.\n\nSystem and account notifications will appear here.")
             return
         }
 
@@ -156,7 +156,7 @@ class AdminNotificationsActivity : Activity() {
         subtitleText.text = "$visibleCount / ${cachedNotifications.length()} notification(s)"
 
         if (visibleCount == 0) {
-            addCard("🔎 No notifications match the current filter.\n\nTry clearing filters or searching another title, message, or type.")
+            addCard("No notifications match the current filter.\n\nTry clearing filters or searching another title, message, or type.")
         }
     }
 

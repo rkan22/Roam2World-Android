@@ -50,15 +50,13 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <TextView
+                <ImageView
                     android:layout_width="52dp"
                     android:layout_height="52dp"
                     android:background="@drawable/admin_menu_button"
-                    android:gravity="center"
-                    android:text="AD"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:padding="12dp"
+                    android:src="@drawable/admin_icon_health"
+                    android:contentDescription="Admin" />
             </LinearLayout>
         </LinearLayout>
 
@@ -109,6 +107,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_partners"
+                    android:drawablePadding="8dp"
                     android:text="Resellers\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -123,6 +123,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_partners"
+                    android:drawablePadding="8dp"
                     android:text="Dealers\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -144,6 +146,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_pricing"
+                    android:drawablePadding="8dp"
                     android:text="Wallet Balance\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -158,6 +162,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_orders"
+                    android:drawablePadding="8dp"
                     android:text="Orders\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -179,6 +185,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_warning"
+                    android:drawablePadding="8dp"
                     android:text="Pending Wallet\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -193,6 +201,8 @@
                     android:background="@drawable/admin_metric_card"
                     android:elevation="3dp"
                     android:padding="16dp"
+                    android:drawableTop="@drawable/admin_icon_health"
+                    android:drawablePadding="8dp"
                     android:text="System Alerts\n-"
                     android:textColor="#07133D"
                     android:textSize="15sp"
@@ -206,6 +216,8 @@
                 android:background="@drawable/admin_section_card"
                 android:elevation="3dp"
                 android:padding="18dp"
+                    android:drawableTop="@drawable/admin_icon_reports"
+                    android:drawablePadding="8dp"
                 android:text="Sales Overview\nTotal Sales: -"
                 android:textColor="#07133D"
                 android:textSize="15sp"
@@ -218,6 +230,8 @@
                 android:background="@drawable/admin_section_card"
                 android:elevation="3dp"
                 android:padding="18dp"
+                    android:drawableTop="@drawable/admin_icon_warning"
+                    android:drawablePadding="8dp"
                 android:text="Pending Wallet Requests\n-"
                 android:textColor="#07133D"
                 android:textSize="15sp"
@@ -230,6 +244,8 @@
                 android:background="@drawable/admin_section_card"
                 android:elevation="3dp"
                 android:padding="18dp"
+                    android:drawableTop="@drawable/admin_icon_partners"
+                    android:drawablePadding="8dp"
                 android:text="Reseller Management\n-"
                 android:textColor="#07133D"
                 android:textSize="15sp"
@@ -242,6 +258,8 @@
                 android:background="@drawable/admin_section_card"
                 android:elevation="3dp"
                 android:padding="18dp"
+                    android:drawableTop="@drawable/admin_icon_pricing"
+                    android:drawablePadding="8dp"
                 android:text="Pricing Management\n-"
                 android:textColor="#07133D"
                 android:textSize="15sp"
@@ -254,6 +272,8 @@
                 android:background="@drawable/admin_section_card"
                 android:elevation="3dp"
                 android:padding="18dp"
+                    android:drawableTop="@drawable/admin_icon_notifications"
+                    android:drawablePadding="8dp"
                 android:text="Notifications\n-"
                 android:textColor="#07133D"
                 android:textSize="15sp"
@@ -270,6 +290,8 @@
 
             <Button
                 android:id="@+id/openApprovalsButton"
+                android:drawableStart="@drawable/admin_icon_pricing"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Wallet Approvals"
@@ -279,6 +301,8 @@
 
             <Button
                 android:id="@+id/openResellersButton"
+                android:drawableStart="@drawable/admin_icon_partners"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Resellers"
@@ -288,6 +312,8 @@
 
             <Button
                 android:id="@+id/openDealersButton"
+                android:drawableStart="@drawable/admin_icon_partners"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Dealers"
@@ -297,6 +323,8 @@
 
             <Button
                 android:id="@+id/openOrdersButton"
+                android:drawableStart="@drawable/admin_icon_orders"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Orders"
@@ -306,6 +334,8 @@
 
             <Button
                 android:id="@+id/openPricingButton"
+                android:drawableStart="@drawable/admin_icon_pricing"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Pricing"
@@ -315,6 +345,8 @@
 
             <Button
                 android:id="@+id/openReportsButton"
+                android:drawableStart="@drawable/admin_icon_reports"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Reports"
@@ -324,6 +356,8 @@
 
             <Button
                 android:id="@+id/openSystemHealthButton"
+                android:drawableStart="@drawable/admin_icon_health"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="System Health"
@@ -333,6 +367,8 @@
 
             <Button
                 android:id="@+id/openAuditLogsButton"
+                android:drawableStart="@drawable/admin_icon_reports"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Audit Logs"
@@ -342,6 +378,8 @@
 
             <Button
                 android:id="@+id/openSupportTicketsButton"
+                android:drawableStart="@drawable/admin_icon_warning"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Support Tickets"
@@ -351,6 +389,8 @@
 
             <Button
                 android:id="@+id/openNotificationsButton"
+                android:drawableStart="@drawable/admin_icon_notifications"
+                android:drawablePadding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:text="Notifications"

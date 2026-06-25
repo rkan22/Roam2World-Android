@@ -56,7 +56,7 @@ class AdminDealersActivity : Activity() {
     private fun loadDealers() {
         subtitleText.text = "Loading dealer accounts..."
         listContainer.removeAllViews()
-        addCard("⏳ Loading dealers...\\n\\nFetching dealer account status.")
+        addCard("Loading dealers...\\n\\nFetching dealer account status.")
 
         scope.launch {
             val session = withContext(Dispatchers.IO) {
@@ -134,7 +134,7 @@ class AdminDealersActivity : Activity() {
 
         if (cachedDealers.length() == 0) {
             subtitleText.text = "0 dealer account(s)"
-            addCard("📭 No dealers found.\n\nDealer accounts will appear here once resellers create or receive dealers.")
+            addCard("No dealers found.\n\nDealer accounts will appear here once resellers create or receive dealers.")
             return
         }
 
@@ -180,7 +180,7 @@ class AdminDealersActivity : Activity() {
         subtitleText.text = "$visibleCount / ${cachedDealers.length()} dealer account(s)"
 
         if (visibleCount == 0) {
-            addCard("🔎 No dealers match the current filter.\n\nTry clearing filters or searching with another dealer or reseller email.")
+            addCard("No dealers match the current filter.\n\nTry clearing filters or searching with another dealer or reseller email.")
         }
     }
 
@@ -283,21 +283,21 @@ class AdminDealersActivity : Activity() {
     private fun statusBadge(status: String): String {
         val normalized = status.lowercase()
         val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> "🟢"
-            normalized.contains("completed") -> "🟢"
-            normalized.contains("resolved") -> "🟢"
-            normalized.contains("ok") -> "🟢"
-            normalized.contains("open") -> "🔵"
-            normalized.contains("pending") -> "🟠"
-            normalized.contains("progress") -> "🟠"
-            normalized.contains("inactive") -> "⚪"
-            normalized.contains("closed") -> "⚪"
-            normalized.contains("suspended") -> "🔴"
-            normalized.contains("failed") -> "🔴"
-            normalized.contains("error") -> "🔴"
-            else -> "🔘"
+            normalized.contains("active") && !normalized.contains("inactive") -> ""
+            normalized.contains("completed") -> ""
+            normalized.contains("resolved") -> ""
+            normalized.contains("ok") -> ""
+            normalized.contains("open") -> ""
+            normalized.contains("pending") -> ""
+            normalized.contains("progress") -> ""
+            normalized.contains("inactive") -> ""
+            normalized.contains("closed") -> ""
+            normalized.contains("suspended") -> ""
+            normalized.contains("failed") -> ""
+            normalized.contains("error") -> ""
+            else -> ""
         }
-        return "$icon Status: $status"
+        return "Status: $status"
     }
 
     private fun addCard(text: String, dealerJson: String? = null) {
