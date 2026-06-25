@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="im.angry.openeuicc"
+   
     tools:ignore="ProtectedPermissions">
 
     <uses-feature
@@ -28,7 +28,6 @@
             android:name="im.angry.openeuicc.ui.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Roam2World.Splash">
-        
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -126,12 +125,10 @@
             android:name="im.angry.openeuicc.ui.MobileEsimInstallActivity"
             android:exported="false"
             android:theme="@style/Theme.R2W.AppCompat" />
-
         <activity
             android:name=".ui.PrivilegedMainActivity"
             android:exported="false" />
-
-        <service
+<service
             android:name=".service.OpenEuiccService"
             android:exported="true"
             android:permission="android.permission.BIND_EUICC_SERVICE">
@@ -171,7 +168,24 @@
             android:name="im.angry.openeuicc.ui.OpenEuiccIntegrationActivity"
             android:exported="false"
             android:theme="@style/Theme.R2W.AppCompat" />
-
+            <activity android:name=".ApprovalsActivity" android:exported="false" />
+        <activity android:name=".AdminSupportTicketDetailActivity" android:exported="false" />
+        <activity android:name=".AdminSupportTicketsActivity" android:exported="false" />
+        <activity android:name=".AdminNotificationDetailActivity" android:exported="false" />
+        <activity android:name=".AdminNotificationsActivity" android:exported="false" />
+        <activity android:name=".AdminActivityLogDetailActivity" android:exported="false" />
+        <activity android:name=".AdminActivityLogsActivity" android:exported="false" />
+        <activity android:name=".AdminSystemHealthActivity" android:exported="false" />
+        <activity android:name=".AdminReportsActivity" android:exported="false" />
+        <activity android:name=".AdminPricingActivity" android:exported="false" />
+        <activity android:name=".AdminProviderMarkupsActivity" android:exported="false" />
+        <activity android:name=".AdminOrderDetailActivity" android:exported="false" />
+        <activity android:name=".AdminOrdersActivity" android:exported="false" />
+        <activity android:name=".AdminDealerDetailActivity" android:exported="false" />
+        <activity android:name=".AdminDealersActivity" android:exported="false" />
+        <activity android:name=".AdminResellerDetailActivity" android:exported="false" />
+        <activity android:name=".AdminResellersActivity" android:exported="false" />
+            <activity android:name=".MobileAdminActivity" android:exported="true" />
     </application>
 
 </manifest>

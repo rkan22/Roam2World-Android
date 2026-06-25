@@ -152,6 +152,11 @@ fun DashboardScreen(
                     QuickActionsCard(onActionClick = onActionClick)
                 }
                 item {
+                    MobileAdminEntryCard(
+                        onClick = { onActionClick("mobile_admin") }
+                    )
+                }
+                item {
                     RecentPurchasesCard(
                         orders = data?.recentOrders.orEmpty(),
                         onViewAll = { onActionClick("orders") }
@@ -434,6 +439,62 @@ private fun DashboardMetricCard(
         }
     }
 }
+
+
+@Composable
+private fun MobileAdminEntryCard(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(R2WBlue.copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Business,
+                    contentDescription = null,
+                    tint = R2WBlue,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Mobile Admin",
+                    color = R2WText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Open admin dashboard and reseller approvals",
+                    color = R2WMuted,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun RecentPurchasesCard(

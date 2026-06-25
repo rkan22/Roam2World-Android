@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import im.angry.openeuicc.auth.AuthSession
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
@@ -114,7 +115,7 @@ class LoginActivity : ComponentActivity() {
             }
 
             if (activeSession != null) {
-                openMainActivity()
+                openMainActivity(activeSession)
             } else {
                 withContext(Dispatchers.IO) {
                     tokenStore.clear()
@@ -155,7 +156,7 @@ class LoginActivity : ComponentActivity() {
             }
 
             result
-                .onSuccess { openMainActivity() }
+                .onSuccess { session -> openMainActivity(session) }
                 .onFailure {
                     setBusy(false)
                     showStatus(it.message ?: getString(R.string.login_session_expired), isError = true)
@@ -163,8 +164,8 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    private fun openMainActivity() {
-        val target = targetActivityName()
+    private fun openMainActivity(session: AuthSession) {
+        val target = targetActivityName(session)
         if (target.isNullOrBlank()) {
             setBusy(false)
             showStatus(getString(R.string.login_missing_target), isError = true)
@@ -193,13 +194,20 @@ class LoginActivity : ComponentActivity() {
         statusIsError = isError
     }
 
-    private fun targetActivityName(): String? {
+    private fun targetActivityName(session: AuthSession): String? {
+        val role = session.role.orEmpty().trim().lowercase()
+        if (role in ADMIN_ROLES) {
+            return MOBILE_ADMIN_ACTIVITY
+        }
+
         val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         return appInfo.metaData?.getString(META_TARGET_ACTIVITY)
     }
 
     companion object {
         private const val TAG = "LoginActivity"
+        private const val MOBILE_ADMIN_ACTIVITY = "im.angry.openeuicc.MobileAdminActivity"
+        private val ADMIN_ROLES = setOf("admin", "super_admin", "superadmin")
         const val META_TARGET_ACTIVITY = "im.angry.openeuicc.LOGIN_TARGET_ACTIVITY"
     }
 }

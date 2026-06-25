@@ -1,17 +1,9 @@
 package im.angry.openeuicc
 
-import im.angry.openeuicc.core.PrivilegedEuiccChannelManager
-import im.angry.openeuicc.di.AppContainer
-import im.angry.openeuicc.di.PrivilegedAppContainer
-
 class PrivilegedOpenEuiccApplication : OpenEuiccApplication() {
-    override val appContainer: AppContainer by lazy {
-        PrivilegedAppContainer(this)
-    }
-
     override fun onCreate() {
-        super.onCreate()
-
-        (appContainer.euiccChannelManager as PrivilegedEuiccChannelManager).closeAllStaleChannels()
+        // Do NOT call super.onCreate() here.
+        // Original OpenEUICC startup touches privileged Telephony/eUICC APIs.
+        // Roam2World admin/login flow does not need eUICC startup.
     }
 }

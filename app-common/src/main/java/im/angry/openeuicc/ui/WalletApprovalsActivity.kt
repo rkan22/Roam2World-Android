@@ -116,8 +116,9 @@ class WalletApprovalsActivity : Activity() {
 
         uiScope.launch {
             val session = activeSessionOrReturnToLogin() ?: return@launch
-            titleText.text = if (session.role == "admin") "Admin Approvals" else "Dealer Approvals"
-            subtitleText.text = if (session.role == "admin") "Reseller wallet requests" else "Dealer wallet requests"
+            val role = session.role?.lowercase() ?: "dealer"
+                        titleText.text = if (role == "admin" || role == "superadmin" || role == "staff") "Admin Approvals" else "Dealer Approvals"
+            subtitleText.text = if (role == "admin" || role == "superadmin" || role == "staff") "Reseller wallet requests" else "Dealer wallet requests"
 
             val result = runCatching {
                 val all = api.walletApprovalRequests(session)

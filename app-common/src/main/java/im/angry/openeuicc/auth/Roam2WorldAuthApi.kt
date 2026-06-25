@@ -51,6 +51,10 @@ class Roam2WorldAuthApi(baseUrl: String) {
         parseDashboard(getJson(DASHBOARD_ENDPOINT, session.authorizationHeader))
     }
 
+    suspend fun mobileAdminDashboardRaw(session: AuthSession): JSONObject = withContext(Dispatchers.IO) {
+        getJson(MOBILE_ADMIN_DASHBOARD_ENDPOINT, session.authorizationHeader)
+    }
+
     suspend fun wallet(session: AuthSession): MobileWalletData = withContext(Dispatchers.IO) {
         val walletResponse = getJson(WALLET_ENDPOINT, session.authorizationHeader)
         val transactionResponse = getJson(TRANSACTIONS_ENDPOINT, session.authorizationHeader)
@@ -1848,6 +1852,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private const val LOG_CHUNK_SIZE = 3_500
         private val MOBILE_LOGIN_ENDPOINT = ApiEndpoint("mobile login", "api/v1/mobile/auth/login/")
         private val DASHBOARD_ENDPOINT = ApiEndpoint("mobile dashboard", "api/v1/mobile/dashboard/")
+        private val MOBILE_ADMIN_DASHBOARD_ENDPOINT = ApiEndpoint("mobile admin dashboard", "api/v1/mobile/admin/dashboard/")
         private val WALLET_ENDPOINT = ApiEndpoint("mobile wallet", "api/v1/mobile/wallet/")
         private val WALLET_REQUESTS_ENDPOINT = ApiEndpoint("mobile wallet requests", "api/v1/mobile/wallet/requests/")
         private val TRANSACTIONS_ENDPOINT = ApiEndpoint("mobile transactions", "api/v1/mobile/transactions/")
@@ -1864,6 +1869,7 @@ class Roam2WorldAuthApi(baseUrl: String) {
         private val MOBILE_ENDPOINTS = listOf(
             MOBILE_LOGIN_ENDPOINT,
             DASHBOARD_ENDPOINT,
+            MOBILE_ADMIN_DASHBOARD_ENDPOINT,
             MOBILE_DEALERS_ENDPOINT,
             MOBILE_ORDERS_ENDPOINT,
             PACKAGES_ENDPOINT,

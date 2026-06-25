@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F8FF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/admin_hero_background"
+            android:orientation="vertical"
+            android:paddingLeft="22dp"
+            android:paddingTop="26dp"
+            android:paddingRight="22dp"
+            android:paddingBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/adminTitleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Roam2World"
+                        android:textColor="#050A18"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/adminSubtitleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Admin"
+                        android:textColor="#1263F1"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/admin_menu_button"
+                    android:gravity="center"
+                    android:text="AD"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Dashboard Overview"
+                    android:textColor="#07133D"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/refreshButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="Refresh"
+                    android:textColor="#07133D"
+                    android:background="@drawable/admin_secondary_button"
+                    android:minWidth="96dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/resellerCountText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="Resellers\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/dealerCountText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="Dealers\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:id="@+id/walletSummaryText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="Wallet Balance\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/orderMetricText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="Orders\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="18dp">
+
+                <TextView
+                    android:id="@+id/pendingRequestsText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="Pending Wallet\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/systemAlertsText"
+                    android:layout_width="0dp"
+                    android:layout_height="96dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/admin_metric_card"
+                    android:elevation="3dp"
+                    android:padding="16dp"
+                    android:text="System Alerts\n-"
+                    android:textColor="#07133D"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/salesOverviewText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_section_card"
+                android:elevation="3dp"
+                android:padding="18dp"
+                android:text="Sales Overview\nTotal Sales: -"
+                android:textColor="#07133D"
+                android:textSize="15sp"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:id="@+id/pendingWalletPreviewText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_section_card"
+                android:elevation="3dp"
+                android:padding="18dp"
+                android:text="Pending Wallet Requests\n-"
+                android:textColor="#07133D"
+                android:textSize="15sp"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:id="@+id/resellerPreviewText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_section_card"
+                android:elevation="3dp"
+                android:padding="18dp"
+                android:text="Reseller Management\n-"
+                android:textColor="#07133D"
+                android:textSize="15sp"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:id="@+id/pricingPreviewText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_section_card"
+                android:elevation="3dp"
+                android:padding="18dp"
+                android:text="Pricing Management\n-"
+                android:textColor="#07133D"
+                android:textSize="15sp"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:id="@+id/notificationPreviewText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_section_card"
+                android:elevation="3dp"
+                android:padding="18dp"
+                android:text="Notifications\n-"
+                android:textColor="#07133D"
+                android:textSize="15sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Quick Actions"
+                android:textColor="#07133D"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:id="@+id/openApprovalsButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Wallet Approvals"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openResellersButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Resellers"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openDealersButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Dealers"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openOrdersButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Orders"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openPricingButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Pricing"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openReportsButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Reports"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openSystemHealthButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="System Health"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openAuditLogsButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Audit Logs"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openSupportTicketsButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Support Tickets"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/openNotificationsButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Notifications"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/admin_menu_button"
+                android:layout_marginBottom="18dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="@drawable/admin_section_card"
+                android:elevation="4dp"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/bottomDashboardNav"
+                    android:text="Dashboard"
+                    android:textColor="#1263F1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/bottomResellersNav"
+                    android:text="Resellers"
+                    android:textColor="#53627C" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/bottomWalletNav"
+                    android:text="Wallet"
+                    android:textColor="#53627C" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/bottomPricingNav"
+                    android:text="Pricing"
+                    android:textColor="#53627C" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:id="@+id/bottomMoreNav"
+                    android:text="More"
+                    android:textColor="#53627C" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
