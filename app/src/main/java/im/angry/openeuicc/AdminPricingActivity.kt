@@ -2,6 +2,7 @@ package im.angry.openeuicc
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -88,6 +89,7 @@ class AdminPricingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("R2W_PRICING_TEST", "AdminPricingActivity opened")
 
         setContent {
             val composeScope = rememberCoroutineScope()
@@ -96,6 +98,7 @@ class AdminPricingActivity : ComponentActivity() {
             var pricingItems by remember { mutableStateOf<List<AdminPricingUi>>(emptyList()) }
             var query by remember { mutableStateOf("") }
             var statusFilter by remember { mutableStateOf("all") }
+            var providerFilter by remember { mutableStateOf("all") }
 
             suspend fun loadPricing() {
                 loading = true
@@ -137,8 +140,10 @@ class AdminPricingActivity : ComponentActivity() {
                     pricingItems = pricingItems,
                     query = query,
                     statusFilter = statusFilter,
+                    providerFilter = providerFilter,
                     onQueryChange = { query = it },
                     onStatusFilterChange = { statusFilter = it },
+                    onProviderFilterChange = { providerFilter = it },
                     onRefresh = {
                         composeScope.launch {
                             loadPricing()
@@ -162,6 +167,7 @@ class AdminPricingActivity : ComponentActivity() {
     }
 
     private fun fetchAdminPricing(authorizationHeader: String): JSONObject {
+        Log.d("R2W_PRICING_TEST", "fetch start")
         val url = URL("https://roam2world-panels-backend.onrender.com/api/v1/mobile/admin/pricing/")
         val connection = url.openConnection() as HttpURLConnection
 
@@ -179,12 +185,13 @@ class AdminPricingActivity : ComponentActivity() {
             }
 
             val body = stream.bufferedReader().use { it.readText() }
+            Log.d("R2W_PRICING_TEST", "HTTP ${connection.responseCode}: ${body.take(12000)}")
 
             if (connection.responseCode !in 200..299) {
                 throw IllegalStateException("HTTP ${connection.responseCode}: $body")
             }
 
-            JSONObject(body)
+            JSONObject(body).also { Log.d("R2W_PRICING_TEST", body.take(12000)) }
         } finally {
             connection.disconnect()
         }
@@ -209,6 +216,7 @@ class AdminPricingActivity : ComponentActivity() {
                     dataVolume = item.optString("data_volume", "-"),
                     validityDays = item.optInt("validity_days", 0),
                     basePrice = item.optString("base_price", "0.00"),
+                    dealerPrice = item.optString("dealer_price", item.optString("dealerPrice", item.optString("reseller_price", "0.00"))),
                     resellerPrice = item.optString("reseller_price", "0.00"),
                     publicPrice = item.optString("public_price", "0.00"),
                     markup = item.optString("markup_percentage", "0.00"),
@@ -241,6 +249,7 @@ private data class AdminPricingUi(
     val validityDays: Int,
     val basePrice: String,
     val resellerPrice: String,
+    val dealerPrice: String,
     val publicPrice: String,
     val markup: String,
     val active: Boolean,
@@ -262,19 +271,24 @@ private fun AdminPricingScreen(
     pricingItems: List<AdminPricingUi>,
     query: String,
     statusFilter: String,
+    providerFilter: String,
     onQueryChange: (String) -> Unit,
     onStatusFilterChange: (String) -> Unit,
+    onProviderFilterChange: (String) -> Unit,
     onRefresh: () -> Unit,
     onProviderMarkups: () -> Unit,
     onBottomNavClick: (PricingTab) -> Unit
 ) {
-    val filtered by remember(pricingItems, query, statusFilter) {
+    val filtered by remember(pricingItems, query, statusFilter, providerFilter) {
         derivedStateOf {
             val cleanQuery = query.trim().lowercase()
 
             pricingItems
                 .filter { item ->
                     statusFilter == "all" || item.status.lowercase() == statusFilter
+                }
+                .filter { item ->
+                    providerFilter == "all" || item.provider.lowercase() == providerFilter
                 }
                 .filter { item ->
                     cleanQuery.isBlank() || listOf(
@@ -292,6 +306,11 @@ private fun AdminPricingScreen(
 
     val active = pricingItems.count { it.active }
     val inactive = pricingItems.count { !it.active }
+    val providerCounts = pricingItems
+        .groupingBy { it.provider.lowercase().ifBlank { "unknown" } }
+        .eachCount()
+    val fixedProviders = listOf("esimcard", "airhub", "flexnet", "tgt", "traveroam")
+    val providerOptions = listOf("all") + (fixedProviders + providerCounts.keys).distinct().sorted()
 
     Scaffold(
         containerColor = PricingBg,
@@ -353,8 +372,12 @@ private fun AdminPricingScreen(
                 PricingFilterCard(
                     query = query,
                     statusFilter = statusFilter,
+                    providerFilter = providerFilter,
+                    providerOptions = providerOptions,
+                    providerCounts = providerCounts,
                     onQueryChange = onQueryChange,
                     onStatusFilterChange = onStatusFilterChange,
+                    onProviderFilterChange = onProviderFilterChange,
                     onRefresh = onRefresh,
                     loading = loading
                 )
@@ -515,12 +538,18 @@ private fun PricingActionCard(
     }
 }
 
+private fun Int?.orZero(): Int = this ?: 0
+
 @Composable
 private fun PricingFilterCard(
     query: String,
     statusFilter: String,
+    providerFilter: String,
+    providerOptions: List<String>,
+    providerCounts: Map<String, Int>,
     onQueryChange: (String) -> Unit,
     onStatusFilterChange: (String) -> Unit,
+    onProviderFilterChange: (String) -> Unit,
     onRefresh: () -> Unit,
     loading: Boolean
 ) {
@@ -583,6 +612,41 @@ private fun PricingFilterCard(
                     border = BorderStroke(1.dp, PricingBlue.copy(alpha = 0.35f))
                 )
             }
+
+            Text(
+                text = "Provider",
+                color = PricingMuted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                providerOptions.forEach { provider ->
+                    val selected = providerFilter == provider
+                    val count = if (provider == "all") providerCounts.values.sum() else providerCounts[provider].orZero()
+                    val label = if (provider == "all") "All $count" else "${provider.uppercase()} $count"
+
+                    AssistChip(
+                        onClick = { onProviderFilterChange(provider) },
+                        label = {
+                            Text(
+                                label,
+                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            labelColor = if (selected) PricingBlue else PricingMuted
+                        ),
+                        border = BorderStroke(1.dp, if (selected) PricingBlue.copy(alpha = 0.35f) else PricingBorder)
+                    )
+                }
+            }
         }
     }
 }
@@ -644,10 +708,25 @@ private fun PricingItemCard(item: AdminPricingUi) {
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PricingMiniStat(Modifier.weight(1f), "Base", item.basePrice)
-                PricingMiniStat(Modifier.weight(1f), "Reseller", item.resellerPrice)
-                PricingMiniStat(Modifier.weight(1f), "Public", item.publicPrice)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    PricingMiniStat(Modifier.weight(1f), "Cost", item.basePrice)
+                    PricingMiniStat(Modifier.weight(1f), "Dealer", item.dealerPrice)
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    PricingMiniStat(Modifier.weight(1f), "Reseller", item.resellerPrice)
+                    PricingMiniStat(Modifier.weight(1f), "Public", item.publicPrice)
+                }
             }
 
             Text(
