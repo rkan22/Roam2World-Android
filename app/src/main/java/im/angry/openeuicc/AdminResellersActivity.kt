@@ -1,94 +1,169 @@
 package im.angry.openeuicc
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
-import kotlinx.coroutines.CoroutineScope
+import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import org.json.JSONObject
 
-class AdminResellersActivity : Activity() {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+private val ResellerBg = Color(0xFFF6F8FC)
+private val ResellerNavy = Color(0xFF061A3F)
+private val ResellerNavy2 = Color(0xFF123EAD)
+private val ResellerBlue = Color(0xFF1263F1)
+private val ResellerText = Color(0xFF101828)
+private val ResellerMuted = Color(0xFF667085)
+private val ResellerBorder = Color(0xFFE1E8F2)
+private val ResellerGreen = Color(0xFF16A34A)
+private val ResellerOrange = Color(0xFFF97316)
+private val ResellerRed = Color(0xFFEF4444)
+
+class AdminResellersActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
-
-    private lateinit var subtitleText: TextView
-    private lateinit var refreshButton: Button
-    private lateinit var listContainer: LinearLayout
-
-    private var cachedResellers = JSONArray()
-    private var currentSearchQuery = ""
-    private var currentStatusFilter = "all"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_admin_resellers)
 
-        subtitleText = findViewById(R.id.adminResellersSubtitleText)
-        refreshButton = findViewById(R.id.adminResellersRefreshButton)
-        listContainer = findViewById(R.id.adminResellersListContainer)
+        setContent {
+            val composeScope = rememberCoroutineScope()
+            var loading by remember { mutableStateOf(true) }
+            var errorMessage by remember { mutableStateOf<String?>(null) }
+            var resellers by remember { mutableStateOf<List<AdminResellerUi>>(emptyList()) }
+            var query by remember { mutableStateOf("") }
+            var selectedStatus by remember { mutableStateOf("all") }
 
-        refreshButton.setOnClickListener { loadResellers() }
+            suspend fun loadResellers() {
+                loading = true
+                errorMessage = null
 
-        loadResellers()
-    }
+                val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
 
-    override fun onDestroy() {
-        scope.cancel()
-        super.onDestroy()
-    }
+                if (session == null || JwtUtils.isExpired(session.accessToken)) {
+                    redirectToLogin()
+                    loading = false
+                    return
+                }
 
-    private fun loadResellers() {
-        subtitleText.text = "Loading reseller accounts..."
-        listContainer.removeAllViews()
-        addCard("Loading Resellers\\n\\nRetrieving partner account status, balances, and markup data.")
+                val result = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val response = fetchAdminResellers(session.authorizationHeader)
+                        parseResellers(response)
+                    }
+                }
 
-        scope.launch {
-            val session = withContext(Dispatchers.IO) {
-                tokenStore.getSession()
+                result
+                    .onSuccess { resellers = it }
+                    .onFailure {
+                        errorMessage = it.message ?: "Resellers API error"
+                        Toast.makeText(this@AdminResellersActivity, errorMessage, Toast.LENGTH_LONG).show()
+                    }
+
+                loading = false
             }
 
-            if (session == null || JwtUtils.isExpired(session.accessToken)) {
-                redirectToLogin()
-                return@launch
+            LaunchedEffect(Unit) {
+                loadResellers()
             }
 
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    fetchAdminResellers(session.authorizationHeader)
-                }
+            R2WTheme {
+                AdminResellersListScreen(
+                    loading = loading,
+                    errorMessage = errorMessage,
+                    resellers = resellers,
+                    query = query,
+                    selectedStatus = selectedStatus,
+                    onQueryChange = { query = it },
+                    onStatusChange = { selectedStatus = it },
+                    onRefresh = {
+                        composeScope.launch {
+                            loadResellers()
+                        }
+                    },
+                    onOpenReseller = { reseller ->
+                        startActivity(
+                            Intent(this@AdminResellersActivity, AdminResellerDetailActivity::class.java).apply {
+                                putExtra(AdminResellerDetailActivity.EXTRA_RESELLER_JSON, reseller.rawJson)
+                            }
+                        )
+                    },
+                    onBottomNavClick = { tab ->
+                        when (tab) {
+                            PartnerBottomTab.Dashboard -> startActivity(Intent(this@AdminResellersActivity, MobileAdminActivity::class.java))
+                            PartnerBottomTab.Partners -> startActivity(Intent(this@AdminResellersActivity, AdminPartnersActivity::class.java))
+                            PartnerBottomTab.Orders -> startActivity(Intent(this@AdminResellersActivity, AdminOrdersOverviewActivity::class.java))
+                            PartnerBottomTab.Pricing -> startActivity(Intent(this@AdminResellersActivity, AdminPricingOverviewActivity::class.java))
+                            PartnerBottomTab.More -> startActivity(Intent(this@AdminResellersActivity, AdminMoreActivity::class.java))
+                        }
+                    }
+                )
             }
-
-            result
-                .onSuccess { response ->
-                    renderResellers(response)
-                }
-                .onFailure { error ->
-                    subtitleText.text = "Resellers unavailable"
-                    Toast.makeText(
-                        this@AdminResellersActivity,
-                        error.message ?: "Resellers API error",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
         }
     }
-
 
     private fun fetchAdminResellers(authorizationHeader: String): JSONObject {
         val url = URL("https://roam2world-panels-backend.onrender.com/api/v1/mobile/admin/resellers/")
@@ -119,208 +194,40 @@ class AdminResellersActivity : Activity() {
         }
     }
 
-
-    private fun renderResellers(response: JSONObject) {
+    private fun parseResellers(response: JSONObject): List<AdminResellerUi> {
         val data = response.optJSONObject("data") ?: response
-        cachedResellers = data.optJSONArray("resellers") ?: JSONArray()
-        renderFilteredResellers()
-    }
+        val arr = data.optJSONArray("resellers") ?: JSONArray()
+        val list = mutableListOf<AdminResellerUi>()
 
-    private fun renderFilteredResellers() {
-        listContainer.removeAllViews()
-        addFilterControls()
-
-        var visibleCount = 0
-
-        if (cachedResellers.length() == 0) {
-            subtitleText.text = "0 reseller account(s)"
-            addCard("No Resellers Found\n\nNew reseller accounts will appear here after onboarding.")
-            return
-        }
-
-        for (i in 0 until cachedResellers.length()) {
-            val reseller = cachedResellers.optJSONObject(i) ?: continue
-
-            if (!matchesFilters(reseller)) {
-                continue
-            }
-
-            visibleCount++
-
-            val name = reseller.optString("name", "-")
-            val email = reseller.optString("email", "-")
-            val credit = reseller.optString("current_credit", "0.00")
-            val creditLimit = reseller.optString("credit_limit", "0.00")
-            val monthlySpent = reseller.optString("current_month_spent", "0.00")
-            val monthlyLimit = reseller.optString("monthly_spend_limit", "0.00")
-            val markup = reseller.optString("markup_percentage", "0.00")
+        for (i in 0 until arr.length()) {
+            val reseller = arr.optJSONObject(i) ?: continue
             val active = reseller.optBoolean("is_active", false)
             val suspended = reseller.optBoolean("is_suspended", false)
-
             val status = when {
                 suspended -> "Suspended"
                 active -> "Active"
                 else -> "Inactive"
             }
 
-            addCard(
-                "$name\n" +
-                    "$email\n" +
-                    statusBadge(status) + "\n\n" +
-                    "Credit: $credit\n" +
-                    "Credit Limit: $creditLimit\n" +
-                    "Monthly Spend: $monthlySpent / $monthlyLimit\n" +
-                    "Markup: $markup%\n\n" +
-                    "Open reseller details",
-                reseller.toString()
+            list.add(
+                AdminResellerUi(
+                    rawJson = reseller.toString(),
+                    id = reseller.optString("id", reseller.optString("user_id", "")),
+                    name = reseller.optString("name", "-"),
+                    email = reseller.optString("email", "-"),
+                    credit = reseller.optString("current_credit", "0.00"),
+                    creditLimit = reseller.optString("credit_limit", "0.00"),
+                    monthlySpent = reseller.optString("current_month_spent", "0.00"),
+                    monthlyLimit = reseller.optString("monthly_spend_limit", "0.00"),
+                    markup = reseller.optString("markup_percentage", "0.00"),
+                    active = active,
+                    suspended = suspended,
+                    status = status
+                )
             )
         }
 
-        subtitleText.text = "$visibleCount / ${cachedResellers.length()} reseller account(s)"
-
-        if (visibleCount == 0) {
-            addCard("No Matching Resellers\n\nClear filters or search by reseller name, email, or account id.")
-        }
-    }
-
-    private fun matchesFilters(reseller: JSONObject): Boolean {
-        val active = reseller.optBoolean("is_active", false)
-        val suspended = reseller.optBoolean("is_suspended", false)
-
-        val status = when {
-            suspended -> "suspended"
-            active -> "active"
-            else -> "inactive"
-        }
-
-        if (currentStatusFilter != "all" && status != currentStatusFilter) {
-            return false
-        }
-
-        val query = currentSearchQuery.trim().lowercase()
-        if (query.isBlank()) {
-            return true
-        }
-
-        val searchable = listOf(
-            reseller.optString("id", ""),
-            reseller.optString("user_id", ""),
-            reseller.optString("name", ""),
-            reseller.optString("email", ""),
-            reseller.optString("first_name", ""),
-            reseller.optString("last_name", "")
-        ).joinToString(" ").lowercase()
-
-        return searchable.contains(query)
-    }
-
-    private fun addFilterControls() {
-        addCard(
-            "Search & Filters\n" +
-                "Search: ${currentSearchQuery.ifBlank { "All" }}\n" +
-                "Status: ${currentStatusFilter.replaceFirstChar { it.uppercase() }}"
-        )
-
-        val searchInput = EditText(this)
-        searchInput.hint = "Search reseller name, email, id"
-        searchInput.setText(currentSearchQuery)
-        searchInput.textSize = 15f
-        searchInput.setTextColor(0xFF07133D.toInt())
-        searchInput.setHintTextColor(0xFF6B7280.toInt())
-        searchInput.setBackgroundResource(R.drawable.admin_card_background)
-        searchInput.setPadding(28, 18, 28, 18)
-
-        val inputParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        inputParams.setMargins(0, 0, 0, 12)
-        searchInput.layoutParams = inputParams
-        listContainer.addView(searchInput)
-
-        addSmallActionButton("Search") {
-            currentSearchQuery = searchInput.text.toString()
-            renderFilteredResellers()
-        }
-
-        addSmallActionButton("Clear Filters") {
-            currentSearchQuery = ""
-            currentStatusFilter = "all"
-            renderFilteredResellers()
-        }
-
-        val statuses = listOf("all", "active", "suspended", "inactive")
-
-        statuses.forEach { status ->
-            val label = if (status == "all") "All Statuses" else status.replaceFirstChar { it.uppercase() }
-            addSmallActionButton(label) {
-                currentStatusFilter = status
-                renderFilteredResellers()
-            }
-        }
-    }
-
-    private fun addSmallActionButton(label: String, onClick: () -> Unit) {
-        val button = Button(this)
-        button.text = label
-        button.textSize = 13f
-        button.setTextColor(0xFFFFFFFF.toInt())
-        button.setBackgroundResource(R.drawable.admin_primary_pill)
-        button.setPadding(20, 10, 20, 10)
-        button.setOnClickListener { onClick() }
-
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(0, 0, 0, 10)
-        button.layoutParams = params
-        listContainer.addView(button)
-    }
-
-    private fun statusBadge(status: String): String {
-        return "Status: $status"
-    }
-
-    private fun addCard(text: String, resellerJson: String? = null) {
-        val card = TextView(this)
-        card.text = text
-        card.textSize = 14.5f
-        card.setTextColor(0xFF081A44.toInt())
-        card.setBackgroundResource(R.drawable.admin_section_card)
-        card.elevation = 4f
-        card.setPadding(30, 26, 30, 26)
-        card.setLineSpacing(4f, 1.05f)
-
-        val iconRes = when {
-            text.startsWith("Filters") -> R.drawable.admin_icon_settings
-            text.startsWith("Loading") -> R.drawable.admin_icon_health
-            text.startsWith("No ") -> R.drawable.admin_icon_doc
-            resellerJson != null -> R.drawable.admin_icon_partners
-            else -> R.drawable.admin_icon_doc
-        }
-
-        card.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
-        card.compoundDrawablePadding = 18
-
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(0, 0, 0, 18)
-        card.layoutParams = params
-
-        if (resellerJson != null) {
-            card.setOnClickListener {
-                startActivity(
-                    Intent(this, AdminResellerDetailActivity::class.java).apply {
-                        putExtra(AdminResellerDetailActivity.EXTRA_RESELLER_JSON, resellerJson)
-                    }
-                )
-            }
-        }
-
-        listContainer.addView(card)
+        return list
     }
 
     private fun redirectToLogin() {
@@ -330,5 +237,512 @@ class AdminResellersActivity : Activity() {
             }
         )
         finish()
+    }
+}
+
+private data class AdminResellerUi(
+    val rawJson: String,
+    val id: String,
+    val name: String,
+    val email: String,
+    val credit: String,
+    val creditLimit: String,
+    val monthlySpent: String,
+    val monthlyLimit: String,
+    val markup: String,
+    val active: Boolean,
+    val suspended: Boolean,
+    val status: String
+)
+
+private enum class PartnerBottomTab {
+    Dashboard,
+    Partners,
+    Orders,
+    Pricing,
+    More
+}
+
+@Composable
+private fun AdminResellersListScreen(
+    loading: Boolean,
+    errorMessage: String?,
+    resellers: List<AdminResellerUi>,
+    query: String,
+    selectedStatus: String,
+    onQueryChange: (String) -> Unit,
+    onStatusChange: (String) -> Unit,
+    onRefresh: () -> Unit,
+    onOpenReseller: (AdminResellerUi) -> Unit,
+    onBottomNavClick: (PartnerBottomTab) -> Unit
+) {
+    val filtered by remember(resellers, query, selectedStatus) {
+        derivedStateOf {
+            val cleanQuery = query.trim().lowercase()
+            resellers
+                .filter { selectedStatus == "all" || it.status.lowercase() == selectedStatus }
+                .filter { reseller ->
+                    cleanQuery.isBlank() || listOf(
+                        reseller.id,
+                        reseller.name,
+                        reseller.email,
+                        reseller.credit,
+                        reseller.creditLimit,
+                        reseller.markup,
+                        reseller.status
+                    ).joinToString(" ").lowercase().contains(cleanQuery)
+                }
+        }
+    }
+
+    val active = resellers.count { it.active && !it.suspended }
+    val suspended = resellers.count { it.suspended }
+
+    Scaffold(
+        containerColor = ResellerBg,
+        bottomBar = {
+            PartnerBottomNav(
+                selected = PartnerBottomTab.Partners,
+                onClick = onBottomNavClick
+            )
+        }
+    ) { inner ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(ResellerBg)
+                .padding(inner)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item { Spacer(Modifier.height(8.dp)) }
+
+            item {
+                PartnerListHero(
+                    title = "Resellers",
+                    subtitle = "${filtered.size} shown • ${resellers.size} total • $active active • $suspended suspended",
+                    badge = "Live reseller accounts"
+                )
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PartnerMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_partners,
+                        label = "Shown",
+                        value = filtered.size.toString(),
+                        sub = "${resellers.size} total",
+                        subColor = ResellerBlue
+                    )
+                    PartnerMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_health,
+                        label = "Active",
+                        value = active.toString(),
+                        sub = "enabled",
+                        subColor = ResellerGreen
+                    )
+                }
+            }
+
+            item {
+                PartnerFilterCard(
+                    query = query,
+                    selectedStatus = selectedStatus,
+                    placeholder = "Search reseller name, email, id",
+                    onQueryChange = onQueryChange,
+                    onStatusChange = onStatusChange,
+                    onRefresh = onRefresh,
+                    loading = loading
+                )
+            }
+
+            if (loading) {
+                item {
+                    PartnerInfoCard("Loading Resellers", "Retrieving partner account status, balances, and markup data.") {
+                        CircularProgressIndicator(color = ResellerBlue)
+                    }
+                }
+            }
+
+            if (!loading && errorMessage != null) {
+                item {
+                    PartnerInfoCard("Resellers unavailable", errorMessage)
+                }
+            }
+
+            if (!loading && errorMessage == null && filtered.isEmpty()) {
+                item {
+                    PartnerInfoCard("No Matching Resellers", "Clear filters or search by reseller name, email, or account id.")
+                }
+            }
+
+            items(filtered.size) { index ->
+                ResellerListCard(
+                    reseller = filtered[index],
+                    onClick = { onOpenReseller(filtered[index]) }
+                )
+            }
+
+            item { Spacer(Modifier.height(10.dp)) }
+        }
+    }
+}
+
+@Composable
+private fun PartnerListHero(
+    title: String,
+    subtitle: String,
+    badge: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = ResellerNavy),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .background(Brush.horizontalGradient(listOf(ResellerNavy, ResellerNavy2)))
+                .padding(18.dp)
+        ) {
+            Column {
+                Text(
+                    title,
+                    color = Color.White,
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    subtitle,
+                    color = Color.White.copy(alpha = 0.72f),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    badge,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PartnerMetricCard(
+    modifier: Modifier,
+    @DrawableRes icon: Int,
+    label: String,
+    value: String,
+    sub: String,
+    subColor: Color
+) {
+    Card(
+        modifier = modifier.height(120.dp),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, ResellerBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
+            Column {
+                Text(label, color = ResellerMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = ResellerText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PartnerFilterCard(
+    query: String,
+    selectedStatus: String,
+    placeholder: String,
+    onQueryChange: (String) -> Unit,
+    onStatusChange: (String) -> Unit,
+    onRefresh: () -> Unit,
+    loading: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, ResellerBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                label = { Text(placeholder) },
+                singleLine = true
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    "all" to "All",
+                    "active" to "Active",
+                    "suspended" to "Suspended",
+                    "inactive" to "Inactive"
+                ).forEach { (value, label) ->
+                    val selected = selectedStatus == value
+                    AssistChip(
+                        onClick = { onStatusChange(value) },
+                        label = {
+                            Text(
+                                label,
+                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            labelColor = if (selected) ResellerBlue else ResellerMuted
+                        ),
+                        border = BorderStroke(1.dp, if (selected) ResellerBlue.copy(alpha = 0.35f) else ResellerBorder)
+                    )
+                }
+
+                AssistChip(
+                    onClick = onRefresh,
+                    enabled = !loading,
+                    label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = Color(0xFFEAF2FF),
+                        labelColor = ResellerBlue
+                    ),
+                    border = BorderStroke(1.dp, ResellerBlue.copy(alpha = 0.35f))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResellerListCard(
+    reseller: AdminResellerUi,
+    onClick: () -> Unit
+) {
+    val statusColor = partnerStatusColor(reseller.status)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, ResellerBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.admin_icon_partners),
+                    contentDescription = null,
+                    modifier = Modifier.size(42.dp)
+                )
+
+                Spacer(Modifier.size(12.dp))
+
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        reseller.name.ifBlank { "-" },
+                        color = ResellerText,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        reseller.email.ifBlank { "-" },
+                        color = ResellerMuted,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Surface(
+                    color = statusColor.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(
+                        reseller.status,
+                        color = statusColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                PartnerMiniStat(
+                    modifier = Modifier.weight(1f),
+                    label = "Credit",
+                    value = reseller.credit
+                )
+                PartnerMiniStat(
+                    modifier = Modifier.weight(1f),
+                    label = "Markup",
+                    value = "${reseller.markup}%"
+                )
+            }
+
+            Text(
+                "Monthly Spend: ${reseller.monthlySpent} / ${reseller.monthlyLimit}",
+                color = ResellerMuted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                "Open reseller details",
+                color = ResellerBlue,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun PartnerMiniStat(
+    modifier: Modifier,
+    label: String,
+    value: String
+) {
+    Surface(
+        modifier = modifier,
+        color = Color(0xFFF8FAFC),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, ResellerBorder)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(label, color = ResellerMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(value.ifBlank { "0.00" }, color = ResellerText, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+private fun PartnerInfoCard(
+    title: String,
+    message: String,
+    content: @Composable (() -> Unit)? = null
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, ResellerBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(title, color = ResellerText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = ResellerMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            content?.invoke()
+        }
+    }
+}
+
+private fun partnerStatusColor(status: String): Color {
+    val clean = status.lowercase()
+    return when {
+        clean.contains("active") && !clean.contains("inactive") -> ResellerGreen
+        clean.contains("suspend") -> ResellerRed
+        clean.contains("inactive") -> ResellerOrange
+        else -> ResellerMuted
+    }
+}
+
+@Composable
+private fun PartnerBottomNav(
+    selected: PartnerBottomTab,
+    onClick: (PartnerBottomTab) -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding(),
+        color = Color.White,
+        shadowElevation = 14.dp,
+        border = BorderStroke(1.dp, ResellerBorder)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(66.dp)
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            PartnerBottomItem(Icons.Default.GridView, "Dashboard", selected == PartnerBottomTab.Dashboard) { onClick(PartnerBottomTab.Dashboard) }
+            PartnerBottomItem(Icons.Default.People, "Partners", selected == PartnerBottomTab.Partners) { onClick(PartnerBottomTab.Partners) }
+            PartnerBottomItem(Icons.Default.ShoppingCart, "Orders", selected == PartnerBottomTab.Orders) { onClick(PartnerBottomTab.Orders) }
+            PartnerBottomItem(Icons.Default.CreditCard, "Pricing", selected == PartnerBottomTab.Pricing) { onClick(PartnerBottomTab.Pricing) }
+            PartnerBottomItem(Icons.Default.MoreHoriz, "More", selected == PartnerBottomTab.More) { onClick(PartnerBottomTab.More) }
+        }
+    }
+}
+
+@Composable
+private fun PartnerBottomItem(
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val color = if (selected) ResellerBlue else ResellerMuted
+    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+
+    Column(
+        modifier = Modifier
+            .size(width = 74.dp, height = 54.dp)
+            .background(bg, RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(21.dp))
+        Spacer(Modifier.height(3.dp))
+        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
     }
 }

@@ -1,212 +1,185 @@
 package im.angry.openeuicc
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
-import kotlinx.coroutines.CoroutineScope
+import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-class AdminDealerDetailActivity : Activity() {
+private val DealerDetailBg = Color(0xFFF6F8FC)
+private val DealerDetailNavy = Color(0xFF061A3F)
+private val DealerDetailNavy2 = Color(0xFF123EAD)
+private val DealerDetailBlue = Color(0xFF1263F1)
+private val DealerDetailText = Color(0xFF101828)
+private val DealerDetailMuted = Color(0xFF667085)
+private val DealerDetailBorder = Color(0xFFE1E8F2)
+private val DealerDetailGreen = Color(0xFF16A34A)
+private val DealerDetailOrange = Color(0xFFF97316)
+private val DealerDetailRed = Color(0xFFEF4444)
+
+class AdminDealerDetailActivity : ComponentActivity() {
     companion object {
         const val EXTRA_DEALER_JSON = "extra_dealer_json"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val tokenStore by lazy { AuthTokenStore(this) }
-
-    private lateinit var subtitleText: TextView
-    private lateinit var refreshButton: Button
-    private lateinit var listContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_admin_dealer_detail)
-
-        subtitleText = findViewById(R.id.adminDealerDetailSubtitleText)
-        refreshButton = findViewById(R.id.adminDealerDetailRefreshButton)
-        listContainer = findViewById(R.id.adminDealerDetailListContainer)
-
-        refreshButton.text = "Close"
-        refreshButton.setOnClickListener { finish() }
 
         val raw = intent.getStringExtra(EXTRA_DEALER_JSON)
-        if (raw.isNullOrBlank()) {
-            subtitleText.text = "No dealer data"
-            addCard("Dealer data was not provided.")
-            return
+        val parsed = runCatching {
+            if (raw.isNullOrBlank()) null else parseDealer(JSONObject(raw))
+        }.getOrNull()
+
+        setContent {
+            val scope = rememberCoroutineScope()
+            var busy by remember { mutableStateOf(false) }
+
+            R2WTheme {
+                AdminDealerDetailScreen(
+                    dealer = parsed,
+                    busy = busy,
+                    onBack = { finish() },
+                    onUpdateMarkup = { dealerId, markup ->
+                        confirmMarkup(dealerId, markup) {
+                            scope.launch {
+                                busy = true
+                                updateDealerMarkup(dealerId, markup)
+                                busy = false
+                            }
+                        }
+                    },
+                    onAction = { dealerId, action ->
+                        val label = action.replace("_", " ").replaceFirstChar { it.uppercase() }
+                        confirmAction(
+                            title = label,
+                            message = "Run action: $label?"
+                        ) {
+                            scope.launch {
+                                busy = true
+                                updateDealerStatus(dealerId, action)
+                                busy = false
+                            }
+                        }
+                    }
+                )
+            }
         }
-
-        val dealer = JSONObject(raw)
-        render(dealer)
     }
 
-    override fun onDestroy() {
-        scope.cancel()
-        super.onDestroy()
-    }
-
-    private fun render(dealer: JSONObject) {
-        val id = dealer.optString("id", "-")
-        val name = dealer.optString("name", "-")
-        val email = dealer.optString("email", "-")
-        val balance = dealer.optString("current_balance", "0.00")
-        val totalAllocated = dealer.optString("total_allocated", "0.00")
-        val totalSpent = dealer.optString("total_spent", "0.00")
-        val markup = dealer.optString("markup_percentage", "0.00")
-        val resellerEmail = dealer.optString("reseller_email", "-")
+    private fun parseDealer(dealer: JSONObject): AdminDealerDetailUi {
         val active = dealer.optBoolean("is_active", false)
         val suspended = dealer.optBoolean("is_suspended", false)
-
         val status = when {
             suspended -> "Suspended"
             active -> "Active"
             else -> "Inactive"
         }
 
-        subtitleText.text = "$name / $status"
-
-        addCard(
-            "Overview\n" +
-                "Name: $name\n" +
-                "Email: $email\n" +
-                statusBadge(status) + "\n" +
-                "Active: ${if (active) "Yes" else "No"}\n" +
-                "Suspended: ${if (suspended) "Yes" else "No"}"
+        return AdminDealerDetailUi(
+            rawJson = dealer.toString(),
+            id = dealer.optString("id", "-"),
+            name = dealer.optString("name", "-"),
+            email = dealer.optString("email", "-"),
+            balance = dealer.optString("current_balance", "0.00"),
+            totalAllocated = dealer.optString("total_allocated", "0.00"),
+            totalSpent = dealer.optString("total_spent", "0.00"),
+            markup = dealer.optString("markup_percentage", "0.00"),
+            resellerEmail = dealer.optString("reseller_email", "-"),
+            active = active,
+            suspended = suspended,
+            status = status
         )
-
-        addCard(
-            "Balance\n" +
-                "Current Balance: $balance\n" +
-                "Allocated: $totalAllocated\n" +
-                "Spent: $totalSpent"
-        )
-
-        addCard(
-            "Parent Reseller\n" +
-                "Reseller: $resellerEmail"
-        )
-
-        addCard(
-            "Pricing\n" +
-                "Markup: $markup%"
-        )
-
-        addMarkupEditor(id, markup)
-
-        if (suspended) {
-            addActionButton("Activate Dealer", id, "activate_dealer")
-        } else {
-            addActionButton("Suspend Dealer", id, "suspend_dealer")
-        }
     }
 
-    private fun addMarkupEditor(dealerId: String, currentMarkup: String) {
-        val input = EditText(this)
-        input.hint = "Markup percentage"
-        input.setText(currentMarkup)
-        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER or
-            android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-        input.textSize = 15f
-        input.setTextColor(0xFF07133D.toInt())
-        input.setHintTextColor(0xFF6B7280.toInt())
-        input.setBackgroundResource(R.drawable.admin_card_background)
-        input.setPadding(28, 18, 28, 18)
-
-        val inputParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        inputParams.setMargins(0, 0, 0, 12)
-        input.layoutParams = inputParams
-        listContainer.addView(input)
-
-        val button = Button(this)
-        button.text = "Update Markup"
-        button.textSize = 14f
-        button.setTextColor(0xFFFFFFFF.toInt())
-        button.setBackgroundResource(R.drawable.admin_primary_pill)
-        button.setPadding(24, 14, 24, 14)
-        button.setOnClickListener {
-            confirmAction(
-                title = "Update Markup",
-                message = "Update dealer markup to ${input.text}%",
-            ) {
-                updateDealerMarkup(dealerId, input.text.toString())
-            }
-        }
-
-        val buttonParams = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        buttonParams.setMargins(0, 0, 0, 20)
-        button.layoutParams = buttonParams
-        listContainer.addView(button)
-    }
-
-    private fun updateDealerMarkup(dealerId: String, markup: String) {
+    private suspend fun updateDealerMarkup(dealerId: String, markup: String) {
         if (dealerId.isBlank() || dealerId == "-") {
             Toast.makeText(this, "Missing dealer id", Toast.LENGTH_LONG).show()
             return
         }
 
         val cleanMarkup = markup.trim()
-        if (cleanMarkup.isBlank()) {
-            Toast.makeText(this, "Markup is required", Toast.LENGTH_LONG).show()
+        if (cleanMarkup.toDoubleOrNull() == null) {
+            Toast.makeText(this, "Invalid markup percentage", Toast.LENGTH_LONG).show()
             return
         }
 
-        val value = cleanMarkup.toDoubleOrNull()
-        if (value == null || value < 0.0 || value > 100.0) {
-            Toast.makeText(this, "Markup must be between 0 and 100", Toast.LENGTH_LONG).show()
+        val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        if (session == null || JwtUtils.isExpired(session.accessToken)) {
+            redirectToLogin()
             return
         }
 
-        scope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        val result = withContext(Dispatchers.IO) {
+            runCatching { postDealerMarkup(dealerId, cleanMarkup, session.authorizationHeader) }
+        }
 
-            if (session == null || JwtUtils.isExpired(session.accessToken)) {
-                redirectToLogin()
-                return@launch
-            }
-
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    postDealerMarkup(dealerId, cleanMarkup, session.authorizationHeader)
-                }
-            }
-
-            result.onSuccess { response ->
-                Toast.makeText(
-                    this@AdminDealerDetailActivity,
-                    response.optString("message", "Dealer markup updated"),
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
-            }.onFailure { error ->
-                Toast.makeText(
-                    this@AdminDealerDetailActivity,
-                    error.message ?: "Dealer markup update failed",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        result.onSuccess { response ->
+            Toast.makeText(this, response.optString("message", "Dealer markup updated"), Toast.LENGTH_LONG).show()
+            finish()
+        }.onFailure {
+            Toast.makeText(this, it.message ?: "Markup update failed", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -235,12 +208,7 @@ class AdminDealerDetailActivity : Activity() {
                 output.write(body.toByteArray(Charsets.UTF_8))
             }
 
-            val stream = if (connection.responseCode in 200..299) {
-                connection.inputStream
-            } else {
-                connection.errorStream
-            }
-
+            val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
             val responseBody = stream.bufferedReader().use { it.readText() }
 
             if (connection.responseCode !in 200..299) {
@@ -253,65 +221,27 @@ class AdminDealerDetailActivity : Activity() {
         }
     }
 
-    private fun addActionButton(label: String, dealerId: String, action: String) {
-        val button = Button(this)
-        button.text = label
-        button.textSize = 14f
-        button.setTextColor(0xFFFFFFFF.toInt())
-        button.setBackgroundResource(actionButtonBackground(label))
-        button.setPadding(24, 14, 24, 14)
-        button.setOnClickListener {
-            confirmAction(
-                title = label,
-                message = "Are you sure you want to continue?",
-            ) {
-                updateDealerStatus(dealerId, action)
-            }
-        }
-
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(0, 0, 0, 16)
-        button.layoutParams = params
-        listContainer.addView(button)
-    }
-
-    private fun updateDealerStatus(dealerId: String, action: String) {
+    private suspend fun updateDealerStatus(dealerId: String, action: String) {
         if (dealerId.isBlank() || dealerId == "-") {
             Toast.makeText(this, "Missing dealer id", Toast.LENGTH_LONG).show()
             return
         }
 
-        scope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        if (session == null || JwtUtils.isExpired(session.accessToken)) {
+            redirectToLogin()
+            return
+        }
 
-            if (session == null || JwtUtils.isExpired(session.accessToken)) {
-                redirectToLogin()
-                return@launch
-            }
+        val result = withContext(Dispatchers.IO) {
+            runCatching { postDealerAction(dealerId, action, session.authorizationHeader) }
+        }
 
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    postDealerAction(dealerId, action, session.authorizationHeader)
-                }
-            }
-
-            result.onSuccess { response ->
-                Toast.makeText(
-                    this@AdminDealerDetailActivity,
-                    response.optString("message", "Dealer updated"),
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
-            }.onFailure { error ->
-                Toast.makeText(
-                    this@AdminDealerDetailActivity,
-                    error.message ?: "Dealer action failed",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        result.onSuccess { response ->
+            Toast.makeText(this, response.optString("message", "Dealer updated"), Toast.LENGTH_LONG).show()
+            finish()
+        }.onFailure {
+            Toast.makeText(this, it.message ?: "Dealer update failed", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -326,29 +256,18 @@ class AdminDealerDetailActivity : Activity() {
         return try {
             connection.requestMethod = "POST"
             connection.setRequestProperty("Accept", "application/json")
-            connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("Authorization", authorizationHeader)
-            connection.doOutput = true
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
 
-            connection.outputStream.use { output ->
-                output.write("{}".toByteArray(Charsets.UTF_8))
-            }
-
-            val stream = if (connection.responseCode in 200..299) {
-                connection.inputStream
-            } else {
-                connection.errorStream
-            }
-
-            val body = stream.bufferedReader().use { it.readText() }
+            val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
+            val responseBody = stream.bufferedReader().use { it.readText() }
 
             if (connection.responseCode !in 200..299) {
-                throw IllegalStateException("HTTP ${connection.responseCode}: $body")
+                throw IllegalStateException("HTTP ${connection.responseCode}: $responseBody")
             }
 
-            JSONObject(body)
+            JSONObject(responseBody)
         } finally {
             connection.disconnect()
         }
@@ -360,27 +279,15 @@ class AdminDealerDetailActivity : Activity() {
         finish()
     }
 
-    private fun actionButtonBackground(label: String): Int {
-        val normalized = label.lowercase()
-        return when {
-            normalized.contains("suspend") -> R.drawable.admin_danger_pill
-            normalized.contains("cancel") -> R.drawable.admin_danger_pill
-            normalized.contains("delete") -> R.drawable.admin_danger_pill
-            normalized.contains("activate") -> R.drawable.admin_success_pill
-            normalized.contains("complete") -> R.drawable.admin_success_pill
-            normalized.contains("delivered") -> R.drawable.admin_success_pill
-            normalized.contains("confirmed") -> R.drawable.admin_success_pill
-            normalized.contains("processing") -> R.drawable.admin_warning_pill
-            normalized.contains("dispatched") -> R.drawable.admin_warning_pill
-            else -> R.drawable.admin_primary_pill
-        }
+    private fun confirmMarkup(dealerId: String, markup: String, onConfirm: () -> Unit) {
+        confirmAction(
+            title = "Update Markup",
+            message = "Update dealer $dealerId markup to $markup%?",
+            onConfirm = onConfirm
+        )
     }
 
-    private fun confirmAction(
-        title: String,
-        message: String,
-        onConfirm: () -> Unit
-    ) {
+    private fun confirmAction(title: String, message: String, onConfirm: () -> Unit) {
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
@@ -388,42 +295,313 @@ class AdminDealerDetailActivity : Activity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+}
 
-    private fun statusBadge(status: String): String {
-        val normalized = status.lowercase()
-        val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> ""
-            normalized.contains("completed") -> ""
-            normalized.contains("resolved") -> ""
-            normalized.contains("ok") -> ""
-            normalized.contains("open") -> ""
-            normalized.contains("pending") -> ""
-            normalized.contains("progress") -> ""
-            normalized.contains("inactive") -> ""
-            normalized.contains("closed") -> ""
-            normalized.contains("suspended") -> ""
-            normalized.contains("failed") -> ""
-            normalized.contains("error") -> ""
-            else -> ""
+private data class AdminDealerDetailUi(
+    val rawJson: String,
+    val id: String,
+    val name: String,
+    val email: String,
+    val balance: String,
+    val totalAllocated: String,
+    val totalSpent: String,
+    val markup: String,
+    val resellerEmail: String,
+    val active: Boolean,
+    val suspended: Boolean,
+    val status: String
+)
+
+@Composable
+private fun AdminDealerDetailScreen(
+    dealer: AdminDealerDetailUi?,
+    busy: Boolean,
+    onBack: () -> Unit,
+    onUpdateMarkup: (String, String) -> Unit,
+    onAction: (String, String) -> Unit
+) {
+    var markupInput by remember(dealer?.markup) { mutableStateOf(dealer?.markup ?: "") }
+
+    Scaffold(containerColor = DealerDetailBg) { inner ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DealerDetailBg)
+                .padding(inner)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (dealer == null) {
+                DealerDetailTopBar("Dealer Detail", onBack)
+                DealerDetailInfoCard("No dealer data", R.drawable.admin_icon_doc) {
+                    DealerDetailLine("Status", "Dealer data was not provided.")
+                }
+            } else {
+                DealerDetailHero(dealer, onBack)
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    DealerDetailMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_money,
+                        label = "Balance",
+                        value = dealer.balance,
+                        sub = "current wallet"
+                    )
+                    DealerDetailMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_tag,
+                        label = "Markup",
+                        value = "${dealer.markup}%",
+                        sub = "dealer rate"
+                    )
+                }
+
+                DealerDetailInfoCard("Account", R.drawable.admin_icon_user) {
+                    DealerDetailLine("ID", dealer.id)
+                    DealerDetailLine("Name", dealer.name)
+                    DealerDetailLine("Email", dealer.email)
+                    DealerDetailLine("Status", dealer.status)
+                }
+
+                DealerDetailInfoCard("Wallet & Spend", R.drawable.admin_icon_money) {
+                    DealerDetailLine("Current Balance", dealer.balance)
+                    DealerDetailLine("Total Allocated", dealer.totalAllocated)
+                    DealerDetailLine("Total Spent", dealer.totalSpent)
+                    DealerDetailLine("Parent Reseller", dealer.resellerEmail)
+                }
+
+                DealerMarkupCard(
+                    markupInput = markupInput,
+                    busy = busy,
+                    onMarkupChange = { markupInput = it },
+                    onSave = { onUpdateMarkup(dealer.id, markupInput) }
+                )
+
+                DealerActionsCard(
+                    dealer = dealer,
+                    busy = busy,
+                    onAction = { action -> onAction(dealer.id, action) }
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
-        return "Status: $status"
     }
+}
 
-    private fun addCard(text: String) {
-        val card = TextView(this)
-        card.text = text
-        card.textSize = 15.5f
-        card.setTextColor(0xFF07133D.toInt())
-        card.setBackgroundResource(R.drawable.admin_card_background)
-        card.elevation = 3f
-        card.setPadding(28, 24, 28, 24)
+@Composable
+private fun DealerDetailTopBar(title: String, onBack: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = DealerDetailText)
+        }
+        Text(title, color = DealerDetailText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+    }
+}
 
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+@Composable
+private fun DealerDetailHero(dealer: AdminDealerDetailUi, onBack: () -> Unit) {
+    val statusColor = dealerDetailStatusColor(dealer.status)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = DealerDetailNavy),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(184.dp)
+                .background(Brush.horizontalGradient(listOf(DealerDetailNavy, DealerDetailNavy2)))
+                .padding(16.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    Text("Dealer Detail", color = Color.White, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    dealer.name.ifBlank { "-" },
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(5.dp))
+
+                Text(
+                    dealer.email.ifBlank { "-" },
+                    color = Color.White.copy(alpha = 0.74f),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                Surface(
+                    color = statusColor.copy(alpha = 0.20f),
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f))
+                ) {
+                    Text(
+                        dealer.status,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DealerDetailMetricCard(
+    modifier: Modifier,
+    @DrawableRes icon: Int,
+    label: String,
+    value: String,
+    sub: String
+) {
+    Card(
+        modifier = modifier.height(120.dp),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, DealerDetailBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
+            Column {
+                Text(label, color = DealerDetailMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = DealerDetailText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Text(sub, color = DealerDetailBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DealerDetailInfoCard(
+    title: String,
+    @DrawableRes icon: Int,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, DealerDetailBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
+                Spacer(Modifier.width(10.dp))
+                Text(title, color = DealerDetailText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun DealerDetailLine(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+        Text(label, color = DealerDetailMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.42f))
+        Text(
+            value.ifBlank { "-" },
+            color = DealerDetailText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(0.58f),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
         )
-        params.setMargins(0, 0, 0, 20)
-        card.layoutParams = params
-        listContainer.addView(card)
+    }
+}
+
+@Composable
+private fun DealerMarkupCard(
+    markupInput: String,
+    busy: Boolean,
+    onMarkupChange: (String) -> Unit,
+    onSave: () -> Unit
+) {
+    DealerDetailInfoCard("Markup Editor", R.drawable.admin_icon_tag) {
+        OutlinedTextField(
+            value = markupInput,
+            onValueChange = onMarkupChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Markup percentage") },
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Percent, contentDescription = null) }
+        )
+
+        Button(
+            onClick = onSave,
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = DealerDetailBlue)
+        ) {
+            Text(if (busy) "Updating..." else "Update Markup", fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+@Composable
+private fun DealerActionsCard(
+    dealer: AdminDealerDetailUi,
+    busy: Boolean,
+    onAction: (String) -> Unit
+) {
+    val action = if (dealer.active && !dealer.suspended) "suspend_dealer" else "activate_dealer"
+    val danger = action.contains("suspend")
+    val title = if (danger) "Suspend Dealer" else "Activate Dealer"
+
+    DealerDetailInfoCard("Account Actions", R.drawable.admin_icon_settings) {
+        Button(
+            onClick = { onAction(action) },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (danger) DealerDetailRed else DealerDetailGreen,
+                disabledContainerColor = DealerDetailMuted.copy(alpha = 0.35f)
+            )
+        ) {
+            Icon(if (danger) Icons.Default.Block else Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(if (busy) "Updating..." else title, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+private fun dealerDetailStatusColor(status: String): Color {
+    val clean = status.lowercase()
+    return when {
+        clean.contains("active") && !clean.contains("inactive") -> DealerDetailGreen
+        clean.contains("suspend") -> DealerDetailRed
+        clean.contains("inactive") -> DealerDetailOrange
+        else -> DealerDetailMuted
     }
 }

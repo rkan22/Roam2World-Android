@@ -22,7 +22,7 @@
         android:localeConfig="@xml/locale_config"
         android:roundIcon="@drawable/ic_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App.Starting"
+        android:theme="@style/Theme.Roam2World.NoPreview"
         tools:targetApi="tiramisu">
         <activity
             android:name="im.angry.openeuicc.ui.SplashActivity"
@@ -186,6 +186,17 @@
         <activity android:name=".AdminResellerDetailActivity" android:exported="false" />
         <activity android:name=".AdminResellersActivity" android:exported="false" />
             <activity android:name=".MobileAdminActivity" android:exported="true" />
-    </application>
+            <activity android:name=".AdminMoreActivity" android:exported="false" />
+        <activity android:name=".AdminPartnersActivity" android:exported="false" />
+        <activity android:name=".AdminOrdersOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminPricingOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminWalletApprovalsOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminNotificationsOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminSystemHealthOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminReportsOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminSupportTicketsOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminActivityLogsOverviewActivity" android:exported="false" />
+        <activity android:name=".AdminProfileSettingsActivity" android:exported="false" />
+</application>
 
 </manifest>

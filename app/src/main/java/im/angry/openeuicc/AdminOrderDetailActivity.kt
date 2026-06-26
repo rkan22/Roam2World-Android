@@ -1,203 +1,179 @@
 package im.angry.openeuicc
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.PendingActions
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
-import kotlinx.coroutines.CoroutineScope
+import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-class AdminOrderDetailActivity : Activity() {
+private val DetailBg = Color(0xFFF6F8FC)
+private val DetailNavy = Color(0xFF061A3F)
+private val DetailNavy2 = Color(0xFF123EAD)
+private val DetailBlue = Color(0xFF1263F1)
+private val DetailText = Color(0xFF101828)
+private val DetailMuted = Color(0xFF667085)
+private val DetailBorder = Color(0xFFE1E8F2)
+private val DetailGreen = Color(0xFF16A34A)
+private val DetailOrange = Color(0xFFF97316)
+private val DetailRed = Color(0xFFEF4444)
+
+class AdminOrderDetailActivity : ComponentActivity() {
     companion object {
         const val EXTRA_ORDER_JSON = "extra_order_json"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val tokenStore by lazy { AuthTokenStore(this) }
-
-    private lateinit var subtitleText: TextView
-    private lateinit var refreshButton: Button
-    private lateinit var listContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_admin_order_detail)
-
-        subtitleText = findViewById(R.id.adminOrderDetailSubtitleText)
-        refreshButton = findViewById(R.id.adminOrderDetailRefreshButton)
-        listContainer = findViewById(R.id.adminOrderDetailListContainer)
-
-        refreshButton.text = "Close"
-        refreshButton.setOnClickListener { finish() }
 
         val raw = intent.getStringExtra(EXTRA_ORDER_JSON)
-        if (raw.isNullOrBlank()) {
-            subtitleText.text = "No order data"
-            addCard("Order data was not provided.")
-            return
-        }
+        val parsedOrder = runCatching {
+            if (raw.isNullOrBlank()) null else parseOrder(JSONObject(raw))
+        }.getOrNull()
 
-        val order = JSONObject(raw)
-        render(order)
-    }
+        setContent {
+            val scope = rememberCoroutineScope()
+            var updating by remember { mutableStateOf(false) }
 
-    override fun onDestroy() {
-        scope.cancel()
-        super.onDestroy()
-    }
+            R2WTheme {
+                AdminOrderDetailScreen(
+                    order = parsedOrder,
+                    updating = updating,
+                    onBack = { finish() },
+                    onStatusClick = { nextStatus ->
+                        if (parsedOrder == null) return@AdminOrderDetailScreen
 
-    private fun render(order: JSONObject) {
-        val id = order.optString("id", order.optString("order_id", "-"))
-        val orderNumber = order.optString("order_number", "-")
-        val status = order.optString("status", "-")
-        subtitleText.text = "$orderNumber / $status"
-
-        val name = order.optString("name", "-")
-        val email = order.optString("email", "-")
-        val source = order.optString("order_source", "-")
-        val type = order.optString("order_type", "-")
-        val product = order.optString("product_name", "-")
-        val quantity = order.optInt("quantity", 0)
-        val total = order.optString("total_amount", "0.00")
-        val customer = order.optString("customer_name", "-")
-        val resellerEmail = order.optString("reseller_email", "")
-        val dealerEmail = order.optString("dealer_email", "")
-        val country = order.optString("delivery_country", "")
-        val createdAt = order.optString("created_at", "-")
-        val updatedAt = order.optString("updated_at", "-")
-
-        addCard(
-            "Overview\n" +
-                "Order: $orderNumber\n" +
-                statusBadge(status) + "\n" +
-                "Created: $createdAt\n" +
-                "Updated: $updatedAt"
-        )
-
-        addCard(
-            "Customer\n" +
-                "Name: ${name.ifBlank { "-" }}\n" +
-                "Email: ${email.ifBlank { "-" }}\n" +
-                "Customer: ${customer.ifBlank { "-" }}\n" +
-                "Country: ${country.ifBlank { "-" }}"
-        )
-
-        addCard(
-            "Product & Payment\n" +
-                "Product: ${product.ifBlank { "-" }}\n" +
-                "Quantity: $quantity\n" +
-                "Total: $total"
-        )
-
-        addCard(
-            "Channel\n" +
-                "Source: $source\n" +
-                "Type: $type\n" +
-                "Reseller: ${resellerEmail.ifBlank { "-" }}\n" +
-                "Dealer: ${dealerEmail.ifBlank { "-" }}"
-        )
-
-        addOrderStatusActions(id, status)
-    }
-
-    private fun addOrderStatusActions(orderId: String, currentStatus: String) {
-        val nextStatuses = when (currentStatus.lowercase()) {
-            "pending" -> listOf("confirmed", "cancelled")
-            "confirmed" -> listOf("processing", "cancelled")
-            "processing" -> listOf("dispatched", "cancelled")
-            "dispatched" -> listOf("delivered", "cancelled")
-            "delivered" -> listOf("activated", "completed")
-            "activated" -> listOf("completed")
-            else -> emptyList()
-        }
-
-        if (nextStatuses.isEmpty()) {
-            addCard("Status Actions\nNo next action available for this order.")
-            return
-        }
-
-        addCard("Status Actions\nCurrent: $currentStatus")
-
-        nextStatuses.forEach { nextStatus ->
-            addActionButton("Set ${nextStatus.replaceFirstChar { it.uppercase() }}", orderId, nextStatus)
-        }
-    }
-
-    private fun addActionButton(label: String, orderId: String, status: String) {
-        val button = Button(this)
-        button.text = label
-        button.textSize = 14f
-        button.setTextColor(0xFFFFFFFF.toInt())
-        button.setBackgroundResource(actionButtonBackground(label))
-        button.setPadding(24, 14, 24, 14)
-        button.setOnClickListener {
-            confirmAction(
-                title = label,
-                message = "Change order status to $status?",
-            ) {
-                updateOrderStatus(orderId, status)
+                        confirmAction(
+                            title = "Set ${nextStatus.replaceFirstChar { it.uppercase() }}",
+                            message = "Change order status to $nextStatus?"
+                        ) {
+                            scope.launch {
+                                updating = true
+                                updateOrderStatus(parsedOrder.id, nextStatus)
+                                updating = false
+                            }
+                        }
+                    }
+                )
             }
         }
-
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        params.setMargins(0, 0, 0, 16)
-        button.layoutParams = params
-        listContainer.addView(button)
     }
 
-    private fun updateOrderStatus(orderId: String, status: String) {
+    private fun parseOrder(order: JSONObject): AdminOrderDetailUi {
+        return AdminOrderDetailUi(
+            rawJson = order.toString(),
+            id = order.optString("id", order.optString("order_id", "-")),
+            orderNumber = order.optString("order_number", "-"),
+            status = order.optString("status", "-"),
+            name = order.optString("name", "-"),
+            email = order.optString("email", "-"),
+            source = order.optString("order_source", "-"),
+            type = order.optString("order_type", "-"),
+            product = order.optString("product_name", "-"),
+            quantity = order.optInt("quantity", 0).toString(),
+            total = order.optString("total_amount", "0.00"),
+            customer = order.optString("customer_name", "-"),
+            resellerEmail = order.optString("reseller_email", ""),
+            dealerEmail = order.optString("dealer_email", ""),
+            country = order.optString("delivery_country", ""),
+            createdAt = order.optString("created_at", "-"),
+            updatedAt = order.optString("updated_at", "-")
+        )
+    }
+
+    private suspend fun updateOrderStatus(orderId: String, status: String) {
         if (orderId.isBlank() || orderId == "-") {
             Toast.makeText(this, "Missing order id", Toast.LENGTH_LONG).show()
             return
         }
 
-        scope.launch {
-            val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
+        val session = withContext(Dispatchers.IO) { tokenStore.getSession() }
 
-            if (session == null || JwtUtils.isExpired(session.accessToken)) {
-                redirectToLogin()
-                return@launch
-            }
+        if (session == null || JwtUtils.isExpired(session.accessToken)) {
+            redirectToLogin()
+            return
+        }
 
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    postOrderStatus(orderId, status, session.authorizationHeader)
-                }
+        val result = withContext(Dispatchers.IO) {
+            runCatching {
+                postOrderStatus(orderId, status, session.authorizationHeader)
             }
+        }
 
-            result.onSuccess { response ->
-                val message = response.optString("message", "Order status updated")
-                Toast.makeText(
-                    this@AdminOrderDetailActivity,
-                    message,
-                    Toast.LENGTH_LONG
-                ).show()
-                finish()
-            }.onFailure { error ->
-                Toast.makeText(
-                    this@AdminOrderDetailActivity,
-                    error.message ?: "Order status update failed",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        result.onSuccess { response ->
+            val message = response.optString("message", "Order status updated")
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            finish()
+        }.onFailure { error ->
+            Toast.makeText(
+                this,
+                error.message ?: "Order status update failed",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -251,22 +227,6 @@ class AdminOrderDetailActivity : Activity() {
         finish()
     }
 
-    private fun actionButtonBackground(label: String): Int {
-        val normalized = label.lowercase()
-        return when {
-            normalized.contains("suspend") -> R.drawable.admin_danger_pill
-            normalized.contains("cancel") -> R.drawable.admin_danger_pill
-            normalized.contains("delete") -> R.drawable.admin_danger_pill
-            normalized.contains("activate") -> R.drawable.admin_success_pill
-            normalized.contains("complete") -> R.drawable.admin_success_pill
-            normalized.contains("delivered") -> R.drawable.admin_success_pill
-            normalized.contains("confirmed") -> R.drawable.admin_success_pill
-            normalized.contains("processing") -> R.drawable.admin_warning_pill
-            normalized.contains("dispatched") -> R.drawable.admin_warning_pill
-            else -> R.drawable.admin_primary_pill
-        }
-    }
-
     private fun confirmAction(
         title: String,
         message: String,
@@ -279,42 +239,365 @@ class AdminOrderDetailActivity : Activity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+}
 
-    private fun statusBadge(status: String): String {
-        val normalized = status.lowercase()
-        val icon = when {
-            normalized.contains("active") && !normalized.contains("inactive") -> ""
-            normalized.contains("completed") -> ""
-            normalized.contains("resolved") -> ""
-            normalized.contains("ok") -> ""
-            normalized.contains("open") -> ""
-            normalized.contains("pending") -> ""
-            normalized.contains("progress") -> ""
-            normalized.contains("inactive") -> ""
-            normalized.contains("closed") -> ""
-            normalized.contains("suspended") -> ""
-            normalized.contains("failed") -> ""
-            normalized.contains("error") -> ""
-            else -> ""
+private data class AdminOrderDetailUi(
+    val rawJson: String,
+    val id: String,
+    val orderNumber: String,
+    val status: String,
+    val name: String,
+    val email: String,
+    val source: String,
+    val type: String,
+    val product: String,
+    val quantity: String,
+    val total: String,
+    val customer: String,
+    val resellerEmail: String,
+    val dealerEmail: String,
+    val country: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+@Composable
+private fun AdminOrderDetailScreen(
+    order: AdminOrderDetailUi?,
+    updating: Boolean,
+    onBack: () -> Unit,
+    onStatusClick: (String) -> Unit
+) {
+    Scaffold(
+        containerColor = DetailBg
+    ) { inner ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DetailBg)
+                .padding(inner)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (order == null) {
+                DetailTopBar(title = "Order Detail", onBack = onBack)
+                DetailInfoCard(title = "No order data", icon = R.drawable.admin_icon_doc) {
+                    DetailLine("Status", "Order data was not provided.")
+                }
+            } else {
+                DetailHero(order = order, onBack = onBack)
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    DetailMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_orders,
+                        label = "Quantity",
+                        value = order.quantity,
+                        sub = "items"
+                    )
+                    DetailMetricCard(
+                        modifier = Modifier.weight(1f),
+                        icon = R.drawable.admin_icon_money,
+                        label = "Total",
+                        value = order.total.ifBlank { "0.00" },
+                        sub = "order amount"
+                    )
+                }
+
+                DetailInfoCard(title = "Customer", icon = R.drawable.admin_icon_user) {
+                    DetailLine("Customer", order.customer.ifBlank { "-" })
+                    DetailLine("Name", order.name.ifBlank { "-" })
+                    DetailLine("Email", order.email.ifBlank { "-" })
+                    DetailLine("Country", order.country.ifBlank { "-" })
+                }
+
+                DetailInfoCard(title = "Product & Payment", icon = R.drawable.admin_icon_doc) {
+                    DetailLine("Product", order.product.ifBlank { "-" })
+                    DetailLine("Quantity", order.quantity)
+                    DetailLine("Total", order.total.ifBlank { "0.00" })
+                    DetailLine("Order ID", order.id.ifBlank { "-" })
+                }
+
+                DetailInfoCard(title = "Channel", icon = R.drawable.admin_icon_partners) {
+                    DetailLine("Source", order.source.ifBlank { "-" })
+                    DetailLine("Type", order.type.ifBlank { "-" })
+                    DetailLine("Reseller", order.resellerEmail.ifBlank { "-" })
+                    DetailLine("Dealer", order.dealerEmail.ifBlank { "-" })
+                }
+
+                DetailInfoCard(title = "Timeline", icon = R.drawable.admin_icon_health) {
+                    DetailLine("Created", order.createdAt.ifBlank { "-" })
+                    DetailLine("Updated", order.updatedAt.ifBlank { "-" })
+                    DetailLine("Current status", order.status.ifBlank { "-" })
+                }
+
+                StatusActionsCard(
+                    currentStatus = order.status,
+                    updating = updating,
+                    onStatusClick = onStatusClick
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
-        return "Status: $status"
     }
+}
 
-    private fun addCard(text: String) {
-        val card = TextView(this)
-        card.text = text
-        card.textSize = 15.5f
-        card.setTextColor(0xFF07133D.toInt())
-        card.setBackgroundResource(R.drawable.admin_card_background)
-        card.elevation = 3f
-        card.setPadding(28, 24, 28, 24)
+@Composable
+private fun DetailTopBar(title: String, onBack: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = DetailText)
+        }
+        Text(title, color = DetailText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+    }
+}
 
-        val params = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+@Composable
+private fun DetailHero(order: AdminOrderDetailUi, onBack: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = DetailNavy),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(182.dp)
+                .background(Brush.horizontalGradient(listOf(DetailNavy, DetailNavy2)))
+                .padding(16.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                    }
+
+                    Spacer(Modifier.width(4.dp))
+
+                    Text(
+                        "Order Detail",
+                        color = Color.White,
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    order.orderNumber.ifBlank { "-" },
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(5.dp))
+
+                Text(
+                    order.product.ifBlank { "Unknown product" },
+                    color = Color.White.copy(alpha = 0.74f),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(14.dp))
+
+                Surface(
+                    color = detailStatusColor(order.status).copy(alpha = 0.18f),
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f))
+                ) {
+                    Text(
+                        order.status.replaceFirstChar { it.uppercase() },
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailMetricCard(
+    modifier: Modifier,
+    @DrawableRes icon: Int,
+    label: String,
+    value: String,
+    sub: String
+) {
+    Card(
+        modifier = modifier.height(120.dp),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, DetailBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
+            Column {
+                Text(label, color = DetailMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = DetailText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Text(sub, color = DetailBlue, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailInfoCard(
+    title: String,
+    @DrawableRes icon: Int,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, DetailBorder),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(11.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
+                Spacer(Modifier.width(10.dp))
+                Text(title, color = DetailText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            }
+
+            content()
+        }
+    }
+}
+
+@Composable
+private fun DetailLine(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            label,
+            color = DetailMuted,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(0.42f)
         )
-        params.setMargins(0, 0, 0, 20)
-        card.layoutParams = params
-        listContainer.addView(card)
+        Text(
+            value.ifBlank { "-" },
+            color = DetailText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(0.58f),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun StatusActionsCard(
+    currentStatus: String,
+    updating: Boolean,
+    onStatusClick: (String) -> Unit
+) {
+    val nextStatuses = nextOrderStatuses(currentStatus)
+
+    DetailInfoCard(title = "Status Actions", icon = R.drawable.admin_icon_settings) {
+        DetailLine("Current", currentStatus.ifBlank { "-" })
+
+        if (nextStatuses.isEmpty()) {
+            Text(
+                "No next action available for this order.",
+                color = DetailMuted,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        } else {
+            nextStatuses.forEach { status ->
+                Button(
+                    onClick = { onStatusClick(status) },
+                    enabled = !updating,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = actionColor(status),
+                        disabledContainerColor = DetailMuted.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Icon(actionIcon(status), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (updating) "Updating..." else "Set ${status.replaceFirstChar { it.uppercase() }}",
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun nextOrderStatuses(currentStatus: String): List<String> {
+    return when (currentStatus.lowercase()) {
+        "pending" -> listOf("confirmed", "cancelled")
+        "confirmed" -> listOf("processing", "cancelled")
+        "processing" -> listOf("dispatched", "cancelled")
+        "dispatched" -> listOf("delivered", "cancelled")
+        "delivered" -> listOf("activated", "completed")
+        "activated" -> listOf("completed")
+        else -> emptyList()
+    }
+}
+
+private fun detailStatusColor(status: String): Color {
+    val clean = status.lowercase()
+    return when {
+        clean.contains("complete") || clean.contains("deliver") || clean.contains("confirm") || clean.contains("activate") -> DetailGreen
+        clean.contains("process") || clean.contains("dispatch") -> DetailOrange
+        clean.contains("cancel") || clean.contains("fail") -> DetailRed
+        clean.contains("pending") -> DetailBlue
+        else -> DetailMuted
+    }
+}
+
+private fun actionColor(status: String): Color {
+    val clean = status.lowercase()
+    return when {
+        clean.contains("cancel") -> DetailRed
+        clean.contains("complete") || clean.contains("deliver") || clean.contains("confirm") || clean.contains("activate") -> DetailGreen
+        clean.contains("process") || clean.contains("dispatch") -> DetailOrange
+        else -> DetailBlue
+    }
+}
+
+private fun actionIcon(status: String): ImageVector {
+    val clean = status.lowercase()
+    return when {
+        clean.contains("cancel") -> Icons.Default.Close
+        clean.contains("dispatch") || clean.contains("deliver") -> Icons.Default.LocalShipping
+        clean.contains("process") -> Icons.Default.Sync
+        clean.contains("pending") -> Icons.Default.PendingActions
+        else -> Icons.Default.CheckCircle
     }
 }

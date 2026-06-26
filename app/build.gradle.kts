@@ -14,6 +14,14 @@ apply {
 }
 
 android {
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
+
     namespace = "im.angry.openeuicc"
     compileSdk = 35
 
@@ -44,6 +52,16 @@ android {
 }
 
 dependencies {
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.foundation:foundation-layout")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui")
+    implementation(platform("androidx.compose:compose-bom:2024.02.02"))
     compileOnly(project(":libs:hidden-apis-stub"))
     implementation(project(":libs:hidden-apis-shim"))
     implementation(project(":libs:lpac-jni"))
@@ -114,4 +132,10 @@ tasks.register<Zip>("assembleReleaseMagiskModule") {
     archiveFileName = "magisk-release.zip"
     destinationDirectory = project.layout.buildDirectory.dir("magisk")
     entryCompression = ZipEntryCompression.STORED
+}
+
+
+// Compose compiler workaround for app module, matching app-common.
+configurations.matching { it.name.startsWith("kotlinCompilerPluginClasspath") }.configureEach {
+    project.dependencies.add(this.name, "androidx.compose.compiler:compiler:1.5.14")
 }
