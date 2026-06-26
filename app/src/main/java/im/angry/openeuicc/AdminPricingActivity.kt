@@ -2,7 +2,6 @@ package im.angry.openeuicc
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -89,7 +88,6 @@ class AdminPricingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("R2W_PRICING_TEST", "AdminPricingActivity opened")
 
         setContent {
             val composeScope = rememberCoroutineScope()
@@ -167,7 +165,6 @@ class AdminPricingActivity : ComponentActivity() {
     }
 
     private fun fetchAdminPricing(authorizationHeader: String): JSONObject {
-        Log.d("R2W_PRICING_TEST", "fetch start")
         val url = URL("https://roam2world-panels-backend.onrender.com/api/v1/mobile/admin/pricing/")
         val connection = url.openConnection() as HttpURLConnection
 
@@ -185,13 +182,12 @@ class AdminPricingActivity : ComponentActivity() {
             }
 
             val body = stream.bufferedReader().use { it.readText() }
-            Log.d("R2W_PRICING_TEST", "HTTP ${connection.responseCode}: ${body.take(12000)}")
 
             if (connection.responseCode !in 200..299) {
                 throw IllegalStateException("HTTP ${connection.responseCode}: $body")
             }
 
-            JSONObject(body).also { Log.d("R2W_PRICING_TEST", body.take(12000)) }
+            JSONObject(body)
         } finally {
             connection.disconnect()
         }
