@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import im.angry.openeuicc.auth.AuthTokenStore
+import im.angry.openeuicc.ui.LoginActivity
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.ui.compose.screens.admin.AdminBottomNavItem
@@ -86,7 +87,7 @@ class AdminMoreActivity : ComponentActivity() {
                         startActivity(Intent(this@AdminMoreActivity, AdminProfileSettingsActivity::class.java))
                     },
                     onLogoutClick = {
-                        Toast.makeText(this@AdminMoreActivity, "Logout from main account screen", Toast.LENGTH_SHORT).show()
+                        logoutAdmin()
                     },
                     onBottomNavClick = { item ->
                         when (item) {
@@ -100,5 +101,16 @@ class AdminMoreActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+
+    private fun logoutAdmin() {
+        tokenStore.clear()
+        startActivity(
+            Intent(this, LoginActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+        )
+        finish()
     }
 }

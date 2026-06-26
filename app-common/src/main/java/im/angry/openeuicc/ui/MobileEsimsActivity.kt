@@ -149,7 +149,7 @@ class MobileEsimsActivity : ComponentActivity() {
                 return@launch
             }
 
-            val result = runCatching { authApi.esims(session) }
+            val result = runCatching { authApi.parseMobileEsims(fetchAllMobileEsimsPages(session)) }
 
             result
                 .onSuccess {
@@ -259,6 +259,91 @@ class MobileEsimsActivity : ComponentActivity() {
             return
         }
         startActivity(Intent().setClassName(this, target))
+    }
+
+
+    private suspend fun fetchAllMobileEsimsPages(session: im.angry.openeuicc.auth.AuthSession): org.json.JSONObject = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val base = im.angry.openeuicc.common.BuildConfig.ROAM2WORLD_API_BASE_URL.trimEnd('/')
+        val merged = org.json.JSONArray()
+        var totalCount = 0
+        var page = 1
+        var keepGoing = true
+        val seenIds = linkedSetOf<String>()
+
+        while (keepGoing && page <= 50) {
+            val url = java.net.URL("$base/api/v1/mobile/esims/?page=$page&page_size=100&limit=100")
+            val connection = url.openConnection() as java.net.HttpURLConnection
+
+            try {
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Accept", "application/json")
+                connection.setRequestProperty("Authorization", session.authorizationHeader)
+                connection.connectTimeout = 15000
+                connection.readTimeout = 15000
+
+                val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
+                val body = stream.bufferedReader().use { it.readText() }
+
+                if (connection.responseCode !in 200..299) {
+                    throw IllegalStateException("HTTP ${connection.responseCode}: $body")
+                }
+
+                val response = org.json.JSONObject(body)
+                val data = response.optJSONObject("data") ?: response
+                val pageArray = data.optJSONArray("esims")
+                    ?: data.optJSONArray("results")
+                    ?: response.optJSONArray("esims")
+                    ?: response.optJSONArray("results")
+                    ?: org.json.JSONArray()
+
+                totalCount = maxOf(
+                    totalCount,
+                    data.optInt("count", 0),
+                    data.optInt("total", 0),
+                    response.optInt("count", 0),
+                    response.optInt("total", 0)
+                )
+
+                var addedThisPage = 0
+                for (i in 0 until pageArray.length()) {
+                    val item = pageArray.optJSONObject(i) ?: continue
+                    val key = listOf(
+                        item.optString("id"),
+                        item.optString("esim_id"),
+                        item.optString("iccid"),
+                        item.optString("order_id")
+                    ).firstOrNull { it.isNotBlank() } ?: item.toString()
+
+                    if (seenIds.add(key)) {
+                        merged.put(item)
+                        addedThisPage++
+                    }
+                }
+
+                val next = data.optString("next", response.optString("next", ""))
+                keepGoing = when {
+                    pageArray.length() == 0 -> false
+                    addedThisPage == 0 -> false
+                    totalCount > 0 && merged.length() >= totalCount -> false
+                    next.isNotBlank() && next != "null" -> true
+                    totalCount > 0 && merged.length() < totalCount -> true
+                    pageArray.length() >= 35 -> true
+                    else -> false
+                }
+
+                page++
+            } finally {
+                connection.disconnect()
+            }
+        }
+
+        org.json.JSONObject().apply {
+            put("success", true)
+            put("data", org.json.JSONObject().apply {
+                put("count", if (totalCount > 0) totalCount else merged.length())
+                put("esims", merged)
+            })
+        }
     }
 
     private fun redirectToLogin(): AuthSession? {
