@@ -134,7 +134,6 @@ fun AdminDashboardScreen(
             }
 
             item {
-                AdminRecentActivityCard()
             }
 
             item {
@@ -416,13 +415,13 @@ private fun AdminSalesPerformanceCard(totalRevenue: String) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            ChartBar("Mon", 0.42f)
-            ChartBar("Tue", 0.68f)
-            ChartBar("Wed", 0.54f)
-            ChartBar("Thu", 0.76f)
-            ChartBar("Fri", 0.61f)
-            ChartBar("Sat", 0.88f)
-            ChartBar("Sun", 1f)
+            Text(
+                text = "No sales data for this period",
+                color = AdminMuted,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 18.dp)
+            )
         }
     }
 }
@@ -577,51 +576,6 @@ private fun AdminQuickActionCard(
     }
 }
 
-@Composable
-private fun AdminRecentActivityCard() {
-    AdminSectionCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Recent Activity",
-                color = AdminText,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Text(
-                text = "View all",
-                color = AdminBlue,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AdminActivityRow(
-            iconTint = AdminBlue,
-            title = "New order #ORD-92341",
-            subtitle = "Acme Travel Ltd",
-            time = "2m ago"
-        )
-
-        AdminActivityRow(
-            iconTint = AdminOrange,
-            title = "Wallet request from BlueSky Corp",
-            subtitle = "$2,500.00 pending approval",
-            time = "10m ago"
-        )
-
-        AdminActivityRow(
-            iconTint = AdminGreen,
-            title = "Provider markup updated",
-            subtitle = "Airalo default markup changed",
-            time = "1h ago"
-        )
-    }
-}
 
 @Composable
 private fun AdminActivityRow(

@@ -509,7 +509,7 @@ private fun RecentPurchasesCard(
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Recent Activity", color = R2WText, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
+                Text("", color = R2WText, fontSize = 1.sp)
                 Text(
                     "View All",
                     color = R2WBlue,
@@ -521,7 +521,7 @@ private fun RecentPurchasesCard(
             val displayOrders = orders.take(3)
             if (displayOrders.isEmpty()) {
                 Text(
-                    "No recent activity yet",
+                    "",
                     color = R2WMuted,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,

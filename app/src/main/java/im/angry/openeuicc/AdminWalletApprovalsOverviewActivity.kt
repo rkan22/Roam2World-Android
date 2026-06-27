@@ -12,6 +12,7 @@ import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.ui.compose.screens.admin.AdminBottomNavItem
 import im.angry.openeuicc.ui.compose.screens.admin.AdminWalletApprovalsOverviewScreen
+import im.angry.openeuicc.ui.WalletApprovalsActivity
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -51,7 +52,7 @@ class AdminWalletApprovalsOverviewActivity : ComponentActivity() {
                     resellerPending = resellerPending.value,
                     dealerPending = dealerPending.value,
                     onOpenApprovalsClick = {
-                        val intent = Intent(this@AdminWalletApprovalsOverviewActivity, ApprovalsActivity::class.java)
+                        val intent = Intent(this@AdminWalletApprovalsOverviewActivity, WalletApprovalsActivity::class.java)
                         intent.putExtra(
                             ApprovalsActivity.EXTRA_APPROVAL_MODE,
                             ApprovalsActivity.MODE_ADMIN_RESELLER_WALLET

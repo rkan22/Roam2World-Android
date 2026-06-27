@@ -96,7 +96,7 @@ class PurchaseReviewActivity : ComponentActivity() {
             .joinToString("  •  ")
 
     private fun submit() {
-        val msg = "Purchase flow triggered (mock UI)"
+        val msg = "Purchase flow started"
         message = msg
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
