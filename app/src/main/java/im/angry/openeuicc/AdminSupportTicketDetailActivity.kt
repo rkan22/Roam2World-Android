@@ -71,7 +71,7 @@ private val TicketDetailNavy2 = Color(0xFF123EAD)
 private val TicketDetailBlue = Color(0xFF1263F1)
 private val TicketDetailText = Color(0xFF101828)
 private val TicketDetailMuted = Color(0xFF667085)
-private val TicketDetailBorder = Color(0xFFE1E8F2)
+private val TicketDetailBorder = Color(0xFFE2E8F0)
 private val TicketDetailGreen = Color(0xFF16A34A)
 private val TicketDetailOrange = Color(0xFFF97316)
 private val TicketDetailRed = Color(0xFFEF4444)
@@ -333,7 +333,7 @@ private fun TicketDetailHero(ticket: AdminSupportTicketDetailUi, onBack: () -> U
             modifier = Modifier
                 .fillMaxWidth()
                 .height(190.dp)
-                .background(Brush.horizontalGradient(listOf(TicketDetailNavy, TicketDetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {

@@ -3,8 +3,8 @@ package im.angry.openeuicc
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
+import android.text.InputType
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -70,6 +70,13 @@ import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import im.angry.openeuicc.ui.compose.saas.R2wMetricCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasBottomNav
+import im.angry.openeuicc.ui.compose.saas.R2wSaasCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasColors
+import im.angry.openeuicc.ui.compose.saas.R2wSaasHeader
+import im.angry.openeuicc.ui.compose.saas.R2wSaasNavItem
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -88,7 +95,7 @@ private val MarkupNavy2 = Color(0xFF123EAD)
 private val MarkupBlue = Color(0xFF1263F1)
 private val MarkupText = Color(0xFF101828)
 private val MarkupMuted = Color(0xFF667085)
-private val MarkupBorder = Color(0xFFE1E8F2)
+private val MarkupBorder = Color(0xFFE2E8F0)
 private val MarkupGreen = Color(0xFF16A34A)
 private val MarkupOrange = Color(0xFFF97316)
 private val MarkupRed = Color(0xFFEF4444)
@@ -172,8 +179,8 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
                             }
                         }
                     },
-                    onUpdateDefault = { provider, markup ->
-                        showProviderMarkupDialog(provider, markup) {
+                    onUpdateDefault = { provider, resellerMarkup, dealerMarkup ->
+                        showProviderMarkupDialog(provider, resellerMarkup, dealerMarkup) {
                             composeScope.launch {
                                 loadProviderMarkups()
                             }
@@ -228,11 +235,53 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
         val data = response.optJSONObject("data") ?: JSONObject()
         val rules = response.optJSONArray("rules") ?: JSONArray()
 
-        val defaults = data.keys().asSequence().toList().sorted().map { provider ->
-            ProviderDefaultUi(
-                provider = provider,
-                markup = data.optDouble(provider, 0.0)
-            )
+        val defaults = mutableListOf<ProviderDefaultUi>()
+
+        val providerDefaultsArray = response.optJSONObject("data")
+            ?.optJSONArray("provider_markups")
+            ?: response.optJSONArray("data")
+
+        if (providerDefaultsArray != null) {
+            for (i in 0 until providerDefaultsArray.length()) {
+                val item = providerDefaultsArray.optJSONObject(i) ?: continue
+                val resellerMarkup = item.optDouble(
+                    "reseller_markup_percentage",
+                    item.optDouble("markup_percentage", 0.0)
+                )
+                defaults.add(
+                    ProviderDefaultUi(
+                        provider = item.optString("provider", "-"),
+                        markup = resellerMarkup,
+                        dealerMarkup = item.optDouble("dealer_markup_percentage", resellerMarkup)
+                    )
+                )
+            }
+        } else {
+            data.keys().asSequence().toList().sorted().forEach { provider ->
+                val rawValue = data.opt(provider)
+                if (rawValue is JSONObject) {
+                    val resellerMarkup = rawValue.optDouble(
+                        "reseller_markup_percentage",
+                        rawValue.optDouble("markup_percentage", 0.0)
+                    )
+                    defaults.add(
+                        ProviderDefaultUi(
+                            provider = provider,
+                            markup = resellerMarkup,
+                            dealerMarkup = rawValue.optDouble("dealer_markup_percentage", resellerMarkup)
+                        )
+                    )
+                } else {
+                    val resellerMarkup = data.optDouble(provider, 0.0)
+                    defaults.add(
+                        ProviderDefaultUi(
+                            provider = provider,
+                            markup = resellerMarkup,
+                            dealerMarkup = resellerMarkup
+                        )
+                    )
+                }
+            }
         }
 
         val parsedRules = mutableListOf<ScopeRuleUi>()
@@ -254,30 +303,65 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
         return ProviderMarkupResponseUi(defaults = defaults, rules = parsedRules)
     }
 
-    private fun showProviderMarkupDialog(provider: String, currentMarkup: Double, onDone: () -> Unit) {
-        val input = EditText(this)
-        input.hint = "Markup percentage"
-        input.setText(String.format("%.2f", currentMarkup))
-        input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-        input.setSelectAllOnFocus(true)
+    private fun showProviderMarkupDialog(
+        provider: String,
+        currentResellerMarkup: Double,
+        currentDealerMarkup: Double,
+        onDone: () -> Unit
+    ) {
+        val form = LinearLayout(this)
+        form.orientation = LinearLayout.VERTICAL
+        form.setPadding(32, 16, 32, 0)
+
+        val resellerInput = EditText(this)
+        resellerInput.hint = "Reseller markup percentage"
+        resellerInput.setText(String.format("%.2f", currentResellerMarkup))
+        resellerInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        resellerInput.setSelectAllOnFocus(true)
+        form.addView(resellerInput)
+
+        val dealerInput = EditText(this)
+        dealerInput.hint = "Dealer markup percentage"
+        dealerInput.setText(String.format("%.2f", currentDealerMarkup))
+        dealerInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        dealerInput.setSelectAllOnFocus(true)
+        form.addView(dealerInput)
 
         AlertDialog.Builder(this)
             .setTitle("Update ${provider.uppercase()} markup")
-            .setMessage("Enter default markup percentage between 0 and 100.")
-            .setView(input)
+            .setMessage("Enter reseller and dealer default markup percentages between 0 and 100.")
+            .setView(form)
             .setNegativeButton("Cancel", null)
             .setPositiveButton("Update") { _, _ ->
-                updateProviderMarkup(provider, input.text.toString().trim(), onDone)
+                updateProviderMarkup(
+                    provider = provider,
+                    resellerMarkupValue = resellerInput.text.toString().trim(),
+                    dealerMarkupValue = dealerInput.text.toString().trim(),
+                    onDone = onDone
+                )
             }
             .show()
     }
 
-    private fun updateProviderMarkup(provider: String, markupValue: String, onDone: () -> Unit) {
-        val normalizedValue = markupValue.replace(",", ".").trim()
-        val parsed = normalizedValue.toDoubleOrNull()
+    private fun updateProviderMarkup(
+        provider: String,
+        resellerMarkupValue: String,
+        dealerMarkupValue: String,
+        onDone: () -> Unit
+    ) {
+        val normalizedResellerValue = resellerMarkupValue.replace(",", ".").trim()
+        val normalizedDealerValue = dealerMarkupValue.replace(",", ".").trim()
 
-        if (parsed == null || parsed < 0.0 || parsed > 100.0) {
-            Toast.makeText(this, "Markup must be between 0 and 100", Toast.LENGTH_LONG).show()
+        val parsedReseller = normalizedResellerValue.toDoubleOrNull()
+        val parsedDealer = normalizedDealerValue.toDoubleOrNull()
+
+        if (parsedReseller == null || parsedReseller < 0.0 || parsedReseller > 100.0) {
+            Toast.makeText(this, "Reseller markup must be between 0 and 100", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (parsedDealer == null || parsedDealer < 0.0 || parsedDealer > 100.0) {
+            Toast.makeText(this, "Dealer markup must be between 0 and 100", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -294,7 +378,8 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
                     sendProviderMarkupUpdate(
                         authorizationHeader = session.authorizationHeader,
                         provider = provider,
-                        markupValue = normalizedValue
+                        resellerMarkupValue = normalizedResellerValue,
+                        dealerMarkupValue = normalizedDealerValue
                     )
                 }
             }
@@ -311,7 +396,8 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
     private fun sendProviderMarkupUpdate(
         authorizationHeader: String,
         provider: String,
-        markupValue: String
+        resellerMarkupValue: String,
+        dealerMarkupValue: String
     ): JSONObject {
         val url = URL("https://roam2world-panels-backend.onrender.com/api/v1/provider-markups/$provider/")
         val connection = url.openConnection() as HttpURLConnection
@@ -325,7 +411,11 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
 
-            val body = "{\"markup_percentage\":$markupValue}"
+            val body = JSONObject()
+                .put("markup_percentage", resellerMarkupValue.toDouble())
+                .put("reseller_markup_percentage", resellerMarkupValue.toDouble())
+                .put("dealer_markup_percentage", dealerMarkupValue.toDouble())
+                .toString()
 
             connection.outputStream.use { output ->
                 output.write(body.toByteArray(Charsets.UTF_8))
@@ -333,6 +423,8 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
 
             val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
             val responseBody = stream.bufferedReader().use { it.readText() }
+            Log.d("DEFAULT_MARKUP_SAVE", "provider=$provider body=$body")
+            Log.d("DEFAULT_MARKUP_SAVE", "HTTP ${connection.responseCode}: $responseBody")
 
             if (connection.responseCode !in 200..299) {
                 val apiError = runCatching {
@@ -518,7 +610,6 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
             }
 
             val body = bodyJson.toString()
-            Log.d("AdminProviderMarkups", "SCOPE POST body=$body")
 
             connection.outputStream.use { output ->
                 output.write(body.toByteArray(Charsets.UTF_8))
@@ -526,7 +617,6 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
 
             val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
             val responseBody = stream.bufferedReader().use { it.readText() }
-            Log.d("AdminProviderMarkups", "SCOPE HTTP ${connection.responseCode}: $responseBody")
 
             if (connection.responseCode !in 200..299) {
                 val apiError = runCatching {
@@ -601,7 +691,6 @@ class AdminProviderMarkupsActivity : ComponentActivity() {
 
             val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
             val responseBody = stream.bufferedReader().use { it.readText() }
-            Log.d("AdminProviderMarkups", "DELETE HTTP ${connection.responseCode}: $responseBody")
 
             if (connection.responseCode !in 200..299) {
                 val apiError = runCatching {
@@ -639,7 +728,8 @@ private data class ProviderMarkupResponseUi(
 
 private data class ProviderDefaultUi(
     val provider: String,
-    val markup: Double
+    val markup: Double,
+    val dealerMarkup: Double
 )
 
 private data class ScopeRuleUi(
@@ -672,318 +762,276 @@ private fun AdminProviderMarkupsScreen(
     onFilterChange: (String) -> Unit,
     onRefresh: () -> Unit,
     onAddScopeRule: () -> Unit,
-    onUpdateDefault: (String, Double) -> Unit,
+    onUpdateDefault: (String, Double, Double) -> Unit,
     onDeleteRule: (Int) -> Unit,
     onBottomNavClick: (MarkupTab) -> Unit
 ) {
-    val visibleDefaults by remember(providerDefaults, query, filter) {
+    val filteredDefaults by remember(providerDefaults, query, filter) {
         derivedStateOf {
-            val cleanQuery = query.trim().lowercase()
+            val q = query.trim().lowercase()
             providerDefaults.filter { item ->
-                val matchesQuery = cleanQuery.isBlank() || item.provider.lowercase().contains(cleanQuery)
-                val matchesFilter = filter == "all" || filter == "defaults"
+                val matchesQuery = q.isBlank() ||
+                    item.provider.lowercase().contains(q) ||
+                    providerMarkupProviderLabel(item.provider).lowercase().contains(q)
+
+                val matchesFilter = filter == "all" || item.provider.lowercase() == filter.lowercase()
                 matchesQuery && matchesFilter
             }
         }
     }
 
-    val visibleRules by remember(scopeRules, query, filter) {
-        derivedStateOf {
-            val cleanQuery = query.trim().lowercase()
-            scopeRules.filter { rule ->
-                val searchable = listOf(
-                    rule.id.toString(),
-                    rule.provider,
-                    rule.scopeType,
-                    rule.scopeValue,
-                    rule.resellerId,
-                    rule.priority.toString(),
-                    rule.markup.toString()
-                ).joinToString(" ").lowercase()
-
-                val matchesQuery = cleanQuery.isBlank() || searchable.contains(cleanQuery)
-                val matchesFilter = when (filter) {
-                    "all" -> true
-                    "rules" -> true
-                    "country" -> rule.scopeType.lowercase() == "country"
-                    "region" -> rule.scopeType.lowercase() == "region"
-                    "global" -> rule.scopeType.lowercase() == "global"
-                    else -> false
-                }
-
-                matchesQuery && matchesFilter
-            }
-        }
+    val providerKeys = remember(providerDefaults) {
+        providerDefaults
+            .map { it.provider }
+            .filter { it.isNotBlank() && it != "-" }
+            .distinctBy { it.lowercase() }
+            .take(10)
     }
 
     Scaffold(
-        containerColor = MarkupBg,
+        containerColor = R2wSaasColors.Background,
         bottomBar = {
-            MarkupBottomNav(
-                selected = MarkupTab.Pricing,
-                onClick = onBottomNavClick
+            R2wSaasBottomNav(
+                selected = R2wSaasNavItem.Pricing,
+                onClick = { item -> onBottomNavClick(item.toMarkupTab()) }
             )
         }
     ) { inner ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MarkupBg)
                 .padding(inner)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                MarkupHero(
-                    defaults = providerDefaults.size.toString(),
-                    rules = scopeRules.size.toString()
+                R2wSaasHeader(
+                    title = "Provider Markups",
+                    subtitle = "${filteredDefaults.size} providers with reseller and dealer margin rules.",
+                    badge = if (loading) "Loading" else "Live API"
                 )
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    MarkupMetricCard(
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_tag,
-                        label = "Defaults",
+                        title = "Providers",
                         value = providerDefaults.size.toString(),
-                        sub = "provider rules",
-                        subColor = MarkupBlue
+                        subtitle = "default rules",
+                        icon = Icons.Default.CreditCard,
+                        tint = R2wSaasColors.Primary
                     )
-                    MarkupMetricCard(
+
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_settings,
-                        label = "Scope Rules",
+                        title = "Scope Rules",
                         value = scopeRules.size.toString(),
-                        sub = "overrides",
-                        subColor = MarkupOrange
+                        subtitle = "custom overrides",
+                        icon = Icons.Default.People,
+                        tint = R2wSaasColors.Orange
                     )
                 }
             }
 
             item {
-                MarkupActionCard(
-                    title = "Add Scope Rule",
-                    subtitle = "Create or update country, region, global, or reseller-specific markup",
-                    onClick = onAddScopeRule
-                )
-            }
-
-            item {
-                MarkupFilterCard(
+                MarkupSearchAndFilters(
                     query = query,
                     filter = filter,
-                    loading = loading,
+                    providers = providerKeys,
                     onQueryChange = onQueryChange,
                     onFilterChange = onFilterChange,
-                    onRefresh = onRefresh
+                    onRefresh = onRefresh,
+                    onAddScopeRule = onAddScopeRule
                 )
             }
 
-            if (loading) {
+            if (errorMessage != null) {
                 item {
-                    MarkupInfoCard("Loading provider markups", "Fetching provider defaults and scope rules.") {
-                        CircularProgressIndicator(color = MarkupBlue)
+                    R2wSaasCard {
+                        Text(
+                            text = "Could not load provider markups",
+                            color = R2wSaasColors.Red,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = errorMessage,
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
 
-            if (!loading && errorMessage != null) {
+            if (loading) {
                 item {
-                    MarkupInfoCard("Provider markups unavailable", errorMessage)
+                    R2wSaasCard {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(color = R2wSaasColors.Primary)
+                            Text(
+                                text = "Loading provider markups...",
+                                color = R2wSaasColors.Muted,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        }
+                    }
                 }
-            }
-
-            if (!loading && errorMessage == null && visibleDefaults.isEmpty() && visibleRules.isEmpty()) {
+            } else if (filteredDefaults.isEmpty()) {
                 item {
-                    MarkupInfoCard("No Matching Markups", "Clear filters or search provider, scope, reseller id, priority, or markup value.")
+                    R2wSaasCard {
+                        Text(
+                            text = "No provider markups found",
+                            color = R2wSaasColors.Text,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "Try another provider filter or refresh the API.",
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
-            }
-
-            if (!loading && visibleDefaults.isNotEmpty()) {
-                item {
-                    MarkupSectionTitle("Provider Defaults")
-                }
-
-                items(visibleDefaults.size) { index ->
-                    ProviderDefaultCard(
-                        item = visibleDefaults[index],
-                        onUpdate = { onUpdateDefault(visibleDefaults[index].provider, visibleDefaults[index].markup) }
+            } else {
+                items(filteredDefaults.size) { index ->
+                    ProviderDefaultSaasCard(
+                        item = filteredDefaults[index],
+                        onUpdate = {
+                            onUpdateDefault(
+                                filteredDefaults[index].provider,
+                                filteredDefaults[index].markup,
+                                filteredDefaults[index].dealerMarkup
+                            )
+                        }
                     )
                 }
             }
 
-            if (!loading && visibleRules.isNotEmpty()) {
+            if (scopeRules.isNotEmpty()) {
                 item {
-                    MarkupSectionTitle("Scope Rules")
+                    R2wSaasCard {
+                        Text(
+                            text = "Scope Rules",
+                            color = R2wSaasColors.Text,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Black
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "Custom overrides for provider, region, country or reseller.",
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
 
-                items(visibleRules.size) { index ->
-                    ScopeRuleCard(
-                        item = visibleRules[index],
-                        onDelete = { onDeleteRule(visibleRules[index].id) }
+                items(scopeRules.take(20).size) { index ->
+                    ScopeRuleSaasCard(
+                        item = scopeRules[index],
+                        onDelete = { onDeleteRule(scopeRules[index].id) }
                     )
                 }
             }
 
-            item { Spacer(Modifier.height(10.dp)) }
+            item { Spacer(Modifier.height(18.dp)) }
         }
     }
 }
 
 @Composable
-private fun MarkupHero(defaults: String, rules: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = MarkupNavy),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(MarkupNavy, MarkupNavy2)))
-                .padding(18.dp)
-        ) {
-            Column {
-                Text("Provider Markups", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "$defaults provider default(s), $rules scope rule(s)",
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "Pricing control center",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
-                        .padding(horizontal = 14.dp, vertical = 7.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MarkupMetricCard(
-    modifier: Modifier,
-    @DrawableRes icon: Int,
-    label: String,
-    value: String,
-    sub: String,
-    subColor: Color
-) {
-    Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
-            Column {
-                Text(label, color = MarkupMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = MarkupText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MarkupActionCard(title: String, subtitle: String, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Image(painterResource(R.drawable.admin_icon_settings), contentDescription = null, modifier = Modifier.size(44.dp))
-            Column(modifier = Modifier.weight(1f).padding(horizontal = 14.dp)) {
-                Text(title, color = MarkupText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(4.dp))
-                Text(subtitle, color = MarkupMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-            }
-            Surface(color = MarkupGreen.copy(alpha = 0.12f), shape = RoundedCornerShape(16.dp)) {
-                Text("Add", color = MarkupGreen, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun MarkupFilterCard(
+private fun MarkupSearchAndFilters(
     query: String,
     filter: String,
-    loading: Boolean,
+    providers: List<String>,
     onQueryChange: (String) -> Unit,
     onFilterChange: (String) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onAddScopeRule: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                label = { Text("Search provider, scope, reseller id") },
-                singleLine = true
-            )
+    R2wSaasCard {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = R2wSaasColors.Muted
+                )
+            },
+            placeholder = { Text("Search provider markup") },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = R2wSaasColors.Primary,
+                unfocusedBorderColor = R2wSaasColors.Border,
+                focusedContainerColor = R2wSaasColors.Card,
+                unfocusedContainerColor = R2wSaasColors.Card,
+                focusedTextColor = R2wSaasColors.Text,
+                unfocusedTextColor = R2wSaasColors.Text,
+                cursorColor = R2wSaasColors.Primary
+            ),
+            shape = RoundedCornerShape(18.dp)
+        )
 
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            MarkupFilterChip("all", "All Providers", filter, onFilterChange)
+
+            providers.forEach { provider ->
+                MarkupFilterChip(
+                    key = provider,
+                    label = providerMarkupProviderLabel(provider),
+                    selected = filter,
+                    onClick = onFilterChange
+                )
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onRefresh,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = R2wSaasColors.Primary),
+                shape = RoundedCornerShape(18.dp)
             ) {
-                listOf(
-                    "all" to "All",
-                    "defaults" to "Provider Defaults",
-                    "rules" to "Scope Rules",
-                    "country" to "Country",
-                    "region" to "Region",
-                    "global" to "Global"
-                ).forEach { (value, label) ->
-                    val selected = filter == value
-                    AssistChip(
-                        onClick = { onFilterChange(value) },
-                        label = { Text(label, fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
-                            labelColor = if (selected) MarkupBlue else MarkupMuted
-                        ),
-                        border = BorderStroke(1.dp, if (selected) MarkupBlue.copy(alpha = 0.35f) else MarkupBorder)
-                    )
-                }
+                Text(
+                    text = "Refresh",
+                    fontWeight = FontWeight.Black
+                )
+            }
 
-                AssistChip(
-                    onClick = onRefresh,
-                    enabled = !loading,
-                    label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
-                        labelColor = MarkupBlue
-                    ),
-                    border = BorderStroke(1.dp, MarkupBlue.copy(alpha = 0.35f))
+            Button(
+                onClick = onAddScopeRule,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = R2wSaasColors.Orange),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Text(
+                    text = "Add Rule",
+                    fontWeight = FontWeight.Black
                 )
             }
         }
@@ -991,170 +1039,287 @@ private fun MarkupFilterCard(
 }
 
 @Composable
-private fun MarkupSectionTitle(title: String) {
-    Text(
-        title,
-        color = MarkupText,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.ExtraBold,
-        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+private fun MarkupFilterChip(
+    key: String,
+    label: String,
+    selected: String,
+    onClick: (String) -> Unit
+) {
+    val isSelected = selected.equals(key, ignoreCase = true)
+
+    AssistChip(
+        onClick = { onClick(key) },
+        label = { Text(label, fontWeight = FontWeight.ExtraBold) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = if (isSelected) R2wSaasColors.PrimarySoft else R2wSaasColors.Card,
+            labelColor = if (isSelected) R2wSaasColors.Primary else R2wSaasColors.Muted
+        ),
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
     )
 }
 
 @Composable
-private fun ProviderDefaultCard(item: ProviderDefaultUi, onUpdate: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(painterResource(R.drawable.admin_icon_tag), contentDescription = null, modifier = Modifier.size(42.dp))
-                Spacer(Modifier.size(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(item.provider.uppercase(), color = MarkupText, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("Default markup: ${formatPercent(item.markup)}", color = MarkupMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-                Surface(color = MarkupBlue.copy(alpha = 0.12f), shape = RoundedCornerShape(14.dp)) {
-                    Text(formatPercent(item.markup), color = MarkupBlue, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
-                }
-            }
-
-            Text(
-                "Applies when no country, region, reseller, or global scope rule overrides it.",
-                color = MarkupMuted,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Button(
-                onClick = onUpdate,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MarkupBlue)
-            ) {
-                Text("Update Default Markup", fontWeight = FontWeight.ExtraBold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ScopeRuleCard(item: ScopeRuleUi, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(painterResource(R.drawable.admin_icon_settings), contentDescription = null, modifier = Modifier.size(42.dp))
-                Spacer(Modifier.size(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("#${item.id} · ${item.provider.uppercase()}", color = MarkupText, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("${item.scopeType.uppercase()} / ${item.scopeValue}", color = MarkupMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                }
-                Surface(color = MarkupOrange.copy(alpha = 0.12f), shape = RoundedCornerShape(14.dp)) {
-                    Text(formatPercent(item.markup), color = MarkupOrange, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
-                }
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MarkupMiniStat(Modifier.weight(1f), "Reseller ID", item.resellerId)
-                MarkupMiniStat(Modifier.weight(1f), "Priority", item.priority.toString())
-            }
-
-            Button(
-                onClick = onDelete,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MarkupRed)
-            ) {
-                Text("Delete Rule", fontWeight = FontWeight.ExtraBold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MarkupMiniStat(modifier: Modifier, label: String, value: String) {
-    Surface(
-        modifier = modifier,
-        color = Color(0xFFF8FAFC),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MarkupBorder)
-    ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(label, color = MarkupMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            Text(value.ifBlank { "-" }, color = MarkupText, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
-        }
-    }
-}
-
-@Composable
-private fun MarkupInfoCard(title: String, message: String, content: @Composable (() -> Unit)? = null) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MarkupBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, color = MarkupText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = MarkupMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            content?.invoke()
-        }
-    }
-}
-
-@Composable
-private fun MarkupBottomNav(selected: MarkupTab, onClick: (MarkupTab) -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-        color = Color.White,
-        shadowElevation = 14.dp,
-        border = BorderStroke(1.dp, MarkupBorder)
+private fun ProviderDefaultSaasCard(
+    item: ProviderDefaultUi,
+    onUpdate: () -> Unit
+) {
+    R2wSaasCard(
+        modifier = Modifier.clickable(onClick = onUpdate)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(66.dp).padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
         ) {
-            MarkupBottomItem(Icons.Default.GridView, "Dashboard", selected == MarkupTab.Dashboard) { onClick(MarkupTab.Dashboard) }
-            MarkupBottomItem(Icons.Default.People, "Partners", selected == MarkupTab.Partners) { onClick(MarkupTab.Partners) }
-            MarkupBottomItem(Icons.Default.ShoppingCart, "Orders", selected == MarkupTab.Orders) { onClick(MarkupTab.Orders) }
-            MarkupBottomItem(Icons.Default.CreditCard, "Pricing", selected == MarkupTab.Pricing) { onClick(MarkupTab.Pricing) }
-            MarkupBottomItem(Icons.Default.MoreHoriz, "More", selected == MarkupTab.More) { onClick(MarkupTab.More) }
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = providerMarkupTint(item.provider).copy(alpha = 0.10f),
+                border = BorderStroke(1.dp, R2wSaasColors.Border)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CreditCard,
+                    contentDescription = null,
+                    tint = providerMarkupTint(item.provider),
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = providerMarkupProviderLabel(item.provider),
+                            color = R2wSaasColors.Text,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = item.provider,
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    MarkupPill("Edit", R2wSaasColors.Primary)
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MarkupMiniStat(
+                        title = "Reseller",
+                        value = "${formatMarkup(item.markup)}%",
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    MarkupMiniStat(
+                        title = "Dealer",
+                        value = "${formatMarkup(item.dealerMarkup)}%",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "Tap to update reseller and dealer default markup.",
+                    color = R2wSaasColors.Muted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun MarkupBottomItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
-    val color = if (selected) MarkupBlue else MarkupMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+private fun ScopeRuleSaasCard(
+    item: ScopeRuleUi,
+    onDelete: () -> Unit
+) {
+    R2wSaasCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = R2wSaasColors.Purple.copy(alpha = 0.10f),
+                border = BorderStroke(1.dp, R2wSaasColors.Border)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.People,
+                    contentDescription = null,
+                    tint = R2wSaasColors.Purple,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
 
-    Column(
-        modifier = Modifier
-            .size(width = 74.dp, height = 54.dp)
-            .background(bg, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(21.dp))
-        Spacer(Modifier.height(3.dp))
-        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = providerMarkupProviderLabel(item.provider),
+                            color = R2wSaasColors.Text,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = "${item.scopeType}: ${item.scopeValue}",
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    MarkupPill("Delete", R2wSaasColors.Red)
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MarkupMiniStat(
+                        title = "Markup",
+                        value = "${formatMarkup(item.markup)}%",
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    MarkupMiniStat(
+                        title = "Priority",
+                        value = item.priority.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = onDelete,
+                    colors = ButtonDefaults.buttonColors(containerColor = R2wSaasColors.Red),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = "Delete Rule",
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+        }
     }
 }
 
-private fun formatPercent(value: Double): String {
-    return String.format("%.2f%%", value)
+@Composable
+private fun MarkupPill(
+    text: String,
+    color: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = color.copy(alpha = 0.10f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.18f))
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+            maxLines = 1
+        )
+    }
 }
+
+@Composable
+private fun MarkupMiniStat(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = R2wSaasColors.Background,
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
+    ) {
+        Column(modifier = Modifier.padding(9.dp)) {
+            Text(
+                text = title,
+                color = R2wSaasColors.Muted,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = value,
+                color = R2wSaasColors.Text,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+private fun R2wSaasNavItem.toMarkupTab(): MarkupTab =
+    when (this) {
+        R2wSaasNavItem.Dashboard -> MarkupTab.Dashboard
+        R2wSaasNavItem.Partners -> MarkupTab.Partners
+        R2wSaasNavItem.Orders -> MarkupTab.Orders
+        R2wSaasNavItem.Pricing -> MarkupTab.Pricing
+        R2wSaasNavItem.More -> MarkupTab.More
+    }
+
+private fun providerMarkupTint(provider: String): Color {
+    return when (provider.lowercase().trim()) {
+        "tgt" -> R2wSaasColors.Orange
+        "esimcard", "orange" -> R2wSaasColors.Primary
+        "airhub", "airhubapp", "vodafone" -> R2wSaasColors.Red
+        "flexnet", "masmovil", "mas movil" -> R2wSaasColors.Purple
+        "traveroam", "travelroam", "roam2world" -> R2wSaasColors.Green
+        else -> R2wSaasColors.Primary
+    }
+}
+
+private fun providerMarkupProviderLabel(provider: String): String {
+    return when (provider.lowercase().trim()) {
+        "traveroam", "travelroam", "roam2world" -> "TravelRoam"
+        "tgt" -> "Orange Balkans"
+        "flexnet", "masmovil", "mas movil" -> "Orange Big Data"
+        "esimcard", "orange" -> "Orange World"
+        "airhub", "airhubapp", "vodafone" -> "Vodafone"
+        else -> provider.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+    }
+}
+
+private fun formatMarkup(value: Double): String =
+    String.format("%.2f", value)

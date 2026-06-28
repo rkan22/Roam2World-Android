@@ -50,7 +50,7 @@ private val LogDetailNavy2 = Color(0xFF123EAD)
 private val LogDetailBlue = Color(0xFF1263F1)
 private val LogDetailText = Color(0xFF101828)
 private val LogDetailMuted = Color(0xFF667085)
-private val LogDetailBorder = Color(0xFFE1E8F2)
+private val LogDetailBorder = Color(0xFFE2E8F0)
 private val LogDetailGreen = Color(0xFF16A34A)
 private val LogDetailOrange = Color(0xFFF97316)
 private val LogDetailRed = Color(0xFFEF4444)
@@ -189,7 +189,7 @@ private fun LogDetailHero(log: AdminActivityLogDetailUi, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(190.dp)
-                .background(Brush.horizontalGradient(listOf(LogDetailNavy, LogDetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {

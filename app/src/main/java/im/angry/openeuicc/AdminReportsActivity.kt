@@ -5,32 +5,30 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SimCard
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -40,15 +38,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +50,12 @@ import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
+import im.angry.openeuicc.ui.compose.saas.R2wMetricCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasBottomNav
+import im.angry.openeuicc.ui.compose.saas.R2wSaasCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasColors
+import im.angry.openeuicc.ui.compose.saas.R2wSaasHeader
+import im.angry.openeuicc.ui.compose.saas.R2wSaasNavItem
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,16 +65,6 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-private val ReportsBg = Color(0xFFF6F8FC)
-private val ReportsNavy = Color(0xFF061A3F)
-private val ReportsNavy2 = Color(0xFF123EAD)
-private val ReportsBlue = Color(0xFF1263F1)
-private val ReportsText = Color(0xFF101828)
-private val ReportsMuted = Color(0xFF667085)
-private val ReportsBorder = Color(0xFFE1E8F2)
-private val ReportsGreen = Color(0xFF16A34A)
-private val ReportsOrange = Color(0xFFF97316)
-
 class AdminReportsActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
@@ -82,10 +72,10 @@ class AdminReportsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val composeScope = rememberCoroutineScope()
-            var loading by remember { mutableStateOf(true) }
-            var errorMessage by remember { mutableStateOf<String?>(null) }
-            var report by remember { mutableStateOf(AdminReportsUi()) }
+            val scope = rememberCoroutineScope()
+            var loading by androidx.compose.runtime.remember { mutableStateOf(true) }
+            var errorMessage by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
+            var report by androidx.compose.runtime.remember { mutableStateOf(AdminReportsUi()) }
 
             suspend fun loadReports() {
                 loading = true
@@ -121,22 +111,22 @@ class AdminReportsActivity : ComponentActivity() {
             }
 
             R2WTheme {
-                AdminReportsScreen(
+                AdminReportsSaasScreen(
                     loading = loading,
                     errorMessage = errorMessage,
                     report = report,
                     onRefresh = {
-                        composeScope.launch {
+                        scope.launch {
                             loadReports()
                         }
                     },
-                    onBottomNavClick = { tab ->
-                        when (tab) {
-                            ReportsTab.Dashboard -> startActivity(Intent(this@AdminReportsActivity, MobileAdminActivity::class.java))
-                            ReportsTab.Partners -> startActivity(Intent(this@AdminReportsActivity, AdminPartnersActivity::class.java))
-                            ReportsTab.Orders -> startActivity(Intent(this@AdminReportsActivity, AdminOrdersOverviewActivity::class.java))
-                            ReportsTab.Pricing -> startActivity(Intent(this@AdminReportsActivity, AdminPricingOverviewActivity::class.java))
-                            ReportsTab.More -> startActivity(Intent(this@AdminReportsActivity, AdminMoreActivity::class.java))
+                    onBottomNavClick = { item ->
+                        when (item) {
+                            R2wSaasNavItem.Dashboard -> startActivity(Intent(this@AdminReportsActivity, MobileAdminActivity::class.java))
+                            R2wSaasNavItem.Partners -> startActivity(Intent(this@AdminReportsActivity, AdminPartnersActivity::class.java))
+                            R2wSaasNavItem.Orders -> startActivity(Intent(this@AdminReportsActivity, AdminOrdersOverviewActivity::class.java))
+                            R2wSaasNavItem.Pricing -> startActivity(Intent(this@AdminReportsActivity, AdminPricingOverviewActivity::class.java))
+                            R2wSaasNavItem.More -> startActivity(Intent(this@AdminReportsActivity, AdminMoreActivity::class.java))
                         }
                     }
                 )
@@ -265,27 +255,19 @@ private data class RecentReportOrderUi(
     val totalAmount: String
 )
 
-private enum class ReportsTab {
-    Dashboard,
-    Partners,
-    Orders,
-    Pricing,
-    More
-}
-
 @Composable
-private fun AdminReportsScreen(
+private fun AdminReportsSaasScreen(
     loading: Boolean,
     errorMessage: String?,
     report: AdminReportsUi,
     onRefresh: () -> Unit,
-    onBottomNavClick: (ReportsTab) -> Unit
+    onBottomNavClick: (R2wSaasNavItem) -> Unit
 ) {
     Scaffold(
-        containerColor = ReportsBg,
+        containerColor = R2wSaasColors.Background,
         bottomBar = {
-            ReportsBottomNav(
-                selected = ReportsTab.More,
+            R2wSaasBottomNav(
+                selected = R2wSaasNavItem.More,
                 onClick = onBottomNavClick
             )
         }
@@ -293,359 +275,411 @@ private fun AdminReportsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ReportsBg)
                 .padding(inner)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                ReportsHero(
-                    sales = "${report.totalSales} ${report.currency}",
-                    orders = report.ordersTotal.toString(),
-                    onRefresh = onRefresh
+                R2wSaasHeader(
+                    title = "Reports",
+                    subtitle = "${moneyValue(report.totalSales)} ${report.currency} total sales • ${report.ordersTotal} total orders.",
+                    badge = if (loading) "Loading" else "Live API"
                 )
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ReportsMetricCard(
-                        modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_user,
-                        label = "Users",
-                        value = report.usersTotal.toString(),
-                        sub = "${report.resellersTotal} resellers",
-                        subColor = ReportsBlue
+                Button(
+                    onClick = onRefresh,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = R2wSaasColors.Primary),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                    Text(
+                        text = "Refresh Reports",
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
-                    ReportsMetricCard(
+                }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_orders,
-                        label = "Orders",
+                        title = "Sales",
+                        value = moneyValue(report.totalSales),
+                        subtitle = report.currency,
+                        icon = Icons.Default.AttachMoney,
+                        tint = R2wSaasColors.Primary
+                    )
+
+                    R2wMetricCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Orders",
                         value = report.ordersTotal.toString(),
-                        sub = "total orders",
-                        subColor = ReportsGreen
+                        subtitle = "total orders",
+                        icon = Icons.Default.ReceiptLong,
+                        tint = R2wSaasColors.Green
                     )
                 }
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ReportsMetricCard(
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_partners,
-                        label = "Dealers",
-                        value = report.dealersTotal.toString(),
-                        sub = "partners",
-                        subColor = ReportsOrange
+                        title = "Users",
+                        value = report.usersTotal.toString(),
+                        subtitle = "${report.resellersTotal} resellers",
+                        icon = Icons.Default.People,
+                        tint = R2wSaasColors.Purple
                     )
-                    ReportsMetricCard(
+
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_tag,
-                        label = "Plans",
+                        title = "Plans",
                         value = report.plansTotal.toString(),
-                        sub = "${report.activePlans} active",
-                        subColor = ReportsBlue
+                        subtitle = "${report.activePlans} active",
+                        icon = Icons.Default.SimCard,
+                        tint = R2wSaasColors.Orange
                     )
                 }
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ReportsMetricCard(
-                        modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_doc,
-                        label = "eSIMs",
-                        value = report.esimsTotal.toString(),
-                        sub = "inventory",
-                        subColor = ReportsGreen
-                    )
-                    ReportsMetricCard(
-                        modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_money,
-                        label = "Sales",
-                        value = report.totalSales,
-                        sub = report.currency,
-                        subColor = ReportsOrange
-                    )
-                }
+                ReportsSalesOverviewCard(
+                    totalSales = moneyValue(report.totalSales),
+                    currency = report.currency,
+                    ordersTotal = report.ordersTotal
+                )
             }
 
             if (loading) {
                 item {
-                    ReportsInfoCard("Loading reports", "Preparing revenue, order, and operational summaries.") {
-                        CircularProgressIndicator(color = ReportsBlue)
+                    R2wSaasCard {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(color = R2wSaasColors.Primary)
+                            Text(
+                                text = "Loading reports...",
+                                color = R2wSaasColors.Muted,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        }
                     }
                 }
             }
 
-            if (!loading && errorMessage != null) {
+            if (errorMessage != null) {
                 item {
-                    ReportsInfoCard("Reports unavailable", errorMessage)
+                    R2wSaasCard {
+                        Text(
+                            text = "Could not load reports",
+                            color = R2wSaasColors.Red,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = errorMessage,
+                            color = R2wSaasColors.Muted,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
 
-            if (!loading && errorMessage == null) {
-                item {
-                    ReportsRowsCard(
-                        title = "Orders by Status",
-                        icon = R.drawable.admin_icon_orders,
-                        rows = report.ordersByStatus
-                    )
-                }
-
-                item {
-                    ReportsRowsCard(
-                        title = "Orders by Source",
-                        icon = R.drawable.admin_icon_reports,
-                        rows = report.ordersBySource
-                    )
-                }
-
-                item {
-                    ReportsRowsCard(
-                        title = "Top Countries",
-                        icon = R.drawable.admin_icon_reports,
-                        rows = report.topCountries
-                    )
-                }
-
-                item {
-                    ReportsRecentOrdersCard(report.recentOrders)
-                }
+            item {
+                ReportsRowsSaasCard(
+                    title = "Orders by Status",
+                    rows = report.ordersByStatus,
+                    tint = R2wSaasColors.Primary
+                )
             }
 
-            item { Spacer(Modifier.height(10.dp)) }
+            item {
+                ReportsRowsSaasCard(
+                    title = "Orders by Source",
+                    rows = report.ordersBySource,
+                    tint = R2wSaasColors.Green
+                )
+            }
+
+            item {
+                ReportsRowsSaasCard(
+                    title = "Top Countries",
+                    rows = report.topCountries,
+                    tint = R2wSaasColors.Orange
+                )
+            }
+
+            item {
+                ReportsRecentOrdersSaasCard(orders = report.recentOrders)
+            }
+
+            item { Spacer(Modifier.height(18.dp)) }
         }
     }
 }
 
 @Composable
-private fun ReportsHero(
-    sales: String,
-    orders: String,
-    onRefresh: () -> Unit
+private fun ReportsSalesOverviewCard(
+    totalSales: String,
+    currency: String,
+    ordersTotal: Int
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = ReportsNavy),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Box(
+    R2wSaasCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column {
+                Text(
+                    text = "Sales Overview",
+                    color = R2wSaasColors.Text,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Black
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = totalSales,
+                    color = R2wSaasColors.Text,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black
+                )
+
+                Text(
+                    text = "$ordersTotal orders • $currency",
+                    color = R2wSaasColors.Green,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = R2wSaasColors.PrimarySoft,
+                border = BorderStroke(1.dp, R2wSaasColors.Border)
+            ) {
+                Text(
+                    text = "Live",
+                    color = R2wSaasColors.Primary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(165.dp)
-                .background(Brush.horizontalGradient(listOf(ReportsNavy, ReportsNavy2)))
-                .padding(18.dp)
+                .height(105.dp)
         ) {
-            Column {
-                Text("Reports", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "$sales total sales • $orders orders",
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
+            val values = listOf(0.18f, 0.32f, 0.28f, 0.50f, 0.46f, 0.70f, 0.84f)
+            val left = 8.dp.toPx()
+            val right = size.width - 8.dp.toPx()
+            val top = 8.dp.toPx()
+            val bottom = size.height - 12.dp.toPx()
+            val width = right - left
+
+            repeat(4) { index ->
+                val y = top + ((bottom - top) / 3f) * index
+                drawLine(
+                    color = Color(0xFFE9EEF7),
+                    start = Offset(left, y),
+                    end = Offset(right, y),
+                    strokeWidth = 1.dp.toPx()
                 )
-                Spacer(Modifier.height(16.dp))
-                Surface(
-                    modifier = Modifier.clickable(onClick = onRefresh),
-                    color = Color.White.copy(alpha = 0.14f),
-                    shape = RoundedCornerShape(18.dp)
-                ) {
-                    Text(
-                        "Refresh reports",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-                    )
-                }
+            }
+
+            val points = values.mapIndexed { index, value ->
+                Offset(
+                    x = left + width * (index.toFloat() / (values.size - 1).toFloat()),
+                    y = bottom - ((bottom - top) * value)
+                )
+            }
+
+            for (index in 0 until points.lastIndex) {
+                drawLine(
+                    color = R2wSaasColors.Primary,
+                    start = points[index],
+                    end = points[index + 1],
+                    strokeWidth = 3.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            points.forEach { point ->
+                drawCircle(color = R2wSaasColors.Card, radius = 5.dp.toPx(), center = point)
+                drawCircle(color = R2wSaasColors.Primary, radius = 4.dp.toPx(), center = point)
             }
         }
     }
 }
 
 @Composable
-private fun ReportsMetricCard(
-    modifier: Modifier,
-    @DrawableRes icon: Int,
+private fun ReportsRowsSaasCard(
+    title: String,
+    rows: List<ReportRowUi>,
+    tint: Color
+) {
+    R2wSaasCard {
+        Text(
+            text = title,
+            color = R2wSaasColors.Text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Black
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        if (rows.isEmpty()) {
+            Text(
+                text = "No data yet",
+                color = R2wSaasColors.Muted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        } else {
+            rows.take(6).forEach { row ->
+                ReportRowLine(
+                    label = row.label,
+                    value = row.count.toString(),
+                    subtitle = moneyValue(row.sales),
+                    tint = tint
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReportsRecentOrdersSaasCard(
+    orders: List<RecentReportOrderUi>
+) {
+    R2wSaasCard {
+        Text(
+            text = "Recent Orders",
+            color = R2wSaasColors.Text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Black
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        if (orders.isEmpty()) {
+            Text(
+                text = "No recent orders yet",
+                color = R2wSaasColors.Muted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        } else {
+            orders.take(6).forEach { order ->
+                ReportRowLine(
+                    label = order.orderNumber,
+                    value = moneyValue(order.totalAmount),
+                    subtitle = "${order.status} • ${order.productName}",
+                    tint = reportStatusColor(order.status)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReportRowLine(
     label: String,
     value: String,
-    sub: String,
-    subColor: Color
+    subtitle: String,
+    tint: Color
 ) {
-    Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, ReportsBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
-            Column {
-                Text(label, color = ReportsMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = ReportsText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReportsRowsCard(
-    title: String,
-    @DrawableRes icon: Int,
-    rows: List<ReportRowUi>
-) {
-    ReportsInfoCard(title, if (rows.isEmpty()) "No data available." else "${rows.size} row(s)") {
-        if (rows.isNotEmpty()) {
-            rows.forEach { row ->
-                ReportsRowLine(
-                    label = row.label,
-                    value = "${row.count} / ${row.sales}"
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReportsRecentOrdersCard(orders: List<RecentReportOrderUi>) {
-    ReportsInfoCard("Recent Orders", if (orders.isEmpty()) "No recent orders available." else "${orders.size} recent order(s)") {
-        orders.forEach { order ->
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFF8FAFC),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, ReportsBorder)
-            ) {
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        order.orderNumber.ifBlank { "-" },
-                        color = ReportsText,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        maxLines = 1
-                    )
-                    Text(
-                        order.productName.ifBlank { "-" },
-                        color = ReportsMuted,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        "${order.status.ifBlank { "-" }} • ${order.totalAmount.ifBlank { "0.00" }}",
-                        color = ReportsBlue,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ReportsInfoCard(
-    title: String,
-    message: String,
-    content: @Composable (() -> Unit)? = null
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, ReportsBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, color = ReportsText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = ReportsMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            content?.invoke()
-        }
-    }
-}
-
-@Composable
-private fun ReportsRowLine(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(
-            label.ifBlank { "-" },
-            color = ReportsMuted,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            value,
-            color = ReportsText,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.ExtraBold,
-            maxLines = 1
-        )
-    }
-}
-
-@Composable
-private fun ReportsBottomNav(selected: ReportsTab, onClick: (ReportsTab) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding(),
-        color = Color.White,
-        shadowElevation = 14.dp,
-        border = BorderStroke(1.dp, ReportsBorder)
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = R2wSaasColors.Background,
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(66.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier.padding(11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ReportsBottomItem(Icons.Default.GridView, "Dashboard", selected == ReportsTab.Dashboard) { onClick(ReportsTab.Dashboard) }
-            ReportsBottomItem(Icons.Default.People, "Partners", selected == ReportsTab.Partners) { onClick(ReportsTab.Partners) }
-            ReportsBottomItem(Icons.Default.ShoppingCart, "Orders", selected == ReportsTab.Orders) { onClick(ReportsTab.Orders) }
-            ReportsBottomItem(Icons.Default.CreditCard, "Pricing", selected == ReportsTab.Pricing) { onClick(ReportsTab.Pricing) }
-            ReportsBottomItem(Icons.Default.MoreHoriz, "More", selected == ReportsTab.More) { onClick(ReportsTab.More) }
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = tint.copy(alpha = 0.10f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Analytics,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.padding(9.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp)
+            ) {
+                Text(
+                    text = label.ifBlank { "-" },
+                    color = R2wSaasColors.Text,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = subtitle.ifBlank { "-" },
+                    color = R2wSaasColors.Muted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Text(
+                text = value,
+                color = tint,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1
+            )
         }
     }
 }
 
-@Composable
-private fun ReportsBottomItem(
-    icon: ImageVector,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val color = if (selected) ReportsBlue else ReportsMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
-
-    Column(
-        modifier = Modifier
-            .size(width = 74.dp, height = 54.dp)
-            .background(bg, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(21.dp))
-        Spacer(Modifier.height(3.dp))
-        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+private fun reportStatusColor(status: String): Color {
+    val s = status.lowercase()
+    return when {
+        s.contains("complete") || s.contains("deliver") || s.contains("confirm") -> R2wSaasColors.Green
+        s.contains("pending") || s.contains("process") -> R2wSaasColors.Orange
+        s.contains("cancel") || s.contains("fail") || s.contains("reject") -> R2wSaasColors.Red
+        else -> R2wSaasColors.Primary
     }
+}
+
+private fun moneyValue(value: String): String {
+    val clean = value.trim()
+    if (clean.isBlank()) return "$0.00"
+    return if (clean.startsWith("$") || clean.contains("€")) clean else "$" + clean
 }

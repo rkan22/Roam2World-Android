@@ -185,7 +185,7 @@
         <activity android:name=".AdminDealersActivity" android:exported="false" />
         <activity android:name=".AdminResellerDetailActivity" android:exported="false" />
         <activity android:name=".AdminResellersActivity" android:exported="false" />
-            <activity android:name=".MobileAdminActivity" android:exported="true" />
+            <activity android:name=".MobileAdminActivity" android:exported="false" />
             <activity android:name=".AdminMoreActivity" android:exported="false" />
         <activity android:name=".AdminPartnersActivity" android:exported="false" />
         <activity android:name=".AdminOrdersOverviewActivity" android:exported="false" />
@@ -197,6 +197,9 @@
         <activity android:name=".AdminSupportTicketsOverviewActivity" android:exported="false" />
         <activity android:name=".AdminActivityLogsOverviewActivity" android:exported="false" />
         <activity android:name=".AdminProfileSettingsActivity" android:exported="false" />
+
+        <activity android:name=".AdminApiKeysActivity" android:exported="false" />
+        <activity android:name=".AdminWhiteLabelActivity" android:exported="false" />
 </application>
 
 </manifest>

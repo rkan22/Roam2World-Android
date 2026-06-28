@@ -5,40 +5,31 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,10 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,6 +51,13 @@ import androidx.compose.ui.unit.sp
 import im.angry.openeuicc.auth.AuthTokenStore
 import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.ui.LoginActivity
+import im.angry.openeuicc.ui.compose.saas.R2wActionCard
+import im.angry.openeuicc.ui.compose.saas.R2wMetricCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasBottomNav
+import im.angry.openeuicc.ui.compose.saas.R2wSaasCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasColors
+import im.angry.openeuicc.ui.compose.saas.R2wSaasHeader
+import im.angry.openeuicc.ui.compose.saas.R2wSaasNavItem
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,17 +67,6 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-private val PricingBg = Color(0xFFF6F8FC)
-private val PricingNavy = Color(0xFF061A3F)
-private val PricingNavy2 = Color(0xFF123EAD)
-private val PricingBlue = Color(0xFF1263F1)
-private val PricingText = Color(0xFF101828)
-private val PricingMuted = Color(0xFF667085)
-private val PricingBorder = Color(0xFFE1E8F2)
-private val PricingGreen = Color(0xFF16A34A)
-private val PricingOrange = Color(0xFFF97316)
-private val PricingRed = Color(0xFFEF4444)
-
 class AdminPricingActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
 
@@ -90,7 +74,7 @@ class AdminPricingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val composeScope = rememberCoroutineScope()
+            val scope = rememberCoroutineScope()
             var loading by remember { mutableStateOf(true) }
             var errorMessage by remember { mutableStateOf<String?>(null) }
             var pricingItems by remember { mutableStateOf<List<AdminPricingUi>>(emptyList()) }
@@ -132,7 +116,7 @@ class AdminPricingActivity : ComponentActivity() {
             }
 
             R2WTheme {
-                AdminPricingScreen(
+                AdminPricingSaasScreen(
                     loading = loading,
                     errorMessage = errorMessage,
                     pricingItems = pricingItems,
@@ -142,21 +126,17 @@ class AdminPricingActivity : ComponentActivity() {
                     onQueryChange = { query = it },
                     onStatusFilterChange = { statusFilter = it },
                     onProviderFilterChange = { providerFilter = it },
-                    onRefresh = {
-                        composeScope.launch {
-                            loadPricing()
-                        }
-                    },
+                    onRefresh = { scope.launch { loadPricing() } },
                     onProviderMarkups = {
                         startActivity(Intent(this@AdminPricingActivity, AdminProviderMarkupsActivity::class.java))
                     },
-                    onBottomNavClick = { tab ->
-                        when (tab) {
-                            PricingTab.Dashboard -> startActivity(Intent(this@AdminPricingActivity, MobileAdminActivity::class.java))
-                            PricingTab.Partners -> startActivity(Intent(this@AdminPricingActivity, AdminPartnersActivity::class.java))
-                            PricingTab.Orders -> startActivity(Intent(this@AdminPricingActivity, AdminOrdersOverviewActivity::class.java))
-                            PricingTab.Pricing -> Unit
-                            PricingTab.More -> startActivity(Intent(this@AdminPricingActivity, AdminMoreActivity::class.java))
+                    onBottomNavClick = { item ->
+                        when (item) {
+                            R2wSaasNavItem.Dashboard -> startActivity(Intent(this@AdminPricingActivity, MobileAdminActivity::class.java))
+                            R2wSaasNavItem.Partners -> startActivity(Intent(this@AdminPricingActivity, AdminPartnersActivity::class.java))
+                            R2wSaasNavItem.Orders -> startActivity(Intent(this@AdminPricingActivity, AdminOrdersOverviewActivity::class.java))
+                            R2wSaasNavItem.Pricing -> Unit
+                            R2wSaasNavItem.More -> startActivity(Intent(this@AdminPricingActivity, AdminMoreActivity::class.java))
                         }
                     }
                 )
@@ -202,20 +182,40 @@ class AdminPricingActivity : ComponentActivity() {
             val item = pricing.optJSONObject(i) ?: continue
             val active = item.optBoolean("is_active", false)
 
+            val provider = item.optString("provider", "-")
+            val dataVolume = item.optString("data_volume", "")
+            val validityDays = item.optInt("validity_days", 0)
+
             list.add(
                 AdminPricingUi(
                     rawJson = item.toString(),
-                    name = item.optString("name", "-"),
+                    name = pricingPackageTitle(
+                        provider = provider,
+                        originalName = item.optString("name", "-"),
+                        dataVolume = dataVolume,
+                        validityDays = validityDays
+                    ),
                     country = item.optString("country", "-"),
                     region = item.optString("region", ""),
-                    provider = item.optString("provider", "-"),
-                    dataVolume = item.optString("data_volume", "-"),
-                    validityDays = item.optInt("validity_days", 0),
+                    provider = provider,
+                    providerLabel = pricingProviderLabel(provider),
+                    dataVolume = dataVolume.ifBlank { "-" },
+                    validityDays = validityDays,
                     basePrice = item.optString("base_price", "0.00"),
-                    dealerPrice = item.optString("dealer_price", item.optString("dealerPrice", item.optString("reseller_price", "0.00"))),
+                    dealerPrice = item.optString(
+                        "dealer_price",
+                        item.optString("dealerPrice", item.optString("reseller_price", "0.00"))
+                    ),
                     resellerPrice = item.optString("reseller_price", "0.00"),
-                    publicPrice = item.optString("public_price", "0.00"),
                     markup = item.optString("markup_percentage", "0.00"),
+                    resellerMarkup = item.optString(
+                        "applied_reseller_markup",
+                        item.optString("markup_percentage", "0.00")
+                    ),
+                    dealerMarkup = item.optString(
+                        "applied_dealer_markup",
+                        item.optString("markup_percentage", "0.00")
+                    ),
                     active = active,
                     status = if (active) "Active" else "Inactive"
                 )
@@ -241,27 +241,21 @@ private data class AdminPricingUi(
     val country: String,
     val region: String,
     val provider: String,
+    val providerLabel: String,
     val dataVolume: String,
     val validityDays: Int,
     val basePrice: String,
     val resellerPrice: String,
     val dealerPrice: String,
-    val publicPrice: String,
     val markup: String,
+    val resellerMarkup: String,
+    val dealerMarkup: String,
     val active: Boolean,
     val status: String
 )
 
-private enum class PricingTab {
-    Dashboard,
-    Partners,
-    Orders,
-    Pricing,
-    More
-}
-
 @Composable
-private fun AdminPricingScreen(
+private fun AdminPricingSaasScreen(
     loading: Boolean,
     errorMessage: String?,
     pricingItems: List<AdminPricingUi>,
@@ -273,8 +267,16 @@ private fun AdminPricingScreen(
     onProviderFilterChange: (String) -> Unit,
     onRefresh: () -> Unit,
     onProviderMarkups: () -> Unit,
-    onBottomNavClick: (PricingTab) -> Unit
+    onBottomNavClick: (R2wSaasNavItem) -> Unit
 ) {
+    val providers = remember(pricingItems) {
+        pricingItems
+            .map { it.provider }
+            .filter { it.isNotBlank() && it != "-" }
+            .distinctBy { it.lowercase() }
+            .take(10)
+    }
+
     val filtered by remember(pricingItems, query, statusFilter, providerFilter) {
         derivedStateOf {
             val cleanQuery = query.trim().lowercase()
@@ -284,7 +286,7 @@ private fun AdminPricingScreen(
                     statusFilter == "all" || item.status.lowercase() == statusFilter
                 }
                 .filter { item ->
-                    providerFilter == "all" || item.provider.lowercase() == providerFilter
+                    providerFilter == "all" || item.provider.lowercase() == providerFilter.lowercase()
                 }
                 .filter { item ->
                     cleanQuery.isBlank() || listOf(
@@ -292,27 +294,22 @@ private fun AdminPricingScreen(
                         item.country,
                         item.region,
                         item.provider,
+                        item.providerLabel,
                         item.dataVolume,
-                        item.status,
-                        item.markup
+                        item.status
                     ).joinToString(" ").lowercase().contains(cleanQuery)
                 }
         }
     }
 
-    val active = pricingItems.count { it.active }
-    val inactive = pricingItems.count { !it.active }
-    val providerCounts = pricingItems
-        .groupingBy { it.provider.lowercase().ifBlank { "unknown" } }
-        .eachCount()
-    val fixedProviders = listOf("esimcard", "airhub", "flexnet", "tgt", "traveroam")
-    val providerOptions = listOf("all") + (fixedProviders + providerCounts.keys).distinct().sorted()
+    val activeCount = pricingItems.count { it.active }
+    val inactiveCount = pricingItems.count { !it.active }
 
     Scaffold(
-        containerColor = PricingBg,
+        containerColor = R2wSaasColors.Background,
         bottomBar = {
-            PricingBottomNav(
-                selected = PricingTab.Pricing,
+            R2wSaasBottomNav(
+                selected = R2wSaasNavItem.Pricing,
                 onClick = onBottomNavClick
             )
         }
@@ -320,524 +317,519 @@ private fun AdminPricingScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(PricingBg)
                 .padding(inner)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                PricingHero(
-                    shown = filtered.size.toString(),
-                    total = pricingItems.size.toString(),
-                    active = active.toString()
+                R2wSaasHeader(
+                    title = "Package Pricing",
+                    subtitle = "${filtered.size} visible of ${pricingItems.size} B2B packages.",
+                    badge = if (loading) "Loading" else "Live API"
                 )
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PricingMetricCard(
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_tag,
-                        label = "Active Plans",
-                        value = active.toString(),
-                        sub = "$inactive inactive",
-                        subColor = PricingGreen
+                        title = "Active",
+                        value = activeCount.toString(),
+                        subtitle = "$inactiveCount inactive",
+                        icon = Icons.Default.CreditCard,
+                        tint = R2wSaasColors.Green
                     )
-                    PricingMetricCard(
+
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_money,
-                        label = "Pricing",
-                        value = pricingItems.size.toString(),
-                        sub = "catalog items",
-                        subColor = PricingBlue
+                        title = "Providers",
+                        value = providers.size.toString(),
+                        subtitle = "connected",
+                        icon = Icons.Default.People,
+                        tint = R2wSaasColors.Primary
                     )
                 }
             }
 
             item {
-                PricingActionCard(
+                R2wActionCard(
                     title = "Provider Markups",
-                    subtitle = "Default provider markup and scope rule controls",
-                    onClick = onProviderMarkups
+                    subtitle = "Edit reseller and dealer markup defaults",
+                    icon = Icons.Default.ShoppingCart,
+                    onClick = onProviderMarkups,
+                    tint = R2wSaasColors.Orange
                 )
             }
 
             item {
-                PricingFilterCard(
+                PricingSearchAndFilters(
                     query = query,
                     statusFilter = statusFilter,
                     providerFilter = providerFilter,
-                    providerOptions = providerOptions,
-                    providerCounts = providerCounts,
+                    providers = providers,
                     onQueryChange = onQueryChange,
                     onStatusFilterChange = onStatusFilterChange,
                     onProviderFilterChange = onProviderFilterChange,
-                    onRefresh = onRefresh,
-                    loading = loading
+                    onRefresh = onRefresh
                 )
             }
 
-            if (loading) {
+            if (errorMessage != null) {
                 item {
-                    PricingInfoCard("Loading pricing", "Fetching provider plans and price overview.") {
-                        CircularProgressIndicator(color = PricingBlue)
+                    R2wSaasCard {
+                        Text(
+                            text = "Could not load pricing",
+                            color = R2wSaasColors.Red,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = errorMessage,
+                            color = R2wSaasColors.Muted,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
 
-            if (!loading && errorMessage != null) {
+            if (loading) {
                 item {
-                    PricingInfoCard("Pricing unavailable", errorMessage)
+                    R2wSaasCard {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(color = R2wSaasColors.Primary)
+                            Text(
+                                text = "Loading pricing...",
+                                color = R2wSaasColors.Muted,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        }
+                    }
+                }
+            } else if (filtered.isEmpty()) {
+                item {
+                    R2wSaasCard {
+                        Text(
+                            text = "No pricing found",
+                            color = R2wSaasColors.Text,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "Try another search, provider or status filter.",
+                            color = R2wSaasColors.Muted,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            } else {
+                items(filtered.size) { index ->
+                    PricingSaasCard(item = filtered[index])
                 }
             }
 
-            if (!loading && errorMessage == null && filtered.isEmpty()) {
-                item {
-                    PricingInfoCard("No Matching Pricing", "Clear filters or search by plan, country, provider, region, or data volume.")
-                }
-            }
-
-            items(filtered.size) { index ->
-                PricingItemCard(filtered[index])
-            }
-
-            item { Spacer(Modifier.height(10.dp)) }
+            item { Spacer(Modifier.height(18.dp)) }
         }
     }
 }
 
 @Composable
-private fun PricingHero(
-    shown: String,
-    total: String,
-    active: String
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = PricingNavy),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(PricingNavy, PricingNavy2)))
-                .padding(18.dp)
-        ) {
-            Column {
-                Text(
-                    "Pricing",
-                    color = Color.White,
-                    fontSize = 27.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "$shown shown • $total total • $active active",
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "Provider plan pricing overview",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
-                        .padding(horizontal = 14.dp, vertical = 7.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PricingMetricCard(
-    modifier: Modifier,
-    @DrawableRes icon: Int,
-    label: String,
-    value: String,
-    sub: String,
-    subColor: Color
-) {
-    Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PricingBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
-            Column {
-                Text(label, color = PricingMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = PricingText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PricingActionCard(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PricingBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(painterResource(R.drawable.admin_icon_tag), contentDescription = null, modifier = Modifier.size(44.dp))
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 14.dp)
-            ) {
-                Text(title, color = PricingText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(4.dp))
-                Text(subtitle, color = PricingMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-            }
-
-            Surface(
-                color = PricingOrange.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    "Open",
-                    color = PricingOrange,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-                )
-            }
-        }
-    }
-}
-
-private fun Int?.orZero(): Int = this ?: 0
-
-@Composable
-private fun PricingFilterCard(
+private fun PricingSearchAndFilters(
     query: String,
     statusFilter: String,
     providerFilter: String,
-    providerOptions: List<String>,
-    providerCounts: Map<String, Int>,
+    providers: List<String>,
     onQueryChange: (String) -> Unit,
     onStatusFilterChange: (String) -> Unit,
     onProviderFilterChange: (String) -> Unit,
-    onRefresh: () -> Unit,
-    loading: Boolean
+    onRefresh: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PricingBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                label = { Text("Search plan, country, provider") },
-                singleLine = true
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(
-                    "all" to "All",
-                    "active" to "Active",
-                    "inactive" to "Inactive"
-                ).forEach { (value, label) ->
-                    val selected = statusFilter == value
-                    AssistChip(
-                        onClick = { onStatusFilterChange(value) },
-                        label = {
-                            Text(
-                                label,
-                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                            )
-                        },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
-                            labelColor = if (selected) PricingBlue else PricingMuted
-                        ),
-                        border = BorderStroke(1.dp, if (selected) PricingBlue.copy(alpha = 0.35f) else PricingBorder)
-                    )
-                }
-
-                AssistChip(
-                    onClick = onRefresh,
-                    enabled = !loading,
-                    label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
-                        labelColor = PricingBlue
-                    ),
-                    border = BorderStroke(1.dp, PricingBlue.copy(alpha = 0.35f))
+    R2wSaasCard {
+        OutlinedTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = R2wSaasColors.Muted
                 )
-            }
+            },
+            placeholder = { Text("Search packages...") },
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = R2wSaasColors.Primary,
+                unfocusedBorderColor = R2wSaasColors.Border,
+                focusedContainerColor = R2wSaasColors.Card,
+                unfocusedContainerColor = R2wSaasColors.Card,
+                focusedTextColor = R2wSaasColors.Text,
+                unfocusedTextColor = R2wSaasColors.Text,
+                cursorColor = R2wSaasColors.Primary
+            ),
+            shape = RoundedCornerShape(18.dp)
+        )
 
-            Text(
-                text = "Provider",
-                color = PricingMuted,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.ExtraBold
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PricingChip("all", "All", statusFilter, onStatusFilterChange)
+            PricingChip("active", "Active", statusFilter, onStatusFilterChange)
+            PricingChip("inactive", "Inactive", statusFilter, onStatusFilterChange)
+
+            AssistChip(
+                onClick = onRefresh,
+                label = { Text("Refresh", fontWeight = FontWeight.ExtraBold) },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = R2wSaasColors.PrimarySoft,
+                    labelColor = R2wSaasColors.Primary
+                ),
+                border = BorderStroke(1.dp, R2wSaasColors.Border)
             )
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                providerOptions.forEach { provider ->
-                    val selected = providerFilter == provider
-                    val count = if (provider == "all") providerCounts.values.sum() else providerCounts[provider].orZero()
-                    val label = if (provider == "all") "All $count" else "${provider.uppercase()} $count"
+        Spacer(Modifier.height(8.dp))
 
-                    AssistChip(
-                        onClick = { onProviderFilterChange(provider) },
-                        label = {
-                            Text(
-                                label,
-                                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.SemiBold
-                            )
-                        },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
-                            labelColor = if (selected) PricingBlue else PricingMuted
-                        ),
-                        border = BorderStroke(1.dp, if (selected) PricingBlue.copy(alpha = 0.35f) else PricingBorder)
-                    )
-                }
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ProviderChip("all", "All Providers", providerFilter, onProviderFilterChange)
+
+            providers.forEach { provider ->
+                ProviderChip(
+                    key = provider,
+                    label = pricingProviderLabel(provider),
+                    selected = providerFilter,
+                    onClick = onProviderFilterChange
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PricingItemCard(item: AdminPricingUi) {
-    val statusColor = if (item.active) PricingGreen else PricingRed
+private fun PricingChip(
+    key: String,
+    label: String,
+    selected: String,
+    onClick: (String) -> Unit
+) {
+    val isSelected = selected == key
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PricingBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+    AssistChip(
+        onClick = { onClick(key) },
+        label = { Text(label, fontWeight = FontWeight.ExtraBold) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = if (isSelected) R2wSaasColors.PrimarySoft else R2wSaasColors.Card,
+            labelColor = if (isSelected) R2wSaasColors.Primary else R2wSaasColors.Muted
+        ),
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
+    )
+}
+
+@Composable
+private fun ProviderChip(
+    key: String,
+    label: String,
+    selected: String,
+    onClick: (String) -> Unit
+) {
+    val isSelected = selected.equals(key, ignoreCase = true)
+
+    AssistChip(
+        onClick = { onClick(key) },
+        label = { Text(label, fontWeight = FontWeight.ExtraBold) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = if (isSelected) R2wSaasColors.PrimarySoft else R2wSaasColors.Card,
+            labelColor = if (isSelected) R2wSaasColors.Primary else R2wSaasColors.Muted
+        ),
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
+    )
+}
+
+@Composable
+private fun PricingSaasCard(item: AdminPricingUi) {
+    R2wSaasCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(R.drawable.admin_icon_tag),
+            Surface(
+                shape = RoundedCornerShape(17.dp),
+                color = providerTint(item.provider).copy(alpha = 0.10f),
+                border = BorderStroke(1.dp, R2wSaasColors.Border)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CreditCard,
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp)
+                    tint = providerTint(item.provider),
+                    modifier = Modifier.padding(11.dp)
                 )
-
-                Spacer(Modifier.size(12.dp))
-
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        item.name.ifBlank { "-" },
-                        color = PricingText,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        listOf(item.country, item.region).filter { it.isNotBlank() && it != "-" }.joinToString(" • ").ifBlank { "-" },
-                        color = PricingMuted,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Surface(
-                    color = statusColor.copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(
-                        item.status,
-                        color = statusColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    )
-                }
             }
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    PricingMiniStat(Modifier.weight(1f), "Cost", item.basePrice)
-                    PricingMiniStat(Modifier.weight(1f), "Dealer", item.dealerPrice)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.name,
+                            color = R2wSaasColors.Text,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(Modifier.height(4.dp))
+
+                        ProviderLabelPill(
+                            text = item.providerLabel,
+                            color = providerTint(item.provider)
+                        )
+                    }
+
+                    PricingStatusPill(
+                        item.status,
+                        if (item.active) R2wSaasColors.Green else R2wSaasColors.Orange
+                    )
                 }
+
+                Spacer(Modifier.height(10.dp))
+
+                Text(
+                    text = listOf(item.country, item.region)
+                        .filter { it.isNotBlank() && it != "-" }
+                        .joinToString(" • ")
+                        .ifBlank { "Global package" },
+                    color = R2wSaasColors.Muted,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PriceMiniStat(
+                        title = "Cost",
+                        value = moneyValue(item.basePrice),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    PriceMiniStat(
+                        title = "Dealer",
+                        value = moneyValue(item.dealerPrice),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    PriceMiniStat(
+                        title = "Reseller",
+                        value = moneyValue(item.resellerPrice),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PriceMiniStat(
+                        title = "Data",
+                        value = item.dataVolume,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    PriceMiniStat(
+                        title = "Validity",
+                        value = if (item.validityDays > 0) "${item.validityDays}d" else "-",
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    PriceMiniStat(
+                        title = "Margin",
+                        value = "${item.resellerMarkup}%",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(9.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    PricingMiniStat(Modifier.weight(1f), "Reseller", item.resellerPrice)
-                    PricingMiniStat(Modifier.weight(1f), "Public", item.publicPrice)
+                    Text(
+                        text = "Dealer markup ${item.dealerMarkup}%",
+                        color = R2wSaasColors.Muted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = "View ›",
+                        color = R2wSaasColors.Primary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black
+                    )
                 }
             }
-
-            Text(
-                "Provider: ${item.provider.ifBlank { "-" }} • Data: ${item.dataVolume.ifBlank { "-" }} / ${item.validityDays} days",
-                color = PricingMuted,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Text(
-                "Markup: ${item.markup.ifBlank { "0.00" }}%",
-                color = PricingBlue,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
         }
     }
 }
 
 @Composable
-private fun PricingMiniStat(
-    modifier: Modifier,
-    label: String,
-    value: String
+private fun ProviderLabelPill(
+    text: String,
+    color: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = color.copy(alpha = 0.10f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.16f))
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun PricingStatusPill(
+    text: String,
+    color: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = color.copy(alpha = 0.10f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.18f))
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun PriceMiniStat(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
-        color = Color(0xFFF8FAFC),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, PricingBorder)
+        color = R2wSaasColors.Background,
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
     ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(label, color = PricingMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            Text(value.ifBlank { "0.00" }, color = PricingText, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+        Column(modifier = Modifier.padding(9.dp)) {
+            Text(
+                text = title,
+                color = R2wSaasColors.Muted,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = value.ifBlank { "-" },
+                color = R2wSaasColors.Text,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
-@Composable
-private fun PricingInfoCard(
-    title: String,
-    message: String,
-    content: @Composable (() -> Unit)? = null
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PricingBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(title, color = PricingText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = PricingMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            content?.invoke()
-        }
+private fun providerTint(provider: String): Color {
+    return when (provider.lowercase().trim()) {
+        "tgt" -> R2wSaasColors.Orange
+        "esimcard", "orange" -> R2wSaasColors.Primary
+        "airhub", "airhubapp", "vodafone" -> R2wSaasColors.Red
+        "flexnet", "masmovil", "mas movil" -> R2wSaasColors.Purple
+        "traveroam", "travelroam", "roam2world" -> R2wSaasColors.Green
+        else -> R2wSaasColors.Primary
     }
 }
 
-@Composable
-private fun PricingBottomNav(
-    selected: PricingTab,
-    onClick: (PricingTab) -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding(),
-        color = Color.White,
-        shadowElevation = 14.dp,
-        border = BorderStroke(1.dp, PricingBorder)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(66.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PricingBottomItem(Icons.Default.GridView, "Dashboard", selected == PricingTab.Dashboard) { onClick(PricingTab.Dashboard) }
-            PricingBottomItem(Icons.Default.People, "Partners", selected == PricingTab.Partners) { onClick(PricingTab.Partners) }
-            PricingBottomItem(Icons.Default.ShoppingCart, "Orders", selected == PricingTab.Orders) { onClick(PricingTab.Orders) }
-            PricingBottomItem(Icons.Default.CreditCard, "Pricing", selected == PricingTab.Pricing) { onClick(PricingTab.Pricing) }
-            PricingBottomItem(Icons.Default.MoreHoriz, "More", selected == PricingTab.More) { onClick(PricingTab.More) }
-        }
+private fun pricingProviderLabel(provider: String): String {
+    return when (provider.lowercase().trim()) {
+        "traveroam", "travelroam", "roam2world" -> "TravelRoam"
+        "tgt" -> "Orange Balkans"
+        "flexnet", "masmovil", "mas movil" -> "Orange Big Data"
+        "esimcard", "orange" -> "Orange World"
+        "airhub", "airhubapp", "vodafone" -> "Vodafone"
+        else -> provider.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
 }
 
-@Composable
-private fun PricingBottomItem(
-    icon: ImageVector,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val color = if (selected) PricingBlue else PricingMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+private fun pricingPackageTitle(
+    provider: String,
+    originalName: String,
+    dataVolume: String,
+    validityDays: Int
+): String {
+    val cleanName = originalName
+        .replace("eSIM", "", ignoreCase = true)
+        .replace("Data For", "", ignoreCase = true)
+        .replace("Data", "", ignoreCase = true)
+        .replace("Unthrottled", "", ignoreCase = true)
+        .replace("V2", "", ignoreCase = true)
+        .replace(Regex("\\s+"), " ")
+        .trim()
+        .ifBlank { originalName }
 
-    Column(
-        modifier = Modifier
-            .size(width = 74.dp, height = 54.dp)
-            .background(bg, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(21.dp))
-        Spacer(Modifier.height(3.dp))
-        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+    val providerLabel = pricingProviderLabel(provider)
+    val volume = dataVolume.ifBlank { "" }
+    val validity = if (validityDays > 0) "$validityDays Days" else ""
+    val suffix = listOf(volume, validity).filter { it.isNotBlank() }.joinToString(" / ")
+
+    return if (suffix.isNotBlank()) {
+        "$providerLabel - $suffix"
+    } else {
+        "$providerLabel - $cleanName"
     }
+}
+
+private fun moneyValue(value: String): String {
+    val clean = value.trim()
+    if (clean.isBlank()) return "$0.00"
+    return if (clean.startsWith("$") || clean.contains("€")) clean else "$" + clean
 }

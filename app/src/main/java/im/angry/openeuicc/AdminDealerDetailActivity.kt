@@ -72,7 +72,7 @@ private val DealerDetailNavy2 = Color(0xFF123EAD)
 private val DealerDetailBlue = Color(0xFF1263F1)
 private val DealerDetailText = Color(0xFF101828)
 private val DealerDetailMuted = Color(0xFF667085)
-private val DealerDetailBorder = Color(0xFFE1E8F2)
+private val DealerDetailBorder = Color(0xFFE2E8F0)
 private val DealerDetailGreen = Color(0xFF16A34A)
 private val DealerDetailOrange = Color(0xFFF97316)
 private val DealerDetailRed = Color(0xFFEF4444)
@@ -414,7 +414,7 @@ private fun DealerDetailHero(dealer: AdminDealerDetailUi, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(184.dp)
-                .background(Brush.horizontalGradient(listOf(DealerDetailNavy, DealerDetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {

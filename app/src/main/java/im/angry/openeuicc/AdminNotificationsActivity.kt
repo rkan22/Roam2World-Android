@@ -78,7 +78,7 @@ private val NotifyNavy2 = Color(0xFF123EAD)
 private val NotifyBlue = Color(0xFF1263F1)
 private val NotifyText = Color(0xFF101828)
 private val NotifyMuted = Color(0xFF667085)
-private val NotifyBorder = Color(0xFFE1E8F2)
+private val NotifyBorder = Color(0xFFE2E8F0)
 private val NotifyGreen = Color(0xFF16A34A)
 private val NotifyOrange = Color(0xFFF97316)
 
@@ -384,36 +384,40 @@ private fun NotifyHero(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = NotifyNavy),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(NotifyNavy, NotifyNavy2)))
+                .height(138.dp)
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0B2B66), Color(0xFF1263F1))
+                    )
+                )
                 .padding(18.dp)
         ) {
             Column {
                 Text(
                     "Notifications",
                     color = Color.White,
-                    fontSize = 27.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "$shown shown • $total total • $unread unread",
                     color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     "Live notification center",
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
@@ -434,8 +438,8 @@ private fun NotifyMetricCard(
     subColor: Color
 ) {
     Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
+        modifier = modifier.height(108.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, NotifyBorder),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -448,9 +452,9 @@ private fun NotifyMetricCard(
         ) {
             Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
             Column {
-                Text(label, color = NotifyMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = NotifyText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(label, color = NotifyMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = NotifyText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+                Text(sub, color = subColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -467,13 +471,13 @@ private fun NotifyFilterCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, NotifyBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             OutlinedTextField(
@@ -506,7 +510,7 @@ private fun NotifyFilterCard(
                             )
                         },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            containerColor = if (selected) Color.White else Color.White,
                             labelColor = if (selected) NotifyBlue else NotifyMuted
                         ),
                         border = BorderStroke(1.dp, if (selected) NotifyBlue.copy(alpha = 0.35f) else NotifyBorder)
@@ -518,7 +522,7 @@ private fun NotifyFilterCard(
                     enabled = !loading,
                     label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
+                        containerColor = Color.White,
                         labelColor = NotifyBlue
                     ),
                     border = BorderStroke(1.dp, NotifyBlue.copy(alpha = 0.35f))
@@ -540,20 +544,20 @@ private fun NotifyListCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, NotifyBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(R.drawable.admin_icon_notifications),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(38.dp)
                 )
 
                 Spacer(Modifier.size(12.dp))
@@ -562,7 +566,7 @@ private fun NotifyListCard(
                     Text(
                         notification.title.ifBlank { "-" },
                         color = NotifyText,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -570,7 +574,7 @@ private fun NotifyListCard(
                     Text(
                         notification.type.ifBlank { "-" },
                         color = NotifyMuted,
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -584,7 +588,7 @@ private fun NotifyListCard(
                     Text(
                         readText,
                         color = readColor,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )
@@ -594,7 +598,7 @@ private fun NotifyListCard(
             Text(
                 notification.message.ifBlank { "-" },
                 color = NotifyMuted,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
@@ -603,16 +607,16 @@ private fun NotifyListCard(
             Text(
                 "Created: ${notification.createdAt.ifBlank { "-" }}",
                 color = NotifyMuted,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                "Open notification details",
+                "View details ›",
                 color = NotifyBlue,
-                fontSize = 13.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
@@ -627,17 +631,17 @@ private fun NotifyInfoCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, NotifyBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(title, color = NotifyText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = NotifyMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(title, color = NotifyText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = NotifyMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
             content?.invoke()
         }
     }
@@ -681,7 +685,7 @@ private fun NotifyBottomItem(
     onClick: () -> Unit
 ) {
     val color = if (selected) NotifyBlue else NotifyMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+    val bg = if (selected) Color.White else Color.Transparent
 
     Column(
         modifier = Modifier

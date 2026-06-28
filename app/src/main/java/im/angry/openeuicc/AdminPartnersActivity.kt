@@ -4,33 +4,24 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,12 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,19 +38,16 @@ import im.angry.openeuicc.auth.JwtUtils
 import im.angry.openeuicc.auth.Roam2WorldAuthApi
 import im.angry.openeuicc.common.BuildConfig
 import im.angry.openeuicc.ui.LoginActivity
+import im.angry.openeuicc.ui.compose.saas.R2wActionCard
+import im.angry.openeuicc.ui.compose.saas.R2wMetricCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasBottomNav
+import im.angry.openeuicc.ui.compose.saas.R2wSaasCard
+import im.angry.openeuicc.ui.compose.saas.R2wSaasColors
+import im.angry.openeuicc.ui.compose.saas.R2wSaasHeader
+import im.angry.openeuicc.ui.compose.saas.R2wSaasNavItem
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
-private val PartnersBg = Color(0xFFF6F8FC)
-private val PartnersNavy = Color(0xFF061A3F)
-private val PartnersNavy2 = Color(0xFF123EAD)
-private val PartnersBlue = Color(0xFF1263F1)
-private val PartnersText = Color(0xFF101828)
-private val PartnersMuted = Color(0xFF667085)
-private val PartnersBorder = Color(0xFFE1E8F2)
-private val PartnersGreen = Color(0xFF16A34A)
-private val PartnersRed = Color(0xFFEF4444)
 
 class AdminPartnersActivity : ComponentActivity() {
     private val tokenStore by lazy { AuthTokenStore(this) }
@@ -115,7 +98,7 @@ class AdminPartnersActivity : ComponentActivity() {
             }
 
             R2WTheme {
-                PartnersOverviewScreenFixed(
+                PartnersOverviewScreen(
                     resellerTotal = resellerTotal.value,
                     resellerActive = resellerActive.value,
                     resellerSuspended = resellerSuspended.value,
@@ -130,11 +113,11 @@ class AdminPartnersActivity : ComponentActivity() {
                     },
                     onBottomNavClick = { tab ->
                         when (tab) {
-                            PartnersTab.Dashboard -> startActivity(Intent(this@AdminPartnersActivity, MobileAdminActivity::class.java))
-                            PartnersTab.Partners -> Unit
-                            PartnersTab.Orders -> startActivity(Intent(this@AdminPartnersActivity, AdminOrdersOverviewActivity::class.java))
-                            PartnersTab.Pricing -> startActivity(Intent(this@AdminPartnersActivity, AdminPricingOverviewActivity::class.java))
-                            PartnersTab.More -> startActivity(Intent(this@AdminPartnersActivity, AdminMoreActivity::class.java))
+                            R2wSaasNavItem.Dashboard -> startActivity(Intent(this@AdminPartnersActivity, MobileAdminActivity::class.java))
+                            R2wSaasNavItem.Partners -> Unit
+                            R2wSaasNavItem.Orders -> startActivity(Intent(this@AdminPartnersActivity, AdminOrdersOverviewActivity::class.java))
+                            R2wSaasNavItem.Pricing -> startActivity(Intent(this@AdminPartnersActivity, AdminPricingOverviewActivity::class.java))
+                            R2wSaasNavItem.More -> startActivity(Intent(this@AdminPartnersActivity, AdminMoreActivity::class.java))
                         }
                     }
                 )
@@ -143,16 +126,8 @@ class AdminPartnersActivity : ComponentActivity() {
     }
 }
 
-private enum class PartnersTab {
-    Dashboard,
-    Partners,
-    Orders,
-    Pricing,
-    More
-}
-
 @Composable
-private fun PartnersOverviewScreenFixed(
+private fun PartnersOverviewScreen(
     resellerTotal: String,
     resellerActive: String,
     resellerSuspended: String,
@@ -161,13 +136,18 @@ private fun PartnersOverviewScreenFixed(
     dealerSuspended: String,
     onResellersClick: () -> Unit,
     onDealersClick: () -> Unit,
-    onBottomNavClick: (PartnersTab) -> Unit
+    onBottomNavClick: (R2wSaasNavItem) -> Unit
 ) {
+    val totalPartners = (
+        resellerTotal.toIntOrNull().orZero() +
+            dealerTotal.toIntOrNull().orZero()
+        ).toString()
+
     Scaffold(
-        containerColor = PartnersBg,
+        containerColor = R2wSaasColors.Background,
         bottomBar = {
-            PartnersBottomNav(
-                selected = PartnersTab.Partners,
+            R2wSaasBottomNav(
+                selected = R2wSaasNavItem.Partners,
                 onClick = onBottomNavClick
             )
         }
@@ -175,303 +155,154 @@ private fun PartnersOverviewScreenFixed(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(PartnersBg)
                 .padding(inner)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                PartnersHero(
-                    totalPartners = (
-                        resellerTotal.toIntOrNull().orZero() +
-                            dealerTotal.toIntOrNull().orZero()
-                        ).toString()
+                R2wSaasHeader(
+                    title = "Partner Network",
+                    subtitle = "$totalPartners partners across reseller and dealer channels.",
+                    badge = "Live API"
                 )
             }
 
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PartnersMetricCard(
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_partners,
-                        label = "Resellers",
+                        title = "Resellers",
                         value = resellerTotal,
-                        sub = "$resellerActive active",
-                        subColor = PartnersGreen
+                        subtitle = "$resellerActive active",
+                        icon = Icons.Default.Groups,
+                        tint = R2wSaasColors.Primary
                     )
 
-                    PartnersMetricCard(
+                    R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        icon = R.drawable.admin_icon_user,
-                        label = "Dealers",
+                        title = "Dealers",
                         value = dealerTotal,
-                        sub = "$dealerActive active",
-                        subColor = PartnersBlue
+                        subtitle = "$dealerActive active",
+                        icon = Icons.Default.Storefront,
+                        tint = R2wSaasColors.Green
                     )
                 }
             }
 
             item {
-                PartnersActionCard(
-                    icon = R.drawable.admin_icon_partners,
-                    title = "Manage Resellers",
-                    subtitle = "$resellerTotal total • $resellerActive active • $resellerSuspended suspended",
-                    buttonText = "Open Resellers List",
-                    accent = PartnersBlue,
-                    onClick = onResellersClick
-                )
+                R2wSaasCard {
+                    Text(
+                        text = "Quick Partner Actions",
+                        color = R2wSaasColors.Text,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Create, manage and monitor partner hierarchy.",
+                        color = R2wSaasColors.Muted,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                        R2wActionCard(
+                            title = "Manage Resellers",
+                            subtitle = "$resellerTotal total • $resellerActive active • $resellerSuspended suspended",
+                            icon = Icons.Default.People,
+                            onClick = onResellersClick,
+                            tint = R2wSaasColors.Primary
+                        )
+
+                        R2wActionCard(
+                            title = "Manage Dealers",
+                            subtitle = "$dealerTotal total • $dealerActive active • $dealerSuspended suspended",
+                            icon = Icons.Default.Business,
+                            onClick = onDealersClick,
+                            tint = R2wSaasColors.Green
+                        )
+                    }
+                }
             }
 
             item {
-                PartnersActionCard(
-                    icon = R.drawable.admin_icon_user,
-                    title = "Manage Dealers",
-                    subtitle = "$dealerTotal total • $dealerActive active • $dealerSuspended suspended",
-                    buttonText = "Open Dealers List",
-                    accent = PartnersGreen,
-                    onClick = onDealersClick
-                )
+                PartnerSaasInfoCard()
             }
 
-            item {
-                PartnersInfoCard()
-            }
-
-            item { Spacer(Modifier.height(12.dp)) }
+            item { Spacer(Modifier.height(18.dp)) }
         }
     }
 }
 
 @Composable
-private fun PartnersHero(totalPartners: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = PartnersNavy),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(PartnersNavy, PartnersNavy2)))
-                .padding(18.dp)
-        ) {
-            Column {
-                Text(
-                    "Partners",
-                    color = Color.White,
-                    fontSize = 27.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "$totalPartners total partner accounts",
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    "Reseller & dealer management",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
-                        .padding(horizontal = 14.dp, vertical = 7.dp)
-                )
-            }
-        }
+private fun PartnerSaasInfoCard() {
+    R2wSaasCard {
+        Text(
+            text = "SaaS Partner Controls",
+            color = R2wSaasColors.Text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Black
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        PartnerInfoLine("Wallet credit hierarchy", "Admin → Reseller → Dealer credit flow")
+        PartnerInfoLine("Markup management", "Separate reseller and dealer pricing")
+        PartnerInfoLine("White-label ready", "Logo, domain and support branding later")
+        PartnerInfoLine("API access", "Partner API keys and webhook setup later")
     }
 }
 
 @Composable
-private fun PartnersMetricCard(
-    modifier: Modifier,
-    @DrawableRes icon: Int,
-    label: String,
-    value: String,
-    sub: String,
-    subColor: Color
-) {
-    Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PartnersBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
-            Column {
-                Text(label, color = PartnersMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = PartnersText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-private fun PartnersActionCard(
-    @DrawableRes icon: Int,
+private fun PartnerInfoLine(
     title: String,
-    subtitle: String,
-    buttonText: String,
-    accent: Color,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PartnersBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(46.dp)
-            )
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 14.dp)
-            ) {
-                Text(
-                    title,
-                    color = PartnersText,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    subtitle,
-                    color = PartnersMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    buttonText,
-                    color = accent,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
-
-            Surface(
-                color = accent.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    "Open",
-                    color = accent,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PartnersInfoCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, PartnersBorder),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                "Partner Controls",
-                color = PartnersText,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Text(
-                "Use reseller and dealer lists to review balances, markups, account status and activation controls.",
-                color = PartnersMuted,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-@Composable
-private fun PartnersBottomNav(
-    selected: PartnersTab,
-    onClick: (PartnersTab) -> Unit
+    subtitle: String
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding(),
-        color = Color.White,
-        shadowElevation = 14.dp,
-        border = BorderStroke(1.dp, PartnersBorder)
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = R2wSaasColors.Background,
+        border = BorderStroke(1.dp, R2wSaasColors.Border)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(66.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            PartnersBottomItem(Icons.Default.GridView, "Dashboard", selected == PartnersTab.Dashboard) { onClick(PartnersTab.Dashboard) }
-            PartnersBottomItem(Icons.Default.People, "Partners", selected == PartnersTab.Partners) { onClick(PartnersTab.Partners) }
-            PartnersBottomItem(Icons.Default.ShoppingCart, "Orders", selected == PartnersTab.Orders) { onClick(PartnersTab.Orders) }
-            PartnersBottomItem(Icons.Default.CreditCard, "Pricing", selected == PartnersTab.Pricing) { onClick(PartnersTab.Pricing) }
-            PartnersBottomItem(Icons.Default.MoreHoriz, "More", selected == PartnersTab.More) { onClick(PartnersTab.More) }
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = R2wSaasColors.PrimarySoft
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.CreditCard,
+                    contentDescription = null,
+                    tint = R2wSaasColors.Primary,
+                    modifier = Modifier.padding(9.dp)
+                )
+            }
+
+            Column {
+                Text(
+                    text = title,
+                    color = R2wSaasColors.Text,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black
+                )
+                Text(
+                    text = subtitle,
+                    color = R2wSaasColors.Muted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
-    }
-}
-
-@Composable
-private fun PartnersBottomItem(
-    icon: ImageVector,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val color = if (selected) PartnersBlue else PartnersMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
-
-    Column(
-        modifier = Modifier
-            .size(width = 74.dp, height = 54.dp)
-            .background(bg, RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(21.dp))
-        Spacer(Modifier.height(3.dp))
-        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
     }
 }
 

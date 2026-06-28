@@ -73,7 +73,7 @@ private val ResellerDetailNavy2 = Color(0xFF123EAD)
 private val ResellerDetailBlue = Color(0xFF1263F1)
 private val ResellerDetailText = Color(0xFF101828)
 private val ResellerDetailMuted = Color(0xFF667085)
-private val ResellerDetailBorder = Color(0xFFE1E8F2)
+private val ResellerDetailBorder = Color(0xFFE2E8F0)
 private val ResellerDetailGreen = Color(0xFF16A34A)
 private val ResellerDetailOrange = Color(0xFFF97316)
 private val ResellerDetailRed = Color(0xFFEF4444)
@@ -415,7 +415,7 @@ private fun ResellerDetailHero(reseller: AdminResellerDetailUi, onBack: () -> Un
             modifier = Modifier
                 .fillMaxWidth()
                 .height(184.dp)
-                .background(Brush.horizontalGradient(listOf(ResellerDetailNavy, ResellerDetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {

@@ -78,7 +78,7 @@ private val LogsNavy2 = Color(0xFF123EAD)
 private val LogsBlue = Color(0xFF1263F1)
 private val LogsText = Color(0xFF101828)
 private val LogsMuted = Color(0xFF667085)
-private val LogsBorder = Color(0xFFE1E8F2)
+private val LogsBorder = Color(0xFFE2E8F0)
 private val LogsGreen = Color(0xFF16A34A)
 private val LogsOrange = Color(0xFFF97316)
 private val LogsRed = Color(0xFFEF4444)
@@ -430,36 +430,40 @@ private fun LogsHero(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = LogsNavy),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(LogsNavy, LogsNavy2)))
+                .height(138.dp)
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0B2B66), Color(0xFF1263F1))
+                    )
+                )
                 .padding(18.dp)
         ) {
             Column {
                 Text(
                     "Activity Logs",
                     color = Color.White,
-                    fontSize = 27.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "$shown shown • $total total events",
                     color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     "Admin & system audit trail",
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
@@ -480,8 +484,8 @@ private fun LogsMetricCard(
     subColor: Color
 ) {
     Card(
-        modifier = modifier.height(112.dp),
-        shape = RoundedCornerShape(22.dp),
+        modifier = modifier.height(104.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LogsBorder),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -492,11 +496,11 @@ private fun LogsMetricCard(
                 .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(34.dp))
+            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
             Column {
-                Text(label, color = LogsMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = LogsText, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(label, color = LogsMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = LogsText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+                Text(sub, color = subColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -513,13 +517,13 @@ private fun LogsFilterCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LogsBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             OutlinedTextField(
@@ -555,7 +559,7 @@ private fun LogsFilterCard(
                             )
                         },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            containerColor = if (selected) Color.White else Color.White,
                             labelColor = if (selected) LogsBlue else LogsMuted
                         ),
                         border = BorderStroke(1.dp, if (selected) LogsBlue.copy(alpha = 0.35f) else LogsBorder)
@@ -567,7 +571,7 @@ private fun LogsFilterCard(
                     enabled = !loading,
                     label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
+                        containerColor = Color.White,
                         labelColor = LogsBlue
                     ),
                     border = BorderStroke(1.dp, LogsBlue.copy(alpha = 0.35f))
@@ -588,20 +592,20 @@ private fun ActivityLogCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LogsBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(R.drawable.admin_icon_reports),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(38.dp)
                 )
 
                 Spacer(Modifier.size(12.dp))
@@ -610,7 +614,7 @@ private fun ActivityLogCard(
                     Text(
                         log.title.ifBlank { "-" },
                         color = LogsText,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -618,7 +622,7 @@ private fun ActivityLogCard(
                     Text(
                         log.type.ifBlank { "-" },
                         color = LogsMuted,
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -632,7 +636,7 @@ private fun ActivityLogCard(
                     Text(
                         log.status.ifBlank { "-" },
                         color = statusColor,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         maxLines = 1
@@ -643,7 +647,7 @@ private fun ActivityLogCard(
             Text(
                 log.message.ifBlank { "-" },
                 color = LogsMuted,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
@@ -652,16 +656,16 @@ private fun ActivityLogCard(
             Text(
                 "Actor: ${log.actor.ifBlank { "-" }} • Date: ${log.createdAt.ifBlank { "-" }}",
                 color = LogsMuted,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                "Tap to open details",
+                "View details ›",
                 color = LogsBlue,
-                fontSize = 13.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
@@ -676,17 +680,17 @@ private fun LogsInfoCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, LogsBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(title, color = LogsText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = LogsMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(title, color = LogsText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = LogsMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
             content?.invoke()
         }
     }
@@ -740,7 +744,7 @@ private fun LogsBottomItem(
     onClick: () -> Unit
 ) {
     val color = if (selected) LogsBlue else LogsMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+    val bg = if (selected) Color.White else Color.Transparent
 
     Column(
         modifier = Modifier

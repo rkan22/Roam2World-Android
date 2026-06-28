@@ -71,7 +71,7 @@ private val HealthNavy2 = Color(0xFF123EAD)
 private val HealthBlue = Color(0xFF1263F1)
 private val HealthText = Color(0xFF101828)
 private val HealthMuted = Color(0xFF667085)
-private val HealthBorder = Color(0xFFE1E8F2)
+private val HealthBorder = Color(0xFFE2E8F0)
 private val HealthGreen = Color(0xFF16A34A)
 private val HealthOrange = Color(0xFFF97316)
 private val HealthRed = Color(0xFFEF4444)
@@ -388,7 +388,7 @@ private fun HealthHero(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = HealthNavy),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
@@ -396,16 +396,20 @@ private fun HealthHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(170.dp)
-                .background(Brush.horizontalGradient(listOf(HealthNavy, HealthNavy2)))
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0B2B66), Color(0xFF1263F1))
+                    )
+                )
                 .padding(18.dp)
         ) {
             Column {
-                Text("System Health", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
+                Text("System Health", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     timestamp.ifBlank { "-" },
                     color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -421,7 +425,7 @@ private fun HealthHero(
                         Text(
                             "Status: ${status.ifBlank { "-" }}",
                             color = Color.White,
-                            fontSize = 12.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                         )
@@ -435,7 +439,7 @@ private fun HealthHero(
                         Text(
                             "Refresh",
                             color = Color.White,
-                            fontSize = 12.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                         )
@@ -456,8 +460,8 @@ private fun HealthMetricCard(
     subColor: Color
 ) {
     Card(
-        modifier = modifier.height(120.dp),
-        shape = RoundedCornerShape(22.dp),
+        modifier = modifier.height(108.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, HealthBorder),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -470,9 +474,9 @@ private fun HealthMetricCard(
         ) {
             Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(38.dp))
             Column {
-                Text(label, color = HealthMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = HealthText, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text(label, color = HealthMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = HealthText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                Text(sub, color = subColor, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1)
             }
         }
     }
@@ -489,7 +493,7 @@ private fun HealthChecksCard(checks: List<HealthCheckUi>) {
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFF8FAFC),
+                color = Color(0xFFF6F8FC),
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(1.dp, HealthBorder)
             ) {
@@ -498,7 +502,7 @@ private fun HealthChecksCard(checks: List<HealthCheckUi>) {
                         Text(
                             check.name.ifBlank { "-" },
                             color = HealthText,
-                            fontSize = 13.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
@@ -512,7 +516,7 @@ private fun HealthChecksCard(checks: List<HealthCheckUi>) {
                             Text(
                                 check.status.ifBlank { "-" },
                                 color = color,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                                 maxLines = 1
@@ -523,7 +527,7 @@ private fun HealthChecksCard(checks: List<HealthCheckUi>) {
                     Text(
                         check.message.ifBlank { "-" },
                         color = HealthMuted,
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
@@ -542,14 +546,14 @@ private fun HealthInfoCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, HealthBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, color = HealthText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = HealthMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Column(modifier = Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(title, color = HealthText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = HealthMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
             content?.invoke()
         }
     }
@@ -561,14 +565,14 @@ private fun HealthLine(label: String, value: String) {
         Text(
             label,
             color = HealthMuted,
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(0.42f)
         )
         Text(
             value.ifBlank { "-" },
             color = HealthText,
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(0.58f),
             maxLines = 3,
@@ -625,7 +629,7 @@ private fun HealthBottomItem(
     onClick: () -> Unit
 ) {
     val color = if (selected) HealthBlue else HealthMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+    val bg = if (selected) Color.White else Color.Transparent
 
     Column(
         modifier = Modifier

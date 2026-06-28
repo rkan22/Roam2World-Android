@@ -75,7 +75,7 @@ private val DetailNavy2 = Color(0xFF123EAD)
 private val DetailBlue = Color(0xFF1263F1)
 private val DetailText = Color(0xFF101828)
 private val DetailMuted = Color(0xFF667085)
-private val DetailBorder = Color(0xFFE1E8F2)
+private val DetailBorder = Color(0xFFE2E8F0)
 private val DetailGreen = Color(0xFF16A34A)
 private val DetailOrange = Color(0xFFF97316)
 private val DetailRed = Color(0xFFEF4444)
@@ -369,7 +369,7 @@ private fun DetailHero(order: AdminOrderDetailUi, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(182.dp)
-                .background(Brush.horizontalGradient(listOf(DetailNavy, DetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {

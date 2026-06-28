@@ -78,7 +78,7 @@ private val SupportNavy2 = Color(0xFF123EAD)
 private val SupportBlue = Color(0xFF1263F1)
 private val SupportText = Color(0xFF101828)
 private val SupportMuted = Color(0xFF667085)
-private val SupportBorder = Color(0xFFE1E8F2)
+private val SupportBorder = Color(0xFFE2E8F0)
 private val SupportGreen = Color(0xFF16A34A)
 private val SupportOrange = Color(0xFFF97316)
 private val SupportRed = Color(0xFFEF4444)
@@ -428,36 +428,40 @@ private fun SupportHero(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = SupportNavy),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(SupportNavy, SupportNavy2)))
+                .height(138.dp)
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF0B2B66), Color(0xFF1263F1))
+                    )
+                )
                 .padding(18.dp)
         ) {
             Column {
                 Text(
                     "Support Tickets",
                     color = Color.White,
-                    fontSize = 27.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "$shown shown • $total total • $open open",
                     color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 13.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     "Client support operations",
                     color = Color.White,
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .background(Color.White.copy(alpha = 0.14f), RoundedCornerShape(18.dp))
@@ -478,8 +482,8 @@ private fun SupportMetricCard(
     subColor: Color
 ) {
     Card(
-        modifier = modifier.height(112.dp),
-        shape = RoundedCornerShape(22.dp),
+        modifier = modifier.height(104.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SupportBorder),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -490,11 +494,11 @@ private fun SupportMetricCard(
                 .padding(14.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(34.dp))
+            Image(painterResource(icon), contentDescription = null, modifier = Modifier.size(32.dp))
             Column {
-                Text(label, color = SupportMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(value, color = SupportText, fontSize = 19.sp, fontWeight = FontWeight.ExtraBold)
-                Text(sub, color = subColor, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(label, color = SupportMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(value, color = SupportText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+                Text(sub, color = subColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -511,13 +515,13 @@ private fun SupportFilterCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SupportBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             OutlinedTextField(
@@ -552,7 +556,7 @@ private fun SupportFilterCard(
                             )
                         },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            containerColor = if (selected) Color.White else Color.White,
                             labelColor = if (selected) SupportBlue else SupportMuted
                         ),
                         border = BorderStroke(1.dp, if (selected) SupportBlue.copy(alpha = 0.35f) else SupportBorder)
@@ -564,7 +568,7 @@ private fun SupportFilterCard(
                     enabled = !loading,
                     label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
+                        containerColor = Color.White,
                         labelColor = SupportBlue
                     ),
                     border = BorderStroke(1.dp, SupportBlue.copy(alpha = 0.35f))
@@ -585,20 +589,20 @@ private fun SupportTicketCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SupportBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(R.drawable.admin_icon_support),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(38.dp)
                 )
 
                 Spacer(Modifier.size(12.dp))
@@ -607,7 +611,7 @@ private fun SupportTicketCard(
                     Text(
                         ticket.subject.ifBlank { "-" },
                         color = SupportText,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -615,7 +619,7 @@ private fun SupportTicketCard(
                     Text(
                         ticket.clientEmail.ifBlank { "-" },
                         color = SupportMuted,
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -629,7 +633,7 @@ private fun SupportTicketCard(
                     Text(
                         ticket.status.ifBlank { "-" },
                         color = statusColor,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         maxLines = 1
@@ -640,7 +644,7 @@ private fun SupportTicketCard(
             Text(
                 ticket.description.ifBlank { "-" },
                 color = SupportMuted,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
@@ -649,7 +653,7 @@ private fun SupportTicketCard(
             Text(
                 "Client: ${ticket.clientName.ifBlank { "-" }} • Assigned: ${ticket.assignedTo.ifBlank { "-" }}",
                 color = SupportMuted,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -658,16 +662,16 @@ private fun SupportTicketCard(
             Text(
                 "Created: ${ticket.createdAt.ifBlank { "-" }}",
                 color = SupportMuted,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
             Text(
-                "Tap to open details",
+                "View details ›",
                 color = SupportBlue,
-                fontSize = 13.sp,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold
             )
         }
@@ -682,17 +686,17 @@ private fun SupportInfoCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SupportBorder),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(13.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(title, color = SupportText, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-            Text(message, color = SupportMuted, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(title, color = SupportText, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+            Text(message, color = SupportMuted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
             content?.invoke()
         }
     }
@@ -748,7 +752,7 @@ private fun SupportBottomItem(
     onClick: () -> Unit
 ) {
     val color = if (selected) SupportBlue else SupportMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+    val bg = if (selected) Color.White else Color.Transparent
 
     Column(
         modifier = Modifier

@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.PriceChange
-import androidx.compose.material.icons.filled.Rule
-import androidx.compose.material.icons.filled.SettingsSuggest
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.Domain
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,29 +34,20 @@ import im.angry.openeuicc.ui.compose.saas.R2wSaasHeader
 import im.angry.openeuicc.ui.compose.saas.R2wSaasNavItem
 import im.angry.openeuicc.ui.compose.theme.R2WTheme
 
-class AdminPricingOverviewActivity : ComponentActivity() {
+class AdminWhiteLabelActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             R2WTheme {
-                AdminPricingOverviewSaasScreen(
-                    onOpenPricingClick = {
-                        startActivity(Intent(this@AdminPricingOverviewActivity, AdminPricingActivity::class.java))
-                    },
-                    onProviderMarkupsClick = {
-                        startActivity(Intent(this@AdminPricingOverviewActivity, AdminProviderMarkupsActivity::class.java))
-                    },
-                    onReportsClick = {
-                        startActivity(Intent(this@AdminPricingOverviewActivity, AdminReportsOverviewActivity::class.java))
-                    },
+                AdminWhiteLabelSaasScreen(
                     onBottomNavClick = { item ->
                         when (item) {
-                            R2wSaasNavItem.Dashboard -> startActivity(Intent(this@AdminPricingOverviewActivity, MobileAdminActivity::class.java))
-                            R2wSaasNavItem.Partners -> startActivity(Intent(this@AdminPricingOverviewActivity, AdminPartnersActivity::class.java))
-                            R2wSaasNavItem.Orders -> startActivity(Intent(this@AdminPricingOverviewActivity, AdminOrdersOverviewActivity::class.java))
-                            R2wSaasNavItem.Pricing -> Unit
-                            R2wSaasNavItem.More -> startActivity(Intent(this@AdminPricingOverviewActivity, AdminMoreActivity::class.java))
+                            R2wSaasNavItem.Dashboard -> startActivity(Intent(this, MobileAdminActivity::class.java))
+                            R2wSaasNavItem.Partners -> startActivity(Intent(this, AdminPartnersActivity::class.java))
+                            R2wSaasNavItem.Orders -> startActivity(Intent(this, AdminOrdersOverviewActivity::class.java))
+                            R2wSaasNavItem.Pricing -> startActivity(Intent(this, AdminPricingOverviewActivity::class.java))
+                            R2wSaasNavItem.More -> startActivity(Intent(this, AdminMoreActivity::class.java))
                         }
                     }
                 )
@@ -66,17 +57,14 @@ class AdminPricingOverviewActivity : ComponentActivity() {
 }
 
 @Composable
-private fun AdminPricingOverviewSaasScreen(
-    onOpenPricingClick: () -> Unit,
-    onProviderMarkupsClick: () -> Unit,
-    onReportsClick: () -> Unit,
+private fun AdminWhiteLabelSaasScreen(
     onBottomNavClick: (R2wSaasNavItem) -> Unit
 ) {
     Scaffold(
         containerColor = R2wSaasColors.Background,
         bottomBar = {
             R2wSaasBottomNav(
-                selected = R2wSaasNavItem.Pricing,
+                selected = R2wSaasNavItem.More,
                 onClick = onBottomNavClick
             )
         }
@@ -92,8 +80,8 @@ private fun AdminPricingOverviewSaasScreen(
 
             item {
                 R2wSaasHeader(
-                    title = "Pricing",
-                    subtitle = "Manage package prices, provider markups and B2B margins.",
+                    title = "White-label",
+                    subtitle = "Branding, app identity, support contact and custom domain.",
                     badge = "B2B"
                 )
             }
@@ -102,19 +90,19 @@ private fun AdminPricingOverviewSaasScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                     R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        title = "Reseller",
-                        value = "Markup",
-                        subtitle = "sell price layer",
-                        icon = Icons.Default.PriceChange,
+                        title = "Brands",
+                        value = "0",
+                        subtitle = "configured",
+                        icon = Icons.Default.Storefront,
                         tint = R2wSaasColors.Primary
                     )
 
                     R2wMetricCard(
                         modifier = Modifier.weight(1f),
-                        title = "Dealer",
-                        value = "Margin",
-                        subtitle = "sub account layer",
-                        icon = Icons.Default.Rule,
+                        title = "Domains",
+                        value = "0",
+                        subtitle = "connected",
+                        icon = Icons.Default.Domain,
                         tint = R2wSaasColors.Green
                     )
                 }
@@ -123,7 +111,7 @@ private fun AdminPricingOverviewSaasScreen(
             item {
                 R2wSaasCard {
                     Text(
-                        text = "Pricing Actions",
+                        text = "Brand Controls",
                         color = R2wSaasColors.Text,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Black
@@ -133,26 +121,34 @@ private fun AdminPricingOverviewSaasScreen(
 
                     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                         R2wActionCard(
-                            title = "Package Pricing",
-                            subtitle = "Cost / Dealer / Reseller price table",
-                            icon = Icons.Default.CreditCard,
-                            onClick = onOpenPricingClick,
+                            title = "Brand Identity",
+                            subtitle = "Logo, app name, splash screen and color palette",
+                            icon = Icons.Default.Brush,
+                            onClick = {},
                             tint = R2wSaasColors.Primary
                         )
 
                         R2wActionCard(
-                            title = "Provider Markups",
-                            subtitle = "Default provider reseller/dealer markup",
-                            icon = Icons.Default.SettingsSuggest,
-                            onClick = onProviderMarkupsClick,
+                            title = "Custom Domain",
+                            subtitle = "Partner domain and portal URL",
+                            icon = Icons.Default.Domain,
+                            onClick = {},
+                            tint = R2wSaasColors.Green
+                        )
+
+                        R2wActionCard(
+                            title = "Mobile App Settings",
+                            subtitle = "Partner app icon, package label and support info",
+                            icon = Icons.Default.PhoneAndroid,
+                            onClick = {},
                             tint = R2wSaasColors.Orange
                         )
 
                         R2wActionCard(
-                            title = "Pricing Reports",
-                            subtitle = "Margins, revenue and package performance",
-                            icon = Icons.Default.Assessment,
-                            onClick = onReportsClick,
+                            title = "Support Branding",
+                            subtitle = "Email, WhatsApp, terms and help center links",
+                            icon = Icons.Default.Settings,
+                            onClick = {},
                             tint = R2wSaasColors.Purple
                         )
                     }
@@ -162,18 +158,16 @@ private fun AdminPricingOverviewSaasScreen(
             item {
                 R2wSaasCard {
                     Text(
-                        text = "B2B Pricing Logic",
+                        text = "Next backend connection",
                         color = R2wSaasColors.Text,
-                        fontSize = 17.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Black
                     )
-
-                    Spacer(Modifier.height(10.dp))
-
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Provider cost is the base. Dealer price and reseller price are calculated separately. Public price is not shown in the B2B mobile pricing list.",
+                        text = "Later this screen will save reseller-specific branding to backend and apply it on login, dashboard, package cards and emails.",
                         color = R2wSaasColors.Muted,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         lineHeight = 19.sp
                     )

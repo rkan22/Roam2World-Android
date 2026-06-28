@@ -78,7 +78,7 @@ private val DealerNavy2 = Color(0xFF123EAD)
 private val DealerBlue = Color(0xFF1263F1)
 private val DealerText = Color(0xFF101828)
 private val DealerMuted = Color(0xFF667085)
-private val DealerBorder = Color(0xFFE1E8F2)
+private val DealerBorder = Color(0xFFE2E8F0)
 private val DealerGreen = Color(0xFF16A34A)
 private val DealerOrange = Color(0xFFF97316)
 private val DealerRed = Color(0xFFEF4444)
@@ -406,7 +406,7 @@ private fun DealerListHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .background(Brush.horizontalGradient(listOf(DealerNavy, DealerNavy2)))
+                .background(Color.White)
                 .padding(18.dp)
         ) {
             Column {
@@ -523,7 +523,7 @@ private fun DealerFilterCard(
                             )
                         },
                         colors = AssistChipDefaults.assistChipColors(
-                            containerColor = if (selected) Color(0xFFEAF2FF) else Color.White,
+                            containerColor = if (selected) Color.White else Color.White,
                             labelColor = if (selected) DealerBlue else DealerMuted
                         ),
                         border = BorderStroke(1.dp, if (selected) DealerBlue.copy(alpha = 0.35f) else DealerBorder)
@@ -535,7 +535,7 @@ private fun DealerFilterCard(
                     enabled = !loading,
                     label = { Text(if (loading) "Loading" else "Refresh", fontWeight = FontWeight.ExtraBold) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = Color(0xFFEAF2FF),
+                        containerColor = Color.White,
                         labelColor = DealerBlue
                     ),
                     border = BorderStroke(1.dp, DealerBlue.copy(alpha = 0.35f))
@@ -656,7 +656,7 @@ private fun DealerMiniStat(
 ) {
     Surface(
         modifier = modifier,
-        color = Color(0xFFF8FAFC),
+        color = Color(0xFFF6F8FC),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, DealerBorder)
     ) {
@@ -739,7 +739,7 @@ private fun DealerBottomItem(
     onClick: () -> Unit
 ) {
     val color = if (selected) DealerBlue else DealerMuted
-    val bg = if (selected) Color(0xFFEAF2FF) else Color.Transparent
+    val bg = if (selected) Color.White else Color.Transparent
 
     Column(
         modifier = Modifier

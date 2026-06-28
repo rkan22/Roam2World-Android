@@ -70,7 +70,7 @@ private val NotifyDetailNavy2 = Color(0xFF123EAD)
 private val NotifyDetailBlue = Color(0xFF1263F1)
 private val NotifyDetailText = Color(0xFF101828)
 private val NotifyDetailMuted = Color(0xFF667085)
-private val NotifyDetailBorder = Color(0xFFE1E8F2)
+private val NotifyDetailBorder = Color(0xFFE2E8F0)
 private val NotifyDetailGreen = Color(0xFF16A34A)
 private val NotifyDetailOrange = Color(0xFFF97316)
 
@@ -309,7 +309,7 @@ private fun NotifyDetailHero(notification: AdminNotificationDetailUi, onBack: ()
             modifier = Modifier
                 .fillMaxWidth()
                 .height(184.dp)
-                .background(Brush.horizontalGradient(listOf(NotifyDetailNavy, NotifyDetailNavy2)))
+                .background(Color.White)
                 .padding(16.dp)
         ) {
             Column {
